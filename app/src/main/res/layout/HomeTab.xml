@@ -5,17 +5,58 @@
     android:layout_height="match_parent">
 
     <!--
-    <TextView
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:gravity="center"
-        android:textSize="30sp"
-        android:text="The Home Tab!"/>
+    <com.baibuti.biji.HorizontalListView
+        android:layout_width="wrap_content"
+        android:layout_height="50dp"
+        android:id="@+id/home_horizontallist"/>
         -->
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="left">
+
+        <Button
+            android:id="@+id/id_home_newnote"
+            android:layout_width="70sp"
+            android:layout_height="wrap_content"
+            android:drawableTop="@mipmap/tab_weixin_pressed"
+            style="?android:attr/borderlessButtonStyle"
+            android:textColor="#8b8b8b"
+            android:text="新笔记"/>
+
+        <Button
+            android:id="@+id/id_home_newalarm"
+            android:layout_width="70sp"
+            android:layout_height="wrap_content"
+            android:drawableTop="@mipmap/tab_weixin_pressed"
+            style="?android:attr/borderlessButtonStyle"
+            android:textColor="#8b8b8b"
+            android:text="新提醒"/>
+
+    </LinearLayout>
 
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_margin="5sp"
-        android:text="提醒："/>
+        android:layout_margin="8sp"
+        android:text="最近提醒："/>
+
+    <ListView
+        android:layout_width="match_parent"
+        android:layout_height="180sp"
+        android:id="@+id/id_home_alarmlist" />
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="8sp"
+        android:text="最近笔记："/>
+
+    <ListView
+        android:layout_width="match_parent"
+        android:layout_height="180sp"
+        android:id="@+id/id_home_notelist" />
+
 </LinearLayout>

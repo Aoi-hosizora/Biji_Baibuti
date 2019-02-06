@@ -25,15 +25,15 @@ public class MainActivity extends FragmentActivity implements OnClickListener {
     private List<Fragment> mFragments;
 
     //四个Tab对应的布局
-    private LinearLayout mTabWeixin;
-    private LinearLayout mTabFrd;
-    private LinearLayout mTabAddress;
+    private LinearLayout mTabHome;
+    private LinearLayout mTabNote;
+    private LinearLayout mTabAlarm;
     private LinearLayout mTabSetting;
 
     //四个Tab对应的ImageButton
-    private ImageButton mImgWeixin;
-    private ImageButton mImgFrd;
-    private ImageButton mImgAddress;
+    private ImageButton mImgHome;
+    private ImageButton mImgNote;
+    private ImageButton mImgAlarm;
     private ImageButton mImgSetting;
 
     @Override
@@ -45,6 +45,8 @@ public class MainActivity extends FragmentActivity implements OnClickListener {
         initViews();//初始化控件
         initEvents();//初始化事件
         initDatas();//初始化数据
+
+
     }
 
     private void initDatas() {
@@ -97,26 +99,25 @@ public class MainActivity extends FragmentActivity implements OnClickListener {
 
     private void initEvents() {
         //设置四个Tab的点击事件
-        mTabWeixin.setOnClickListener(this);
-        mTabFrd.setOnClickListener(this);
-        mTabAddress.setOnClickListener(this);
+        mTabHome.setOnClickListener(this);
+        mTabNote.setOnClickListener(this);
+        mTabAlarm.setOnClickListener(this);
         mTabSetting.setOnClickListener(this);
     }
 
-    //初始化控件
     private void initViews() {
         mViewPager = (ViewPager) findViewById(R.id.id_viewpager);
 
         //////////
-        mTabWeixin = (LinearLayout) findViewById(R.id.id_tab_weixin);
-        mTabFrd = (LinearLayout) findViewById(R.id.id_tab_frd);
-        mTabAddress = (LinearLayout) findViewById(R.id.id_tab_address);
+        mTabHome = (LinearLayout) findViewById(R.id.id_tab_home);
+        mTabNote = (LinearLayout) findViewById(R.id.id_tab_note);
+        mTabAlarm = (LinearLayout) findViewById(R.id.id_tab_alarm);
         mTabSetting = (LinearLayout) findViewById(R.id.id_tab_setting);
 
         //////////
-        mImgWeixin = (ImageButton) findViewById(R.id.id_tab_weixin_img);
-        mImgFrd = (ImageButton) findViewById(R.id.id_tab_frd_img);
-        mImgAddress = (ImageButton) findViewById(R.id.id_tab_address_img);
+        mImgHome = (ImageButton) findViewById(R.id.id_tab_home_img);
+        mImgNote = (ImageButton) findViewById(R.id.id_tab_note_img);
+        mImgAlarm = (ImageButton) findViewById(R.id.id_tab_alarm_img);
         mImgSetting = (ImageButton) findViewById(R.id.id_tab_setting_img);
 
     }
@@ -128,13 +129,13 @@ public class MainActivity extends FragmentActivity implements OnClickListener {
 
         //根据点击的Tab切换不同的页面及设置对应的ImageButton为绿色
         switch (v.getId()) {
-            case R.id.id_tab_weixin:
+            case R.id.id_tab_home:
                 selectTab(0);
                 break;
-            case R.id.id_tab_frd:
+            case R.id.id_tab_note:
                 selectTab(1);
                 break;
-            case R.id.id_tab_address:
+            case R.id.id_tab_alarm:
                 selectTab(2);
                 break;
             case R.id.id_tab_setting:
@@ -147,13 +148,13 @@ public class MainActivity extends FragmentActivity implements OnClickListener {
         //根据点击的Tab设置对应的ImageButton为绿色
         switch (i) {
             case 0:
-                mImgWeixin.setImageResource(R.mipmap.tab_weixin_pressed);
+                mImgHome.setImageResource(R.mipmap.tab_weixin_pressed);
                 break;
             case 1:
-                mImgFrd.setImageResource(R.mipmap.tab_find_frd_pressed);
+                mImgNote.setImageResource(R.mipmap.tab_find_frd_pressed);
                 break;
             case 2:
-                mImgAddress.setImageResource(R.mipmap.tab_address_pressed);
+                mImgAlarm.setImageResource(R.mipmap.tab_address_pressed);
                 break;
             case 3:
                 mImgSetting.setImageResource(R.mipmap.tab_settings_pressed);
@@ -163,12 +164,10 @@ public class MainActivity extends FragmentActivity implements OnClickListener {
         mViewPager.setCurrentItem(i);
     }
 
-
-    //将四个ImageButton设置为灰色
     private void resetImgs() {
-        mImgWeixin.setImageResource(R.mipmap.tab_weixin_normal);
-        mImgFrd.setImageResource(R.mipmap.tab_find_frd_normal);
-        mImgAddress.setImageResource(R.mipmap.tab_address_normal);
+        mImgHome.setImageResource(R.mipmap.tab_weixin_normal);
+        mImgNote.setImageResource(R.mipmap.tab_find_frd_normal);
+        mImgAlarm.setImageResource(R.mipmap.tab_address_normal);
         mImgSetting.setImageResource(R.mipmap.tab_settings_normal);
     }
 }
