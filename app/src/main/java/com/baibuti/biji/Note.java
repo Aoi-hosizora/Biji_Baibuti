@@ -2,6 +2,7 @@ package com.baibuti.biji;
 
 import android.media.Image;
 
+import java.io.Serializable;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
@@ -9,7 +10,7 @@ import java.util.Date;
  * Created by Windows 10 on 016 2019/02/16.
  */
 
-public class Note {
+public class Note implements Serializable {
 
     private String Title;
     private Date MakeTime;
@@ -52,4 +53,15 @@ public class Note {
 
         return df.format(MakeTime);
     }
+
+    public void setTitle(String Title) {
+        this.Title = Title;
+        this.MakeTime = new Date();
+    }
+
+    public void setContent(String Content) {
+        this.Content = Content;
+        this.MakeTime = new Date();
+    }
+
 }

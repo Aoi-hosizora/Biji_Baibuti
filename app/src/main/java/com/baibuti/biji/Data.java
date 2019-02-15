@@ -10,39 +10,58 @@ public class Data {
     private static Data DataInstance;
 
     public static Data getData() {
-        if (DataInstance == null)
+        if (DataInstance == null) {
+            initAlarm();
+            initNote();
             DataInstance = new Data();
+        }
+
         return DataInstance;
     }
 
-    public ArrayList<Alarm> getAlarm() {
-        ArrayList<Alarm> list = new ArrayList<>();
+    static ArrayList<Alarm> alarmlist;
+    static ArrayList<Note> notelist;
+
+    private static void initAlarm() {
+        alarmlist = new ArrayList<>();
         if (false)
-            list.add(new Alarm("No Note","Empty"));
+            alarmlist.add(new Alarm("No Note","Empty"));
 
-        list.add(new Alarm("First Alarm","Empty"));
-        list.add(new Alarm("First Alarm","Empty"));
-        list.add(new Alarm("First Alarm","Empty"));
-        list.add(new Alarm("First Alarm","Empty"));
-        list.add(new Alarm("First Alarm","Empty"));
-        list.add(new Alarm("First Alarm","Empty"));
-        list.add(new Alarm("First Alarm","Empty"));
-        list.add(new Alarm("First Alarm","Empty"));
+        alarmlist.add(new Alarm("First Alarm","Empty"));
+        alarmlist.add(new Alarm("First Alarm","Empty"));
+        alarmlist.add(new Alarm("First Alarm","Empty"));
+        alarmlist.add(new Alarm("First Alarm","Empty"));
+        alarmlist.add(new Alarm("First Alarm","Empty"));
+        alarmlist.add(new Alarm("First Alarm","Empty"));
+        alarmlist.add(new Alarm("First Alarm","Empty"));
+        alarmlist.add(new Alarm("First Alarm","Empty"));
+    }
 
-        return list;
+    private static void initNote() {
+        notelist = new ArrayList<>();
+        if (false)
+            notelist.add(new Note("No Note","Empty"));
+
+        notelist.add(new Note("Xinki","New"));
+        notelist.add(new Note("Xinki","New"));
+        notelist.add(new Note("Xinki","New"));
+        notelist.add(new Note("Xinki","New"));
+        notelist.add(new Note("Xinki","New"));
+    }
+
+    public ArrayList<Alarm> getAlarm() {
+        return alarmlist;
     }
 
     public ArrayList<Note> getNote() {
-        ArrayList<Note> list = new ArrayList<>();
-        if (false)
-            list.add(new Note("No Note","Empty"));
+        return notelist;
+    }
 
-        list.add(new Note("Xinki","New"));
-        list.add(new Note("Xinki","New"));
-        list.add(new Note("Xinki","New"));
-        list.add(new Note("Xinki","New"));
-        list.add(new Note("Xinki","New"));
+    public void setAlarmItem(int index, Alarm alarm) {
+        alarmlist.set(index, alarm);
+    }
 
-        return list;
+    public void setNoteItem(int index, Note note) {
+        notelist.set(index, note);
     }
 }
