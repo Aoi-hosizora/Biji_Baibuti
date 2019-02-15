@@ -18,15 +18,6 @@
         android:gravity="left">
 
         <Button
-            android:id="@+id/id_home_newnote"
-            android:layout_width="70sp"
-            android:layout_height="wrap_content"
-            android:drawableTop="@mipmap/tab_weixin_pressed"
-            style="?android:attr/borderlessButtonStyle"
-            android:textColor="#8b8b8b"
-            android:text="新笔记"/>
-
-        <Button
             android:id="@+id/id_home_newalarm"
             android:layout_width="70sp"
             android:layout_height="wrap_content"
@@ -34,6 +25,15 @@
             style="?android:attr/borderlessButtonStyle"
             android:textColor="#8b8b8b"
             android:text="新提醒"/>
+
+        <Button
+            android:id="@+id/id_home_newnote"
+            android:layout_width="70sp"
+            android:layout_height="wrap_content"
+            android:drawableTop="@mipmap/tab_weixin_pressed"
+            style="?android:attr/borderlessButtonStyle"
+            android:textColor="#8b8b8b"
+            android:text="新笔记"/>
 
     </LinearLayout>
 
