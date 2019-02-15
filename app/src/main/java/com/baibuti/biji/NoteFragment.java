@@ -20,9 +20,9 @@ public class NoteFragment extends Fragment implements View.OnClickListener {
 
     private Data mainData;
 
-    private FloatingActionButton fab;
-    private SwipeRefreshLayout swipeRefresh;
-    private ListView NoteListView;
+    private FloatingActionButton mFab;
+    private SwipeRefreshLayout mSwipeRefresh;
+    private ListView mNoteListView;
     private ArrayList<Note> NoteList;
 
     @Nullable
@@ -30,20 +30,20 @@ public class NoteFragment extends Fragment implements View.OnClickListener {
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.notetab, container, false);
 
-        fab = (FloatingActionButton) view.findViewById(R.id.id_note_addfab);
-        swipeRefresh = (SwipeRefreshLayout) view.findViewById(R.id.swipe_refresh);
-        NoteListView = (ListView) view.findViewById(R.id.id_note_notelistview);
+        mFab = (FloatingActionButton) view.findViewById(R.id.id_note_addfab);
+        mSwipeRefresh = (SwipeRefreshLayout) view.findViewById(R.id.swipe_refresh);
+        mNoteListView = (ListView) view.findViewById(R.id.id_note_notelistview);
 
 
-        swipeRefresh.setColorSchemeResources(R.color.colorPrimary);
-        swipeRefresh.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+        mSwipeRefresh.setColorSchemeResources(R.color.colorPrimary);
+        mSwipeRefresh.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
                 refreshdata();
             }
         });
 
-        fab.setOnClickListener(this);
+        mFab.setOnClickListener(this);
 
         initData();
 
@@ -65,10 +65,10 @@ public class NoteFragment extends Fragment implements View.OnClickListener {
         NoteList = mainData.getNote();
 
 
-        ArrayAdapter<Note> NoteAdapter = new ArrayAdapter<>(getActivity(),android.R.layout.simple_list_item_1, NoteList);
-        NoteListView.setAdapter(NoteAdapter);
+        NoteAdapter noteAdapter = new NoteAdapter(getActivity(), R.layout.notelistview, NoteList);
+        mNoteListView.setAdapter(noteAdapter);
 
-        NoteListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+        mNoteListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 Note note = NoteList.get(position);
@@ -90,7 +90,7 @@ public class NoteFragment extends Fragment implements View.OnClickListener {
                     @Override
                     public void run() {
                         initData();
-                        swipeRefresh.setRefreshing(false);
+                        mSwipeRefresh.setRefreshing(false);
                     }
                 });
             }

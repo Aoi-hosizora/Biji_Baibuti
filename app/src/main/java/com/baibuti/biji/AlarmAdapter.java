@@ -26,8 +26,8 @@ public class AlarmAdapter extends ArrayAdapter<Alarm> {
     public View getView(int position, View convertView, ViewGroup parent) {
         Alarm alarm = getItem(position);
         View view = LayoutInflater.from(getContext()).inflate(resourceId, parent, false);
-        TextView Title = (TextView) view.findViewById(R.id.id_notelistview_title);
-        TextView MakeTime = (TextView) view.findViewById(R.id.id_notelistview_maketime);
+        TextView Title = (TextView) view.findViewById(R.id.id_alarmlistview_title);
+        TextView MakeTime = (TextView) view.findViewById(R.id.id_alarmlistview_maketime);
 
         Title.setText(alarm.getTitle());
         MakeTime.setText(alarm.getMakeTimeShortString());

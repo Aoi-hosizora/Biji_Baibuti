@@ -22,6 +22,13 @@ public class Data {
 
         list.add(new Alarm("First Alarm","Empty"));
         list.add(new Alarm("First Alarm","Empty"));
+        list.add(new Alarm("First Alarm","Empty"));
+        list.add(new Alarm("First Alarm","Empty"));
+        list.add(new Alarm("First Alarm","Empty"));
+        list.add(new Alarm("First Alarm","Empty"));
+        list.add(new Alarm("First Alarm","Empty"));
+        list.add(new Alarm("First Alarm","Empty"));
+
         return list;
     }
 
@@ -30,6 +37,10 @@ public class Data {
         if (false)
             list.add(new Note("No Note","Empty"));
 
+        list.add(new Note("Xinki","New"));
+        list.add(new Note("Xinki","New"));
+        list.add(new Note("Xinki","New"));
+        list.add(new Note("Xinki","New"));
         list.add(new Note("Xinki","New"));
 
         return list;

@@ -76,7 +76,7 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
         AlarmAList = mainData.getAlarm();
         NoteAList = mainData.getNote();
 
-        ArrayAdapter<Alarm> alarmAdapter = new ArrayAdapter<>(getActivity(),android.R.layout.simple_list_item_1,AlarmAList);
+        AlarmAdapter alarmAdapter = new AlarmAdapter(getActivity(),R.layout.alarmlistview, AlarmAList);
         mHomeAlarmList.setAdapter(alarmAdapter);
 
         NoteAdapter noteAdapter = new NoteAdapter(getActivity(), R.layout.notelistview, NoteAList);
