@@ -2,6 +2,8 @@ package com.baibuti.biji;
 
 import java.util.ArrayList;
 
+import com.baibuti.biji.Note;
+
 public class Data {
     private Data() {}
 
@@ -13,21 +15,23 @@ public class Data {
         return DataInstance;
     }
 
-    public ArrayList<String> getAlarm() {
-        ArrayList<String> list = new ArrayList<>();
+    public ArrayList<Alarm> getAlarm() {
+        ArrayList<Alarm> list = new ArrayList<>();
         if (false)
-            list.add("No Alarm...");
-        list.add("First Alarm");
-        list.add("Second Alarm");
+            list.add(new Alarm("No Note","Empty"));
+
+        list.add(new Alarm("First Alarm","Empty"));
+        list.add(new Alarm("First Alarm","Empty"));
         return list;
     }
 
-    public ArrayList<String> getNote() {
-        ArrayList<String> list = new ArrayList<>();
+    public ArrayList<Note> getNote() {
+        ArrayList<Note> list = new ArrayList<>();
         if (false)
-            list.add("No Note...");
+            list.add(new Note("No Note","Empty"));
 
-        list.add("Null");
+        list.add(new Note("Xinki","New"));
+
         return list;
     }
 }

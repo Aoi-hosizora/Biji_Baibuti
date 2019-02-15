@@ -28,8 +28,8 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
     private Button mHomeNewNote;
 
     private Data mainData;
-    private ArrayList<String> AlarmAList;
-    private ArrayList<String> NoteAList;
+    private ArrayList<Alarm> AlarmAList;
+    private ArrayList<Note> NoteAList;
 
     @Nullable
     @Override
@@ -76,25 +76,25 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
         AlarmAList = mainData.getAlarm();
         NoteAList = mainData.getNote();
 
-        ArrayAdapter<String> AlarmAdapter = new ArrayAdapter<>(getActivity(),android.R.layout.simple_list_item_1,AlarmAList);
-        mHomeAlarmList.setAdapter(AlarmAdapter);
+        ArrayAdapter<Alarm> alarmAdapter = new ArrayAdapter<>(getActivity(),android.R.layout.simple_list_item_1,AlarmAList);
+        mHomeAlarmList.setAdapter(alarmAdapter);
 
-        ArrayAdapter<String> NoteAdapter = new ArrayAdapter<>(getActivity(),android.R.layout.simple_list_item_1,NoteAList);
-        mHomeNoteList.setAdapter(NoteAdapter);
+        NoteAdapter noteAdapter = new NoteAdapter(getActivity(), R.layout.notelistview, NoteAList);
+        mHomeNoteList.setAdapter(noteAdapter);
 
         mHomeAlarmList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                String alarm = AlarmAList.get(position);
-                Toast.makeText(getActivity(), alarm, Toast.LENGTH_SHORT).show();
+                Alarm alarm = AlarmAList.get(position);
+                Toast.makeText(getActivity(), alarm.getTitle(), Toast.LENGTH_SHORT).show();
             }
         });
 
         mHomeNoteList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                String note = NoteAList.get(position);
-                Toast.makeText(getActivity(), note, Toast.LENGTH_SHORT).show();
+                Note note = NoteAList.get(position);
+                Toast.makeText(getActivity(), note.getTitle(), Toast.LENGTH_SHORT).show();
             }
         });
 
