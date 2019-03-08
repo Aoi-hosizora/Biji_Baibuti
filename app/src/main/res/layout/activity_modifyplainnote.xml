@@ -29,6 +29,5 @@
         android:gravity="top"
         android:ems="10"
         android:id="@+id/id_modifynote_content"
-        android:layout_weight="1"
-        />
+        android:layout_weight="1" />
 </LinearLayout>

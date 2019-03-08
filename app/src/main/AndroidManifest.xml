@@ -15,8 +15,7 @@
             </intent-filter>
         </activity>
 
-        <activity android:name=".Activity.ModifyNoteActivity"
-                  android:parentActivityName=".Activity.MainActivity">
+        <activity android:name=".Activity.ModifyNoteActivity">
             <intent-filter>
                 <action android:name="activitytest.example.com.activitytest.ModifyNoteActivity" />
                 <category android:name="android.intent.category.DEFAULT" />

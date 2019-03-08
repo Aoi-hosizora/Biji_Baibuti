@@ -30,9 +30,11 @@ public class NoteAdapter extends ArrayAdapter<Note> {
         View view = LayoutInflater.from(getContext()).inflate(resourceId, parent, false);
         TextView Title = (TextView) view.findViewById(R.id.id_notelistview_title);
         TextView MakeTime = (TextView) view.findViewById(R.id.id_notelistview_maketime);
+        TextView Type = (TextView) view.findViewById(R.id.id_notelistview_type);
 
         Title.setText(note.getTitle());
         MakeTime.setText(note.getMakeTimeShortString());
+        Type.setText(note.getIsMarkDown()==true?"MD":"PL");
         return view;
     }
 }

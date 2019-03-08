@@ -2,6 +2,7 @@ package com.baibuti.biji.Fragment;
 
 import android.app.AlertDialog;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
@@ -14,6 +15,7 @@ import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.Toast;
 
+import com.baibuti.biji.Activity.ModifyNoteActivity;
 import com.baibuti.biji.Data.Alarm;
 import com.baibuti.biji.Data.AlarmAdapter;
 import com.baibuti.biji.Data.Data;
@@ -22,6 +24,8 @@ import com.baibuti.biji.Data.NoteAdapter;
 import com.baibuti.biji.R;
 
 import java.util.ArrayList;
+
+import static android.app.Activity.RESULT_OK;
 
 public class HomeFragment extends Fragment implements View.OnClickListener {
 
@@ -33,8 +37,8 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
     private Button mHomeNewNote;
 
     private Data mainData;
-    private ArrayList<Alarm> AlarmAList;
-    private ArrayList<Note> NoteAList;
+    private ArrayList<Alarm> AlarmList;
+    private ArrayList<Note> NoteList;
 
     @Nullable
     @Override
@@ -75,22 +79,25 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
         }
     }
 
+    private int NoteListClickPos;
+    private NoteAdapter noteAdapter;
+    private AlarmAdapter alarmAdapter;
 
     private void initDatas() {
         mainData = Data.getData();
-        AlarmAList = mainData.getAlarm();
-        NoteAList = mainData.getNote();
+        AlarmList = mainData.getAlarm();
+        NoteList = mainData.getNote();
 
-        AlarmAdapter alarmAdapter = new AlarmAdapter(getActivity(),R.layout.alarmlistview, AlarmAList);
+        alarmAdapter = new AlarmAdapter(getActivity(),R.layout.alarmlistview, AlarmList);
         mHomeAlarmList.setAdapter(alarmAdapter);
 
-        NoteAdapter noteAdapter = new NoteAdapter(getActivity(), R.layout.notelistview, NoteAList);
+        noteAdapter = new NoteAdapter(getActivity(), R.layout.notelistview, NoteList);
         mHomeNoteList.setAdapter(noteAdapter);
 
         mHomeAlarmList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                Alarm alarm = AlarmAList.get(position);
+                Alarm alarm = AlarmList.get(position);
                 Toast.makeText(getActivity(), alarm.getTitle(), Toast.LENGTH_SHORT).show();
             }
         });
@@ -98,10 +105,33 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
         mHomeNoteList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                Note note = NoteAList.get(position);
-                Toast.makeText(getActivity(), note.getTitle(), Toast.LENGTH_SHORT).show();
+                Note note = NoteList.get(position);
+                NoteListClickPos = position;
+
+                Intent intent=new Intent(getActivity(),ModifyNoteActivity.class);
+                intent.putExtra("notedata",note);
+                startActivityForResult(intent,1);
             }
         });
 
+    }
+
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        switch (requestCode) {
+            case 1:
+                if (resultCode == RESULT_OK) {
+                    if (data.getBooleanExtra("intent_result", true) == true) {
+                        Note newnote = (Note) data.getSerializableExtra("modify_note");
+                        NoteList.set(NoteListClickPos,newnote);
+
+                        mainData.setNoteItem(NoteListClickPos, newnote);
+
+                        noteAdapter.notifyDataSetChanged();
+                    }
+                }
+        }
     }
 }

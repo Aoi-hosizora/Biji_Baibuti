@@ -26,6 +26,7 @@ public class ModifyNoteActivity extends AppCompatActivity implements View.OnClic
     private EditText ContentEditText;
 
     private Note note;
+    // private boolean IsNewData ;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -36,6 +37,10 @@ public class ModifyNoteActivity extends AppCompatActivity implements View.OnClic
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
         note = (Note) getIntent().getSerializableExtra("notedata");
+
+//        IsNewData = false;
+//        if (note.getTitle().isEmpty() && note.getContent().isEmpty())
+//            IsNewData = true;
 
         TitleEditText = (EditText) findViewById(R.id.id_modifynote_title);
         ContentEditText = (EditText) findViewById(R.id.id_modifynote_content);
@@ -62,8 +67,12 @@ public class ModifyNoteActivity extends AppCompatActivity implements View.OnClic
                 note.setContent(ContentEditText.getText().toString());
 
                 Intent intent = new Intent();
-                intent.putExtra("modify_result",true);
-                intent.putExtra("modify_note",note);
+                intent.putExtra("intent_result",true);
+
+//                if (IsNewData)
+//                    intent.putExtra("new_note",note);
+//                else
+                    intent.putExtra("modify_note",note);
 
                 setResult(RESULT_OK,intent);
                 finish();
