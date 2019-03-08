@@ -1,4 +1,4 @@
-package com.baibuti.biji;
+package com.baibuti.biji.Activity;
 
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
@@ -12,6 +12,12 @@ import android.view.View.OnClickListener;
 import android.view.Window;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
+
+import com.baibuti.biji.Fragment.AlertFragment;
+import com.baibuti.biji.Fragment.HomeFragment;
+import com.baibuti.biji.Fragment.NoteFragment;
+import com.baibuti.biji.Fragment.SettingFragment;
+import com.baibuti.biji.R;
 
 import java.util.ArrayList;
 import java.util.List;

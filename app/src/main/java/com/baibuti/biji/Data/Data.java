@@ -1,8 +1,6 @@
-package com.baibuti.biji;
+package com.baibuti.biji.Data;
 
 import java.util.ArrayList;
-
-import com.baibuti.biji.Note;
 
 public class Data {
     private Data() {}

@@ -1,20 +1,25 @@
-package com.baibuti.biji;
+package com.baibuti.biji.Fragment;
 
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.Toast;
+
+import com.baibuti.biji.Data.Alarm;
+import com.baibuti.biji.Data.AlarmAdapter;
+import com.baibuti.biji.Data.Data;
+import com.baibuti.biji.Data.Note;
+import com.baibuti.biji.Data.NoteAdapter;
+import com.baibuti.biji.R;
 
 import java.util.ArrayList;
 
