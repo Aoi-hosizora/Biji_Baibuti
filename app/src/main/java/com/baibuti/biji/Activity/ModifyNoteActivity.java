@@ -3,6 +3,7 @@ package com.baibuti.biji.Activity;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.v4.app.NavUtils;
 import android.support.v7.app.AppCompatActivity;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -31,7 +32,8 @@ public class ModifyNoteActivity extends AppCompatActivity implements View.OnClic
         super.onCreate(savedInstanceState);
 
         setContentView(R.layout.activity_modifyplainnote);
-        getSupportActionBar().show();
+       //  getSupportActionBar().show();
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
         note = (Note) getIntent().getSerializableExtra("notedata");
 
@@ -44,6 +46,7 @@ public class ModifyNoteActivity extends AppCompatActivity implements View.OnClic
         // button = (Button) findViewById(R.id.button);
         // button.setOnClickListener(this);
     }
+
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -65,6 +68,8 @@ public class ModifyNoteActivity extends AppCompatActivity implements View.OnClic
                 setResult(RESULT_OK,intent);
                 finish();
                 break;
+            case android.R.id.home:
+
             case R.id.id_menu_modifynote_cancel:
                 finish();
                 break;
