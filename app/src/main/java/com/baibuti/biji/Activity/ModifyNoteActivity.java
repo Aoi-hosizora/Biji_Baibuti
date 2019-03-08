@@ -29,16 +29,19 @@ public class ModifyNoteActivity extends AppCompatActivity implements View.OnClic
 
     private Note note;
     // private boolean IsNewData ;
+    private boolean IsMarkDown;
+    private Menu mMenu;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
         setContentView(R.layout.activity_modifyplainnote);
-       //  getSupportActionBar().show();
+        //  getSupportActionBar().show();
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
         note = (Note) getIntent().getSerializableExtra("notedata");
+        IsMarkDown = note.getIsMarkDown();
 
 //        IsNewData = false;
 //        if (note.getTitle().isEmpty() && note.getContent().isEmpty())
@@ -51,16 +54,24 @@ public class ModifyNoteActivity extends AppCompatActivity implements View.OnClic
 
         TitleEditText.setText(note.getTitle());
         ContentEditText.setText(note.getContent());
-        TypeTextView.setText(note.getIsMarkDown()?"MarkDown":"PlainNote"+" - "+note.getMakeTimeString());
+        TypeTextView.setText((note.getIsMarkDown() ? "MarkDown" : "PlainNote") + " - " + note.getMakeTimeString());
 
         // button = (Button) findViewById(R.id.button);
         // button.setOnClickListener(this);
+
     }
 
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.modifynoteactivity_menu,menu);
+        getMenuInflater().inflate(R.menu.modifynoteactivity_menu, menu);
+        mMenu = menu;
+        if (IsMarkDown == false) {
+            mMenu.findItem(R.id.id_menu_modifynote_changeplain).setVisible(false);
+            mMenu.findItem(R.id.id_menu_modifynote_showmarkdown).setVisible(false);
+        } else {
+            mMenu.findItem(R.id.id_menu_modifynote_changemd).setVisible(false);
+        }
         return true;
     }
 
@@ -72,14 +83,14 @@ public class ModifyNoteActivity extends AppCompatActivity implements View.OnClic
                 note.setContent(ContentEditText.getText().toString());
 
                 Intent intent = new Intent();
-                intent.putExtra("intent_result",true);
+                intent.putExtra("intent_result", true);
 
 //                if (IsNewData)
 //                    intent.putExtra("new_note",note);
 //                else
-                    intent.putExtra("modify_note",note);
+                intent.putExtra("modify_note", note);
 
-                setResult(RESULT_OK,intent);
+                setResult(RESULT_OK, intent);
                 finish();
                 break;
             case android.R.id.home:
@@ -87,25 +98,31 @@ public class ModifyNoteActivity extends AppCompatActivity implements View.OnClic
             case R.id.id_menu_modifynote_cancel:
                 finish();
                 break;
+
+            case R.id.id_menu_modifynote_changeplain:
+                note.setIsMarkDown(false);
+                TypeTextView.setText((note.getIsMarkDown() ? "MarkDown" : "PlainNote") + " - " + note.getMakeTimeString());
+                mMenu.findItem(R.id.id_menu_modifynote_changeplain).setVisible(false);
+                mMenu.findItem(R.id.id_menu_modifynote_changemd).setVisible(true);
+
+                mMenu.findItem(R.id.id_menu_modifynote_showmarkdown).setVisible(false);
+                break;
+
+            case R.id.id_menu_modifynote_changemd:
+                note.setIsMarkDown(true);
+                TypeTextView.setText((note.getIsMarkDown() ? "MarkDown" : "PlainNote") + " - " + note.getMakeTimeString());
+                mMenu.findItem(R.id.id_menu_modifynote_changemd).setVisible(false);
+                mMenu.findItem(R.id.id_menu_modifynote_changeplain).setVisible(true);
+
+                mMenu.findItem(R.id.id_menu_modifynote_showmarkdown).setVisible(true);
+
+                break;
+
+            case R.id.id_menu_modifynote_showmarkdown:
+
+
+                break;
         }
         return super.onOptionsItemSelected(item);
-    }
-
-    @Override
-    public void onClick(View v) {
-        switch (v.getId()) {
-//            case R.id.id_menu_modifynote_finish:
-//
-//                note.setTitle(TitleEditText.getText().toString());
-//                note.setContent(ContentEditText.getText().toString());
-//
-//                Intent intent = new Intent();
-//                intent.putExtra("modify_result",true);
-//                intent.putExtra("modify_note",note);
-//
-//                setResult(RESULT_OK,intent);
-//                finish();
-//                break;
-        }
     }
 }

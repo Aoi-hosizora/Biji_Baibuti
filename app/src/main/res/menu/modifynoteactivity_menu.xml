@@ -11,4 +11,19 @@
     <item
         android:id="@+id/id_menu_modifynote_cancel"
         android:title="Cancel" />
+
+    <item
+        android:id="@+id/id_menu_modifynote_changeplain"
+        android:title="Change to Plain Note" />
+
+    <item
+        android:id="@+id/id_menu_modifynote_changemd"
+        android:title="Change to MarkDown" />
+
+
+    <item
+        android:id="@+id/id_menu_modifynote_showmarkdown"
+        android:title="Show MarkDown" />
+
+
 </menu>
