@@ -11,6 +11,7 @@ import android.view.View;
 import android.view.Window;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.TextView;
 
 import com.baibuti.biji.Data.Note;
 import com.baibuti.biji.R;
@@ -24,6 +25,7 @@ public class ModifyNoteActivity extends AppCompatActivity implements View.OnClic
     // private Button button;
     private EditText TitleEditText;
     private EditText ContentEditText;
+    private TextView TypeTextView;
 
     private Note note;
     // private boolean IsNewData ;
@@ -44,9 +46,12 @@ public class ModifyNoteActivity extends AppCompatActivity implements View.OnClic
 
         TitleEditText = (EditText) findViewById(R.id.id_modifynote_title);
         ContentEditText = (EditText) findViewById(R.id.id_modifynote_content);
+        TypeTextView = (TextView) findViewById(R.id.id_modifynote_type);
+
 
         TitleEditText.setText(note.getTitle());
         ContentEditText.setText(note.getContent());
+        TypeTextView.setText(note.getIsMarkDown()?"MarkDown":"PlainNote"+" - "+note.getMakeTimeString());
 
         // button = (Button) findViewById(R.id.button);
         // button.setOnClickListener(this);

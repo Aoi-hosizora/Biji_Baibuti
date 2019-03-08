@@ -149,7 +149,7 @@ public class NoteFragment extends Fragment implements View.OnClickListener {
                         Note newnote = (Note) data.getSerializableExtra("modify_note");
                         Toast.makeText(getActivity(), newnote.getTitle(), Toast.LENGTH_SHORT).show();
                         NoteList.add(NoteList.size(), newnote);
-                        Log.i("si", String.valueOf(mainData.getNote().size()));
+                        // Log.i("si", String.valueOf(mainData.getNote().size()));
                         noteAdapter.notifyDataSetChanged();
                     }
                 }
