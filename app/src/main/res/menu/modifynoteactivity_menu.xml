@@ -25,5 +25,7 @@
         android:id="@+id/id_menu_modifynote_showmarkdown"
         android:title="Show MarkDown" />
 
-
+    <item
+        android:id="@+id/id_menu_modifynote_hidemarkdown"
+        android:title="Hide MarkDown" />
 </menu>

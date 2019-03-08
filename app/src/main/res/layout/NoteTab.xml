@@ -46,6 +46,7 @@
                 fab:fab_colorNormal="@color/pink"
                 fab:fab_title="Add Plain Note"
                 fab:fab_colorPressed="@color/pink_pressed"
+                app:elevation="5dp"
                 fab:fab_size="mini"/>
 
             <com.getbase.floatingactionbutton.FloatingActionButton
@@ -55,19 +56,12 @@
                 fab:fab_colorNormal="@color/pink"
                 fab:fab_title="Add Markdown Note"
                 fab:fab_colorPressed="@color/pink_pressed"
+                app:elevation="5dp"
+
                 fab:fab_size="mini"/>
 
         </com.getbase.floatingactionbutton.FloatingActionsMenu>
     </android.support.design.widget.CoordinatorLayout>
 
-    <!--
-    <android.support.design.widget.NavigationView
-        android:id="@+id/nav_view"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_gravity="start"
-        app:headerLayout="@layout/nav_header"
-        app:menu="@menu/nav_menu" />
-    -->
 
 </LinearLayout>

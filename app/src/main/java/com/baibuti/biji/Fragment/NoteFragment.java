@@ -30,7 +30,7 @@ public class NoteFragment extends Fragment implements View.OnClickListener {
 
     private Data mainData;
 
-    private FloatingActionButton mFab;
+    private com.getbase.floatingactionbutton.FloatingActionsMenu mFab;
     private SwipeRefreshLayout mSwipeRefresh;
     private ListView mNoteListView;
     private ArrayList<Note> NoteList;
@@ -42,7 +42,7 @@ public class NoteFragment extends Fragment implements View.OnClickListener {
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.notetab, container, false);
 
-        // mFab = (FloatingActionButton) view.findViewById(R.id.id_note_addfab);
+        mFab = (com.getbase.floatingactionbutton.FloatingActionsMenu) view.findViewById(R.id.id_note_addfab);
         mSwipeRefresh = (SwipeRefreshLayout) view.findViewById(R.id.swipe_refresh);
         mNoteListView = (ListView) view.findViewById(R.id.id_note_notelistview);
         mAddDocMenu = (com.getbase.floatingactionbutton.FloatingActionButton) view.findViewById(R.id.id_note_addfab_addDoc);
@@ -68,6 +68,7 @@ public class NoteFragment extends Fragment implements View.OnClickListener {
     public void onClick(View v) {
         switch (v.getId()) {
             case R.id.id_note_addfab_addDoc:
+
                 Intent addDoc_intent=new Intent(getActivity(),ModifyNoteActivity.class);
                 addDoc_intent.putExtra("notedata",new Note("","",new Date(),false));
                 startActivityForResult(addDoc_intent,2);
