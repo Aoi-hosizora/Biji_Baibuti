@@ -15,15 +15,17 @@ public class Note implements Serializable {
     private String Title;
     private Date MakeTime;
     private String Content;
+    private boolean IsMarkDown;
 
-    public Note(String Title, String Content, Date MakeTime) {
+    public Note(String Title, String Content, Date MakeTime, boolean IsMarkDown) {
         this.Title = Title;
         this.MakeTime = MakeTime;
         this.Content = Content;
+        this.IsMarkDown = IsMarkDown;
     }
 
     public Note(String Title, String Content) {
-        this(Title, Content, new Date());
+        this(Title, Content, new Date(), false);
     }
 
     public String getTitle() {
@@ -54,6 +56,10 @@ public class Note implements Serializable {
         return df.format(MakeTime);
     }
 
+    public boolean getIsMarkDown() {
+        return this.IsMarkDown;
+    }
+
     public void setTitle(String Title) {
         this.Title = Title;
         this.MakeTime = new Date();
@@ -61,6 +67,11 @@ public class Note implements Serializable {
 
     public void setContent(String Content) {
         this.Content = Content;
+        this.MakeTime = new Date();
+    }
+
+    public void setIsMarkDown(boolean IsMarkDown) {
+        this.IsMarkDown = IsMarkDown;
         this.MakeTime = new Date();
     }
 

@@ -11,7 +11,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ListView;
-import android.widget.Toast;
 
 
 import com.baibuti.biji.Data.Data;
@@ -38,7 +37,7 @@ public class NoteFragment extends Fragment implements View.OnClickListener {
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.notetab, container, false);
 
-        mFab = (FloatingActionButton) view.findViewById(R.id.id_note_addfab);
+        // mFab = (FloatingActionButton) view.findViewById(R.id.id_note_addfab);
         mSwipeRefresh = (SwipeRefreshLayout) view.findViewById(R.id.swipe_refresh);
         mNoteListView = (ListView) view.findViewById(R.id.id_note_notelistview);
 
@@ -51,7 +50,7 @@ public class NoteFragment extends Fragment implements View.OnClickListener {
             }
         });
 
-        mFab.setOnClickListener(this);
+        // mFab.setOnClickListener(this);
 
         initData();
 
@@ -61,9 +60,9 @@ public class NoteFragment extends Fragment implements View.OnClickListener {
     @Override
     public void onClick(View v) {
         switch (v.getId()) {
-            case R.id.id_note_addfab:
-                Toast.makeText(getActivity(), "A", Toast.LENGTH_SHORT).show();
-            break;
+            // case R.id.id_note_addfab:
+            //     Toast.makeText(getActivity(), "A", Toast.LENGTH_SHORT).show();
+            // break;
         }
     }
 
