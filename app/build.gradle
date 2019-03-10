@@ -29,7 +29,6 @@ dependencies {
     implementation 'com.getbase:floatingactionbutton:1.10.1'
     implementation 'com.zzhoujay.richtext:richtext:2.5.4'
     implementation 'com.rmtheis:tess-two:9.0.0'
-
     // implementation 'com.zzhoujay.richtext:richtext:latest-version'
     // implementation 'com.zzhoujay:html:latest-version'
 
