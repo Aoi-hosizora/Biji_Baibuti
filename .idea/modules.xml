@@ -5,6 +5,7 @@
       <module fileurl="file://$PROJECT_DIR$/Biji.iml" filepath="$PROJECT_DIR$/Biji.iml" />
       <module fileurl="file://$PROJECT_DIR$/Biji_Baibuti_GUO.iml" filepath="$PROJECT_DIR$/Biji_Baibuti_GUO.iml" />
       <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
+      <module fileurl="file://$PROJECT_DIR$/tess-two/tess-two.iml" filepath="$PROJECT_DIR$/tess-two/tess-two.iml" />
     </modules>
   </component>
 </project>

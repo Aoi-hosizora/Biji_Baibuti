@@ -133,7 +133,7 @@ public class ModifyNoteActivity extends AppCompatActivity implements View.OnClic
                 break;
 
             case R.id.id_menu_modifynote_showmarkdown:
-                //////////
+                ////////// https://github.com/zzhoujay/RichText/wiki
                 RichText.fromMarkdown(ContentEditText.getText().toString()).into(MdTextView);
                 MdTextView.setVisibility(View.VISIBLE);
                 ContentEditText.setVisibility(View.GONE);
