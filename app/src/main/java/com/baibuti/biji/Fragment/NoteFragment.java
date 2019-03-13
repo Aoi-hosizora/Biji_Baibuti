@@ -6,6 +6,7 @@ import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
 import android.support.v4.widget.SwipeRefreshLayout;
+import android.support.v7.widget.CardView;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -44,7 +45,7 @@ public class NoteFragment extends Fragment implements View.OnClickListener {
 
         mFab = (com.getbase.floatingactionbutton.FloatingActionsMenu) view.findViewById(R.id.id_note_addfab);
         mSwipeRefresh = (SwipeRefreshLayout) view.findViewById(R.id.swipe_refresh);
-        mNoteListView = (ListView) view.findViewById(R.id.id_note_notelistview);
+         mNoteListView = (ListView) view.findViewById(R.id.id_note_notelistview);
         mAddDocMenu = (com.getbase.floatingactionbutton.FloatingActionButton) view.findViewById(R.id.id_note_addfab_addDoc);
         mAddMdMenu = (com.getbase.floatingactionbutton.FloatingActionButton) view.findViewById(R.id.id_note_addfab_addMd);
 
@@ -60,6 +61,14 @@ public class NoteFragment extends Fragment implements View.OnClickListener {
         mAddMdMenu.setOnClickListener(this);
 
         initData();
+
+//        CardView cardView = (CardView) view.findViewById(R.id.cardView);
+//
+//        cardView.setRadius(8);//设置图片圆角的半径大小
+//
+//        cardView.setCardElevation(8);//设置阴影部分大小
+//
+//        cardView.setContentPadding(5,5,5,5);//设置图片距离阴影大小
 
         return view;
     }
