@@ -1,19 +1,14 @@
 package com.baibuti.biji.Fragment;
 
-import android.app.ActionBar;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
-import android.support.v7.app.AppCompatActivity;
-import android.view.Gravity;
+import android.support.v7.widget.Toolbar;
 import android.view.LayoutInflater;
-import android.view.Menu;
-import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.Toast;
 
@@ -49,7 +44,7 @@ public class NoteFragment extends Fragment implements View.OnClickListener {
                 Toast.makeText(getContext(),"HAHAHA", Toast.LENGTH_SHORT).show();
             }
         });
-        //initActionbar();
+        initToolbar(view);
         initDatas();
         return view;
     }
@@ -62,31 +57,20 @@ public class NoteFragment extends Fragment implements View.OnClickListener {
     private int NoteListClickPos;
     private NoteAdapter noteAdapter;
 
-    private void initActionbar(){
-        /*android.support.v7.app.ActionBar actionBar = ((AppCompatActivity)getActivity()).getSupportActionBar();
-        if(actionBar == null) {
-            Toast.makeText(getContext(),"No ActionBar",Toast.LENGTH_LONG).show();
-            return;
-        }
-        actionBar.setDisplayOptions(actionBar.getDisplayOptions()
-                | ActionBar.DISPLAY_SHOW_CUSTOM);
-        ImageView imageView = new ImageView(actionBar.getThemedContext());
-        imageView.setScaleType(ImageView.ScaleType.CENTER);
-        imageView.setImageResource(R.drawable.search);
-        ActionBar.LayoutParams layoutParams = new ActionBar.LayoutParams(
-                ActionBar.LayoutParams.WRAP_CONTENT,
-                ActionBar.LayoutParams.WRAP_CONTENT, Gravity.RIGHT
-                | Gravity.CENTER_VERTICAL);
-        layoutParams.rightMargin = 80;
-        imageView.setLayoutParams(layoutParams);
-        actionBar.setCustomView(imageView);
-        imageView.setOnClickListener(new View.OnClickListener() {
+    private void initToolbar(View view){
+        Toolbar toolbar = view.findViewById(R.id.note_toolbar);
+        toolbar.inflateMenu(R.menu.notefragment_actionbar);
+        toolbar.setOnMenuItemClickListener(new Toolbar.OnMenuItemClickListener() {
             @Override
-            public void onClick(View view) {
-                searchFragment.show(getActivity().getSupportFragmentManager(),com.wyt.searchbox.SearchFragment.TAG);
+            public boolean onMenuItemClick(MenuItem item) {
+                switch (item.getItemId()) {
+                    case R.id.action_search:
+                        searchFragment.show(getActivity().getSupportFragmentManager(),com.wyt.searchbox.SearchFragment.TAG);
+                        break;
+                }
+                return true;
             }
-        });*/
-
+        });
     }
 
     private void initDatas() {
@@ -94,22 +78,6 @@ public class NoteFragment extends Fragment implements View.OnClickListener {
         NoteList = mainData.getNote();
         noteAdapter = new NoteAdapter(getActivity(), R.layout.notelistview, NoteList,this);
         mNoteList.setAdapter(noteAdapter);
-    }
-
-    @Override
-    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-        menu.clear();
-        inflater.inflate(R.menu.notefragment_actionbar,menu);
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()){
-            case R.id.action_search:
-                searchFragment.show(getActivity().getSupportFragmentManager(),com.wyt.searchbox.SearchFragment.TAG);
-                return true;
-        }
-        return false;
     }
 
     @Override

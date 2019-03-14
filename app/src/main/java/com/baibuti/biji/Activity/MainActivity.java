@@ -1,29 +1,32 @@
 package com.baibuti.biji.Activity;
 
+import android.graphics.Point;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v4.view.ViewPager.OnPageChangeListener;
 import android.os.Bundle;
 
 import android.support.v7.app.AppCompatActivity;
+import android.view.Display;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.baibuti.biji.Fragment.ClassFragment;
 import com.baibuti.biji.Fragment.NoteFragment;
 import com.baibuti.biji.Fragment.SearchFragment;
 import com.baibuti.biji.Fragment.FileFragment;
 import com.baibuti.biji.R;
+import com.jeremyfeinstein.slidingmenu.lib.SlidingMenu;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class MainActivity extends AppCompatActivity implements OnClickListener {
+public class MainActivity extends FragmentActivity implements OnClickListener {
     //声明ViewPager
     private ViewPager mViewPager;
     //适配器
@@ -117,6 +120,27 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
     }
 
     private void initViews() {
+        //获取屏幕宽度
+        Display display = getWindowManager().getDefaultDisplay();
+        Point size = new Point();
+        display.getSize(size);
+        int width = size.x;
+        //添加侧拉菜单
+        SlidingMenu slidingMenu =new SlidingMenu(this);
+        slidingMenu.setMode(SlidingMenu.LEFT);
+        //设置预留屏幕宽度
+        slidingMenu.setBehindOffset(width/4);
+        //全屏都可以拖拽触摸
+        slidingMenu.setTouchModeAbove(SlidingMenu.TOUCHMODE_FULLSCREEN);
+        //附加到当前的Activity上去
+        slidingMenu.attachToActivity(this,SlidingMenu.SLIDING_CONTENT);
+        //设置阴影的宽度
+        slidingMenu.setShadowWidthRes(R.dimen.drawer_shadow);
+        //设置渐入渐出效果的值
+        slidingMenu.setFadeDegree(0.35f);
+        //为侧滑菜单设置布局
+        slidingMenu.setMenu(R.layout.left_menu);
+
         mViewPager = (ViewPager) findViewById(R.id.id_viewpager);
 
         //////////
