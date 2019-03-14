@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">笔迹</string>
+    <string name="notefragment_menu_search">search</string>
 </resources>

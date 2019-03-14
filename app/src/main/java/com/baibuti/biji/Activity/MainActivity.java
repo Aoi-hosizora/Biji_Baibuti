@@ -1,28 +1,29 @@
 package com.baibuti.biji.Activity;
 
 import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v4.view.ViewPager.OnPageChangeListener;
 import android.os.Bundle;
 
+import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.view.View.OnClickListener;
-import android.view.Window;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
+import android.widget.TextView;
+import android.widget.Toast;
 
-import com.baibuti.biji.Fragment.AlertFragment;
-import com.baibuti.biji.Fragment.HomeFragment;
+import com.baibuti.biji.Fragment.ClassFragment;
 import com.baibuti.biji.Fragment.NoteFragment;
-import com.baibuti.biji.Fragment.SettingFragment;
+import com.baibuti.biji.Fragment.SearchFragment;
+import com.baibuti.biji.Fragment.FileFragment;
 import com.baibuti.biji.R;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class MainActivity extends FragmentActivity implements OnClickListener {
+public class MainActivity extends AppCompatActivity implements OnClickListener {
     //声明ViewPager
     private ViewPager mViewPager;
     //适配器
@@ -31,37 +32,41 @@ public class MainActivity extends FragmentActivity implements OnClickListener {
     private List<Fragment> mFragments;
 
     //四个Tab对应的布局
-    private LinearLayout mTabHome;
     private LinearLayout mTabNote;
-    private LinearLayout mTabAlarm;
-    private LinearLayout mTabSetting;
+    private LinearLayout mTabSearch;
+    private LinearLayout mTabClass;
+    private LinearLayout mTabFile;
 
     //四个Tab对应的ImageButton
-    private ImageButton mImgHome;
     private ImageButton mImgNote;
-    private ImageButton mImgAlarm;
-    private ImageButton mImgSetting;
+    private ImageButton mImgSearch;
+    private ImageButton mImgClass;
+    private ImageButton mImgFile;
+
+    private TextView mTextNote;
+    private TextView mTextSearch;
+    private TextView mTextClass;
+    private TextView mTextFile;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        //requestWindowFeature(Window.FEATURE_NO_TITLE);
         super.onCreate(savedInstanceState);
-        requestWindowFeature(Window.FEATURE_NO_TITLE);
         setContentView(R.layout.activity_main);
 
         initViews();//初始化控件
         initEvents();//初始化事件
         initDatas();//初始化数据
-
-
     }
 
     private void initDatas() {
+
         mFragments = new ArrayList<>();
         //将四个Fragment加入集合中
-        mFragments.add(new HomeFragment());
         mFragments.add(new NoteFragment());
-        mFragments.add(new AlertFragment());
-        mFragments.add(new SettingFragment());
+        mFragments.add(new SearchFragment());
+        mFragments.add(new ClassFragment());
+        mFragments.add(new FileFragment());
 
         //初始化适配器
         mAdapter = new FragmentPagerAdapter(getSupportFragmentManager()) {
@@ -105,27 +110,33 @@ public class MainActivity extends FragmentActivity implements OnClickListener {
 
     private void initEvents() {
         //设置四个Tab的点击事件
-        mTabHome.setOnClickListener(this);
         mTabNote.setOnClickListener(this);
-        mTabAlarm.setOnClickListener(this);
-        mTabSetting.setOnClickListener(this);
+        mTabSearch.setOnClickListener(this);
+        mTabClass.setOnClickListener(this);
+        mTabFile.setOnClickListener(this);
     }
 
     private void initViews() {
         mViewPager = (ViewPager) findViewById(R.id.id_viewpager);
 
         //////////
-        mTabHome = (LinearLayout) findViewById(R.id.id_tab_home);
-        mTabNote = (LinearLayout) findViewById(R.id.id_tab_note);
-        mTabAlarm = (LinearLayout) findViewById(R.id.id_tab_alarm);
-        mTabSetting = (LinearLayout) findViewById(R.id.id_tab_setting);
+        mTabNote = (LinearLayout) findViewById(R.id.tab_note);
+        mTabSearch = (LinearLayout) findViewById(R.id.tab_search);
+        mTabClass = (LinearLayout) findViewById(R.id.tab_class);
+        mTabFile = (LinearLayout) findViewById(R.id.tab_file);
 
         //////////
-        mImgHome = (ImageButton) findViewById(R.id.id_tab_home_img);
-        mImgNote = (ImageButton) findViewById(R.id.id_tab_note_img);
-        mImgAlarm = (ImageButton) findViewById(R.id.id_tab_alarm_img);
-        mImgSetting = (ImageButton) findViewById(R.id.id_tab_setting_img);
+        mImgNote = (ImageButton) findViewById(R.id.tab_note_img);
+        mImgSearch = (ImageButton) findViewById(R.id.tab_search_img);
+        mImgClass = (ImageButton) findViewById(R.id.tab_class_img);
+        mImgFile = (ImageButton) findViewById(R.id.tab_file_img);
 
+        mTextNote = (TextView) findViewById(R.id.tab_note_text);
+        mTextSearch = (TextView) findViewById(R.id.tab_search_text);
+        mTextClass = (TextView) findViewById(R.id.tab_class_text);
+        mTextFile = (TextView) findViewById(R.id.tab_file_text);
+
+        selectTab(0);
     }
 
     @Override
@@ -135,16 +146,16 @@ public class MainActivity extends FragmentActivity implements OnClickListener {
 
         //根据点击的Tab切换不同的页面及设置对应的ImageButton为绿色
         switch (v.getId()) {
-            case R.id.id_tab_home:
+            case R.id.tab_note:
                 selectTab(0);
                 break;
-            case R.id.id_tab_note:
+            case R.id.tab_search:
                 selectTab(1);
                 break;
-            case R.id.id_tab_alarm:
+            case R.id.tab_class:
                 selectTab(2);
                 break;
-            case R.id.id_tab_setting:
+            case R.id.tab_file:
                 selectTab(3);
                 break;
         }
@@ -154,16 +165,24 @@ public class MainActivity extends FragmentActivity implements OnClickListener {
         //根据点击的Tab设置对应的ImageButton为绿色
         switch (i) {
             case 0:
-                mImgHome.setImageResource(R.mipmap.tab_weixin_pressed);
+                mTextNote.setTextColor(getResources().getColor(R.color.colorPrimary));
+                //mTabNote.setBackgroundColor(getResources().getColor(R.color.colorPrimaryDark));
+                mImgNote.setImageResource(R.drawable.tab_note_pressed);
                 break;
             case 1:
-                mImgNote.setImageResource(R.mipmap.tab_find_frd_pressed);
+                mTextSearch.setTextColor(getResources().getColor(R.color.colorPrimary));
+                //mTabSearch.setBackgroundColor(getResources().getColor(R.color.colorPrimaryDark));
+                mImgSearch.setImageResource(R.drawable.tab_search_pressed);
                 break;
             case 2:
-                mImgAlarm.setImageResource(R.mipmap.tab_address_pressed);
+                mTextClass.setTextColor(getResources().getColor(R.color.colorPrimary));
+                //mTabClass.setBackgroundColor(getResources().getColor(R.color.colorPrimaryDark));
+                mImgClass.setImageResource(R.drawable.tab_class_pressed);
                 break;
             case 3:
-                mImgSetting.setImageResource(R.mipmap.tab_settings_pressed);
+                mTextFile.setTextColor(getResources().getColor(R.color.colorPrimary));
+                //mTabFile.setBackgroundColor(getResources().getColor(R.color.colorPrimaryDark));
+                mImgFile.setImageResource(R.drawable.tab_file_pressed);
                 break;
         }
         //设置当前点击的Tab所对应的页面
@@ -171,9 +190,14 @@ public class MainActivity extends FragmentActivity implements OnClickListener {
     }
 
     private void resetImgs() {
-        mImgHome.setImageResource(R.mipmap.tab_weixin_normal);
-        mImgNote.setImageResource(R.mipmap.tab_find_frd_normal);
-        mImgAlarm.setImageResource(R.mipmap.tab_address_normal);
-        mImgSetting.setImageResource(R.mipmap.tab_settings_normal);
+        mImgNote.setImageResource(R.drawable.tab_note_normal);
+        mImgSearch.setImageResource(R.drawable.tab_search_normal);
+        mImgClass.setImageResource(R.drawable.tab_class_normal);
+        mImgFile.setImageResource(R.drawable.tab_file_normal);
+
+        mTextNote.setTextColor(getResources().getColor(R.color.half_black));
+        mTextSearch.setTextColor(getResources().getColor(R.color.half_black));
+        mTextClass.setTextColor(getResources().getColor(R.color.half_black));
+        mTextFile.setTextColor(getResources().getColor(R.color.half_black));
     }
 }

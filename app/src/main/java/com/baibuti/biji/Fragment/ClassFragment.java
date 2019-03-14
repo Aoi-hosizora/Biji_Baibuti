@@ -9,11 +9,11 @@ import android.view.ViewGroup;
 
 import com.baibuti.biji.R;
 
-public class AlertFragment extends Fragment {
+public class ClassFragment extends Fragment {
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.alarmtab, container, false);
+        View view = inflater.inflate(R.layout.classtab, container, false);
         return view;
     }
 }

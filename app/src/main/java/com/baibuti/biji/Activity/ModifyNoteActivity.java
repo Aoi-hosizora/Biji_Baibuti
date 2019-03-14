@@ -31,6 +31,7 @@ public class ModifyNoteActivity extends AppCompatActivity implements View.OnClic
     private TextView MdTextView;
 
     private Note note;
+    private int notePos;
     // private boolean IsNewData ;
     private boolean IsMarkDown;
     private Menu mMenu;
@@ -44,6 +45,7 @@ public class ModifyNoteActivity extends AppCompatActivity implements View.OnClic
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
         note = (Note) getIntent().getSerializableExtra("notedata");
+        notePos = getIntent().getIntExtra("notepos",0);
         IsMarkDown = note.getIsMarkDown();
 
 //        IsNewData = false;
@@ -71,7 +73,7 @@ public class ModifyNoteActivity extends AppCompatActivity implements View.OnClic
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.modifynoteactivity_menu,menu);
         mMenu = menu;
-        if (IsMarkDown == false) {
+        if (!IsMarkDown) {
             mMenu.findItem(R.id.id_menu_modifynote_changeplain).setVisible(false);
             mMenu.findItem(R.id.id_menu_modifynote_showmarkdown).setVisible(false);
             mMenu.findItem(R.id.id_menu_modifynote_hidemarkdown).setVisible(false);
@@ -96,6 +98,7 @@ public class ModifyNoteActivity extends AppCompatActivity implements View.OnClic
 
                 Intent intent = new Intent();
                 intent.putExtra("intent_result",true);
+                intent.putExtra("modify_note_pos",notePos);
 
 //                if (IsNewData)
 //                    intent.putExtra("new_note",note);
@@ -106,6 +109,7 @@ public class ModifyNoteActivity extends AppCompatActivity implements View.OnClic
                 finish();
                 break;
             case android.R.id.home:
+                break;
 
             case R.id.id_menu_modifynote_cancel:
                 finish();
