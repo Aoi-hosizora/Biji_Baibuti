@@ -10,20 +10,12 @@ import android.support.v7.app.AppCompatActivity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.Window;
-import android.widget.Button;
 import android.widget.EditText;
-import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.baibuti.biji.Data.Note;
 import com.baibuti.biji.R;
-import com.sendtion.xrichtext.DataImageView;
-import com.sendtion.xrichtext.RichTextEditor;
 import com.zzhoujay.richtext.RichText;
-
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Created by Windows 10 on 016 2019/02/16.
