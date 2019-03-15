@@ -3,6 +3,7 @@ package com.baibuti.biji.Activity;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.support.v4.app.NavUtils;
 import android.support.v7.app.AppCompatActivity;
@@ -12,11 +13,17 @@ import android.view.View;
 import android.view.Window;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.baibuti.biji.Data.Note;
 import com.baibuti.biji.R;
+import com.sendtion.xrichtext.DataImageView;
+import com.sendtion.xrichtext.RichTextEditor;
 import com.zzhoujay.richtext.RichText;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Created by Windows 10 on 016 2019/02/16.
@@ -46,10 +53,6 @@ public class ModifyNoteActivity extends AppCompatActivity implements View.OnClic
         note = (Note) getIntent().getSerializableExtra("notedata");
         IsMarkDown = note.getIsMarkDown();
 
-//        IsNewData = false;
-//        if (note.getTitle().isEmpty() && note.getContent().isEmpty())
-//            IsNewData = true;
-
         TitleEditText = (EditText) findViewById(R.id.id_modifynote_title);
         ContentEditText = (EditText) findViewById(R.id.id_modifynote_content);
         TypeTextView = (TextView) findViewById(R.id.id_modifynote_type);
@@ -61,11 +64,8 @@ public class ModifyNoteActivity extends AppCompatActivity implements View.OnClic
 
         MdTextView.setVisibility(View.GONE);
         ContentEditText.setVisibility(View.VISIBLE);
-        // button = (Button) findViewById(R.id.button);
-        // button.setOnClickListener(this);
 
     }
-
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {

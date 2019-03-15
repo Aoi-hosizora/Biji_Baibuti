@@ -9,6 +9,12 @@
         android:icon="@drawable/ic_done"/>
 
     <item
+        android:id="@+id/id_menu_modifynote_img"
+        android:title="Add Pic"
+        app:showAsAction="always"
+        android:icon="@drawable/ic_fab_star"/>
+
+    <item
         android:id="@+id/id_menu_modifynote_cancel"
         android:title="Cancel" />
 
