@@ -3,7 +3,7 @@
     <color name="colorPrimary">#00A2FF</color>
     <color name="colorPrimaryDark">#0090FF</color>
     <color name="colorAccent">#FF4081</color>
-    <color name="color_shadow">#808080AA</color>
+    <color name="color_shadow">#417F7F81</color>
 
     <color name="black_semi_transparent">#B2000000</color>
     <color name="background">#e5e5e5</color>
@@ -11,8 +11,8 @@
     <color name="white">#FAFAFA</color>
     <color name="white_pressed">#f1f1f1</color>
     <color name="pink_pressed">#e91e63</color>
-    <color name="pink">#ec407a</color>
+    <color name="pink">#EC407A</color>
     <color name="blue_semi_transparent">#805677fc</color>
-    <color name="blue_semi_transparent_pressed">#80738ffe</color>
+    <color name="blue_semi_transparent_pressed">#8020368D</color>
 
 </resources>

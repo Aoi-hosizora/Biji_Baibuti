@@ -1,6 +1,7 @@
 package com.baibuti.biji.Fragment;
 
 import android.content.Intent;
+import android.media.Image;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
@@ -9,13 +10,17 @@ import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.support.v7.widget.ActionMenuView;
+import android.widget.ImageButton;
 import android.widget.ListView;
 import android.widget.Toast;
 
+import com.baibuti.biji.Activity.MainActivity;
 import com.baibuti.biji.Data.Data;
 import com.baibuti.biji.Data.Note;
 import com.baibuti.biji.Data.NoteAdapter;
 import com.baibuti.biji.R;
+import com.jeremyfeinstein.slidingmenu.lib.SlidingMenu;
 
 import java.util.ArrayList;
 
@@ -29,12 +34,15 @@ public class NoteFragment extends Fragment implements View.OnClickListener {
     private ArrayList<Note> NoteList;
     private com.wyt.searchbox.SearchFragment searchFragment;
 
+    private SlidingMenu slidingMenu;
+
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.notetab, container, false);
         setHasOptionsMenu(true);
-        mNoteList = (ListView) view.findViewById(R.id.note_list);
+        slidingMenu = ((MainActivity)getActivity()).getSlidingMenu();
+        mNoteList = view.findViewById(R.id.note_list);
         //添加搜索框
         searchFragment = com.wyt.searchbox.SearchFragment.newInstance();
         searchFragment.setOnSearchClickListener(new com.wyt.searchbox.custom.IOnSearchClickListener() {
@@ -71,6 +79,28 @@ public class NoteFragment extends Fragment implements View.OnClickListener {
                 return true;
             }
         });
+        toolbar.setNavigationIcon(R.mipmap.ic_launcher);
+        toolbar.setNavigationOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if(slidingMenu != null)
+                    slidingMenu.showMenu();
+            }
+        });
+        /*ActionMenuView actionMenuView = (ActionMenuView) toolbar.findViewById(R.id.note_toolbar_menu);
+        getActivity().getMenuInflater().inflate(R.menu.menu_toolbar_left, actionMenuView.getMenu());
+        // 点击事件
+        actionMenuView.setOnMenuItemClickListener(new ActionMenuView.OnMenuItemClickListener() {
+            @Override
+            public boolean onMenuItemClick(MenuItem item) {
+                switch (item.getItemId()){
+                    case R.id.home_btn:
+                        Toast.makeText(getContext(),"This is homebtn",Toast.LENGTH_LONG).show();
+                        break;
+                }
+                return true;
+            }
+        });*/
     }
 
     private void initDatas() {
