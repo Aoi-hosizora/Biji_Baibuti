@@ -52,10 +52,10 @@ public class ModifyNoteActivity extends AppCompatActivity implements View.OnClic
 //        if (note.getTitle().isEmpty() && note.getContent().isEmpty())
 //            IsNewData = true;
 
-        TitleEditText = (EditText) findViewById(R.id.id_modifynote_title);
-        ContentEditText = (EditText) findViewById(R.id.id_modifynote_content);
-        TypeTextView = (TextView) findViewById(R.id.id_modifynote_type);
-        MdTextView = (TextView) findViewById(R.id.id_modifynote_md);
+        TitleEditText = findViewById(R.id.id_modifynote_title);
+        ContentEditText = findViewById(R.id.id_modifynote_content);
+        TypeTextView = findViewById(R.id.id_modifynote_type);
+        MdTextView = findViewById(R.id.id_modifynote_md);
 
         TitleEditText.setText(note.getTitle());
         ContentEditText.setText(note.getContent());
@@ -109,6 +109,7 @@ public class ModifyNoteActivity extends AppCompatActivity implements View.OnClic
                 finish();
                 break;
             case android.R.id.home:
+                finish();
                 break;
 
             case R.id.id_menu_modifynote_cancel:
@@ -162,19 +163,6 @@ public class ModifyNoteActivity extends AppCompatActivity implements View.OnClic
 
     @Override
     public void onClick(View v) {
-        switch (v.getId()) {
-//            case R.id.id_menu_modifynote_finish:
-//
-//                note.setTitle(TitleEditText.getText().toString());
-//                note.setContent(ContentEditText.getText().toString());
-//
-//                Intent intent = new Intent();
-//                intent.putExtra("modify_result",true);
-//                intent.putExtra("modify_note",note);
-//
-//                setResult(RESULT_OK,intent);
-//                finish();
-//                break;
-        }
+
     }
 }

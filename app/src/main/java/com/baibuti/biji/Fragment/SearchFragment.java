@@ -40,11 +40,11 @@ public class SearchFragment extends Fragment implements View.OnClickListener {
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.searchtab, container, false);
 
-        mFab = (com.getbase.floatingactionbutton.FloatingActionsMenu) view.findViewById(R.id.id_note_addfab);
-        mSwipeRefresh = (SwipeRefreshLayout) view.findViewById(R.id.swipe_refresh);
-        mNoteListView = (ListView) view.findViewById(R.id.id_note_notelistview);
-        mAddDocMenu = (com.getbase.floatingactionbutton.FloatingActionButton) view.findViewById(R.id.id_note_addfab_addDoc);
-        mAddMdMenu = (com.getbase.floatingactionbutton.FloatingActionButton) view.findViewById(R.id.id_note_addfab_addMd);
+        mFab = view.findViewById(R.id.id_note_addfab);
+        mSwipeRefresh = view.findViewById(R.id.swipe_refresh);
+        mNoteListView = view.findViewById(R.id.id_note_notelistview);
+        mAddDocMenu = view.findViewById(R.id.id_note_addfab_addDoc);
+        mAddMdMenu = view.findViewById(R.id.id_note_addfab_addMd);
 
         mSwipeRefresh.setColorSchemeResources(R.color.colorPrimary);
         mSwipeRefresh.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
@@ -132,7 +132,7 @@ public class SearchFragment extends Fragment implements View.OnClickListener {
         switch (requestCode) {
             case 1:
                 if (resultCode == RESULT_OK) {
-                    if (data.getBooleanExtra("intent_result", true) == true) {
+                    if (data.getBooleanExtra("intent_result", true)) {
                         Note newnote = (Note) data.getSerializableExtra("modify_note");
                         NoteList.set(NoteListClickPos,newnote);
 
@@ -144,7 +144,7 @@ public class SearchFragment extends Fragment implements View.OnClickListener {
                 }
             case 2:
                 if (resultCode == RESULT_OK) {
-                    if (data.getBooleanExtra("intent_result", true) == true) {
+                    if (data.getBooleanExtra("intent_result", true)) {
                         Note newnote = (Note) data.getSerializableExtra("modify_note");
                         Toast.makeText(getActivity(), newnote.getTitle(), Toast.LENGTH_SHORT).show();
                         NoteList.add(NoteList.size(), newnote);

@@ -20,6 +20,7 @@ import com.baibuti.biji.Data.Data;
 import com.baibuti.biji.Data.Note;
 import com.baibuti.biji.Data.NoteAdapter;
 import com.baibuti.biji.R;
+import com.getbase.floatingactionbutton.FloatingActionButton;
 import com.jeremyfeinstein.slidingmenu.lib.SlidingMenu;
 
 import java.util.ArrayList;
@@ -45,14 +46,16 @@ public class NoteFragment extends Fragment implements View.OnClickListener {
         mNoteList = view.findViewById(R.id.note_list);
         //添加搜索框
         searchFragment = com.wyt.searchbox.SearchFragment.newInstance();
+        searchFragment.setAllowReturnTransitionOverlap(true);
         searchFragment.setOnSearchClickListener(new com.wyt.searchbox.custom.IOnSearchClickListener() {
             @Override
             public void OnSearchClick(String keyword) {
-                //这里处理逻辑
-                Toast.makeText(getContext(),"HAHAHA", Toast.LENGTH_SHORT).show();
+                Toast.makeText(getContext(),"This is note_search", Toast.LENGTH_SHORT).show();
+                //添加逻辑处理
             }
         });
         initToolbar(view);
+        initFloatingActionBar(view);
         initDatas();
         return view;
     }
@@ -87,20 +90,26 @@ public class NoteFragment extends Fragment implements View.OnClickListener {
                     slidingMenu.showMenu();
             }
         });
-        /*ActionMenuView actionMenuView = (ActionMenuView) toolbar.findViewById(R.id.note_toolbar_menu);
-        getActivity().getMenuInflater().inflate(R.menu.menu_toolbar_left, actionMenuView.getMenu());
-        // 点击事件
-        actionMenuView.setOnMenuItemClickListener(new ActionMenuView.OnMenuItemClickListener() {
+        toolbar.setTitle(R.string.note_header);
+    }
+
+    private void initFloatingActionBar(View view){
+        FloatingActionButton mNotePhoto = view.findViewById(R.id.note_photo);
+        FloatingActionButton mNoteEdit = view.findViewById(R.id.note_edit);
+        mNotePhoto.setOnClickListener(new View.OnClickListener() {
             @Override
-            public boolean onMenuItemClick(MenuItem item) {
-                switch (item.getItemId()){
-                    case R.id.home_btn:
-                        Toast.makeText(getContext(),"This is homebtn",Toast.LENGTH_LONG).show();
-                        break;
-                }
-                return true;
+            public void onClick(View view) {
+                Toast.makeText(getContext(), "This is note_photo",Toast.LENGTH_LONG).show();
+                //添加逻辑处理
             }
-        });*/
+        });
+        mNoteEdit.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Toast.makeText(getContext(), "This is note_edit",Toast.LENGTH_LONG).show();
+                //添加逻辑处理
+            }
+        });
     }
 
     private void initDatas() {

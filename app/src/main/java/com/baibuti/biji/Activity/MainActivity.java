@@ -131,7 +131,7 @@ public class MainActivity extends FragmentActivity implements OnClickListener {
         slidingMenu =new SlidingMenu(this);
         slidingMenu.setMode(SlidingMenu.LEFT);
         //设置预留屏幕宽度
-        slidingMenu.setBehindOffset(width/4);
+        slidingMenu.setBehindOffset(width/5);
         //全屏都可以拖拽触摸
         slidingMenu.setTouchModeAbove(SlidingMenu.TOUCHMODE_NONE);
         //附加到当前的Activity上去
