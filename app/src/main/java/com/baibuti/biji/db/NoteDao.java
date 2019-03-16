@@ -7,19 +7,18 @@ import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteStatement;
 
+import com.baibuti.biji.Data.Group;
 import com.baibuti.biji.Data.Note;
 import com.baibuti.biji.util.CommonUtil;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-/**
- * 作者：Sendtion on 2016/10/24 0024 15:53
- * 邮箱：sendtion@163.com
- * 博客：http://sendtion.cn
- * 描述：笔记处理
- */
+
+// 存储形式：
+// n_id, n_title, n_content, n_groupid, n_createtime, n_updatetime
 
 public class NoteDao {
     private MyOpenHelper helper;
@@ -40,15 +39,17 @@ public class NoteDao {
         Cursor cursor = null;
         try {
             if (groupId > 0){
-                sql = "select * from db_note where n_group_id =" + groupId +
-                        "order by n_create_time desc";
+                sql = "select * from db_note where n_group_id =" + groupId + "order by n_create_time desc";
             } else {
                 sql = "select * from db_note " ;
             }
+
+
             cursor = db.rawQuery(sql, null);
             //cursor = db.query("note", null, null, null, null, null, "n_id desc");
+
             while (cursor.moveToNext()) {
-                //循环获得展品信息
+
                 note = new Note("","");
 
                 note.setId(cursor.getInt(cursor.getColumnIndex("n_id")));
@@ -56,11 +57,21 @@ public class NoteDao {
                 note.setTitle(cursor.getString(cursor.getColumnIndex("n_title")));
                 note.setContent(cursor.getString(cursor.getColumnIndex("n_content")));
 
-                note.setGroupId(cursor.getInt(cursor.getColumnIndex("n_group_id")));
-                note.setGroupName(cursor.getString(cursor.getColumnIndex("n_group_name")));
+                Group grouptmp = new Group();
 
-//                note.setCreateTime(cursor.getString(cursor.getColumnIndex("n_create_time")));
-//                note.setUpdateTime(cursor.getString(cursor.getColumnIndex("n_update_time")));
+                grouptmp.setId(cursor.getInt(cursor.getColumnIndex("n_group_id")));
+                grouptmp.setName(cursor.getString(cursor.getColumnIndex("n_group_name")));
+
+                note.setGroupLabel(grouptmp);
+
+                note.setCreateTime(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").parse(
+                        cursor.getString(cursor.getColumnIndex("n_create_time"))
+                ));
+
+                note.setUpdateTime(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").parse(
+                        cursor.getString(cursor.getColumnIndex("n_update_time"))
+                ));
+
 
                 noteList.add(note);
             }
@@ -82,12 +93,10 @@ public class NoteDao {
      */
     public long insertNote(Note note) {
         SQLiteDatabase db = helper.getWritableDatabase();
-        String sql = "insert into db_note(n_title,n_content,n_group_id,n_group_name," +
-                "n_type,n_bg_color,n_encrypt,n_create_time,n_update_time) " +
-                "values(?,?,?,?,?,?,?,?,?)";
+        String sql = "insert into db_note(n_title,n_content,n_groupid,n_create_time,n_update_time) values(?,?,?,?,?)";
 
         long ret = 0;
-        //sql = "insert into ex_user(eu_login_name,eu_create_time,eu_update_time) values(?,?,?)";
+
         SQLiteStatement stat = db.compileStatement(sql);
         db.beginTransaction();
         try {
@@ -95,11 +104,13 @@ public class NoteDao {
             stat.bindString(1, note.getTitle()); // title
             stat.bindString(2, note.getContent()); // content
 
-            stat.bindLong(3, note.getGroupId()); // groupid
-            stat.bindString(4, note.getGroupName()); // groupname
 
-            stat.bindString(8, CommonUtil.date2string(new Date())); // createtime
-             stat.bindString(9, CommonUtil.date2string(new Date())); // updatetime
+
+            stat.bindLong(3, note.getGroupLabel().getId()); // groupid
+            // stat.bindString(4, note.getGroupLabel().getName()); // groupname
+
+            stat.bindString(4, CommonUtil.date2string(new Date())); // createtime
+             stat.bindString(5, CommonUtil.date2string(new Date())); // updatetime
 
             ret = stat.executeInsert();
             db.setTransactionSuccessful();
@@ -125,8 +136,7 @@ public class NoteDao {
         values.put("n_title", note.getTitle());
         values.put("n_content", note.getContent());
 
-        values.put("n_group_id", note.getGroupId());
-        values.put("n_group_name", note.getGroupName());
+        values.put("n_group_id", note.getGroupLabel().getId());
 
         values.put("n_update_time", CommonUtil.date2string(new Date()));
 
