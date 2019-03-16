@@ -19,15 +19,12 @@ import com.zzhoujay.richtext.RichText;
 
 public class ModifyNoteActivity extends AppCompatActivity implements View.OnClickListener {
 
-    // private Button button;
     private EditText TitleEditText;
     private com.sendtion.xrichtext.RichTextEditor ContentEditText;
+
     private TextView TypeTextView;
-    private TextView MdTextView;
 
     private Note note;
-    // private boolean IsNewData ;
-    private boolean IsMarkDown;
     private Menu mMenu;
 
     @Override
@@ -35,130 +32,58 @@ public class ModifyNoteActivity extends AppCompatActivity implements View.OnClic
         super.onCreate(savedInstanceState);
 
         setContentView(R.layout.activity_modifyplainnote);
-        // getSupportActionBar().show();
-        // getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+         getSupportActionBar().show();
+         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
         note = (Note) getIntent().getSerializableExtra("notedata");
-        IsMarkDown = note.getIsMarkDown();
 
         TitleEditText = (EditText) findViewById(R.id.id_modifynote_title);
         ContentEditText = (com.sendtion.xrichtext.RichTextEditor) findViewById(R.id.id_modifynote_content);
         TypeTextView = (TextView) findViewById(R.id.id_modifynote_type);
-        // MdTextView = (TextView) findViewById(R.id.id_modifynote_md);
 
         TitleEditText.setText(note.getTitle());
-        // ContentEditText.setText(note.getContent());
-        TypeTextView.setText((note.getIsMarkDown()?"MarkDown":"PlainNote")+" - "+note.getMakeTimeString());
-
-        // MdTextView.setVisibility(View.GONE);
-        //ContentEditText.setVisibility(View.VISIBLE);
-
+        TypeTextView.setText(note.getUpdateTimeString());
     }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.modifynoteactivity_menu,menu);
         mMenu = menu;
-        if (IsMarkDown == false) {
-            mMenu.findItem(R.id.id_menu_modifynote_changeplain).setVisible(false);
-            mMenu.findItem(R.id.id_menu_modifynote_showmarkdown).setVisible(false);
-            mMenu.findItem(R.id.id_menu_modifynote_hidemarkdown).setVisible(false);
-
-        }
-        else {
-            mMenu.findItem(R.id.id_menu_modifynote_changemd).setVisible(false);
-            mMenu.findItem(R.id.id_menu_modifynote_hidemarkdown).setVisible(false);
-
-        }
         return true;
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-//        switch (item.getItemId()) {
-//            case R.id.id_menu_modifynote_finish:
-//                if (TitleEditText.getText().toString().isEmpty() || ContentEditText.getText().toString().isEmpty())
-//                    break;
-//                note.setTitle(TitleEditText.getText().toString());
-//                note.setContent(ContentEditText.getText().toString());
-//
-//                Intent intent = new Intent();
-//                intent.putExtra("intent_result",true);
-//
-////                if (IsNewData)
-////                    intent.putExtra("new_note",note);
-////                else
-//                    intent.putExtra("modify_note",note);
-//
-//                setResult(RESULT_OK,intent);
-//                finish();
-//                break;
-//            case android.R.id.home:
-//
-//            case R.id.id_menu_modifynote_cancel:
-//                finish();
-//                break;
-//
-//            case R.id.id_menu_modifynote_changeplain:
-//                note.setIsMarkDown(false);
-//                TypeTextView.setText((note.getIsMarkDown()?"MarkDown":"PlainNote")+" - "+note.getMakeTimeString());
-//                mMenu.findItem(R.id.id_menu_modifynote_changeplain).setVisible(false);
-//                mMenu.findItem(R.id.id_menu_modifynote_changemd).setVisible(true);
-//
-//                mMenu.findItem(R.id.id_menu_modifynote_showmarkdown).setVisible(false);
-//                mMenu.findItem(R.id.id_menu_modifynote_hidemarkdown).setVisible(false);
-//                break;
-//
-//            case R.id.id_menu_modifynote_changemd:
-//                note.setIsMarkDown(true);
-//                TypeTextView.setText((note.getIsMarkDown()?"MarkDown":"PlainNote")+" - "+note.getMakeTimeString());
-//                mMenu.findItem(R.id.id_menu_modifynote_changemd).setVisible(false);
-//                mMenu.findItem(R.id.id_menu_modifynote_changeplain).setVisible(true);
-//
-//                mMenu.findItem(R.id.id_menu_modifynote_showmarkdown).setVisible(true);
-//                mMenu.findItem(R.id.id_menu_modifynote_hidemarkdown).setVisible(false);
-//
-//                break;
-//
-//            case R.id.id_menu_modifynote_showmarkdown:
-//                ////////// https://github.com/zzhoujay/RichText/wiki
-//                // RichText.fromMarkdown(ContentEditText.getText().toString()).into(MdTextView);
-//                // MdTextView.setVisibility(View.VISIBLE);
-//                ContentEditText.setVisibility(View.GONE);
-//
-//                mMenu.findItem(R.id.id_menu_modifynote_showmarkdown).setVisible(false);
-//                mMenu.findItem(R.id.id_menu_modifynote_hidemarkdown).setVisible(true);
-//
-//                break;
-//
-//            case R.id.id_menu_modifynote_hidemarkdown:
-//                //////////
-//                // MdTextView.setVisibility(View.GONE);
-//                ContentEditText.setVisibility(View.VISIBLE);
-//
-//                mMenu.findItem(R.id.id_menu_modifynote_showmarkdown).setVisible(true);
-//                mMenu.findItem(R.id.id_menu_modifynote_hidemarkdown).setVisible(false);
-//
-//                break;
-//        }
+        switch (item.getItemId()) {
+            case R.id.id_menu_modifynote_finish:
+                if (TitleEditText.getText().toString().isEmpty())
+                    break;
+                note.setTitle(TitleEditText.getText().toString());
+                // note.setContent(ContentEditText.getText().toString());
+
+                Intent intent = new Intent();
+
+                intent.putExtra("intent_result",true);
+
+
+                intent.putExtra("modify_note",note);
+
+                setResult(RESULT_OK,intent);
+                finish();
+                break;
+            case android.R.id.home:
+
+            case R.id.id_menu_modifynote_cancel:
+                finish();
+                break;
+        }
         return super.onOptionsItemSelected(item);
     }
 
     @Override
     public void onClick(View v) {
         switch (v.getId()) {
-//            case R.id.id_menu_modifynote_finish:
-//
-//                note.setTitle(TitleEditText.getText().toString());
-//                note.setContent(ContentEditText.getText().toString());
-//
-//                Intent intent = new Intent();
-//                intent.putExtra("modify_result",true);
-//                intent.putExtra("modify_note",note);
-//
-//                setResult(RESULT_OK,intent);
-//                finish();
-//                break;
+
         }
     }
 }

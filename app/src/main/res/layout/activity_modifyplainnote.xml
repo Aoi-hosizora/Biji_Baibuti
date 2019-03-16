@@ -1,93 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:orientation="vertical"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <!--<android.support.design.widget.AppBarLayout-->
-        <!--android:layout_width="match_parent"-->
-        <!--android:layout_height="wrap_content"-->
-        <!--android:theme="@style/AppTheme.AppBarOverlay">-->
-
-        <!--<android.support.v7.widget.Toolbar-->
-            <!--android:id="@+id/toolbar_new"-->
-            <!--android:layout_width="match_parent"-->
-            <!--android:layout_height="?attr/actionBarSize"-->
-            <!--android:background="?attr/colorPrimary"-->
-            <!--app:popupTheme="@style/AppTheme.PopupOverlay" />-->
-
-    <!--</android.support.design.widget.AppBarLayout>-->
-
     <include layout="@layout/content_new" />
 
-
-    <!--<TextView-->
-        <!--android:text="Type - #00:00#"-->
-        <!--android:id="@+id/id_modifynote_type"-->
-        <!--android:textSize="15sp"-->
-        <!--android:layout_marginRight="12px"-->
-        <!--android:layout_marginTop="5px"-->
-        <!--android:gravity="right"-->
-        <!--android:layout_width="match_parent"-->
-        <!--android:layout_height="wrap_content" />-->
-
-    <!--<TextView-->
-        <!--android:text="Title"-->
-        <!--android:textSize="20sp"-->
-        <!--android:layout_marginTop="-20sp"-->
-        <!--android:layout_marginLeft="15px"-->
-        <!--android:layout_width="match_parent"-->
-        <!--android:layout_height="wrap_content" />-->
-
-    <!--<EditText-->
-        <!--android:layout_width="match_parent"-->
-        <!--android:layout_height="wrap_content"-->
-        <!--android:layout_marginLeft="5px"-->
-        <!--android:layout_marginRight="5px"-->
-        <!--android:inputType="text"-->
-        <!--android:text="Name"-->
-        <!--android:id="@+id/id_modifynote_title" />-->
-
-    <!--<TextView-->
-        <!--android:text="Content"-->
-        <!--android:textSize="20sp"-->
-        <!--android:layout_marginTop="0px"-->
-        <!--android:layout_marginLeft="15px"-->
-        <!--android:layout_width="match_parent"-->
-        <!--android:layout_height="wrap_content" />-->
-
-    <!--&lt;!&ndash;<EditText&ndash;&gt;-->
-        <!--&lt;!&ndash;android:layout_width="match_parent"&ndash;&gt;-->
-        <!--&lt;!&ndash;android:layout_height="wrap_content"&ndash;&gt;-->
-        <!--&lt;!&ndash;android:inputType="textMultiLine"&ndash;&gt;-->
-        <!--&lt;!&ndash;android:visibility="visible"&ndash;&gt;-->
-        <!--&lt;!&ndash;android:text="Name"&ndash;&gt;-->
-        <!--&lt;!&ndash;android:gravity="top"&ndash;&gt;-->
-        <!--&lt;!&ndash;android:ems="10"&ndash;&gt;-->
-        <!--&lt;!&ndash;android:id="@+id/id_modifynote_content"&ndash;&gt;-->
-        <!--&lt;!&ndash;android:layout_weight="1" />&ndash;&gt;-->
-
-    <!--<com.sendtion.xrichtext.RichTextEditor-->
-        <!--android:id="@+id/et_new_content"-->
-        <!--android:layout_width="match_parent"-->
-        <!--android:layout_height="match_parent"-->
-        <!--app:rt_editor_text_line_space="6dp"-->
-        <!--app:rt_editor_image_height="500"-->
-        <!--app:rt_editor_image_bottom="10"-->
-        <!--app:rt_editor_text_init_hint="在这里输入内容"-->
-        <!--app:rt_editor_text_size="16sp"-->
-        <!--app:rt_editor_text_color="@color/grey_900"/>-->
-
-    <!--<TextView-->
-        <!--android:layout_width="match_parent"-->
-        <!--android:layout_height="wrap_content"-->
-        <!--android:layout_marginLeft="15px"-->
-        <!--android:layout_marginRight="15px"-->
-        <!--android:layout_marginTop="5px"-->
-        <!--android:gravity="top"-->
-        <!--android:ems="10"-->
-        <!--android:id="@+id/id_modifynote_md"-->
-        <!--android:visibility="gone"-->
-        <!--android:layout_weight="1"/>-->
 </LinearLayout>

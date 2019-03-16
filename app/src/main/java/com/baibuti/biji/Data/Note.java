@@ -12,67 +12,63 @@ import java.util.Date;
 
 public class Note implements Serializable {
 
-    private String Title;
-    private Date MakeTime;
-    private String Content;
-    private boolean IsMarkDown;
+    private int Id;
 
-    public Note(String Title, String Content, Date MakeTime, boolean IsMarkDown) {
-        this.Title = Title;
-        this.MakeTime = MakeTime;
-        this.Content = Content;
-        this.IsMarkDown = IsMarkDown;
-    }
+    private String Title;
+    private String Content;
+
+    private int GroupId;
+    private String GroupName;
+
+    private Date CreateTime;
+    private Date UpdateTime;
+
 
     public Note(String Title, String Content) {
-        this(Title, Content, new Date(), false);
+        this.Title = Title;
+        this.Content = Content;
+        this.UpdateTime = new Date();
     }
 
-    public String getTitle() {
-        return Title;
-    }
 
-    public String getContent() {
-        return Content;
-    }
+    public void setId(int id) { this.Id = id; }
 
-    public Date getMakeTime() {
-        return MakeTime;
-    }
+    public void setTitle(String Title) { this.Title = Title;}
+    public void setContent(String Content) { this.Content = Content; }
 
-    public String getMakeTimeShortString() {
+    public void setGroupId(int GroupId) { this.GroupId = GroupId; }
+    public void setGroupName(String GroupName) { this.GroupName = GroupName; }
+
+    public void setCreateTime(Date CreateTime) { this.CreateTime = CreateTime; }
+    public void setUpdateTime(Date UpdateTime) { this.UpdateTime = UpdateTime; }
+
+    public int getId() { return this.Id; }
+
+    public String getTitle() { return this.Title;}
+    public String getContent() { return this.Content; }
+
+    public int getGroupId() { return this.GroupId; }
+    public String getGroupName() { return this.GroupName; }
+
+    public Date getCreateTime() { return this.CreateTime; }
+    public Date getUpdateTime() { return this.UpdateTime; }
+
+
+    public String getUpdateTimeShortString() {
         SimpleDateFormat df;
-        if (new Date().getDate() == MakeTime.getDate())
+        if (new Date().getDate() == UpdateTime.getDate())
             df = new SimpleDateFormat("HH:mm");
         else
             df = new SimpleDateFormat("MM-dd");
 
-        return df.format(MakeTime);
+        return df.format(UpdateTime);
     }
 
-    public String getMakeTimeString() {
+    public String getUpdateTimeString() {
         SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
-        return df.format(MakeTime);
+        return df.format(UpdateTime);
     }
 
-    public boolean getIsMarkDown() {
-        return this.IsMarkDown;
-    }
-
-    public void setTitle(String Title) {
-        this.Title = Title;
-        this.MakeTime = new Date();
-    }
-
-    public void setContent(String Content) {
-        this.Content = Content;
-        this.MakeTime = new Date();
-    }
-
-    public void setIsMarkDown(boolean IsMarkDown) {
-        this.IsMarkDown = IsMarkDown;
-        this.MakeTime = new Date();
-    }
 
 }

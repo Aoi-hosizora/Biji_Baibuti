@@ -62,16 +62,5 @@
         app:rt_editor_text_size="16sp"
         app:rt_editor_text_color="@color/grey_900"/>
 
-    <!--<TextView-->
-        <!--android:layout_width="match_parent"-->
-        <!--android:layout_height="wrap_content"-->
-        <!--android:layout_marginLeft="15px"-->
-        <!--android:layout_marginRight="15px"-->
-        <!--android:layout_marginTop="5px"-->
-        <!--android:gravity="top"-->
-        <!--android:ems="10"-->
-        <!--android:id="@+id/id_modifynote_md"-->
-        <!--android:visibility="gone"-->
-        <!--/>-->
 
 </LinearLayout>

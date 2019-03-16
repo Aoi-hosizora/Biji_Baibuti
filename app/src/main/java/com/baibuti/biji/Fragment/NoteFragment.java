@@ -79,12 +79,12 @@ public class NoteFragment extends Fragment implements View.OnClickListener {
             case R.id.id_note_addfab_addDoc:
 
                 Intent addDoc_intent=new Intent(getActivity(),ModifyNoteActivity.class);
-                addDoc_intent.putExtra("notedata",new Note("","",new Date(),false));
+                addDoc_intent.putExtra("notedata",new Note("",""));
                 startActivityForResult(addDoc_intent,2);
                 break;
             case R.id.id_note_addfab_addMd:
                 Intent addMd_intent=new Intent(getActivity(),ModifyNoteActivity.class);
-                addMd_intent.putExtra("notedata",new Note("","",new Date(),true));
+                addMd_intent.putExtra("notedata",new Note("",""));
                 startActivityForResult(addMd_intent,2);
                 break;
         }

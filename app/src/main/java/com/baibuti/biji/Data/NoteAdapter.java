@@ -33,8 +33,8 @@ public class NoteAdapter extends ArrayAdapter<Note> {
         TextView Type = (TextView) view.findViewById(R.id.id_notelistview_type);
 
         Title.setText(note.getTitle());
-        MakeTime.setText(note.getMakeTimeShortString());
-        Type.setText(note.getIsMarkDown()==true?"MD":"PL");
+        MakeTime.setText(note.getUpdateTimeShortString());
+        Type.setText("PL");
         return view;
     }
 }
