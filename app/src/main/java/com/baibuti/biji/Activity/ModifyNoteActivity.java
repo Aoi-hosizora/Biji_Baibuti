@@ -24,6 +24,7 @@ import com.baibuti.biji.util.SDCardUtil;
 import com.baibuti.biji.util.StringUtils;
 import com.sendtion.xrichtext.RichTextEditor;
 
+import java.util.Date;
 import java.util.List;
 
 import io.reactivex.Observable;
@@ -61,6 +62,11 @@ public class ModifyNoteActivity extends AppCompatActivity implements View.OnClic
         setContentView(R.layout.activity_modifyplainnote);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
+        loadingDialog = new ProgressDialog(this);
+        loadingDialog.setMessage("数据加载中...");
+        loadingDialog.setCanceledOnTouchOutside(false);
+        loadingDialog.show();
+
         note = (Note) getIntent().getSerializableExtra("notedata");
         flag = getIntent().getIntExtra("flag",0);
 
@@ -76,11 +82,6 @@ public class ModifyNoteActivity extends AppCompatActivity implements View.OnClic
         ContentEditText = (com.sendtion.xrichtext.RichTextEditor) findViewById(R.id.id_modifynote_content);
         UpdateTimeTextView = (TextView) findViewById(R.id.id_modifynote_updatetime);
         GroupNameTextView = (TextView) findViewById(R.id.id_modifynote_group);
-
-        loadingDialog = new ProgressDialog(this);
-        loadingDialog.setMessage("数据加载中...");
-        loadingDialog.setCanceledOnTouchOutside(false);
-        loadingDialog.show();
 
         TitleEditText.setText(note.getTitle());
         UpdateTimeTextView.setText(note.getUpdateTime_ShortString());
@@ -107,16 +108,7 @@ public class ModifyNoteActivity extends AppCompatActivity implements View.OnClic
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.id_menu_modifynote_finish:
-                if (TitleEditText.getText().toString().isEmpty())
-                    break;
-                note.setTitle(TitleEditText.getText().toString());
-                // note.setContent(ContentEditText.getText().toString());
-
-                Intent intent = new Intent();
-                intent.putExtra("modify_note",note);
-
-                setResult(RESULT_OK,intent);
-                finish();
+                saveNoteData();
                 break;
 
             case android.R.id.home:
@@ -270,5 +262,32 @@ public class ModifyNoteActivity extends AppCompatActivity implements View.OnClic
                     }
                 });
     }
-    
+
+    private void saveNoteData() {
+
+        String Content = getEditData();
+
+        if (TitleEditText.getText().toString().length() == 0) {
+            closeSoftKeyInput();
+            AlertDialog alertDialog = new AlertDialog.Builder(this)
+                    .setTitle("没有输入标题，请补全标题")
+                    .setPositiveButton("确定", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialogInterface, int i) {
+                        }
+                    }).create();
+            alertDialog.show();
+        } else {
+            note.setTitle(TitleEditText.getText().toString());
+            note.setContent(Content);
+
+            Intent intent = new Intent();
+            intent.putExtra("modify_note",note);
+
+            setResult(RESULT_OK,intent);
+            finish();
+
+        }
+    }
+
 }
