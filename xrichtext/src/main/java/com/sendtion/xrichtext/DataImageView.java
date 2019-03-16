@@ -8,7 +8,6 @@ import android.graphics.Paint;
 import android.graphics.Rect;
 import android.util.AttributeSet;
 import android.widget.ImageView;
-getEditData
 /**
  * 自定义ImageView，可以存放Bitmap和Path等信息
  *
