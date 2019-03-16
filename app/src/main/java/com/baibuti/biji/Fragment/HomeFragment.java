@@ -110,6 +110,7 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
 
                 Intent intent=new Intent(getActivity(),ModifyNoteActivity.class);
                 intent.putExtra("notedata",note);
+                intent.putExtra("flag",1); // UPDATE
                 startActivityForResult(intent,1);
             }
         });

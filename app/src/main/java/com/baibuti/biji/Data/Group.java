@@ -1,6 +1,8 @@
 package com.baibuti.biji.Data;
 
-public class Group {
+import java.io.Serializable;
+
+public class Group  implements Serializable {
 
     private int id;//ID
     private String name;//分组名称
@@ -11,6 +13,11 @@ public class Group {
 
     private String createTime;//创建时间
     private String updateTime;//修改时间
+
+    public Group() {
+        id = 0;
+        name = "默认笔记";
+    }
 
     public int getId() {
         return id;

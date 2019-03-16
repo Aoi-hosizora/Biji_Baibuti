@@ -29,7 +29,7 @@
         android:paddingBottom="@dimen/activity_margin_16">
 
         <TextView
-            android:id="@+id/id_modifynote_type"
+            android:id="@+id/id_modifynote_updatetime"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textSize="@dimen/text_size_14"
@@ -39,7 +39,7 @@
             tools:text="2018-11-16"/>
 
         <TextView
-            android:id="@+id/tv_new_group"
+            android:id="@+id/id_modifynote_group"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textSize="@dimen/text_size_14"

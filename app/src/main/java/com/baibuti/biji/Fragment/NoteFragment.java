@@ -80,12 +80,8 @@ public class NoteFragment extends Fragment implements View.OnClickListener {
 
                 Intent addDoc_intent=new Intent(getActivity(),ModifyNoteActivity.class);
                 addDoc_intent.putExtra("notedata",new Note("",""));
+                addDoc_intent.putExtra("flag",0); // NEW
                 startActivityForResult(addDoc_intent,2);
-                break;
-            case R.id.id_note_addfab_addMd:
-                Intent addMd_intent=new Intent(getActivity(),ModifyNoteActivity.class);
-                addMd_intent.putExtra("notedata",new Note("",""));
-                startActivityForResult(addMd_intent,2);
                 break;
         }
     }
@@ -109,7 +105,8 @@ public class NoteFragment extends Fragment implements View.OnClickListener {
                 NoteListClickPos = position;
 
                 Intent intent=new Intent(getActivity(),ModifyNoteActivity.class);
-                intent.putExtra("notedata",note);
+                intent.putExtra("notedata", note);
+                intent.putExtra("flag",1); // UPDATE
                 startActivityForResult(intent,1);
 
             }

@@ -27,24 +27,29 @@ public class Note implements Serializable {
         this.Title = Title;
         this.Content = Content;
         this.UpdateTime = new Date();
+        this.GroupLabel = new Group();
     }
 
     //////////////////////////////////////////////////
 
     public void setId(int id) {
         this.Id = id;
+        this.UpdateTime = new Date();
     }
 
     public void setTitle(String Title) {
         this.Title = Title;
+        this.UpdateTime = new Date();
     }
 
     public void setContent(String Content) {
         this.Content = Content;
+        this.UpdateTime = new Date();
     }
 
     public void setGroupLabel(Group GroupLabel) {
         this.GroupLabel = GroupLabel;
+        this.UpdateTime = new Date();
     }
 
     public void setCreateTime(Date CreateTime) {
@@ -83,7 +88,14 @@ public class Note implements Serializable {
 
     //////////////////////////////////////////////////
 
-    public String getUpdateTimeShortString() {
+
+    public String getUpdateTime_FullString() {
+        SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+
+        return df.format(UpdateTime);
+    }
+
+    public String getUpdateTime_TimeString() {
         SimpleDateFormat df;
         if (new Date().getDate() == UpdateTime.getDate())
             df = new SimpleDateFormat("HH:mm");
@@ -93,11 +105,18 @@ public class Note implements Serializable {
         return df.format(UpdateTime);
     }
 
-    public String getUpdateTimeString() {
-        SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+    public String getUpdateTime_DateString() {
+        SimpleDateFormat df = new SimpleDateFormat("MM-dd");
 
         return df.format(UpdateTime);
     }
 
+    public String getUpdateTime_ShortString() {
+        SimpleDateFormat fmt = new SimpleDateFormat("yyyy-MM-dd");
+        if (fmt.format(new Date()).equals(fmt.format(getUpdateTime())))
+            return getUpdateTime_TimeString();
+        else
+            return getUpdateTime_DateString();
+    }
 
 }
