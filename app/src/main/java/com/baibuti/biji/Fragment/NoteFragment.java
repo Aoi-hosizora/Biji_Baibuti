@@ -43,15 +43,6 @@ public class NoteFragment extends Fragment implements View.OnClickListener {
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.notetab, container, false);
-
-        // mFab = (com.getbase.floatingactionbutton.FloatingActionsMenu) view.findViewById(R.id.id_note_addfab);
-        // mSwipeRefresh = (SwipeRefreshLayout) view.findViewById(R.id.swipe_refresh);
-        //  mNoteListView = (ListView) view.findViewById(R.id.id_note_notelistview);
-        // mAddDocMenu = (com.getbase.floatingactionbutton.FloatingActionButton) view.findViewById(R.id.id_note_addfab_addDoc);
-        // mAddMdMenu = (com.getbase.floatingactionbutton.FloatingActionButton) view.findViewById(R.id.id_note_addfab_addMd);
-
-        // mSwipeRefresh.setColorSchemeResources(R.color.colorPrimary);
-        // mSwipeRefresh.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
         setHasOptionsMenu(true);
         slidingMenu = ((MainActivity)getActivity()).getSlidingMenu();
         mNoteList = view.findViewById(R.id.note_list);
@@ -65,20 +56,6 @@ public class NoteFragment extends Fragment implements View.OnClickListener {
                 //添加逻辑处理
             }
         });
-
-        // mAddDocMenu.setOnClickListener(this);
-        // mAddMdMenu.setOnClickListener(this);
-
-        // initData();
-
-//        CardView cardView = (CardView) view.findViewById(R.id.cardView);
-//
-//        cardView.setRadius(8);//设置图片圆角的半径大小
-//
-//        cardView.setCardElevation(8);//设置阴影部分大小
-//
-//        cardView.setContentPadding(5,5,5,5);//设置图片距离阴影大小
-
         initToolbar(view);
         initFloatingActionBar(view);
         initDatas();
@@ -87,15 +64,6 @@ public class NoteFragment extends Fragment implements View.OnClickListener {
 
     @Override
     public void onClick(View v) {
-        switch (v.getId()) {
-        //     case R.id.id_note_addfab_addDoc:
-
-        //         Intent addDoc_intent=new Intent(getActivity(),ModifyNoteActivity.class);
-        //         addDoc_intent.putExtra("notedata",new Note("",""));
-        //         addDoc_intent.putExtra("flag",0); // NEW
-        //         startActivityForResult(addDoc_intent,2);
-        //         break;
-        // }
 
     }
 
@@ -107,15 +75,6 @@ public class NoteFragment extends Fragment implements View.OnClickListener {
         toolbar.inflateMenu(R.menu.notefragment_actionbar);
         toolbar.setOnMenuItemClickListener(new Toolbar.OnMenuItemClickListener() {
             @Override
-            // public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-            //     Note note = NoteList.get(position);
-            //     NoteListClickPos = position;
-
-            //     Intent intent=new Intent(getActivity(),ModifyNoteActivity.class);
-            //     intent.putExtra("notedata", note);
-            //     intent.putExtra("flag",1); // UPDATE
-            //     startActivityForResult(intent,1);
-
             public boolean onMenuItemClick(MenuItem item) {
                 switch (item.getItemId()) {
                     case R.id.action_search:

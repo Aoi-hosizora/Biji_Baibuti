@@ -40,8 +40,8 @@ public class NoteAdapter extends ArrayAdapter<Note> {
         TextView Type = (TextView) view.findViewById(R.id.id_notelistview_type);
 
         Title.setText(note.getTitle());
-        MakeTime.setText(note.getUpdateTime_ShortString());
-        Type.setText("PL");
+        MakeTime.setText(note.getUpdateTime_DateString());
+
         CardView cardview = (CardView) view.findViewById(R.id.tab_note_card);
         cardview.setOnClickListener(new View.OnClickListener() {
             @Override

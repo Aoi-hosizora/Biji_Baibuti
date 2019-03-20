@@ -6,13 +6,13 @@
         android:id="@+id/id_menu_modifynote_finish"
         android:title="完成"
         app:showAsAction="always" />
-        <!--android:icon="@drawable/ic_done"/>-->
+    <!--android:icon="@drawable/ic_done"/>-->
 
     <item
         android:id="@+id/id_menu_modifynote_img"
         android:title="图片"
         app:showAsAction="always" />
-        <!--android:icon="@drawable/ic_fab_star"/>-->
+    <!--android:icon="@drawable/ic_fab_star"/>-->
 
     <item
         android:id="@+id/id_menu_modifynote_group"

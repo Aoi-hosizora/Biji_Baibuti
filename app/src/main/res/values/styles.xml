@@ -13,6 +13,7 @@
         <item name="android:textColor">@color/half_black</item>
     </style>
 
+<<<<<<< HEAD
     <!-- <style name="AppTheme.AppBarOverlay" parent="ThemeOverlay.AppCompat.Dark.ActionBar" />
 
     <style name="AppTheme.PopupOverlay" parent="ThemeOverlay.AppCompat.Light" /> -->
@@ -20,3 +21,6 @@
 
 </resources>
 </resources>
+=======
+</resources>
+>>>>>>> 7bda7ce369d566c0537eacdbba98d4f5a9b269f0
