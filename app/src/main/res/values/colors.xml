@@ -30,21 +30,6 @@
     <color name="grey_700">#616161</color>
     <color name="grey_800">#424242</color>
     <color name="grey_900">#212121</color>
-<<<<<<< HEAD
 
-    <!-- Grey-->
-    <color name="grey_000">#FFFFFF</color>
-    <color name="grey_050">#FAFAFA</color>
-    <color name="grey_100">#F5F5F5</color>
-    <color name="grey_200">#EEEEEE</color>
-    <color name="grey_300">#E0E0E0</color>
-    <color name="grey_400">#BDBDBD</color>
-    <color name="grey_500">#9E9E9E</color>
-    <color name="grey_600">#757575</color>
-    <color name="grey_700">#616161</color>
-    <color name="grey_800">#424242</color>
-    <color name="grey_900">#212121</color>
-=======
->>>>>>> 7bda7ce369d566c0537eacdbba98d4f5a9b269f0
 
 </resources>
