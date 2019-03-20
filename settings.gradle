@@ -1,1 +1,1 @@
-include ':app', ':slidingMenu'
+include ':app', 'tess-two', ':tess-two', ':slidingMenu', ':xrichtext'

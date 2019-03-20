@@ -4,61 +4,6 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <TextView
-        android:text="Type - #00:00#"
-        android:id="@+id/id_modifynote_type"
-        android:textSize="15sp"
-        android:layout_marginRight="12px"
-        android:layout_marginTop="5px"
-        android:gravity="right"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content" />
+    <include layout="@layout/content_new" />
 
-    <TextView
-        android:text="Title"
-        android:textSize="20sp"
-        android:layout_marginTop="-20sp"
-        android:layout_marginLeft="15px"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content" />
-
-    <EditText
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginLeft="5px"
-        android:layout_marginRight="5px"
-        android:inputType="text"
-        android:text="Name"
-        android:id="@+id/id_modifynote_title" />
-
-    <TextView
-        android:text="Content"
-        android:textSize="20sp"
-        android:layout_marginTop="0px"
-        android:layout_marginLeft="15px"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content" />
-
-    <EditText
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:inputType="textMultiLine"
-        android:visibility="visible"
-        android:text="Name"
-        android:gravity="top"
-        android:ems="10"
-        android:id="@+id/id_modifynote_content"
-        android:layout_weight="1" />
-
-    <TextView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginLeft="15px"
-        android:layout_marginRight="15px"
-        android:layout_marginTop="5px"
-        android:gravity="top"
-        android:ems="10"
-        android:id="@+id/id_modifynote_md"
-        android:visibility="gone"
-        android:layout_weight="1"/>
 </LinearLayout>

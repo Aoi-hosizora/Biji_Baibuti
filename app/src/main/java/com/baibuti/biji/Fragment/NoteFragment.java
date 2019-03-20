@@ -11,6 +11,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.support.v7.widget.ActionMenuView;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.ImageButton;
 import android.widget.ListView;
 import android.widget.Toast;
@@ -20,6 +21,7 @@ import com.baibuti.biji.Data.Data;
 import com.baibuti.biji.Data.Note;
 import com.baibuti.biji.Data.NoteAdapter;
 import com.baibuti.biji.R;
+import com.baibuti.biji.View.SimplerSearcherView;
 import com.getbase.floatingactionbutton.FloatingActionButton;
 import com.jeremyfeinstein.slidingmenu.lib.SlidingMenu;
 
@@ -91,6 +93,9 @@ public class NoteFragment extends Fragment implements View.OnClickListener {
             }
         });
         toolbar.setTitle(R.string.note_header);
+
+        //SimplerSearcherView seacherView = view.findViewById(R.id.note_searcher);
+        //seacherView.setOnSearcherClickListener(((MainActivity)getActivity()));
     }
 
     private void initFloatingActionBar(View view){
@@ -125,10 +130,8 @@ public class NoteFragment extends Fragment implements View.OnClickListener {
         switch (requestCode) {
             case 1:
                 if (resultCode == RESULT_OK) {
-                    if (data.getBooleanExtra("intent_result", true)) {
+                    if (data.getBooleanExtra("intent_result", true) == true) {
                         Note newnote = (Note) data.getSerializableExtra("modify_note");
-                        NoteListClickPos = data.getIntExtra("modify_note_pos",0);
-
                         NoteList.set(NoteListClickPos,newnote);
 
                         mainData.setNoteItem(NoteListClickPos, newnote);
@@ -136,7 +139,6 @@ public class NoteFragment extends Fragment implements View.OnClickListener {
                         noteAdapter.notifyDataSetChanged();
                     }
                 }
-                break;
         }
     }
 }

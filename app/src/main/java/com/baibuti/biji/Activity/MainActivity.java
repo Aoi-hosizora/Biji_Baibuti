@@ -8,25 +8,26 @@ import android.support.v4.view.ViewPager;
 import android.support.v4.view.ViewPager.OnPageChangeListener;
 import android.os.Bundle;
 
-import android.support.v7.app.AppCompatActivity;
 import android.view.Display;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.baibuti.biji.Fragment.ClassFragment;
 import com.baibuti.biji.Fragment.NoteFragment;
 import com.baibuti.biji.Fragment.SearchFragment;
 import com.baibuti.biji.Fragment.FileFragment;
 import com.baibuti.biji.R;
+import com.baibuti.biji.View.SimplerSearcherView;
 import com.jeremyfeinstein.slidingmenu.lib.SlidingMenu;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class MainActivity extends FragmentActivity implements OnClickListener {
+public class MainActivity extends FragmentActivity implements OnClickListener, SimplerSearcherView.OnSearcherClickListener {
     //声明ViewPager
     private ViewPager mViewPager;
     //适配器
@@ -62,6 +63,11 @@ public class MainActivity extends FragmentActivity implements OnClickListener {
         initViews();//初始化控件
         initEvents();//初始化事件
         initDatas();//初始化数据
+    }
+
+    @Override
+    public void onSearcherClick(String content) {
+        Toast.makeText(this, "This is searcher", Toast.LENGTH_LONG).show();
     }
 
     private void initDatas() {
