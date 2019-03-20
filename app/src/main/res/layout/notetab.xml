@@ -38,20 +38,6 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/note_toolbar" />
 
-            <!--<android.support.v7.widget.CardView-->
-                <!--android:id="@+id/cardView"-->
-                <!--app:cardCornerRadius="8dp"-->
-                <!--android:layout_width="match_parent"-->
-                <!--android:layout_height="wrap_content"-->
-                <!--android:layout_margin="10dp">-->
-                <!--<TextView-->
-                    <!--android:layout_width="match_parent"-->
-                    <!--android:layout_height="wrap_content"-->
-                    <!--android:padding="5dp"-->
-                    <!--android:text="123456" />-->
-            <!--</android.support.v7.widget.CardView>-->
-
-        <!-- </android.support.v4.widget.SwipeRefreshLayout> -->
     <com.getbase.floatingactionbutton.FloatingActionsMenu
         android:id="@+id/multiple_actions"
         android:layout_width="0dp"

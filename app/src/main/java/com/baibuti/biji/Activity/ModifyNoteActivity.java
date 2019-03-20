@@ -117,18 +117,18 @@ public class ModifyNoteActivity extends AppCompatActivity implements View.OnClic
             case R.id.id_menu_modifynote_cancel:
                 closeSoftKeyInput();
                 AlertDialog alertDialog = new AlertDialog.Builder(this)
-                    .setTitle("确定要取消编辑吗？")
-                    .setMessage("您的修改将不会保存。")
-                    .setPositiveButton("确定", new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialogInterface, int i) {
-                            finish();
-                        }
-                    })
-                    .setNegativeButton("取消", new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialogInterface, int i) {}
-                    }).create();
+                        .setTitle("确定要取消编辑吗？")
+                        .setMessage("您的修改将不会保存。")
+                        .setPositiveButton("确定", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialogInterface, int i) {
+                                finish();
+                            }
+                        })
+                        .setNegativeButton("取消", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialogInterface, int i) {}
+                        }).create();
                 alertDialog.show();
 
                 break;
