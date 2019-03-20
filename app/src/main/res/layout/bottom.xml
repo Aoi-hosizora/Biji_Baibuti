@@ -1,95 +1,110 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="55dp"
+    android:layout_height="48dp"
+    android:background="#FFFFFFFF"
+    android:elevation="2dp"
     android:gravity="center"
-    android:background="@color/material_blue_grey_800"
     android:orientation="horizontal">
 
     <LinearLayout
+        android:id="@+id/tab_note"
         android:layout_width="0dp"
-        android:layout_height="wrap_content"
+        android:layout_height="match_parent"
         android:layout_weight="1"
-        android:id="@+id/id_tab_home"
         android:gravity="center"
         android:orientation="vertical">
 
         <ImageButton
-            android:id="@+id/id_tab_home_img"
-            android:clickable="false"
+            android:id="@+id/tab_note_img"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:src="@mipmap/tab_weixin_pressed"
-            android:background="#00000000"/>
+            android:background="#00000000"
+            android:clickable="false"
+            android:src="@drawable/tab_note_normal" />
 
         <TextView
+            android:id="@+id/tab_note_text"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textColor="#ffffff"
-            android:text="主页"/>
+            android:text="笔记"
+            android:textColor="@color/half_black"
+            android:textSize="10sp" />
     </LinearLayout>
+
     <LinearLayout
-        android:id="@+id/id_tab_note"
+        android:id="@+id/tab_search"
         android:layout_width="0dp"
-        android:layout_height="wrap_content"
+        android:layout_height="match_parent"
         android:layout_weight="1"
         android:gravity="center"
         android:orientation="vertical">
 
         <ImageButton
-            android:id="@+id/id_tab_note_img"
+            android:id="@+id/tab_search_img"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="#00000000"
             android:clickable="false"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:src="@mipmap/tab_find_frd_normal"
-            android:background="#00000000"/>
+            android:src="@drawable/tab_search_normal" />
+
         <TextView
+            android:id="@+id/tab_search_text"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textColor="#ffffff"
-            android:text="笔记"/>
+            android:text="搜题"
+            android:textColor="@color/half_black"
+            android:textSize="10sp" />
     </LinearLayout>
+
     <LinearLayout
-        android:id="@+id/id_tab_alarm"
+        android:id="@+id/tab_class"
         android:layout_width="0dp"
-        android:layout_height="wrap_content"
+        android:layout_height="match_parent"
         android:layout_weight="1"
         android:gravity="center"
         android:orientation="vertical">
 
         <ImageButton
-            android:id="@+id/id_tab_alarm_img"
+            android:id="@+id/tab_class_img"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="#00000000"
             android:clickable="false"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:src="@mipmap/tab_address_normal"
-            android:background="#00000000"/>
+            android:src="@drawable/tab_class_normal" />
+
         <TextView
+            android:id="@+id/tab_class_text"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textColor="#ffffff"
-            android:text="提醒"/>
+            android:text="课表"
+            android:textColor="@color/half_black"
+            android:textSize="10sp" />
     </LinearLayout>
+
     <LinearLayout
-        android:id="@+id/id_tab_setting"
+        android:id="@+id/tab_file"
         android:layout_width="0dp"
-        android:layout_height="wrap_content"
+        android:layout_height="match_parent"
         android:layout_weight="1"
         android:gravity="center"
         android:orientation="vertical">
 
         <ImageButton
-            android:id="@+id/id_tab_setting_img"
+            android:id="@+id/tab_file_img"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="#00000000"
             android:clickable="false"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:src="@mipmap/tab_settings_normal"
-            android:background="#00000000"/>
+            android:src="@drawable/tab_file_normal" />
+
         <TextView
+            android:id="@+id/tab_file_text"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textColor="#ffffff"
-            android:text="设置"/>
+            android:text="资料"
+            android:textColor="@color/half_black"
+            android:textSize="10sp" />
     </LinearLayout>
 
 </LinearLayout>

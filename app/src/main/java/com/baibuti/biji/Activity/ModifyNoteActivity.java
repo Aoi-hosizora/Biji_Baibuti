@@ -51,6 +51,7 @@ public class ModifyNoteActivity extends AppCompatActivity implements View.OnClic
     private Disposable subsLoading;
 
     private Note note;
+    private int notePos;
     private GroupDao groupDao;
     private NoteDao noteDao;
 
@@ -68,6 +69,7 @@ public class ModifyNoteActivity extends AppCompatActivity implements View.OnClic
         loadingDialog.show();
 
         note = (Note) getIntent().getSerializableExtra("notedata");
+        notePos = getIntent().getIntExtra("notepos",0);
         flag = getIntent().getIntExtra("flag",0);
 
         if (flag == 0)
@@ -283,8 +285,10 @@ public class ModifyNoteActivity extends AppCompatActivity implements View.OnClic
 
             Intent intent = new Intent();
             intent.putExtra("modify_note",note);
+            intent.putExtra("modify_note_pos",notePos);
 
             setResult(RESULT_OK,intent);
+            closeSoftKeyInput();
             finish();
 
         }
