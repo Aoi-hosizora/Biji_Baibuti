@@ -1,18 +1,35 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="colorPrimary">#3F51B5</color>
-    <color name="colorPrimaryDark">#303F9F</color>
+    <color name="colorPrimary">#00A2FF</color>
+    <color name="colorPrimaryLight">#00BFFF</color>
+    <color name="colorPrimaryLighter">#00CFFF</color>
+    <color name="colorPrimaryDark">#0090FF</color>
     <color name="colorAccent">#FF4081</color>
+    <color name="color_shadow">#417F7F81</color>
+    <color name="color_searchview">#F2E6E6E6</color>
 
     <color name="black_semi_transparent">#B2000000</color>
-    <color name="background">#e5e5e5</color>
+    <color name="background">#E5E5E5</color>
     <color name="half_black">#808080</color>
-    <color name="white">#fafafa</color>
+    <color name="white">#FFFFFF</color>
     <color name="white_pressed">#f1f1f1</color>
     <color name="pink_pressed">#e91e63</color>
-    <color name="pink">#ec407a</color>
+    <color name="pink">#EC407A</color>
     <color name="blue_semi_transparent">#805677fc</color>
-    <color name="blue_semi_transparent_pressed">#80738ffe</color>
+    <color name="blue_semi_transparent_pressed">#8020368D</color>
+
+    <!-- Grey-->
+    <color name="grey_000">#FFFFFF</color>
+    <color name="grey_050">#FAFAFA</color>
+    <color name="grey_100">#F5F5F5</color>
+    <color name="grey_200">#EEEEEE</color>
+    <color name="grey_300">#E0E0E0</color>
+    <color name="grey_400">#BDBDBD</color>
+    <color name="grey_500">#9E9E9E</color>
+    <color name="grey_600">#757575</color>
+    <color name="grey_700">#616161</color>
+    <color name="grey_800">#424242</color>
+    <color name="grey_900">#212121</color>
 
     <!-- Grey-->
     <color name="grey_000">#FFFFFF</color>

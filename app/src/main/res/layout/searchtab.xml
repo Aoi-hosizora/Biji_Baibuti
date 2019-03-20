@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:fab="http://schemas.android.com/apk/res-auto"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <android.support.design.widget.CoordinatorLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <android.support.v4.widget.SwipeRefreshLayout
+            android:id="@+id/swipe_refresh"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            app:layout_behavior="@string/appbar_scrolling_view_behavior">
+
+            <ListView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:id="@+id/id_note_notelistview"
+                android:minHeight="30dp"/>
+
+        </android.support.v4.widget.SwipeRefreshLayout>
+
+
+
+        <com.getbase.floatingactionbutton.FloatingActionsMenu
+            android:id="@+id/id_note_addfab"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom|end"
+            android:layout_margin="8dp"
+            app:elevation="5dp"
+
+            fab:fab_addButtonColorNormal="@color/pink"
+            fab:fab_addButtonColorPressed="@color/pink_pressed"
+            fab:fab_addButtonPlusIconColor="@color/white"
+            fab:fab_labelStyle="@style/menu_labels_style">
+
+            <com.getbase.floatingactionbutton.FloatingActionButton
+                android:id="@+id/id_note_addfab_addDoc"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                fab:fab_colorNormal="@color/pink"
+                fab:fab_title="Add Plain Note"
+                fab:fab_colorPressed="@color/pink_pressed"
+                app:elevation="5dp"
+                fab:fab_size="mini"/>
+
+            <com.getbase.floatingactionbutton.FloatingActionButton
+                android:id="@+id/id_note_addfab_addMd"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                fab:fab_colorNormal="@color/pink"
+                fab:fab_title="Add Markdown Note"
+                fab:fab_colorPressed="@color/pink_pressed"
+                app:elevation="5dp"
+
+                fab:fab_size="mini"/>
+
+        </com.getbase.floatingactionbutton.FloatingActionsMenu>
+    </android.support.design.widget.CoordinatorLayout>
+
+
+</LinearLayout>

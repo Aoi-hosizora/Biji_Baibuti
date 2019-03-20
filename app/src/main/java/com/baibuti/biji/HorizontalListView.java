@@ -59,7 +59,6 @@ public class HorizontalListView extends AdapterView<ListAdapter> {
     private OnItemLongClickListener mOnItemLongClicked;
     private boolean mDataChanged = false;
 
-
     public HorizontalListView(Context context, AttributeSet attrs) {
         super(context, attrs);
         initView();
@@ -153,8 +152,6 @@ public class HorizontalListView extends AdapterView<ListAdapter> {
         child.measure(MeasureSpec.makeMeasureSpec(getWidth(), MeasureSpec.AT_MOST),
                 MeasureSpec.makeMeasureSpec(getHeight(), MeasureSpec.AT_MOST));
     }
-
-
 
     @Override
     protected synchronized void onLayout(boolean changed, int left, int top, int right, int bottom) {

@@ -9,7 +9,6 @@ public class Data {
 
     public static Data getData() {
         if (DataInstance == null) {
-            initAlarm();
             initNote();
             DataInstance = new Data();
         }
@@ -17,46 +16,20 @@ public class Data {
         return DataInstance;
     }
 
-    static ArrayList<Alarm> alarmlist;
     static ArrayList<Note> notelist;
-
-    private static void initAlarm() {
-        alarmlist = new ArrayList<>();
-        if (false)
-            alarmlist.add(new Alarm("No Note","Empty"));
-
-        alarmlist.add(new Alarm("First Alarm","Empty"));
-        alarmlist.add(new Alarm("First Alarm","Empty"));
-        alarmlist.add(new Alarm("First Alarm","Empty"));
-        alarmlist.add(new Alarm("First Alarm","Empty"));
-        alarmlist.add(new Alarm("First Alarm","Empty"));
-        alarmlist.add(new Alarm("First Alarm","Empty"));
-        alarmlist.add(new Alarm("First Alarm","Empty"));
-        alarmlist.add(new Alarm("First Alarm","Empty"));
-    }
 
     private static void initNote() {
         notelist = new ArrayList<>();
         if (false)
             notelist.add(new Note("No Note","Empty"));
 
-        notelist.add(new Note("Xinki","New"));
-        notelist.add(new Note("Xinki","New"));
-        notelist.add(new Note("Xinki","New"));
-        notelist.add(new Note("Xinki","New"));
-        notelist.add(new Note("Xinki","New"));
-    }
-
-    public ArrayList<Alarm> getAlarm() {
-        return alarmlist;
+        for( int i = 0 ; i < 10 ; i++ ) {
+            notelist.add(new Note("Xinki", "New"));
+        }
     }
 
     public ArrayList<Note> getNote() {
         return notelist;
-    }
-
-    public void setAlarmItem(int index, Alarm alarm) {
-        alarmlist.set(index, alarm);
     }
 
     public void setNoteItem(int index, Note note) {

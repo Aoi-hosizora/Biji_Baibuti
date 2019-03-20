@@ -2,7 +2,7 @@ package com.baibuti.biji.Data;
 
 import java.io.Serializable;
 
-public class Group  implements Serializable {
+public class Group implements Serializable {
 
     private int id;//ID
     private String name;//分组名称

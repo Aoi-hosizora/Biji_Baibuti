@@ -3,6 +3,8 @@
     <dimen name="activity_horizontal_margin">16dp</dimen>
     <dimen name="activity_vertical_margin">16dp</dimen>
 
+    <dimen name="shadow_width">24dp</dimen>
+
     <dimen name="activity_margin_5">5dp</dimen>
     <dimen name="activity_margin_10">10dp</dimen>
     <dimen name="activity_margin_16">16dp</dimen>
