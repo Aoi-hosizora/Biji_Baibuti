@@ -42,9 +42,6 @@ public class ViewModifyNoteActivity extends AppCompatActivity implements View.On
     private Note note;
     private int notePos;
 
-    private GroupDao groupDao;
-    private NoteDao noteDao;
-
     private boolean isModify = false;
 
     @Override
@@ -61,9 +58,6 @@ public class ViewModifyNoteActivity extends AppCompatActivity implements View.On
 
         note = (Note) getIntent().getSerializableExtra("notedata");
         notePos = getIntent().getIntExtra("notepos",0);
-
-        groupDao = new GroupDao(this);
-        noteDao = new NoteDao(this);
 
         TitleEditText_View = (TextView) findViewById(R.id.id_modifynote_viewtitle);
         UpdateTimeTextView_View = (TextView) findViewById(R.id.id_modifynote_viewupdatetime);
@@ -114,13 +108,13 @@ public class ViewModifyNoteActivity extends AppCompatActivity implements View.On
             case R.id.id_menu_modifynote_viewcancel:
                 Intent motointent = new Intent();
 
-//                if (isModify) {
+                if (isModify) {
                     motointent.putExtra("modify_note",note);
                     motointent.putExtra("modify_note_pos", notePos);
                     setResult(RESULT_OK,motointent);
-//                }
-//                else
-//                    setResult(RESULT_CANCELED,motointent);
+                }
+                else
+                    setResult(RESULT_CANCELED,motointent);
 
                 finish();
                 break;
@@ -136,8 +130,8 @@ public class ViewModifyNoteActivity extends AppCompatActivity implements View.On
                 if (resultCode == RESULT_OK) {
                         Note newnote = (Note) data.getSerializableExtra("modify_note");
                         isModify = data.getBooleanExtra("isModify", false);
-//
-//                        if (isModify) {
+
+                        if (isModify) {
                             note = new Note(newnote);
 
                             TitleEditText_View.setText(note.getTitle());
@@ -149,7 +143,7 @@ public class ViewModifyNoteActivity extends AppCompatActivity implements View.On
                                     dealWithContent();
                                 }
                             });
-//                        }
+                        }
                     break;
                 }
         }

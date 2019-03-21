@@ -1,34 +1,38 @@
 package com.baibuti.biji.Data;
 
+import com.baibuti.biji.Activity.MainActivity;
+import com.baibuti.biji.db.GroupDao;
+import com.baibuti.biji.db.NoteDao;
+
 import java.util.ArrayList;
+import java.util.List;
 
 public class Data {
     private Data() {}
 
     private static Data DataInstance;
-
+    private static NoteDao noteDao;
+    private static GroupDao groupDao;
     public static Data getData() {
         if (DataInstance == null) {
             initNote();
+//            noteDao = new NoteDao(null);
+//            groupDao = new GroupDao(null);
             DataInstance = new Data();
         }
 
         return DataInstance;
     }
 
-    static ArrayList<Note> notelist;
+    static List<Note> notelist;
 
     private static void initNote() {
-        notelist = new ArrayList<>();
-        if (false)
-            notelist.add(new Note("No Note","Empty"));
-
-        for( int i = 0 ; i < 10 ; i++ ) {
-            notelist.add(new Note("Xinki", "New"));
-        }
+        if (noteDao == null)
+            noteDao = new NoteDao(null);
+        notelist = noteDao.queryNotesAll(0);
     }
 
-    public ArrayList<Note> getNote() {
+    public List<Note> getNote() {
         return notelist;
     }
 

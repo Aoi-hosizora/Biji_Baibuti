@@ -26,10 +26,12 @@ import com.baibuti.biji.Data.Note;
 import com.baibuti.biji.Data.NoteAdapter;
 import com.baibuti.biji.R;
 import com.baibuti.biji.View.SimplerSearcherView;
+import com.baibuti.biji.db.NoteDao;
 import com.getbase.floatingactionbutton.FloatingActionButton;
 import com.jeremyfeinstein.slidingmenu.lib.SlidingMenu;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import static android.app.Activity.RESULT_OK;
 
@@ -38,7 +40,7 @@ public class NoteFragment extends Fragment implements View.OnClickListener {
     private ListView mNoteList;
 
     private Data mainData;
-    private ArrayList<Note> NoteList;
+    private List<Note> NoteList;
     private com.wyt.searchbox.SearchFragment searchFragment;
 //    private SwipeRefreshLayout mSwipeRefresh;
     private SlidingMenu slidingMenu;
@@ -132,9 +134,16 @@ public class NoteFragment extends Fragment implements View.OnClickListener {
         });
     }
 
+    private NoteDao noteDao;
     private void initDatas() {
-        mainData = Data.getData();
-        NoteList = mainData.getNote();
+
+//        mainData = Data.getData();
+//        NoteList = mainData.getNote();
+
+        if (noteDao == null)
+            noteDao = new NoteDao(this.getContext());
+        NoteList = noteDao.queryNotesAll(0);
+
         noteAdapter = new NoteAdapter(getActivity(), R.layout.notelistview, NoteList,this);
         mNoteList.setAdapter(noteAdapter);
     }

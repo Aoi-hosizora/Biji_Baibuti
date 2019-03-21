@@ -8,6 +8,7 @@ import android.os.Bundle;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -60,7 +61,8 @@ public class ModifyNoteActivity extends AppCompatActivity implements View.OnClic
     private NoteDao noteDao;
 
     private int flag; // 0: NEW, 1: UPDATE
-//    private boolean isModify = false;
+
+    public final int CUTLENGTH = 17;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -94,22 +96,6 @@ public class ModifyNoteActivity extends AppCompatActivity implements View.OnClic
         UpdateTimeTextView.setText(note.getUpdateTime_ShortString());
         GroupNameTextView.setText(note.getGroupLabel().getName());
 
-
-//        TitleEditText.setOnEditorActionListener(new TextView.OnEditorActionListener() {
-//            @Override
-//            public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
-//                isModify = true;
-//                return true;
-//            }
-//        });
-//
-//        ContentEditText.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View v) {
-//                isModify = true;
-//            }
-//        });
-
         //////////////////////////////////////////////////
         // ContentEditText
 
@@ -119,6 +105,12 @@ public class ModifyNoteActivity extends AppCompatActivity implements View.OnClic
                 dealWithContent();
             }
         });
+    }
+
+    private Boolean CheckIsModify() {
+        if (!TitleEditText.getText().toString().equals(note.getTitle()) || !getEditData().equals(note.getContent()))
+            return true;
+        return false;
     }
 
     @Override
@@ -141,7 +133,7 @@ public class ModifyNoteActivity extends AppCompatActivity implements View.OnClic
             case android.R.id.home:
             case R.id.id_menu_modifynote_cancel:
                 closeSoftKeyInput();
-//                if (isModify) {
+                if (CheckIsModify()) {
                     AlertDialog alertDialog = new AlertDialog.Builder(this)
                             .setTitle("确定要取消编辑吗？")
                             .setMessage("您的修改将不会保存。")
@@ -157,9 +149,9 @@ public class ModifyNoteActivity extends AppCompatActivity implements View.OnClic
                                 }
                             }).create();
                     alertDialog.show();
-//                }
-//                else
-//                    finish();
+                }
+                else
+                    finish();
 
                 break;
         }
@@ -299,29 +291,52 @@ public class ModifyNoteActivity extends AppCompatActivity implements View.OnClic
 
         String Content = getEditData();
 
-        if (TitleEditText.getText().toString().length() == 0) {
+
+        if (Content.isEmpty()) {
             closeSoftKeyInput();
             AlertDialog alertDialog = new AlertDialog.Builder(this)
-                    .setTitle("没有输入标题，请补全标题")
+                    .setTitle("没有输入内容，请补全笔记内容")
                     .setPositiveButton("确定", new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialogInterface, int i) {
                         }
                     }).create();
             alertDialog.show();
-        } else {
-            note.setTitle(TitleEditText.getText().toString());
-            note.setContent(Content);
+            return;
+        }
 
-            closeSoftKeyInput();
-            Intent intent = new Intent();
-            intent.putExtra("modify_note",note);
-//            intent.putExtra("isModify",isModify);
 
-            setResult(RESULT_OK,intent);
-            finish();
+        if (TitleEditText.getText().toString().isEmpty()) {
+            if (Content.length() > CUTLENGTH + 3)
+                TitleEditText.setText(Content.substring(0, CUTLENGTH) + "...");
+            else
+                TitleEditText.setText(Content);
+        }
+        //////////////////////////////////////////////////
+        boolean isModify = CheckIsModify();
+        note.setTitle(TitleEditText.getText().toString());
+        note.setContent(Content);
+
+        int groupId = note.getGroupLabel().getId();
+        if (flag == 0) { // NEW
+            long noteId = noteDao.insertNote(note);
+            note.setId((int)noteId);
+            flag = 1;
 
         }
+        else  // MODIFY
+            if (isModify)
+                noteDao.updateNote(note);
+
+        closeSoftKeyInput();
+        Intent intent = new Intent();
+        intent.putExtra("isModify", isModify);
+        intent.putExtra("modify_note",note);
+
+        setResult(RESULT_OK,intent);
+        finish();
+
+
     }
 
 }

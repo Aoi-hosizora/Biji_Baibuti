@@ -30,7 +30,7 @@ public class GroupDao {
      *
      * @return
      */
-    public List<Group> queryGroupAll() {
+    public List<Group> queryGroupAll() { // ArrayList
         SQLiteDatabase db = helper.getWritableDatabase();
         List<Group> groupList = new ArrayList<Group>();
 

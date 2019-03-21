@@ -18,7 +18,7 @@ import java.util.List;
 
 
 // 存储形式：
-// n_id, n_title, n_content, n_groupid, n_createtime, n_updatetime
+// n_id, n_title, n_content, n_group_id, n_createtime, n_updatetime
 
 public class NoteDao {
     private MyOpenHelper helper;
@@ -30,7 +30,7 @@ public class NoteDao {
     /**
      * 查询所有笔记
      */
-    public List<Note> queryNotesAll(int groupId) {
+    public List<Note> queryNotesAll(int groupId) { // ArrayList
         SQLiteDatabase db = helper.getWritableDatabase();
 
         List<Note> noteList = new ArrayList<>();
@@ -93,7 +93,7 @@ public class NoteDao {
      */
     public long insertNote(Note note) {
         SQLiteDatabase db = helper.getWritableDatabase();
-        String sql = "insert into db_note(n_title,n_content,n_groupid,n_create_time,n_update_time) values(?,?,?,?,?)";
+        String sql = "insert into db_note(n_title,n_content,n_group_id,n_create_time,n_update_time) values(?,?,?,?,?)";
 
         long ret = 0;
 
