@@ -8,6 +8,7 @@ import android.os.Bundle;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.text.TextUtils;
+import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -43,12 +44,15 @@ import io.reactivex.schedulers.Schedulers;
 public class ModifyNoteActivity extends AppCompatActivity implements View.OnClickListener {
 
     private EditText TitleEditText;
-    private com.sendtion.xrichtext.RichTextEditor ContentEditText;
     private TextView UpdateTimeTextView;
     private TextView GroupNameTextView;
+    private com.sendtion.xrichtext.RichTextEditor ContentEditText;
+
 
     private ProgressDialog loadingDialog;
     private Disposable subsLoading;
+
+    private Menu menu;
 
     private Note note;
     private int notePos;
@@ -56,6 +60,7 @@ public class ModifyNoteActivity extends AppCompatActivity implements View.OnClic
     private NoteDao noteDao;
 
     private int flag; // 0: NEW, 1: UPDATE
+//    private boolean isModify = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -69,7 +74,6 @@ public class ModifyNoteActivity extends AppCompatActivity implements View.OnClic
         loadingDialog.show();
 
         note = (Note) getIntent().getSerializableExtra("notedata");
-        notePos = getIntent().getIntExtra("notepos",0);
         flag = getIntent().getIntExtra("flag",0);
 
         if (flag == 0)
@@ -81,13 +85,30 @@ public class ModifyNoteActivity extends AppCompatActivity implements View.OnClic
         noteDao = new NoteDao(this);
 
         TitleEditText = (EditText) findViewById(R.id.id_modifynote_title);
-        ContentEditText = (com.sendtion.xrichtext.RichTextEditor) findViewById(R.id.id_modifynote_content);
         UpdateTimeTextView = (TextView) findViewById(R.id.id_modifynote_updatetime);
         GroupNameTextView = (TextView) findViewById(R.id.id_modifynote_group);
+        ContentEditText = (com.sendtion.xrichtext.RichTextEditor) findViewById(R.id.id_modifynote_content);
+
 
         TitleEditText.setText(note.getTitle());
         UpdateTimeTextView.setText(note.getUpdateTime_ShortString());
         GroupNameTextView.setText(note.getGroupLabel().getName());
+
+
+//        TitleEditText.setOnEditorActionListener(new TextView.OnEditorActionListener() {
+//            @Override
+//            public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
+//                isModify = true;
+//                return true;
+//            }
+//        });
+//
+//        ContentEditText.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View v) {
+//                isModify = true;
+//            }
+//        });
 
         //////////////////////////////////////////////////
         // ContentEditText
@@ -103,33 +124,42 @@ public class ModifyNoteActivity extends AppCompatActivity implements View.OnClic
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.modifynoteactivity_menu,menu);
+        this.menu=menu;
         return true;
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
+
+
             case R.id.id_menu_modifynote_finish:
+
                 saveNoteData();
                 break;
 
             case android.R.id.home:
             case R.id.id_menu_modifynote_cancel:
                 closeSoftKeyInput();
-                AlertDialog alertDialog = new AlertDialog.Builder(this)
-                        .setTitle("确定要取消编辑吗？")
-                        .setMessage("您的修改将不会保存。")
-                        .setPositiveButton("确定", new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialogInterface, int i) {
-                                finish();
-                            }
-                        })
-                        .setNegativeButton("取消", new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialogInterface, int i) {}
-                        }).create();
-                alertDialog.show();
+//                if (isModify) {
+                    AlertDialog alertDialog = new AlertDialog.Builder(this)
+                            .setTitle("确定要取消编辑吗？")
+                            .setMessage("您的修改将不会保存。")
+                            .setPositiveButton("确定", new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialogInterface, int i) {
+                                    finish();
+                                }
+                            })
+                            .setNegativeButton("取消", new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialogInterface, int i) {
+                                }
+                            }).create();
+                    alertDialog.show();
+//                }
+//                else
+//                    finish();
 
                 break;
         }
@@ -283,14 +313,12 @@ public class ModifyNoteActivity extends AppCompatActivity implements View.OnClic
             note.setTitle(TitleEditText.getText().toString());
             note.setContent(Content);
 
+            closeSoftKeyInput();
             Intent intent = new Intent();
             intent.putExtra("modify_note",note);
-
-            if (flag==1) // UPDATE
-                intent.putExtra("modify_note_pos",notePos);
+//            intent.putExtra("isModify",isModify);
 
             setResult(RESULT_OK,intent);
-            closeSoftKeyInput();
             finish();
 
         }

@@ -24,6 +24,13 @@
             </intent-filter>
         </activity>
 
+        <activity android:name=".Activity.ViewModifyNoteActivity">
+            <intent-filter>
+                <action android:name="activitytest.example.com.activitytest.ViewModifyNoteActivity" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </activity>
+
         <meta-data
             android:name="preloaded_fonts"
             android:resource="@array/preloaded_fonts" />

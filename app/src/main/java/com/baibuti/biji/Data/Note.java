@@ -4,13 +4,14 @@ import android.media.Image;
 
 import java.io.Serializable;
 import java.text.SimpleDateFormat;
+import java.util.Comparator;
 import java.util.Date;
 
 /**
  * Created by Windows 10 on 016 2019/02/16.
  */
 
-public class Note implements Serializable {
+public class Note implements Serializable, Comparator<Note> {
 
     private int Id;
 
@@ -22,6 +23,14 @@ public class Note implements Serializable {
     private Date CreateTime;
     private Date UpdateTime;
 
+    public Note(Note n) {
+        this.Id = n.Id;
+        this.Title = n.Title;
+        this.Content = n.Content;
+        this.GroupLabel = n.GroupLabel;
+        this.CreateTime = n.CreateTime;
+        this.UpdateTime = n.UpdateTime;
+    }
 
     public Note(String Title, String Content) {
         this.Title = Title;
@@ -30,6 +39,11 @@ public class Note implements Serializable {
         this.GroupLabel = new Group();
     }
 
+
+    @Override
+    public int compare(Note o1, Note o2) {
+        return o1.getUpdateTime().compareTo(o2.getUpdateTime());
+    }
     //////////////////////////////////////////////////
 
     public void setId(int id) {
@@ -92,23 +106,29 @@ public class Note implements Serializable {
     public String getUpdateTime_FullString() {
         SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
-        return df.format(UpdateTime);
+        return df.format(this.UpdateTime);
+    }
+
+    public String getCreateTime_FullString() {
+        SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+
+        return df.format(this.CreateTime);
     }
 
     public String getUpdateTime_TimeString() {
         SimpleDateFormat df;
-        if (new Date().getDate() == UpdateTime.getDate())
+        if (new Date().getDate() == this.UpdateTime.getDate())
             df = new SimpleDateFormat("HH:mm");
         else
             df = new SimpleDateFormat("MM-dd");
 
-        return df.format(UpdateTime);
+        return df.format(this.UpdateTime);
     }
 
     public String getUpdateTime_DateString() {
         SimpleDateFormat df = new SimpleDateFormat("MM-dd");
 
-        return df.format(UpdateTime);
+        return df.format(this.UpdateTime);
     }
 
     public String getUpdateTime_ShortString() {

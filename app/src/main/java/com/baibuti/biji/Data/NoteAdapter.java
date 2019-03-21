@@ -13,6 +13,7 @@ import android.widget.TextView;
 import android.content.Intent;
 
 import com.baibuti.biji.Activity.ModifyNoteActivity;
+import com.baibuti.biji.Activity.ViewModifyNoteActivity;
 import com.baibuti.biji.R;
 
 import java.util.List;
@@ -41,18 +42,17 @@ public class NoteAdapter extends ArrayAdapter<Note> {
         TextView Type = (TextView) view.findViewById(R.id.id_notelistview_type);
 
         Title.setText(note.getTitle());
-        MakeTime.setText(note.getUpdateTime_DateString());
+        MakeTime.setText(note.getUpdateTime_ShortString());
 
         CardView cardview = (CardView) view.findViewById(R.id.tab_note_card);
         cardview.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Intent intent=new Intent(getContext(), ModifyNoteActivity.class);
+                Intent intent=new Intent(getContext(), ViewModifyNoteActivity.class);
                 intent.putExtra("notedata",note);
                 intent.putExtra("notepos", position);
                 intent.putExtra("flag",1); // UPDATE
-                fragment.startActivityForResult(intent,1);
-
+                fragment.startActivityForResult(intent,1); // 1 from CardView
             }
         });
         return view;

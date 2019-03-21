@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/content_note"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/grey_100"
+    android:orientation="vertical"
+    app:layout_behavior="@string/appbar_scrolling_view_behavior"
+    tools:context=".Activity.ModifyNoteActivity"
+    tools:showIn="@layout/activity_viewmodifyplainnote">
+
+    <TextView
+        android:id="@+id/id_modifynote_viewtitle"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@null"
+        android:textSize="@dimen/text_size_18"
+        android:textColor="@color/grey_700"
+        android:padding="@dimen/activity_margin_16" />
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingLeft="@dimen/activity_margin_16"
+        android:paddingRight="@dimen/activity_margin_16"
+        android:paddingBottom="@dimen/activity_margin_16">
+
+        <TextView
+            android:id="@+id/id_modifynote_viewupdatetime"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="@dimen/text_size_14"
+            android:textColor="@color/grey_500"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentStart="true" />
+
+        <TextView
+            android:id="@+id/id_modifynote_viewgroup"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="@dimen/text_size_14"
+            android:textColor="@color/grey_500"
+            android:layout_alignParentRight="true"
+            android:layout_alignParentEnd="true" />
+    </RelativeLayout>
+
+    <com.sendtion.xrichtext.RichTextView
+        android:id="@+id/id_modifynote_viewcontent"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        app:rt_view_text_line_space="6dp"
+        app:rt_view_image_height="0"
+        app:rt_view_image_bottom="10"
+        app:rt_view_text_size="16sp"
+        app:rt_view_text_color="@color/grey_900"/>
+
+</LinearLayout>
