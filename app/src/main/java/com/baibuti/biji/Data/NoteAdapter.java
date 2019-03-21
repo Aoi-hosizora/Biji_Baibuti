@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.IntentFilter;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.CardView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -49,7 +50,9 @@ public class NoteAdapter extends ArrayAdapter<Note> {
                 Intent intent=new Intent(getContext(), ModifyNoteActivity.class);
                 intent.putExtra("notedata",note);
                 intent.putExtra("notepos", position);
+                intent.putExtra("flag",1); // UPDATE
                 fragment.startActivityForResult(intent,1);
+
             }
         });
         return view;

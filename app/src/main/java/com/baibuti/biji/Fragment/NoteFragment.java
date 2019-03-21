@@ -5,18 +5,22 @@ import android.media.Image;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.support.v7.widget.ActionMenuView;
 import android.view.inputmethod.InputMethodManager;
+import android.widget.AdapterView;
 import android.widget.ImageButton;
 import android.widget.ListView;
 import android.widget.Toast;
 
 import com.baibuti.biji.Activity.MainActivity;
+import com.baibuti.biji.Activity.ModifyNoteActivity;
 import com.baibuti.biji.Data.Data;
 import com.baibuti.biji.Data.Note;
 import com.baibuti.biji.Data.NoteAdapter;
@@ -36,7 +40,7 @@ public class NoteFragment extends Fragment implements View.OnClickListener {
     private Data mainData;
     private ArrayList<Note> NoteList;
     private com.wyt.searchbox.SearchFragment searchFragment;
-
+//    private SwipeRefreshLayout mSwipeRefresh;
     private SlidingMenu slidingMenu;
 
     @Nullable
@@ -56,6 +60,15 @@ public class NoteFragment extends Fragment implements View.OnClickListener {
                 //添加逻辑处理
             }
         });
+
+//        mSwipeRefresh.setColorSchemeResources(R.color.colorPrimary);
+//        mSwipeRefresh.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+//            @Override
+//            public void onRefresh() {
+//                refreshdata();
+//            }
+//        });
+
         initToolbar(view);
         initFloatingActionBar(view);
         initDatas();
@@ -67,7 +80,6 @@ public class NoteFragment extends Fragment implements View.OnClickListener {
 
     }
 
-    private int NoteListClickPos;
     private NoteAdapter noteAdapter;
 
     private void initToolbar(View view){
@@ -111,8 +123,11 @@ public class NoteFragment extends Fragment implements View.OnClickListener {
         mNoteEdit.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Toast.makeText(getContext(), "This is note_edit",Toast.LENGTH_LONG).show();
-                //添加逻辑处理
+                Intent addDoc_intent=new Intent(getActivity(),ModifyNoteActivity.class);
+                addDoc_intent.putExtra("notedata",new Note("",""));
+                addDoc_intent.putExtra("flag",0); // NEW
+                startActivityForResult(addDoc_intent,2);
+
             }
         });
     }
@@ -124,21 +139,53 @@ public class NoteFragment extends Fragment implements View.OnClickListener {
         mNoteList.setAdapter(noteAdapter);
     }
 
+
+//    private void refreshdata() {
+//        new Thread(new Runnable() {
+//            @Override
+//            public void run() {
+//                try {
+//                    Thread.sleep(500);
+//                } catch (InterruptedException e) {
+//                    e.printStackTrace();
+//                }
+//                getActivity().runOnUiThread(new Runnable() {
+//                    @Override
+//                    public void run() {
+//                        initDatas();
+//                        noteAdapter.notifyDataSetChanged();
+//                        mSwipeRefresh.setRefreshing(false);
+//                    }
+//                });
+//            }
+//        }).start();
+//    }
+
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         switch (requestCode) {
-            case 1:
+            case 1: // MODIFY
                 if (resultCode == RESULT_OK) {
                     if (data.getBooleanExtra("intent_result", true) == true) {
                         Note newnote = (Note) data.getSerializableExtra("modify_note");
+                        int NoteListClickPos = data.getIntExtra("modify_note_pos",0);
                         NoteList.set(NoteListClickPos,newnote);
-
                         mainData.setNoteItem(NoteListClickPos, newnote);
-
+                        noteAdapter.notifyDataSetChanged();
+                    }
+                    break;
+                }
+            case 2: // ADD
+                if (resultCode == RESULT_OK) {
+                    if (data.getBooleanExtra("intent_result", true) == true) {
+                        Note newnote = (Note) data.getSerializableExtra("modify_note");
+                        Toast.makeText(getActivity(), newnote.getTitle(), Toast.LENGTH_SHORT).show();
+                        NoteList.add(NoteList.size(), newnote);
                         noteAdapter.notifyDataSetChanged();
                     }
                 }
+                break;
         }
     }
 }

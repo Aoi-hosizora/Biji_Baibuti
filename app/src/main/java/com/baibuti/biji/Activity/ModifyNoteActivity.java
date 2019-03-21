@@ -285,7 +285,9 @@ public class ModifyNoteActivity extends AppCompatActivity implements View.OnClic
 
             Intent intent = new Intent();
             intent.putExtra("modify_note",note);
-            intent.putExtra("modify_note_pos",notePos);
+
+            if (flag==1) // UPDATE
+                intent.putExtra("modify_note_pos",notePos);
 
             setResult(RESULT_OK,intent);
             closeSoftKeyInput();
