@@ -304,6 +304,7 @@ public class ImageUtils {
      */
     public static Bitmap compressImage(Bitmap image, int maxSize){
         ByteArrayOutputStream os = new ByteArrayOutputStream();
+        Log.i("147147", "compressImage: "+(image==null));
         // scale
         int options = 80;
         // Store the bitmap into output stream(no compress)

@@ -1,18 +1,23 @@
 package com.baibuti.biji.Activity;
 
 import android.Manifest;
+import android.annotation.TargetApi;
 import android.app.Activity;
 import android.app.Dialog;
 import android.app.ProgressDialog;
+import android.content.ContentResolver;
+import android.content.ContentUris;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
+import android.provider.DocumentsContract;
 import android.provider.MediaStore;
 import android.support.annotation.NonNull;
 import android.support.v4.content.FileProvider;
@@ -57,6 +62,7 @@ import io.reactivex.Observer;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
+import me.kareluo.imaging.IMGEditActivity;
 
 
 /**
@@ -85,9 +91,20 @@ public class ModifyNoteActivity extends AppCompatActivity implements View.OnClic
 
     private int flag; // 0: NEW, 1: UPDATE
 
-    public final int CUTLENGTH = 17;
+    public final int CUT_LENGTH = 17;
     private int screenWidth;
     private int screenHeight;
+
+    private static final int REQUEST_TAKE_PHOTO = 0;// 拍照
+    private static final int REQUEST_CROP = 1;// 裁剪
+    private static final int SCAN_OPEN_PHONE = 2;// 相册
+
+    private Uri imgUri; // 拍照时返回的uri
+    private Uri mCutUri;// 图片裁剪时返回的uri
+    private Bitmap avatarBitMap = null;
+
+    private static final int REQUEST_PERMISSION = 100;
+    private boolean hasPermission = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -139,12 +156,14 @@ public class ModifyNoteActivity extends AppCompatActivity implements View.OnClic
         });
     }
 
+    // 确定是否修改了内容
     private Boolean CheckIsModify() {
         if (!TitleEditText.getText().toString().equals(note.getTitle()) || !getEditData().equals(note.getContent()))
             return true;
         return false;
     }
 
+    // 获取 Menu 实例
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.modifynoteactivity_menu,menu);
@@ -152,6 +171,7 @@ public class ModifyNoteActivity extends AppCompatActivity implements View.OnClic
         return true;
     }
 
+    // 点击顶部菜单项
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
@@ -188,6 +208,7 @@ public class ModifyNoteActivity extends AppCompatActivity implements View.OnClic
                 break;
 
             case R.id.id_menu_modifynote_img:
+                closeSoftKeyInput();
                 Dialog mCameraDialog = new Dialog(this, R.style.BottomDialog);
                 LinearLayout root = (LinearLayout) LayoutInflater.from(this).inflate(
                         R.layout.bottom_dialog, null);
@@ -212,61 +233,93 @@ public class ModifyNoteActivity extends AppCompatActivity implements View.OnClic
         return super.onOptionsItemSelected(item);
     }
 
-    private static final int REQUEST_TAKE_PHOTO = 0;// 拍照
-    private static final int REQUEST_CROP = 1;// 裁剪
-    private static final int SCAN_OPEN_PHONE = 2;// 相册
-    private static final int REQUEST_PERMISSION = 100;
-    private Uri imgUri; // 拍照时返回的uri
-    private Uri mCutUri;// 图片裁剪时返回的uri
-    private boolean hasPermission = false;
-
+    // 点击弹出菜单项
     @Override
     public void onClick(View v) {
         switch (v.getId()) {
             case R.id.id_popmenu_choose_img:
+                // SCAN_OPEN_PHONE
                 checkPermissions();
-                Intent intent = new Intent(Intent.ACTION_PICK);
+//                Intent intent = new Intent(Intent.ACTION_PICK);
+//                intent.setType("image/*");
+//                startActivityForResult(intent,SCAN_OPEN_PHONE);
+                Intent intent = new Intent();
                 intent.setType("image/*");
-                startActivityForResult(intent, REQUEST_CROP/*SCAN_OPEN_PHONE*/);
-            break;
+                intent.setAction(Intent.ACTION_GET_CONTENT);
+                startActivityForResult(intent, SCAN_OPEN_PHONE);
+                break;
             case R.id.id_popmenu_open_camera:
                 checkPermissions();
-
-            break;
+                // REQUEST_TAKE_PHOTO
+                break;
             case R.id.id_popmenu_cancel:
 
-            break;
+                break;
         }
     }
 
-    private void checkPermissions() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            // 检查是否有存储和拍照权限
-            if (checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED
-                    && checkSelfPermission(Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED
-            ) {
-                hasPermission = true;
-//                takePhone();
-            } else {
-                requestPermissions(new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.CAMERA}, REQUEST_PERMISSION);
-            }
-        }
-    }
-
+    // 图片处理活动返回
     @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        if (requestCode == REQUEST_PERMISSION) {
-            if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-//                takePhone();
-                hasPermission = true;
-            } else {
-                Toast.makeText(this, "权限授予失败！", Toast.LENGTH_SHORT).show();
-                hasPermission = false;
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (resultCode == RESULT_OK && data != null) {
+            switch (requestCode) {
+
+                // 拍照并进行裁剪
+                case REQUEST_TAKE_PHOTO:
+                    // cropPhoto(imgUri, true);
+                    WeiXinEditImg(data);
+                break;
+
+                // 打开图库获取图片并进行裁剪 FINISHED
+                case SCAN_OPEN_PHONE:
+                    // cropPhoto(data.getData(), false);
+                    WeiXinEditImg(data); // EXTRA_IMAGE_URI
+
+
+                break;
+
+                //////////////////////////////////////////////////////////////////////
+
+                // 裁剪后设置图片 <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+                case REQUEST_CROP: // 裁剪
+                    Log.i("/////////////1212///", "onActivityResult: "+ data.getData());
+                    mCutUri = data.getData();
+                    insertImagesSync(mCutUri); // URI
+                    // Log.e("S", "onActivityResult: imgUri:REQUEST_CROP:" + mCutUri.toString());
+                break;
             }
         }
     }
-    // 图片裁剪
+
+    // 仿照微信弹出图片涂鸦裁剪
+    private void WeiXinEditImg(Intent data) {
+        try {
+            avatarBitMap = MediaStore.Images.Media.getBitmap(this.getContentResolver(), data.getData());
+            //此处获得了Bitmap图片，可以用作设置头像等等。
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+
+        Intent intent = new Intent(this, IMGEditActivity.class);
+
+        try {
+
+
+            String uri_path = getFilePathByUri(this, data.getData());
+            Uri uri = Uri.fromFile(new File(uri_path));
+            System.out.println(uri.toString());
+
+            intent.putExtra(IMGEditActivity.EXTRA_IMAGE_URI, uri);
+//            intent.putExtra(IMGEditActivity.EXTRA_IMAGE_SAVE_PATH, uri+" - edited");
+            //intent.putExtra(IMGEditActivity.EXTRA_IMAGE_SAVE_PATH,);
+            startActivityForResult(intent,REQUEST_CROP);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    // 由Uri进行图片裁剪
     private void cropPhoto(Uri uri, boolean fromCapture) {
         Log.i("S", "cropPhoto: "+uri);
         Intent intent = new Intent("com.android.camera.action.CROP"); //打开系统自带的裁剪图片的intent
@@ -297,7 +350,7 @@ public class ModifyNoteActivity extends AppCompatActivity implements View.OnClic
         } else { // 从相册中选择，那么裁剪的图片保存在take_photo中
             String time = new SimpleDateFormat("yyyyMMddHHmmss", Locale.CHINA).format(new Date());
             String fileName = "photo_" + time;
-            File mCutFile = new File(Environment.getExternalStorageDirectory() + "/take_photo", fileName + ".jpeg");
+            File mCutFile = new File(Environment.getExternalStorageDirectory() + "/take_photo", fileName + ".jpg");
             if (!mCutFile.getParentFile().exists()) {
                 mCutFile.getParentFile().mkdirs();
             }
@@ -318,10 +371,80 @@ public class ModifyNoteActivity extends AppCompatActivity implements View.OnClic
         startActivityForResult(intent, REQUEST_CROP); //设置裁剪参数显示图片至ImageVie
     }
 
-    // 从file中获取uri
-    // 7.0及以上使用的uri是contentProvider content://com.rain.takephotodemo.FileProvider/images/photo_20180824173621.jpg
-    // 6.0使用的uri为file:///storage/emulated/0/take_photo/photo_20180824171132.jpg
+
+    // 文件保存活动处理
+    private void saveNoteData() {
+
+        String Content = getEditData();
+
+
+        if (Content.isEmpty()) {
+            closeSoftKeyInput();
+            AlertDialog alertDialog = new AlertDialog.Builder(this)
+                    .setTitle("没有输入内容，请补全笔记内容")
+                    .setPositiveButton("确定", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialogInterface, int i) {
+                        }
+                    }).create();
+            alertDialog.show();
+            return;
+        }
+
+
+        if (TitleEditText.getText().toString().isEmpty()) {
+            if (Content.substring(0,4)=="<img") {
+                TitleEditText.setText("图片");
+            }
+            else {
+                if (Content.length() > CUT_LENGTH + 3)
+                    TitleEditText.setText(Content.substring(0, CUT_LENGTH) + "...");
+                else
+                    TitleEditText.setText(Content);
+            }
+        }
+        //////////////////////////////////////////////////
+        boolean isModify = CheckIsModify();
+        note.setTitle(TitleEditText.getText().toString());
+        note.setContent(Content);
+
+        int groupId = note.getGroupLabel().getId();
+        if (flag == 0) { // NEW
+            long noteId = noteDao.insertNote(note);
+            note.setId((int)noteId);
+            flag = 1;
+
+        }
+        else  // MODIFY
+            if (isModify)
+                noteDao.updateNote(note);
+
+        closeSoftKeyInput();
+        Intent intent = new Intent();
+        intent.putExtra("isModify", isModify);
+        intent.putExtra("modify_note",note);
+
+        setResult(RESULT_OK,intent);
+        finish();
+
+
+    }
+
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+    // File2Uri <<<<<<<<<<<<<<<<<<<< FileProvider.getUriForFile
     private static Uri getUriForFile(Context context, File file) {
+
+
+        // 7.0及以上使用的uri是contentProvider content://com.rain.takephotodemo.FileProvider/images/photo_20180824173621.jpg
+        // 6.0使用的uri为file:///storage/emulated/0/take_photo/photo_20180824171132.jpg
+
         if (context == null || file == null) {
             throw new NullPointerException();
         }
@@ -334,103 +457,176 @@ public class ModifyNoteActivity extends AppCompatActivity implements View.OnClic
         return uri;
     }
 
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    // Uri2Path <<<<<<<<<<<<<<<<<<<< uri.getPath()
+    @TargetApi(19)
+    public static String getFilePathByUri(Context context, Uri uri) {
+        String path = null;
+        // 以 file:// 开头的
+        if (ContentResolver.SCHEME_FILE.equals(uri.getScheme())) {
+            path = uri.getPath();
+            return path;
+        }
+        // 以 content:// 开头的，比如 content://media/extenral/images/media/17766
+        if (ContentResolver.SCHEME_CONTENT.equals(uri.getScheme()) && Build.VERSION.SDK_INT < Build.VERSION_CODES.KITKAT) {
+            Cursor cursor = context.getContentResolver().query(uri, new String[]{MediaStore.Images.Media.DATA}, null, null, null);
+            if (cursor != null) {
+                if (cursor.moveToFirst()) {
+                    int columnIndex = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATA);
+                    if (columnIndex > -1) {
+                        path = cursor.getString(columnIndex);
+                    }
+                }
+                cursor.close();
+            }
+            return path;
+        }
+        // 4.4及之后的 是以 content:// 开头的，比如 content://com.android.providers.media.documents/document/image%3A235700
+        if (ContentResolver.SCHEME_CONTENT.equals(uri.getScheme()) && Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+            if (DocumentsContract.isDocumentUri(context, uri)) {
+                if (isExternalStorageDocument(uri)) {
+                    // ExternalStorageProvider
+                    final String docId = DocumentsContract.getDocumentId(uri);
+                    final String[] split = docId.split(":");
+                    final String type = split[0];
+                    if ("primary".equalsIgnoreCase(type)) {
+                        path = Environment.getExternalStorageDirectory() + "/" + split[1];
+                        return path;
+                    }
+                } else if (isDownloadsDocument(uri)) {
+                    // DownloadsProvider
+                    final String id = DocumentsContract.getDocumentId(uri);
+                    final Uri contentUri = ContentUris.withAppendedId(Uri.parse("content://downloads/public_downloads"),
+                            Long.valueOf(id));
+                    path = getDataColumn(context, contentUri, null, null);
+                    return path;
+                } else if (isMediaDocument(uri)) {
+                    // MediaProvider
+                    final String docId = DocumentsContract.getDocumentId(uri);
+                    final String[] split = docId.split(":");
+                    final String type = split[0];
+                    Uri contentUri = null;
+                    if ("image".equals(type)) {
+                        contentUri = MediaStore.Images.Media.EXTERNAL_CONTENT_URI;
+                    } else if ("video".equals(type)) {
+                        contentUri = MediaStore.Video.Media.EXTERNAL_CONTENT_URI;
+                    } else if ("audio".equals(type)) {
+                        contentUri = MediaStore.Audio.Media.EXTERNAL_CONTENT_URI;
+                    }
+                    final String selection = "_id=?";
+                    final String[] selectionArgs = new String[]{split[1]};
+                    path = getDataColumn(context, contentUri, selection, selectionArgs);
+                    return path;
+                }
+            }
+        }
+        return null;
+    }
+
+    // Path2Uri <<<<<<<<<<<<<<<<<<<< uri.getPath()
+    public static Uri getImageStreamFromExternal(String imageName) {
+        File externalPubPath = Environment.getExternalStoragePublicDirectory(
+                Environment.DIRECTORY_PICTURES
+        );
+
+        File picPath = new File(externalPubPath, imageName);
+        Uri uri = null;
+        if(picPath.exists()) {
+            uri = Uri.fromFile(picPath);
+        }
+
+        return uri;
+    }
+
+    public static String getDataColumn(Context context, Uri uri, String selection, String[] selectionArgs) {
+        Cursor cursor = null;
+        String column = MediaStore.Images.Media.DATA;
+        String[] projection = {column};
+        try {
+            cursor = context.getContentResolver().query(uri, projection, selection, selectionArgs, null);
+            if (cursor != null && cursor.moveToFirst()) {
+                int index = cursor.getColumnIndexOrThrow(column);
+                return cursor.getString(index);
+            }
+        } finally {
+            if (cursor != null)
+                cursor.close();
+        }
+        return null;
+    }
+
+    /**
+     * @param uri The Uri to check.
+     * @return Whether the Uri authority is ExternalStorageProvider.
+     */
+    public static boolean isExternalStorageDocument(Uri uri) {
+        return "com.android.externalstorage.documents".equals(uri.getAuthority());
+    }
+
+    /**
+     * @param uri The Uri to check.
+     * @return Whether the Uri authority is DownloadsProvider.
+     */
+    public static boolean isDownloadsDocument(Uri uri) {
+        return "com.android.providers.downloads.documents".equals(uri.getAuthority());
+    }
+
+    /**
+     * @param uri The Uri to check.
+     * @return Whether the Uri authority is MediaProvider.
+     */
+    public static boolean isMediaDocument(Uri uri) {
+        return "com.android.providers.media.documents".equals(uri.getAuthority());
+    }
+
+    /**
+     * @param uri The Uri to check.
+     * @return Whether the Uri authority is Google Photos.
+     */
+    public static boolean isGooglePhotosUri(Uri uri) {
+        return "com.google.android.apps.photos.content".equals(uri.getAuthority());
+    }
 
 
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-        if (resultCode == RESULT_OK) {
-            switch (requestCode) {
-                // 拍照并进行裁剪
-                case REQUEST_TAKE_PHOTO:
-                    // Log.e("S", "onActivityResult: imgUri:REQUEST_TAKE_PHOTO:" + imgUri.toString());
-                    cropPhoto(imgUri, true);
-                    break;
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-                // 裁剪后设置图片
-                case REQUEST_CROP:
-                    insertImagesSync(data.getData());
-                    // Log.e("S", "onActivityResult: imgUri:REQUEST_CROP:" + mCutUri.toString());
-                    break;
-                // 打开图库获取图片并进行裁剪
-                case SCAN_OPEN_PHONE:
-                    // Log.e("S", "onActivityResult: SCAN_OPEN_PHONE:" + data.getData().toString());
-                    cropPhoto(data.getData(), false);
-                    break;
+
+    // 动态判断权限
+    private void checkPermissions() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            // 检查是否有存储和拍照权限
+            if (checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED
+                    && checkSelfPermission(Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED
+            ) {
+                hasPermission = true;
+//                takePhone();
+            } else {
+                requestPermissions(new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.CAMERA}, REQUEST_PERMISSION);
             }
         }
     }
-    /**
-     * 异步方式插入图片
-     * @param data
-     */
-    private void insertImagesSync(final Uri data){
-        insertDialog.show();
 
-
-
-
-        Observable.create(new ObservableOnSubscribe<String>() {
-            @Override
-            public void subscribe(ObservableEmitter<String> emitter) {
-                try{
-                    ContentEditText.measure(0, 0);
-                    Log.e("0", "###data=" + data);
-                    String imagePath = SDCardUtil.getFilePathFromUri(getApplicationContext(),  data);
-                    Log.e("0", "###path=" + imagePath);
-                    Bitmap bitmap = ImageUtils.getSmallBitmap(imagePath, screenWidth, screenHeight);//压缩图片
-                    //bitmap = BitmapFactory.decodeFile(imagePath);
-                    imagePath = SDCardUtil.saveToSdCard(bitmap);
-                    Log.e("1", "###imagePath="+imagePath);
-                    emitter.onNext(imagePath);
-
-
-                    // 测试插入网络图片 http://p695w3yko.bkt.clouddn.com/18-5-5/44849367.jpg
-                    //subscriber.onNext("http://p695w3yko.bkt.clouddn.com/18-5-5/30271511.jpg");
-
-                    emitter.onComplete();
-                }catch (Exception e){
-                    e.printStackTrace();
-                    emitter.onError(e);
-                }
+    // 授予权限
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if (requestCode == REQUEST_PERMISSION) {
+            if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+//                takePhone();
+                hasPermission = true;
+            } else {
+                Toast.makeText(this, "权限授予失败！", Toast.LENGTH_SHORT).show();
+                hasPermission = false;
             }
-        })
-                //.onBackpressureBuffer()
-                .subscribeOn(Schedulers.io())//生产事件在io
-                .observeOn(AndroidSchedulers.mainThread())//消费事件在UI线程
-                .subscribe(new Observer<String>() {
-                    @Override
-                    public void onComplete() {
-                        if (insertDialog != null && insertDialog.isShowing()) {
-                            insertDialog.dismiss();
-                        }
-                        Toast.makeText(ModifyNoteActivity.this, "图片插入成功", Toast.LENGTH_SHORT).show();
-                    }
-
-                    @Override
-                    public void onError(Throwable e) {
-                        if (insertDialog != null && insertDialog.isShowing()) {
-                            insertDialog.dismiss();
-                        }
-                        Toast.makeText(ModifyNoteActivity.this, "图片插入失败", Toast.LENGTH_SHORT).show();
-                    }
-
-                    @Override
-                    public void onSubscribe(Disposable d) {
-                        subsInsert = d;
-                    }
-
-                    @Override
-                    public void onNext(String imagePath) {
-                        ContentEditText.insertImage(imagePath, ContentEditText.getMeasuredWidth());
-                    }
-                });
+        }
     }
 
-
-    /**
-     * 关闭软键盘
-     */
+    // 关闭软键盘
     private void closeSoftKeyInput() {
         InputMethodManager imm = (InputMethodManager) getSystemService(INPUT_METHOD_SERVICE);
         //boolean isOpen=imm.isActive();//isOpen若返回true，则表示输入法打开
@@ -438,6 +634,7 @@ public class ModifyNoteActivity extends AppCompatActivity implements View.OnClic
             imm.hideSoftInputFromWindow(getCurrentFocus().getWindowToken(), InputMethodManager.HIDE_NOT_ALWAYS);
     }
 
+    // 获取 ContentEditText 内容
     private String getEditData() {
         List<RichTextEditor.EditData> editList = ContentEditText.buildEditData();
         StringBuilder content = new StringBuilder();
@@ -451,6 +648,7 @@ public class ModifyNoteActivity extends AppCompatActivity implements View.OnClic
         return content.toString();
     }
 
+    //ContentEditText.post(new Runnable() -> dealWithContent(););
     private void dealWithContent() {
         ContentEditText.clearAllLayout();
         showDataSync(note.getContent());
@@ -483,21 +681,7 @@ public class ModifyNoteActivity extends AppCompatActivity implements View.OnClic
         });
     }
 
-    protected void showEditData(ObservableEmitter<String> emitter, String html) {
-        try {
-            List<String> textList = StringUtils.cutStringByImgTag(html);
-            for (int i = 0; i < textList.size(); i++) {
-                String text = textList.get(i);
-                emitter.onNext(text);
-            }
-            emitter.onComplete();
-        }catch (Exception e){
-            e.printStackTrace();
-            emitter.onError(e);
-        }
-    }
-
-
+    // 异步显示数据
     private void showDataSync(final String html){
         Observable.create(new ObservableOnSubscribe<String>() {
             @Override
@@ -550,56 +734,82 @@ public class ModifyNoteActivity extends AppCompatActivity implements View.OnClic
                 });
     }
 
-    private void saveNoteData() {
-
-        String Content = getEditData();
-
-
-        if (Content.isEmpty()) {
-            closeSoftKeyInput();
-            AlertDialog alertDialog = new AlertDialog.Builder(this)
-                    .setTitle("没有输入内容，请补全笔记内容")
-                    .setPositiveButton("确定", new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialogInterface, int i) {
-                        }
-                    }).create();
-            alertDialog.show();
-            return;
+    // 显示数据
+    protected void showEditData(ObservableEmitter<String> emitter, String html) {
+        try {
+            List<String> textList = StringUtils.cutStringByImgTag(html);
+            for (int i = 0; i < textList.size(); i++) {
+                String text = textList.get(i);
+                emitter.onNext(text);
+            }
+            emitter.onComplete();
+        }catch (Exception e){
+            e.printStackTrace();
+            emitter.onError(e);
         }
-
-
-        if (TitleEditText.getText().toString().isEmpty()) {
-            if (Content.length() > CUTLENGTH + 3)
-                TitleEditText.setText(Content.substring(0, CUTLENGTH) + "...");
-            else
-                TitleEditText.setText(Content);
-        }
-        //////////////////////////////////////////////////
-        boolean isModify = CheckIsModify();
-        note.setTitle(TitleEditText.getText().toString());
-        note.setContent(Content);
-
-        int groupId = note.getGroupLabel().getId();
-        if (flag == 0) { // NEW
-            long noteId = noteDao.insertNote(note);
-            note.setId((int)noteId);
-            flag = 1;
-
-        }
-        else  // MODIFY
-            if (isModify)
-                noteDao.updateNote(note);
-
-        closeSoftKeyInput();
-        Intent intent = new Intent();
-        intent.putExtra("isModify", isModify);
-        intent.putExtra("modify_note",note);
-
-        setResult(RESULT_OK,intent);
-        finish();
-
-
     }
 
+    // 异步由Uri插入图片
+    private void insertImagesSync(final Uri data){
+        insertDialog.show();
+
+
+
+
+        Observable.create(new ObservableOnSubscribe<String>() {
+            @Override
+            public void subscribe(ObservableEmitter<String> emitter) {
+                try{
+                    ContentEditText.measure(0, 0);
+                    Log.e("0", "###data=" + data);
+                    String imagePath = SDCardUtil.getFilePathFromUri(getApplicationContext(),  data);
+                    Log.e("0", "###path=" + imagePath);
+                    Bitmap bitmap = ImageUtils.getSmallBitmap(data+"", screenWidth, screenHeight);//压缩图片
+                    //bitmap = BitmapFactory.decodeFile(imagePath);
+                    imagePath = SDCardUtil.saveToSdCard(bitmap);
+                    Log.e("1", "###imagePath="+imagePath);
+                    emitter.onNext(imagePath);
+
+
+                    // 测试插入网络图片 http://p695w3yko.bkt.clouddn.com/18-5-5/44849367.jpg
+                    //subscriber.onNext("http://p695w3yko.bkt.clouddn.com/18-5-5/30271511.jpg");
+
+                    emitter.onComplete();
+                }catch (Exception e){
+                    e.printStackTrace();
+                    emitter.onError(e);
+                }
+            }
+        })
+                //.onBackpressureBuffer()
+                .subscribeOn(Schedulers.io())//生产事件在io
+                .observeOn(AndroidSchedulers.mainThread())//消费事件在UI线程
+                .subscribe(new Observer<String>() {
+                    @Override
+                    public void onComplete() {
+                        if (insertDialog != null && insertDialog.isShowing()) {
+                            insertDialog.dismiss();
+                        }
+                        Toast.makeText(ModifyNoteActivity.this, "图片插入成功", Toast.LENGTH_SHORT).show();
+                    }
+
+                    @Override
+                    public void onError(Throwable e) {
+                        if (insertDialog != null && insertDialog.isShowing()) {
+                            insertDialog.dismiss();
+                        }
+                        Toast.makeText(ModifyNoteActivity.this, "图片插入失败", Toast.LENGTH_SHORT).show();
+                    }
+
+                    @Override
+                    public void onSubscribe(Disposable d) {
+                        subsInsert = d;
+                    }
+
+                    @Override
+                    public void onNext(String imagePath) {
+                        ContentEditText.insertImage(imagePath, ContentEditText.getMeasuredWidth());
+                    }
+                });
+    }
 }

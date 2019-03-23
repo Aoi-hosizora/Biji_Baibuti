@@ -8,6 +8,7 @@ import android.net.Uri;
 import android.os.Environment;
 import android.os.ParcelFileDescriptor;
 import android.provider.MediaStore;
+import android.util.Log;
 
 import java.io.File;
 import java.io.FileDescriptor;
@@ -103,7 +104,6 @@ public class SDCardUtil {
      */
     public static String getFilePathFromUri(Context context, Uri uri) {
         if (uri == null) return null;
-
         ContentResolver resolver = context.getContentResolver();
         FileInputStream input = null;
         FileOutputStream output = null;
