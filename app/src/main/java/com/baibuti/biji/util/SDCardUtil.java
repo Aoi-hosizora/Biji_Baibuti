@@ -50,7 +50,7 @@ public class SDCardUtil {
      * @return
      */
     public static String saveToSdCard(Bitmap bitmap) {
-        String imageUrl = getPictureDir() + System.currentTimeMillis() + "-";
+        String imageUrl = getPictureDir() + System.currentTimeMillis() + "-"; //////////
         File file = new File(imageUrl);
         try {
             FileOutputStream out = new FileOutputStream(file);

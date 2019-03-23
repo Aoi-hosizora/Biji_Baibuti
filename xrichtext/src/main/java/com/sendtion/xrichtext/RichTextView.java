@@ -295,7 +295,17 @@ public class RichTextView extends ScrollView {
         } else { //如果是本地图片
 
             // 调整imageView的高度，根据宽度等比获得高度
-            Bitmap bmp = BitmapFactory.decodeFile(imagePath);
+            Bitmap bmp;
+            try {
+                bmp = BitmapFactory.decodeFile(imagePath);
+            }
+            catch (Exception ex) {
+                bmp = Bitmap.createBitmap(200,200,Bitmap.Config.ARGB_8888);
+                bmp.eraseColor(Color.parseColor("#808080"));//填充颜色
+                throw ex;
+            }
+
+
             int imageHeight ; //解决连续加载多张图片导致后续图片都跟第一张高度相同的问题
             if (rtImageHeight > 0) {
                 imageHeight = rtImageHeight;

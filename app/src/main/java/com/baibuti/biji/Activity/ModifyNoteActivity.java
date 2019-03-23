@@ -251,6 +251,7 @@ public class ModifyNoteActivity extends AppCompatActivity implements View.OnClic
             case R.id.id_popmenu_open_camera:
                 checkPermissions();
                 // REQUEST_TAKE_PHOTO
+                takePhone();
                 break;
             case R.id.id_popmenu_cancel:
 
@@ -261,20 +262,24 @@ public class ModifyNoteActivity extends AppCompatActivity implements View.OnClic
     // 图片处理活动返回
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (resultCode == RESULT_OK && data != null) {
+        if (resultCode == RESULT_OK) {
             switch (requestCode) {
 
                 // 拍照并进行裁剪
                 case REQUEST_TAKE_PHOTO:
+                    Log.e("000", "onActivityResult: " + imgUri);
                     // cropPhoto(imgUri, true);
-                    WeiXinEditImg(data);
+                    WeiXinEditImg(imgUri);
                 break;
 
                 // 打开图库获取图片并进行裁剪 FINISHED
                 case SCAN_OPEN_PHONE:
-                    // cropPhoto(data.getData(), false);
-                    WeiXinEditImg(data); // EXTRA_IMAGE_URI
+                    if (data != null) {
+                        Log.e("000", "onActivityResult: " + data.getData());
 
+                        // cropPhoto(data.getData(), false);
+                        WeiXinEditImg(data.getData()); // EXTRA_IMAGE_URI
+                    }
 
                 break;
 
@@ -282,19 +287,21 @@ public class ModifyNoteActivity extends AppCompatActivity implements View.OnClic
 
                 // 裁剪后设置图片 <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
                 case REQUEST_CROP: // 裁剪
-                    Log.i("/////////////1212///", "onActivityResult: "+ data.getData());
-                    mCutUri = data.getData();
-                    insertImagesSync(mCutUri); // URI
-                    // Log.e("S", "onActivityResult: imgUri:REQUEST_CROP:" + mCutUri.toString());
+                    if (data != null) {
+                        Log.i("/////////////1212///", "onActivityResult: " + data.getData());
+                        mCutUri = data.getData();
+                        insertImagesSync(mCutUri); // URI
+                        // Log.e("S", "onActivityResult: imgUri:REQUEST_CROP:" + mCutUri.toString());
+                    }
                 break;
             }
         }
     }
 
     // 仿照微信弹出图片涂鸦裁剪
-    private void WeiXinEditImg(Intent data) {
+    private void WeiXinEditImg(Uri uridata) {
         try {
-            avatarBitMap = MediaStore.Images.Media.getBitmap(this.getContentResolver(), data.getData());
+            avatarBitMap = MediaStore.Images.Media.getBitmap(this.getContentResolver(), uridata);
             //此处获得了Bitmap图片，可以用作设置头像等等。
         } catch (Exception e) {
             e.printStackTrace();
@@ -305,10 +312,9 @@ public class ModifyNoteActivity extends AppCompatActivity implements View.OnClic
 
         try {
 
-
-            String uri_path = getFilePathByUri(this, data.getData());
+            String uri_path = getFilePathByUri(this, uridata);
             Uri uri = Uri.fromFile(new File(uri_path));
-            System.out.println(uri.toString());
+            // System.out.println(uri.toString());
 
             intent.putExtra(IMGEditActivity.EXTRA_IMAGE_URI, uri);
 //            intent.putExtra(IMGEditActivity.EXTRA_IMAGE_SAVE_PATH, uri+" - edited");
@@ -318,6 +324,30 @@ public class ModifyNoteActivity extends AppCompatActivity implements View.OnClic
             e.printStackTrace();
         }
     }
+
+    // 拍照
+    private void takePhone() {
+        // 要保存的文件名
+        String fileName = "photo_" + System.currentTimeMillis();
+        // 创建一个文件夹
+        String path = Environment.getExternalStorageDirectory() + "/take_photo";
+        File file = new File(path);
+        if (!file.exists()) {
+            file.mkdirs();
+        }
+        // 要保存的图片文件
+        File imgFile = new File(file, fileName + ".jpg");
+        // 将file转换成uri
+        // 注意7.0及以上与之前获取的uri不一样了，返回的是provider路径
+        imgUri = getUriForFile(this, imgFile);
+        Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+        // 添加Uri读取权限
+        intent.addFlags(Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION);
+        // 添加图片保存位置
+        intent.putExtra(MediaStore.EXTRA_OUTPUT, imgUri);
+        startActivityForResult(intent, REQUEST_TAKE_PHOTO);
+    }
+
 
     // 由Uri进行图片裁剪
     private void cropPhoto(Uri uri, boolean fromCapture) {

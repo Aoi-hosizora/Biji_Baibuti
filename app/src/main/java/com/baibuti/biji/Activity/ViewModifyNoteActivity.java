@@ -10,6 +10,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.baibuti.biji.Data.Note;
 import com.baibuti.biji.R;
@@ -213,14 +214,20 @@ public class ViewModifyNoteActivity extends AppCompatActivity implements View.On
 
                     @Override
                     public void onNext(String text) {
-                        if (ContentEditText_View !=null) {
-                            if (text.contains("<img") && text.contains("src=")) {
-                                //imagePath可能是本地路径，也可能是网络地址
-                                String imagePath = StringUtils.getImgSrc(text);
-                                ContentEditText_View.addImageViewAtIndex(ContentEditText_View.getLastIndex(), imagePath);
-                            } else {
-                                ContentEditText_View.addTextViewAtIndex(ContentEditText_View.getLastIndex(), text);
+                        try {
+                            if (ContentEditText_View != null) {
+                                if (text.contains("<img") && text.contains("src=")) {
+                                    //imagePath可能是本地路径，也可能是网络地址
+                                    String imagePath = StringUtils.getImgSrc(text);
+                                    ContentEditText_View.addImageViewAtIndex(ContentEditText_View.getLastIndex(), imagePath);
+                                } else {
+                                    ContentEditText_View.addTextViewAtIndex(ContentEditText_View.getLastIndex(), text);
+                                }
                             }
+                        }
+                        catch (Exception ex) {
+                            Toast.makeText(ViewModifyNoteActivity.this, "笔记中图片显示错误，可能由于源文件被删除。", Toast.LENGTH_SHORT).show();
+
                         }
                     }
                 });
