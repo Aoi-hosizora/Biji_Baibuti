@@ -46,6 +46,7 @@
             android:authorities="com.baibuti.biji.FileProvider"
             android:exported="false"
             android:grantUriPermissions="true">
+
         <meta-data
             android:name="android.support.FILE_PROVIDER_PATHS"
             android:resource="@xml/public_file_path" />

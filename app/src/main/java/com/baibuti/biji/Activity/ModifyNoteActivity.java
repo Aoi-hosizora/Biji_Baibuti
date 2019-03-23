@@ -265,34 +265,36 @@ public class ModifyNoteActivity extends AppCompatActivity implements View.OnClic
         if (resultCode == RESULT_OK) {
             switch (requestCode) {
 
+
+                // 打开图库获取图片并进行裁剪 FINISHED
+                case SCAN_OPEN_PHONE:
+
+//                        Log.e("000", "onActivityResult: " + data.getData());
+
+//                         cropPhoto(data.getData(), false);
+                    WeiXinEditImg(data.getData());
+
+
+                break;
+
+
                 // 拍照并进行裁剪
                 case REQUEST_TAKE_PHOTO:
-                    Log.e("000", "onActivityResult: " + imgUri);
+//                    Log.e("000", "onActivityResult: " + getFilePathByUri(getApplicationContext(),imgUri));
                     // cropPhoto(imgUri, true);
                     WeiXinEditImg(imgUri);
                 break;
 
-                // 打开图库获取图片并进行裁剪 FINISHED
-                case SCAN_OPEN_PHONE:
-                    if (data != null) {
-                        Log.e("000", "onActivityResult: " + data.getData());
 
-                        // cropPhoto(data.getData(), false);
-                        WeiXinEditImg(data.getData()); // EXTRA_IMAGE_URI
-                    }
-
-                break;
 
                 //////////////////////////////////////////////////////////////////////
 
                 // 裁剪后设置图片 <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
                 case REQUEST_CROP: // 裁剪
-                    if (data != null) {
-                        Log.i("/////////////1212///", "onActivityResult: " + data.getData());
-                        mCutUri = data.getData();
-                        insertImagesSync(mCutUri); // URI
-                        // Log.e("S", "onActivityResult: imgUri:REQUEST_CROP:" + mCutUri.toString());
-                    }
+                    Log.i("/////////////1212///", "onActivityResult: "+ data.getData());
+                    mCutUri = data.getData();
+                    insertImagesSync(mCutUri); // URI
+                    // Log.e("S", "onActivityResult: imgUri:REQUEST_CROP:" + mCutUri.toString());
                 break;
             }
         }
@@ -300,6 +302,9 @@ public class ModifyNoteActivity extends AppCompatActivity implements View.OnClic
 
     // 仿照微信弹出图片涂鸦裁剪
     private void WeiXinEditImg(Uri uridata) {
+//        Log.e("159753123", "WeiXinEditImg: "+uridata.getAuthority() );
+
+
         try {
             avatarBitMap = MediaStore.Images.Media.getBitmap(this.getContentResolver(), uridata);
             //此处获得了Bitmap图片，可以用作设置头像等等。
@@ -312,9 +317,13 @@ public class ModifyNoteActivity extends AppCompatActivity implements View.OnClic
 
         try {
 
+            Log.e("uridata", "WeiXinEditImg: "+ uridata );
+            Log.e("uridata", "WeiXinEditImg: "+ uridata.getAuthority() );
             String uri_path = getFilePathByUri(this, uridata);
+            Log.e("uri_path", "WeiXinEditImg: "+ uri_path );
+
             Uri uri = Uri.fromFile(new File(uri_path));
-            // System.out.println(uri.toString());
+            System.out.println(uri.toString());
 
             intent.putExtra(IMGEditActivity.EXTRA_IMAGE_URI, uri);
 //            intent.putExtra(IMGEditActivity.EXTRA_IMAGE_SAVE_PATH, uri+" - edited");
@@ -327,19 +336,21 @@ public class ModifyNoteActivity extends AppCompatActivity implements View.OnClic
 
     // 拍照
     private void takePhone() {
-        // 要保存的文件名
-        String fileName = "photo_" + System.currentTimeMillis();
-        // 创建一个文件夹
-        String path = Environment.getExternalStorageDirectory() + "/take_photo";
+        String time = new SimpleDateFormat("yyyyMMddHHmmss", Locale.CHINA).format(new Date());
+        String fileName = "photo_" + time;
+        String path = Environment.getExternalStorageDirectory() +File.separator+ "take_photo";
         File file = new File(path);
         if (!file.exists()) {
             file.mkdirs();
         }
         // 要保存的图片文件
-        File imgFile = new File(file, fileName + ".jpg");
+        File imgFile = new File(file+File.separator+ fileName + ".jpg");
+
+//        Log.e("00011", "takePhone: "+path+fileName + ".jpg" );
         // 将file转换成uri
         // 注意7.0及以上与之前获取的uri不一样了，返回的是provider路径
         imgUri = getUriForFile(this, imgFile);
+        Log.e("010", "takePhone: "+(imgUri)+"}"+(imgUri+""));
         Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
         // 添加Uri读取权限
         intent.addFlags(Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION);
@@ -490,7 +501,6 @@ public class ModifyNoteActivity extends AppCompatActivity implements View.OnClic
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
     // Uri2Path <<<<<<<<<<<<<<<<<<<< uri.getPath()
-    @TargetApi(19)
     public static String getFilePathByUri(Context context, Uri uri) {
         String path = null;
         // 以 file:// 开头的
@@ -498,7 +508,29 @@ public class ModifyNoteActivity extends AppCompatActivity implements View.OnClic
             path = uri.getPath();
             return path;
         }
-        // 以 content:// 开头的，比如 content://media/extenral/images/media/17766
+
+
+        Log.e("uri", "getFilePathByUri: "+ uri+":"+isAppDocument(uri) );
+
+        if (isAppDocument(uri)) { // com.baibuti.biji.FileProvider
+
+            // content://com.android.providers.media.documents/document/image%3A235700
+            // content://com.baibuti.biji.FileProvider/images/photo_20190323225817.jpg
+
+            // MediaProvider
+
+            final String[] fin = (uri+"").split(File.separator);
+            final String filename = Environment.getExternalStorageDirectory() +File.separator+ "take_photo"+File.separator+fin[4];
+
+            return filename;
+        }
+
+
+
+
+
+
+            // 以 content:// 开头的，比如 content://media/extenral/images/media/17766
         if (ContentResolver.SCHEME_CONTENT.equals(uri.getScheme()) && Build.VERSION.SDK_INT < Build.VERSION_CODES.KITKAT) {
             Cursor cursor = context.getContentResolver().query(uri, new String[]{MediaStore.Images.Media.DATA}, null, null, null);
             if (cursor != null) {
@@ -512,6 +544,7 @@ public class ModifyNoteActivity extends AppCompatActivity implements View.OnClic
             }
             return path;
         }
+
         // 4.4及之后的 是以 content:// 开头的，比如 content://com.android.providers.media.documents/document/image%3A235700
         if (ContentResolver.SCHEME_CONTENT.equals(uri.getScheme()) && Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
             if (DocumentsContract.isDocumentUri(context, uri)) {
@@ -610,6 +643,9 @@ public class ModifyNoteActivity extends AppCompatActivity implements View.OnClic
         return "com.android.providers.media.documents".equals(uri.getAuthority());
     }
 
+    public static boolean isAppDocument(Uri uri) {
+        return "com.baibuti.biji.FileProvider".equals(uri.getAuthority());
+    }
     /**
      * @param uri The Uri to check.
      * @return Whether the Uri authority is Google Photos.
@@ -617,7 +653,6 @@ public class ModifyNoteActivity extends AppCompatActivity implements View.OnClic
     public static boolean isGooglePhotosUri(Uri uri) {
         return "com.google.android.apps.photos.content".equals(uri.getAuthority());
     }
-
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     ////////////////////////////////////////////////////////////////////////////////////////////////////
