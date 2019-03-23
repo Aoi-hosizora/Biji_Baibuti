@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="300dp"
+    android:background="#ffffff"
+    android:orientation="vertical"
+    android:paddingBottom="20dp"
+    android:paddingLeft="22.5dp"
+    android:paddingRight="22.5dp"
+    android:paddingTop="20dp">
+
+    <Button
+        android:id="@+id/id_popmenu_open_camera"
+        android:layout_width="match_parent"
+        android:layout_height="42dp"
+        android:gravity="center"
+        android:text="拍照"
+        android:textColor="#ffffff"
+        android:textSize="18sp" />
+
+    <Button
+        android:id="@+id/id_popmenu_choose_img"
+        android:layout_width="match_parent"
+        android:layout_height="42dp"
+        android:layout_marginTop="16dp"
+        android:gravity="center"
+        android:text="从相册中选取"
+        android:textColor="#ffffff"
+        android:textSize="18sp" />
+
+    <Button
+        android:id="@+id/id_popmenu_cancel"
+        android:layout_width="match_parent"
+        android:layout_height="42dp"
+        android:layout_marginTop="16dp"
+        android:gravity="center"
+        android:text="取消"
+        android:textColor="#ffffff"
+        android:textSize="18sp" />
+</LinearLayout>

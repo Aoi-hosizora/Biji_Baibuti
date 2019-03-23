@@ -1,11 +1,13 @@
 package com.baibuti.biji.Fragment;
 
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.media.Image;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.widget.SwipeRefreshLayout;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -148,6 +150,13 @@ public class NoteFragment extends Fragment implements View.OnClickListener {
         mNoteList.setAdapter(noteAdapter);
     }
 
+    public void refreshNoteList() {
+        if (noteDao == null)
+            noteDao = new NoteDao(this.getContext());
+        NoteList = noteDao.queryNotesAll(0);
+        noteAdapter.notifyDataSetChanged();
+    }
+
 
 //    private void refreshdata() {
 //        new Thread(new Runnable() {
@@ -180,7 +189,7 @@ public class NoteFragment extends Fragment implements View.OnClickListener {
                         Note newnote = (Note) data.getSerializableExtra("modify_note");
                         int NoteListClickPos = data.getIntExtra("modify_note_pos",0);
                         NoteList.set(NoteListClickPos,newnote);
-                        mainData.setNoteItem(NoteListClickPos, newnote);
+                        // mainData.setNoteItem(NoteListClickPos, newnote);
                         noteAdapter.notifyDataSetChanged();
                     }
                     break;
