@@ -146,7 +146,7 @@ public class CommonUtil {
     }
 
     // 将十进制color转化成十六进制
-    public static String toHexEncoding(int color) {
+    public static String ColorInt_HexEncoding(int color) {
         String R, G, B;
         StringBuffer sb = new StringBuffer();
         R = Integer.toHexString(Color.red(color));
@@ -163,4 +163,8 @@ public class CommonUtil {
         return sb.toString();
     }
 
+    // 将十六进制color转化成十进制
+    public static int ColorHex_IntEncoding(String color) {
+        return Color.parseColor(color);
+    }
 }

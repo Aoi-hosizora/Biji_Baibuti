@@ -429,4 +429,11 @@ public class RainbowPalette extends View {
     public int getColor() {
         return choosedColor;
     }
+
+    public void setColor(int color) {
+
+        choosedColor = color;
+        centerPaint.setColor(color);
+
+    }
 }

@@ -1,5 +1,6 @@
 package com.baibuti.biji.Fragment;
 
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Color;
@@ -178,7 +179,7 @@ public class NoteFragment extends Fragment implements View.OnClickListener {
             noteDao = new NoteDao(this.getContext());
             groupDao = new GroupDao(this.getContext());
         }
-        NoteList = noteDao.queryNotesAll(0);
+        NoteList = noteDao.queryNotesAll();
         noteAdapter.notifyDataSetChanged();
     }
 
@@ -204,53 +205,64 @@ public class NoteFragment extends Fragment implements View.OnClickListener {
 //        }).start();
 //    }
 
+    private AlertDialog GroupDialog;
+    private AlertDialog.Builder addGroupNamedialog;
+
     private void showModifyGroup() {
+        GroupList = groupDao.queryGroupAll();
         groupAdapter = new GroupAdapter(getContext(), GroupList);
-        AlertDialog GroupDialog = new AlertDialog
+        groupAdapter.notifyDataSetChanged();
+
+        GroupDialog = new AlertDialog
                 .Builder(getContext())
                 .setTitle("笔记分类")//设置对话框的标题
-                .setNegativeButton("取消", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        dialog.dismiss();
-                    }
-                })
                 .setNeutralButton("添加", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        ShowAddGroupDialog();
+                        ShowAddGroupDialog(null);
+                        dialog.cancel();
                     }
                 })
                 .setPositiveButton("确定", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        dialog.dismiss();
+                        dialog.cancel();
                     }
                 })
                 .setSingleChoiceItems(groupAdapter, 0, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        Toast.makeText(getContext(), GroupList.get(which).getName(), Toast.LENGTH_SHORT).show();
+                        ShowAddGroupDialog(GroupList.get(which));
+                        dialog.cancel();
                     }
                 }).create();
+
         GroupDialog.show();
     }
 
-
-    private void ShowAddGroupDialog() {
+    private void ShowAddGroupDialog(final Group group) {
         View view = getLayoutInflater().inflate(R.layout.modifygroup_addgroup_dialog, null);
 
         final EditText editText = (EditText) view.findViewById(R.id.id_addgroup_name);
         final TextView colorText = (TextView) view.findViewById(R.id.id_addgroup_colortext);
         final RainbowPalette colorPalette = (RainbowPalette) view.findViewById(R.id.id_addgroup_colorpalettle);
 
+        if (group != null) {
+            editText.setText(group.getName());
+            colorText.setText("笔记代表颜色："+ group.getColor());
+
+            colorPalette.setColor(CommonUtil.ColorHex_IntEncoding(group.getColor()));
+
+        }
+
         colorPalette.setOnChangeListen(new RainbowPalette.OnColorChangedListen() {
             @Override
             public void onColorChange(int color) {
-                colorText.setText("笔记代表颜色："+ CommonUtil.toHexEncoding(color));
+            colorText.setText("笔记代表颜色："+ CommonUtil.ColorInt_HexEncoding(color));
             }
         });
-        AlertDialog addGroupNamedialog = new AlertDialog
+
+        addGroupNamedialog = new AlertDialog
                 .Builder(getContext())
                 .setTitle("添加笔记类型标签")
                 .setView(view)
@@ -258,7 +270,7 @@ public class NoteFragment extends Fragment implements View.OnClickListener {
                 .setNegativeButton("取消", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        dialog.dismiss();
+                        dialog.cancel();
                     }
                 })
                 .setPositiveButton("确定", new DialogInterface.OnClickListener() {
@@ -267,34 +279,97 @@ public class NoteFragment extends Fragment implements View.OnClickListener {
 
                         String newGroupName = editText.getText().toString();
                         int newGroupOrder = 0;
-                        String newGroupColor = CommonUtil.toHexEncoding(colorPalette.getColor());
+                        String newGroupColor = CommonUtil.ColorInt_HexEncoding(colorPalette.getColor());
                         Log.e("COLOR", newGroupColor);
 
 
-                        if (editText.getText().toString().isEmpty()) {
+                        if (newGroupName.isEmpty()) {
                             AlertDialog emptyDialog = new AlertDialog
-                                    .Builder(getContext())
-                                    .setTitle("没有输入类型，请补全内容")
-                                    .setPositiveButton("确定", new DialogInterface.OnClickListener() {
-                                        @Override
-                                        public void onClick(DialogInterface dialog, int which) {
-                                            dialog.dismiss();
-                                        }
-                                    }).create();
+                                .Builder(getContext())
+                                .setTitle("没有输入类型，请补全内容")
+                                .setPositiveButton("确定", new DialogInterface.OnClickListener() {
+                                    @Override
+                                    public void onClick(DialogInterface dialog, int which) {
+                                        dialog.cancel();
+                                    }
+                                })
+                                .setOnCancelListener(new DialogInterface.OnCancelListener() {
+                                    @Override
+                                    public void onCancel(DialogInterface dialog) {
+                                        addGroupNamedialog.show();
+                                    }
+                                }).create();
                             emptyDialog.show();
                         }
                         else {
-                            Group newGroup = new Group(newGroupName, newGroupOrder, newGroupColor);
-                            try {
-                                groupDao.insertGroup(newGroup);
-                            } catch (Exception ex) {
-                                ex.printStackTrace();
+                            if (group == null) {
+                                Group newGroup = new Group(newGroupName, newGroupOrder, newGroupColor);
+                                try {
+                                    groupDao.insertGroup(newGroup);
+                                } catch (Exception ex) {
+                                    ex.printStackTrace();
+                                }
+                            }
+                            else {
+                                group.setName(newGroupName);
+                                group.setColor(newGroupColor);
+                                group.setOrder(newGroupOrder);
+                                try {
+                                    groupDao.updateGroup(group);
+                                } catch (Exception ex) {
+                                    ex.printStackTrace();
+                                }
                             }
                             GroupList = groupDao.queryGroupAll();
                             groupAdapter.notifyDataSetChanged();
+                            dialog.cancel();
                         }
                     }
-                }).create();
+                })
+                .setOnCancelListener(new DialogInterface.OnCancelListener() {
+                    @Override
+                    public void onCancel(DialogInterface dialog) {
+                        showModifyGroup();
+                    }
+                });
+
+        if (group != null) {
+            addGroupNamedialog.setNeutralButton("删除", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    AlertDialog deleteDialog = new AlertDialog
+                        .Builder(getContext())
+                        .setTitle("确定要删除类型 " + group.getName() + " 吗")
+                        .setPositiveButton("确定", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                try {
+                                    groupDao.deleteGroup(group.getId());
+                                } catch (Exception ex) {
+                                    ex.printStackTrace();
+                                }
+                                GroupList = groupDao.queryGroupAll();
+                                groupAdapter.notifyDataSetChanged();
+                                dialog.cancel();
+                            }
+                        })
+                        .setNegativeButton("确定", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                dialog.dismiss();
+                            }
+                        })
+                        .setOnCancelListener(new DialogInterface.OnCancelListener() {
+                            @Override
+                            public void onCancel(DialogInterface dialog) {
+                                showModifyGroup();
+                            }
+                        }).create();
+                    deleteDialog.show();
+                }
+            });
+        }
+
         addGroupNamedialog.show();
 
     }
