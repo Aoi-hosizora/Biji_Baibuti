@@ -1,6 +1,7 @@
 package com.baibuti.biji.Data;
 
 import java.io.Serializable;
+import java.util.Date;
 
 public class Group implements Serializable {
 
@@ -11,12 +12,14 @@ public class Group implements Serializable {
 
     private String color;//分类颜色，存储颜色代码
 
-    private String createTime;//创建时间
-    private String updateTime;//修改时间
+    private Date createTime;//创建时间
+    private Date updateTime;//修改时间
 
     public Group() {
-        id = 0;
+        id = order = 0;
         name = "默认笔记";
+        color = "#FFFFFF";
+        updateTime = new Date();
     }
 
     public int getId() {
@@ -25,6 +28,7 @@ public class Group implements Serializable {
 
     public void setId(int id) {
         this.id = id;
+        this.updateTime = new Date();
     }
 
     public String getName() {
@@ -33,6 +37,7 @@ public class Group implements Serializable {
 
     public void setName(String name) {
         this.name = name;
+        this.updateTime = new Date();
     }
 
     public int getOrder() {
@@ -41,6 +46,7 @@ public class Group implements Serializable {
 
     public void setOrder(int order) {
         this.order = order;
+        this.updateTime = new Date();
     }
 
     public String getColor() {
@@ -49,21 +55,22 @@ public class Group implements Serializable {
 
     public void setColor(String color) {
         this.color = color;
+        this.updateTime = new Date();
     }
 
-    public String getCreateTime() {
+    public Date getCreateTime() {
         return createTime;
     }
 
-    public void setCreateTime(String createTime) {
+    public void setCreateTime(Date createTime) {
         this.createTime = createTime;
     }
 
-    public String getUpdateTime() {
+    public Date getUpdateTime() {
         return updateTime;
     }
 
-    public void setUpdateTime(String updateTime) {
+    public void setUpdateTime(Date updateTime) {
         this.updateTime = updateTime;
     }
 

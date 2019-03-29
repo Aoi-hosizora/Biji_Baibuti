@@ -3,16 +3,16 @@
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <item
-        android:id="@+id/id_menu_modifynote_finish"
-        android:title="完成"
-        app:showAsAction="always"/>
-    <!--android:icon="@drawable/ic_done"/>-->
-
-    <item
         android:id="@+id/id_menu_modifynote_img"
         android:title="图片"
         app:showAsAction="always"/>
     <!--android:icon="@drawable/ic_fab_star"/>-->
+
+    <item
+        android:id="@+id/id_menu_modifynote_finish"
+        android:title="完成"
+        app:showAsAction="always"/>
+    <!--android:icon="@drawable/ic_done"/>-->
 
     <item
         android:id="@+id/id_menu_modifynote_group"

@@ -9,6 +9,7 @@ import android.util.Log;
 import com.baibuti.biji.Data.Group;
 import com.baibuti.biji.util.CommonUtil;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -42,27 +43,20 @@ public class GroupDao {
 
                 int groupId = cursor.getInt(cursor.getColumnIndex("g_id"));
                 String groupName = cursor.getString(cursor.getColumnIndex("g_name"));
-
                 int order = cursor.getInt(cursor.getColumnIndex("g_order"));
-
                 String color = cursor.getString(cursor.getColumnIndex("g_color"));
-
                 String createTime = cursor.getString(cursor.getColumnIndex("g_create_time"));
                 String updateTime = cursor.getString(cursor.getColumnIndex("g_update_time"));
 
                 //生成一个分类
 
                 group = new Group();
-
                 group.setId(groupId);
                 group.setName(groupName);
-
                 group.setOrder(order);
-
                 group.setColor(color);
-
-                group.setCreateTime(createTime);
-                group.setUpdateTime(updateTime);
+                group.setCreateTime(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").parse(createTime));
+                group.setUpdateTime(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").parse(updateTime));
 
                 groupList.add(group);
             }
@@ -114,8 +108,8 @@ public class GroupDao {
 
                 group.setColor(color);
 
-                group.setCreateTime(createTime);
-                group.setUpdateTime(updateTime);
+                group.setCreateTime(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").parse(createTime));
+                group.setUpdateTime(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").parse(updateTime));
 
             }
         } catch (Exception e) {
@@ -164,8 +158,8 @@ public class GroupDao {
 
                 group.setColor(color);
 
-                group.setCreateTime(createTime);
-                group.setUpdateTime(updateTime);
+                group.setCreateTime(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").parse(createTime));
+                group.setUpdateTime(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").parse(updateTime));
 
             }
         } catch (Exception e) {

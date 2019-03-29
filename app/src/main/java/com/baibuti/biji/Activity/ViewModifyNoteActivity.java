@@ -1,12 +1,18 @@
 package com.baibuti.biji.Activity;
 
 import android.app.ProgressDialog;
+import android.content.ClipData;
+import android.content.ClipboardManager;
+import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.MotionEvent;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.TextView;
@@ -76,13 +82,31 @@ public class ViewModifyNoteActivity extends AppCompatActivity implements View.On
                 dealWithContent();
             }
         });
+        ContentEditText_View.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent motionEvent) {
+                switch (motionEvent.getAction()){
+                    case MotionEvent.ACTION_UP:
+//                        Log.d("YYPT", "click the scrollView");
+                        //点击整个页面都会让内容框获得焦点，且弹出软键盘
+                        v.setFocusable(true);
+                        v.setFocusableInTouchMode(true);
+                        v.requestFocus();
+                        ShowModifyNoteActivity();
+                        break;
+                }
+                return false;
+            }
+        });
 
     }
 
     @Override
     public void onClick(View v) {
         switch (v.getId()) {
-
+//            case R.id.id_modifynote_viewcontent:
+//                ShowModifyNoteActivity();
+//                break;
         }
     }
 
@@ -92,16 +116,20 @@ public class ViewModifyNoteActivity extends AppCompatActivity implements View.On
         return true;
     }
 
+    private void ShowModifyNoteActivity() {
+        Intent intent=new Intent(ViewModifyNoteActivity.this, ModifyNoteActivity.class);
+        intent.putExtra("notedata",note);
+        intent.putExtra("flag",1); // UPDATE
+        startActivityForResult(intent,1); // 1 from CardView
+    }
+
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.id_menu_modifynote_viewmodify:
                 // isModify
 
-                Intent intent=new Intent(ViewModifyNoteActivity.this, ModifyNoteActivity.class);
-                intent.putExtra("notedata",note);
-                intent.putExtra("flag",1); // UPDATE
-                startActivityForResult(intent,1); // 1 from CardView
+                ShowModifyNoteActivity();
 
                 break;
 
@@ -118,6 +146,10 @@ public class ViewModifyNoteActivity extends AppCompatActivity implements View.On
                     setResult(RESULT_CANCELED,motointent);
 
                 finish();
+                break;
+
+            case R.id.id_menu_modifynote_viewinfo:
+                showDetailInfo();
                 break;
         }
         return true;
@@ -149,6 +181,34 @@ public class ViewModifyNoteActivity extends AppCompatActivity implements View.On
                 }
         }
         super.onActivityResult(requestCode, resultCode, data);
+    }
+
+    private void showDetailInfo() {
+        final String Info = "标题：" + note.getTitle() + "\n" +
+                "创建时间：" + note.getCreateTime_FullString() + "\n" +
+                "最近修改时间：" + note.getUpdateTime_FullString() + "\n\n" +
+                "分类：" + note.getGroupLabel().getName();
+        AlertDialog dialog = new AlertDialog.Builder(this)
+                .setTitle("详细信息")
+                .setMessage(Info)
+                .setNeutralButton("复制", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        ClipboardManager clipboardManager = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
+                        ClipData clip = ClipData.newPlainText("text", Info);
+                        clipboardManager.setPrimaryClip(clip);
+                        Toast.makeText(ViewModifyNoteActivity.this, "信息复制成功。", Toast.LENGTH_SHORT).show();
+                        dialog.dismiss();
+                    }
+                })
+                .setNegativeButton("确定", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.dismiss();
+                    }
+                }).create();
+        dialog.show();
+
     }
 
 

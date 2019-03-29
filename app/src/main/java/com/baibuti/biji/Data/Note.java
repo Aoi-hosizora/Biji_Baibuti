@@ -36,6 +36,7 @@ public class Note implements Serializable, Comparator<Note> {
         this.Title = Title;
         this.Content = Content;
         this.UpdateTime = new Date();
+        this.CreateTime = new Date(); // //////////
         this.GroupLabel = new Group();
     }
 

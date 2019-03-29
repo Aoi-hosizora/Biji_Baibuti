@@ -96,6 +96,9 @@ public class NoteFragment extends Fragment implements View.OnClickListener {
                     case R.id.action_search:
                         searchFragment.show(getActivity().getSupportFragmentManager(),com.wyt.searchbox.SearchFragment.TAG);
                         break;
+                    case R.id.action_modifygroup:
+
+                        break;
                 }
                 return true;
             }

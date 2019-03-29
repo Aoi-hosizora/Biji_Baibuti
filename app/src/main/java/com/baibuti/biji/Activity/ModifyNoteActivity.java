@@ -5,6 +5,8 @@ import android.annotation.TargetApi;
 import android.app.Activity;
 import android.app.Dialog;
 import android.app.ProgressDialog;
+import android.content.ClipData;
+import android.content.ClipboardManager;
 import android.content.ContentResolver;
 import android.content.ContentUris;
 import android.content.Context;
@@ -106,6 +108,12 @@ public class ModifyNoteActivity extends AppCompatActivity implements View.OnClic
     private static final int REQUEST_PERMISSION = 100;
     private boolean hasPermission = false;
 
+    private Dialog mCameraDialog;
+
+    private static final int NOTE_NEW = 0; // new
+    private static final int NOTE_UPDATE = 1; // modify
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -124,7 +132,7 @@ public class ModifyNoteActivity extends AppCompatActivity implements View.OnClic
         note = (Note) getIntent().getSerializableExtra("notedata");
         flag = getIntent().getIntExtra("flag",0);
 
-        if (flag == 0)
+        if (flag == NOTE_NEW)
             setTitle("新建笔记");
         else
             setTitle("编辑笔记");
@@ -174,63 +182,101 @@ public class ModifyNoteActivity extends AppCompatActivity implements View.OnClic
     // 点击顶部菜单项
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
+
+        closeSoftKeyInput();
+
         switch (item.getItemId()) {
-
-
             case R.id.id_menu_modifynote_finish:
-
-                saveNoteData();
-                break;
+                saveNoteData(true);
+            break;
 
             case android.R.id.home:
             case R.id.id_menu_modifynote_cancel:
-                closeSoftKeyInput();
-                if (CheckIsModify()) {
-                    AlertDialog alertDialog = new AlertDialog.Builder(this)
-                            .setTitle("确定要取消编辑吗？")
-                            .setMessage("您的修改将不会保存。")
-                            .setPositiveButton("确定", new DialogInterface.OnClickListener() {
-                                @Override
-                                public void onClick(DialogInterface dialogInterface, int i) {
-                                    finish();
-                                }
-                            })
-                            .setNegativeButton("取消", new DialogInterface.OnClickListener() {
-                                @Override
-                                public void onClick(DialogInterface dialogInterface, int i) {
-                                }
-                            }).create();
-                    alertDialog.show();
-                }
-                else
-                    finish();
-
-                break;
+                CancelSaveNoteData();
+            break;
 
             case R.id.id_menu_modifynote_img:
-                closeSoftKeyInput();
-                Dialog mCameraDialog = new Dialog(this, R.style.BottomDialog);
-                LinearLayout root = (LinearLayout) LayoutInflater.from(this).inflate(
-                        R.layout.bottom_dialog, null);
-                //初始化视图
-                root.findViewById(R.id.id_popmenu_choose_img).setOnClickListener(this);
-                root.findViewById(R.id.id_popmenu_open_camera).setOnClickListener(this);
-                root.findViewById(R.id.id_popmenu_cancel).setOnClickListener(this);
-                mCameraDialog.setContentView(root);
-                Window dialogWindow = mCameraDialog.getWindow();
-                dialogWindow.setGravity(Gravity.BOTTOM);
-                WindowManager.LayoutParams lp = dialogWindow.getAttributes(); // 获取对话框当前的参数值
-                lp.x = 0; // 新位置X坐标
-                lp.y = 0; // 新位置Y坐标
-                lp.width = (int) getResources().getDisplayMetrics().widthPixels; // 宽度
-                root.measure(0, 0);
-                lp.height = root.getMeasuredHeight();
+                ShowPopMenu();
+            break;
 
-                lp.alpha = 9f; // 透明度
-                dialogWindow.setAttributes(lp);
-                mCameraDialog.show();
+            case R.id.id_menu_modifynote_info:
+                showDetailInfo();
+            break;
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    private void showDetailInfo() {
+        if (flag == NOTE_NEW) {
+            AlertDialog savedialog = new AlertDialog.Builder(this)
+                    .setTitle("详细信息")//设置对话框的标题
+                    .setMessage("当前笔记还没保存，是否要保存？")//设置对话框的内容
+                    //设置对话框的按钮
+                    .setNegativeButton("取消", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            dialog.dismiss();
+                        }
+                    })
+                    .setPositiveButton("保存", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            saveNoteData(false);
+                            dialog.dismiss();
+                        }
+                    }).create();
+            savedialog.show();
+        }
+
+        final String Info = "标题：" + note.getTitle() + "\n" +
+                "创建时间：" + note.getCreateTime_FullString() + "\n" +
+                "最近修改时间：" + note.getUpdateTime_FullString() + "\n\n" +
+                "分类：" + note.getGroupLabel().getName();
+        AlertDialog dialog = new AlertDialog.Builder(this)
+                .setTitle("详细信息")
+                .setMessage(Info)
+                .setNeutralButton("复制", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        ClipboardManager clipboardManager = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
+                        ClipData clip = ClipData.newPlainText("text", Info);
+                        clipboardManager.setPrimaryClip(clip);
+                        Toast.makeText(ModifyNoteActivity.this, "信息复制成功。", Toast.LENGTH_SHORT).show();
+                        dialog.dismiss();
+                    }
+                })
+                .setNegativeButton("确定", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.dismiss();
+                    }
+                }).create();
+        dialog.show();
+
+    }
+
+    // 显示下部弹出图片选择菜单
+    private void ShowPopMenu() {
+        mCameraDialog = new Dialog(this, R.style.BottomDialog);
+        LinearLayout root = (LinearLayout) LayoutInflater.from(this).inflate(
+                R.layout.bottom_dialog, null);
+        //初始化视图
+        root.findViewById(R.id.id_popmenu_choose_img).setOnClickListener(this);
+        root.findViewById(R.id.id_popmenu_open_camera).setOnClickListener(this);
+        root.findViewById(R.id.id_popmenu_cancel).setOnClickListener(this);
+        mCameraDialog.setContentView(root);
+        Window dialogWindow = mCameraDialog.getWindow();
+        dialogWindow.setGravity(Gravity.BOTTOM);
+        WindowManager.LayoutParams lp = dialogWindow.getAttributes(); // 获取对话框当前的参数值
+        lp.x = 0; // 新位置X坐标
+        lp.y = 0; // 新位置Y坐标
+        lp.width = (int) getResources().getDisplayMetrics().widthPixels; // 宽度
+        root.measure(0, 0);
+        lp.height = root.getMeasuredHeight();
+
+        lp.alpha = 9f; // 透明度
+        dialogWindow.setAttributes(lp);
+        mCameraDialog.show();
     }
 
     // 点击弹出菜单项
@@ -254,7 +300,7 @@ public class ModifyNoteActivity extends AppCompatActivity implements View.OnClic
                 takePhone();
                 break;
             case R.id.id_popmenu_cancel:
-
+                mCameraDialog.dismiss();
                 break;
         }
     }
@@ -317,10 +363,10 @@ public class ModifyNoteActivity extends AppCompatActivity implements View.OnClic
 
         try {
 
-            Log.e("uridata", "WeiXinEditImg: "+ uridata );
-            Log.e("uridata", "WeiXinEditImg: "+ uridata.getAuthority() );
+//            Log.e("uridata", "WeiXinEditImg: "+ uridata );
+//            Log.e("uridata", "WeiXinEditImg: "+ uridata.getAuthority() );
             String uri_path = getFilePathByUri(this, uridata);
-            Log.e("uri_path", "WeiXinEditImg: "+ uri_path );
+//            Log.e("uri_path", "WeiXinEditImg: "+ uri_path );
 
             Uri uri = Uri.fromFile(new File(uri_path));
             System.out.println(uri.toString());
@@ -338,7 +384,7 @@ public class ModifyNoteActivity extends AppCompatActivity implements View.OnClic
     private void takePhone() {
         String time = new SimpleDateFormat("yyyyMMddHHmmss", Locale.CHINA).format(new Date());
         String fileName = "photo_" + time;
-        String path = Environment.getExternalStorageDirectory() +File.separator+ "take_photo";
+        String path = SDCardUtil.getPictureDir();
         File file = new File(path);
         if (!file.exists()) {
             file.mkdirs();
@@ -350,7 +396,7 @@ public class ModifyNoteActivity extends AppCompatActivity implements View.OnClic
         // 将file转换成uri
         // 注意7.0及以上与之前获取的uri不一样了，返回的是provider路径
         imgUri = getUriForFile(this, imgFile);
-        Log.e("010", "takePhone: "+(imgUri)+"}"+(imgUri+""));
+//        Log.e("010", "takePhone: "+(imgUri)+"}"+(imgUri+""));
         Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
         // 添加Uri读取权限
         intent.addFlags(Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION);
@@ -361,60 +407,82 @@ public class ModifyNoteActivity extends AppCompatActivity implements View.OnClic
 
 
     // 由Uri进行图片裁剪
-    private void cropPhoto(Uri uri, boolean fromCapture) {
-        Log.i("S", "cropPhoto: "+uri);
-        Intent intent = new Intent("com.android.camera.action.CROP"); //打开系统自带的裁剪图片的intent
-        intent.setDataAndType(uri, "image/*");
-        intent.putExtra("scale", true);
+//    private void cropPhoto(Uri uri, boolean fromCapture) {
+//        Log.i("S", "cropPhoto: "+uri);
+//        Intent intent = new Intent("com.android.camera.action.CROP"); //打开系统自带的裁剪图片的intent
+//        intent.setDataAndType(uri, "image/*");
+//        intent.putExtra("scale", true);
+//
+//        // 设置裁剪区域的宽高比例
+//        intent.putExtra("aspectX", 1);
+//        intent.putExtra("aspectY", 1);
+//
+//        // 设置裁剪区域的宽度和高度
+//        intent.putExtra("outputX", 200);
+//        intent.putExtra("outputY", 200);
+//
+//        // 取消人脸识别
+//        intent.putExtra("noFaceDetection", true);
+//        // 图片输出格式
+//        intent.putExtra("outputFormat", Bitmap.CompressFormat.JPEG.toString());
+//
+//        // 若为false则表示不返回数据
+//        intent.putExtra("return-data", false);
+//
+//
+//        // 指定裁剪完成以后的图片所保存的位置,pic info显示有延时
+//        if (fromCapture) {
+//            // 如果是使用拍照，那么原先的uri和最终目标的uri一致
+//            mCutUri = uri;
+//        } else { // 从相册中选择，那么裁剪的图片保存在take_photo中
+//            String time = new SimpleDateFormat("yyyyMMddHHmmss", Locale.CHINA).format(new Date());
+//            String fileName = "photo_" + time;
+//            File mCutFile = new File(Environment.getExternalStorageDirectory() + "/take_photo", fileName + ".jpg");
+//            if (!mCutFile.getParentFile().exists()) {
+//                mCutFile.getParentFile().mkdirs();
+//            }
+//
+//            ////////////////////////////////////////
+//            mCutUri = getUriForFile(this, mCutFile);
+//
+//
+//
+//        }
+//        intent.putExtra(MediaStore.EXTRA_OUTPUT, mCutUri);
+//        Toast.makeText(this, "剪裁图片", Toast.LENGTH_SHORT).show();
+//        // 以广播方式刷新系统相册，以便能够在相册中找到刚刚所拍摄和裁剪的照片
+//        Intent intentBc = new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE);
+//        intentBc.setData(uri);
+//        this.sendBroadcast(intentBc);
+//
+//        startActivityForResult(intent, REQUEST_CROP); //设置裁剪参数显示图片至ImageVie
+//    }
 
-        // 设置裁剪区域的宽高比例
-        intent.putExtra("aspectX", 1);
-        intent.putExtra("aspectY", 1);
-
-        // 设置裁剪区域的宽度和高度
-        intent.putExtra("outputX", 200);
-        intent.putExtra("outputY", 200);
-
-        // 取消人脸识别
-        intent.putExtra("noFaceDetection", true);
-        // 图片输出格式
-        intent.putExtra("outputFormat", Bitmap.CompressFormat.JPEG.toString());
-
-        // 若为false则表示不返回数据
-        intent.putExtra("return-data", false);
-
-
-        // 指定裁剪完成以后的图片所保存的位置,pic info显示有延时
-        if (fromCapture) {
-            // 如果是使用拍照，那么原先的uri和最终目标的uri一致
-            mCutUri = uri;
-        } else { // 从相册中选择，那么裁剪的图片保存在take_photo中
-            String time = new SimpleDateFormat("yyyyMMddHHmmss", Locale.CHINA).format(new Date());
-            String fileName = "photo_" + time;
-            File mCutFile = new File(Environment.getExternalStorageDirectory() + "/take_photo", fileName + ".jpg");
-            if (!mCutFile.getParentFile().exists()) {
-                mCutFile.getParentFile().mkdirs();
-            }
-
-            ////////////////////////////////////////
-            mCutUri = getUriForFile(this, mCutFile);
-
-
-
+    // 退出取消保存文件
+    private void CancelSaveNoteData() {
+        if (CheckIsModify()) {
+            AlertDialog alertDialog = new AlertDialog.Builder(this)
+                    .setTitle("确定要取消编辑吗？")
+                    .setMessage("您的修改将不会保存。")
+                    .setPositiveButton("确定", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialogInterface, int i) {
+                            finish();
+                        }
+                    })
+                    .setNegativeButton("取消", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialogInterface, int i) {
+                        }
+                    }).create();
+            alertDialog.show();
         }
-        intent.putExtra(MediaStore.EXTRA_OUTPUT, mCutUri);
-        Toast.makeText(this, "剪裁图片", Toast.LENGTH_SHORT).show();
-        // 以广播方式刷新系统相册，以便能够在相册中找到刚刚所拍摄和裁剪的照片
-        Intent intentBc = new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE);
-        intentBc.setData(uri);
-        this.sendBroadcast(intentBc);
-
-        startActivityForResult(intent, REQUEST_CROP); //设置裁剪参数显示图片至ImageVie
+        else
+            finish();
     }
 
-
     // 文件保存活动处理
-    private void saveNoteData() {
+    private void saveNoteData(boolean isFinish) {
 
         String Content = getEditData();
 
@@ -434,15 +502,16 @@ public class ModifyNoteActivity extends AppCompatActivity implements View.OnClic
 
 
         if (TitleEditText.getText().toString().isEmpty()) {
-            if (Content.substring(0,4)=="<img") {
-                TitleEditText.setText("图片");
-            }
-            else {
-                if (Content.length() > CUT_LENGTH + 3)
-                    TitleEditText.setText(Content.substring(0, CUT_LENGTH) + "...");
-                else
-                    TitleEditText.setText(Content);
-            }
+
+            Content = Content.replaceAll("<img src=.*>", " 图片 ");
+//            if ("".equals(Content))
+//                Content = "图片";
+
+            if (Content.length() > CUT_LENGTH + 3)
+                TitleEditText.setText(Content.substring(0, CUT_LENGTH) + "...");
+            else
+                TitleEditText.setText(Content);
+
         }
         //////////////////////////////////////////////////
         boolean isModify = CheckIsModify();
@@ -466,9 +535,9 @@ public class ModifyNoteActivity extends AppCompatActivity implements View.OnClic
         intent.putExtra("modify_note",note);
 
         setResult(RESULT_OK,intent);
-        finish();
 
-
+        if (isFinish)
+            finish();
     }
 
 
