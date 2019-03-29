@@ -7,6 +7,7 @@ import android.graphics.Color;
 import android.media.Image;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AlertDialog;
@@ -48,6 +49,7 @@ import com.jeremyfeinstein.slidingmenu.lib.SlidingMenu;
 import org.w3c.dom.Text;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import static android.app.Activity.RESULT_OK;
@@ -96,7 +98,7 @@ public class NoteFragment extends Fragment implements View.OnClickListener {
 
         initToolbar(view);
         initFloatingActionBar(view);
-        initDatas();
+        initData();
         initListView();
         return view;
     }
@@ -174,6 +176,7 @@ public class NoteFragment extends Fragment implements View.OnClickListener {
         mNoteList.setLayoutManager(layoutManager);
 
         noteAdapter = new NoteAdapter();
+        Collections.sort(NoteList);
         noteAdapter.setmNotes(NoteList);
 
         mNoteList.setAdapter(noteAdapter);
@@ -191,40 +194,58 @@ public class NoteFragment extends Fragment implements View.OnClickListener {
             }
         });
 
-//        noteAdapter.setOnItemClickListener(new NoteAdapter.OnRecyclerViewItemClickListener() {
-//            @Override
-//            public void onItemClick(View view, Note note) {
-//                Intent intent=new Intent(getContext(), ViewModifyNoteActivity.class);
-//                intent.putExtra("notedata",note);
-//
-//                intent.putExtra("flag",1); // UPDATE
-//                startActivityForResult(intent,1); // 1 from List
-//
-////                Intent intent = new Intent(getContext(), ViewModifyNoteActivity.class);
-////                Bundle bundle = new Bundle();
-////                bundle.putSerializable("notedata", note);
-////                intent.putExtra("data", bundle);
-////                intent.putExtra("flag", NOTE_UPDATE); // UPDATE
-////                startActivity(intent);
-//
-//            }
-//        });
-//
-//        noteAdapter.setOnItemLongClickListener(new NoteAdapter.OnRecyclerViewItemLongClickListener() {
-//            @Override
-//            public void onItemLongClick(View view, Note note) {
-//
-//            }
-//        });
-    }
+        noteAdapter.setOnItemLongClickListener(new NoteAdapter.OnRecyclerViewItemLongClickListener() {
+            @Override
+            public void onItemLongClick(final View view, final Note note) {
 
+//                final Note notetmp = note;
+
+                AlertDialog deleteAlert = new AlertDialog
+                    .Builder(getContext())
+                    .setTitle("提示")
+                    .setMessage("确定删除笔记 \"" + note.getTitle() + "\" 吗？")
+                    .setPositiveButton("确定", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+
+                            int ret = noteDao.deleteNote(note.getId());
+
+                            if (ret > 0) {
+                                NoteList.remove(note);
+                                noteAdapter.notifyDataSetChanged();
+
+                                Snackbar.make(view ,"删除成功", Snackbar.LENGTH_LONG)
+                                    .setAction("撤销", new View.OnClickListener() {
+                                        @Override
+                                        public void onClick(View v) {
+                                            try {
+                                                noteDao.insertNote(note);
+                                                NoteList.add(note);
+                                                Collections.sort(NoteList);
+                                                noteAdapter.notifyDataSetChanged();
+                                            } catch (Exception ex) {
+                                                ex.printStackTrace();
+                                            }
+                                            Snackbar.make(view, "已恢复", Snackbar.LENGTH_SHORT).show();
+                                        }
+                                    }).show();
+                            }
+                        }
+                    })
+                    .setNegativeButton("取消", null)
+                    .create();
+
+                deleteAlert.show();
+            }
+        });
+    }
     private NoteAdapter noteAdapter;
     private GroupAdapter groupAdapter;
 
     private NoteDao noteDao;
     private GroupDao groupDao;
 
-    public void initDatas() {
+    public void initData() {
 
 //        mainData = Data.getData();
 //        NoteList = mainData.getNote();
@@ -236,14 +257,12 @@ public class NoteFragment extends Fragment implements View.OnClickListener {
         NoteList = noteDao.queryNotesAll();
         GroupList = groupDao.queryGroupAll();
 
+        groupAdapter = new GroupAdapter(getContext(), GroupList);
     }
 
     public void refreshNoteList() {
-        if (noteDao == null) {
-            noteDao = new NoteDao(this.getContext());
-            groupDao = new GroupDao(this.getContext());
-        }
-        NoteList = noteDao.queryNotesAll();
+        initData();
+
         noteAdapter.notifyDataSetChanged();
     }
 
@@ -274,7 +293,6 @@ public class NoteFragment extends Fragment implements View.OnClickListener {
 
     private void showModifyGroup() {
         GroupList = groupDao.queryGroupAll();
-        groupAdapter = new GroupAdapter(getContext(), GroupList);
         groupAdapter.notifyDataSetChanged();
 
         GroupDialog = new AlertDialog
@@ -447,6 +465,7 @@ public class NoteFragment extends Fragment implements View.OnClickListener {
                     if (data.getBooleanExtra("intent_result", true) == true) {
                         Note newnote = (Note) data.getSerializableExtra("modify_note");
                         NoteList.set(SelectedNoteItem, newnote);
+                        Collections.sort(NoteList);
                         noteAdapter.notifyDataSetChanged();
                     }
                     break;
@@ -457,6 +476,7 @@ public class NoteFragment extends Fragment implements View.OnClickListener {
                         Note newnote = (Note) data.getSerializableExtra("modify_note");
                         Toast.makeText(getActivity(), newnote.getTitle(), Toast.LENGTH_SHORT).show();
                         NoteList.add(NoteList.size(), newnote);
+                        Collections.sort(NoteList);
                         noteAdapter.notifyDataSetChanged();
                     }
                 }

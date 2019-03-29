@@ -286,6 +286,7 @@ public class ModifyNoteActivity extends AppCompatActivity implements View.OnClic
             case R.id.id_popmenu_choose_img:
                 // SCAN_OPEN_PHONE
                 checkPermissions();
+                mCameraDialog.dismiss();
 //                Intent intent = new Intent(Intent.ACTION_PICK);
 //                intent.setType("image/*");
 //                startActivityForResult(intent,SCAN_OPEN_PHONE);
@@ -296,6 +297,7 @@ public class ModifyNoteActivity extends AppCompatActivity implements View.OnClic
                 break;
             case R.id.id_popmenu_open_camera:
                 checkPermissions();
+                mCameraDialog.dismiss();
                 // REQUEST_TAKE_PHOTO
                 takePhone();
                 break;
@@ -504,9 +506,9 @@ public class ModifyNoteActivity extends AppCompatActivity implements View.OnClic
         if (TitleEditText.getText().toString().isEmpty()) {
 //            if ("".equals(Content))
 //                Content = "图片";
-            String Con = Content.replaceAll("<img src=.*", " 图片 ");
+            String Con = Content.replaceAll("<img src=.*", "图片 ");
 
-            if (Content.length() > CUT_LENGTH + 3)
+            if (Con.length() > CUT_LENGTH + 3)
                 TitleEditText.setText(Con.substring(0, CUT_LENGTH) + "...");
             else
                 TitleEditText.setText(Con);

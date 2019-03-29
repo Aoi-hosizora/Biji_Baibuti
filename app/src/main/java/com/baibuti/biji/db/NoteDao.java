@@ -113,8 +113,8 @@ public class NoteDao {
             stat.bindLong(3, note.getGroupLabel().getId()); // groupid
             // stat.bindString(4, note.getGroupLabel().getName()); // groupname
 
-            stat.bindString(4, CommonUtil.date2string(new Date())); // createtime
-             stat.bindString(5, CommonUtil.date2string(new Date())); // updatetime
+            stat.bindString(4, CommonUtil.date2string((note.getCreateTime()==null)?new Date():note.getCreateTime())); // createtime
+             stat.bindString(5, CommonUtil.date2string((note.getUpdateTime()==null)?new Date():note.getUpdateTime())); // updatetime
 
             ret = stat.executeInsert();
             db.setTransactionSuccessful();
