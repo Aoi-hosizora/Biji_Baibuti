@@ -47,7 +47,7 @@ public class ViewModifyNoteActivity extends AppCompatActivity implements View.On
     private Disposable mDisposable;
 
     private Note note;
-    private int notePos;
+//    private int notePos;
 
     private boolean isModify = false;
 
@@ -63,8 +63,10 @@ public class ViewModifyNoteActivity extends AppCompatActivity implements View.On
         loadingDialog.setCanceledOnTouchOutside(false);
         loadingDialog.show();
 
+//        Bundle bundle = getIntent().getBundleExtra("data");
+//        note = (Note) bundle.getSerializable("notedata");
         note = (Note) getIntent().getSerializableExtra("notedata");
-        notePos = getIntent().getIntExtra("notepos",0);
+//        notePos = getIntent().getIntExtra("notepos",0);
 
         TitleEditText_View = (TextView) findViewById(R.id.id_modifynote_viewtitle);
         UpdateTimeTextView_View = (TextView) findViewById(R.id.id_modifynote_viewupdatetime);
@@ -82,22 +84,22 @@ public class ViewModifyNoteActivity extends AppCompatActivity implements View.On
                 dealWithContent();
             }
         });
-        ContentEditText_View.setOnTouchListener(new View.OnTouchListener() {
-            @Override
-            public boolean onTouch(View v, MotionEvent motionEvent) {
-                switch (motionEvent.getAction()){
-                    case MotionEvent.ACTION_UP:
-//                        Log.d("YYPT", "click the scrollView");
-                        //点击整个页面都会让内容框获得焦点，且弹出软键盘
-                        v.setFocusable(true);
-                        v.setFocusableInTouchMode(true);
-                        v.requestFocus();
-                        ShowModifyNoteActivity();
-                        break;
-                }
-                return false;
-            }
-        });
+//        ContentEditText_View.setOnTouchListener(new View.OnTouchListener() {
+//            @Override
+//            public boolean onTouch(View v, MotionEvent motionEvent) {
+//                switch (motionEvent.getAction()){
+//                    case MotionEvent.ACTION_UP:
+////                        Log.d("YYPT", "click the scrollView");
+//                        //点击整个页面都会让内容框获得焦点，且弹出软键盘
+//                        v.setFocusable(true);
+//                        v.setFocusableInTouchMode(true);
+//                        v.requestFocus();
+//                        ShowModifyNoteActivity();
+//                        break;
+//                }
+//                return false;
+//            }
+//        });
 
     }
 
@@ -139,7 +141,7 @@ public class ViewModifyNoteActivity extends AppCompatActivity implements View.On
 
                 if (isModify) {
                     motointent.putExtra("modify_note",note);
-                    motointent.putExtra("modify_note_pos", notePos);
+//                    motointent.putExtra("modify_note_pos", notePos);
                     setResult(RESULT_OK,motointent);
                 }
                 else

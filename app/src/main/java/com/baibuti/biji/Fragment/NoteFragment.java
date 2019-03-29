@@ -10,6 +10,8 @@ import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AlertDialog;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -27,6 +29,7 @@ import android.widget.Toast;
 
 import com.baibuti.biji.Activity.MainActivity;
 import com.baibuti.biji.Activity.ModifyNoteActivity;
+import com.baibuti.biji.Activity.ViewModifyNoteActivity;
 import com.baibuti.biji.Data.Data;
 import com.baibuti.biji.Data.Group;
 import com.baibuti.biji.Data.GroupAdapter;
@@ -35,6 +38,7 @@ import com.baibuti.biji.Data.NoteAdapter;
 import com.baibuti.biji.R;
 import com.baibuti.biji.RainbowPalette;
 import com.baibuti.biji.View.SimplerSearcherView;
+import com.baibuti.biji.View.SpacesItemDecoration;
 import com.baibuti.biji.db.GroupDao;
 import com.baibuti.biji.db.NoteDao;
 import com.baibuti.biji.util.CommonUtil;
@@ -50,7 +54,7 @@ import static android.app.Activity.RESULT_OK;
 
 public class NoteFragment extends Fragment implements View.OnClickListener {
 
-    private ListView mNoteList;
+    private RecyclerView mNoteList;
 
     private Data mainData;
 
@@ -60,6 +64,9 @@ public class NoteFragment extends Fragment implements View.OnClickListener {
     private com.wyt.searchbox.SearchFragment searchFragment;
 //    private SwipeRefreshLayout mSwipeRefresh;
     private SlidingMenu slidingMenu;
+
+    private static final int NOTE_NEW = 0; // new
+    private static final int NOTE_UPDATE = 1; // modify
 
     @Nullable
     @Override
@@ -90,6 +97,7 @@ public class NoteFragment extends Fragment implements View.OnClickListener {
         initToolbar(view);
         initFloatingActionBar(view);
         initDatas();
+        initListView();
         return view;
     }
 
@@ -146,19 +154,77 @@ public class NoteFragment extends Fragment implements View.OnClickListener {
             public void onClick(View view) {
                 Intent addDoc_intent=new Intent(getActivity(),ModifyNoteActivity.class);
                 addDoc_intent.putExtra("notedata",new Note("",""));
-                addDoc_intent.putExtra("flag",0); // NEW
+                addDoc_intent.putExtra("flag",NOTE_NEW); // NEW
                 startActivityForResult(addDoc_intent,2); // 2 from FloatingButton
 
             }
         });
     }
+
+    private int SelectedNoteItem;
+
+    private void initListView() {
+
+//        noteAdapter = new NoteAdapter(getActivity(), R.layout.notelistview, NoteList,this);
+//        mNoteList.setAdapter(noteAdapter);
+
+        mNoteList.addItemDecoration(new SpacesItemDecoration(0));//设置item间距
+        LinearLayoutManager layoutManager = new LinearLayoutManager(getContext());
+        layoutManager.setOrientation(LinearLayoutManager.VERTICAL);//竖向列表
+        mNoteList.setLayoutManager(layoutManager);
+
+        noteAdapter = new NoteAdapter();
+        noteAdapter.setmNotes(NoteList);
+
+        mNoteList.setAdapter(noteAdapter);
+
+        noteAdapter.setOnItemClickListener(new NoteAdapter.OnItemClickListener() {
+            @Override
+            public void onItemClick(View view, int position) {
+
+                SelectedNoteItem = position;
+
+                Intent intent=new Intent(getContext(), ViewModifyNoteActivity.class);
+                intent.putExtra("notedata",NoteList.get(position));
+                intent.putExtra("flag",NOTE_UPDATE); // UPDATE
+                startActivityForResult(intent,1); // 1 from List
+            }
+        });
+
+//        noteAdapter.setOnItemClickListener(new NoteAdapter.OnRecyclerViewItemClickListener() {
+//            @Override
+//            public void onItemClick(View view, Note note) {
+//                Intent intent=new Intent(getContext(), ViewModifyNoteActivity.class);
+//                intent.putExtra("notedata",note);
+//
+//                intent.putExtra("flag",1); // UPDATE
+//                startActivityForResult(intent,1); // 1 from List
+//
+////                Intent intent = new Intent(getContext(), ViewModifyNoteActivity.class);
+////                Bundle bundle = new Bundle();
+////                bundle.putSerializable("notedata", note);
+////                intent.putExtra("data", bundle);
+////                intent.putExtra("flag", NOTE_UPDATE); // UPDATE
+////                startActivity(intent);
+//
+//            }
+//        });
+//
+//        noteAdapter.setOnItemLongClickListener(new NoteAdapter.OnRecyclerViewItemLongClickListener() {
+//            @Override
+//            public void onItemLongClick(View view, Note note) {
+//
+//            }
+//        });
+    }
+
     private NoteAdapter noteAdapter;
     private GroupAdapter groupAdapter;
 
     private NoteDao noteDao;
     private GroupDao groupDao;
 
-    private void initDatas() {
+    public void initDatas() {
 
 //        mainData = Data.getData();
 //        NoteList = mainData.getNote();
@@ -170,8 +236,6 @@ public class NoteFragment extends Fragment implements View.OnClickListener {
         NoteList = noteDao.queryNotesAll();
         GroupList = groupDao.queryGroupAll();
 
-        noteAdapter = new NoteAdapter(getActivity(), R.layout.notelistview, NoteList,this);
-        mNoteList.setAdapter(noteAdapter);
     }
 
     public void refreshNoteList() {
@@ -353,10 +417,10 @@ public class NoteFragment extends Fragment implements View.OnClickListener {
                                 dialog.cancel();
                             }
                         })
-                        .setNegativeButton("确定", new DialogInterface.OnClickListener() {
+                        .setNegativeButton("取消", new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
-                                dialog.dismiss();
+                                dialog.cancel();
                             }
                         })
                         .setOnCancelListener(new DialogInterface.OnCancelListener() {
@@ -378,13 +442,11 @@ public class NoteFragment extends Fragment implements View.OnClickListener {
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         switch (requestCode) {
-            case 1: // MODIFY
+            case 1: // FROM LIST
                 if (resultCode == RESULT_OK) {
                     if (data.getBooleanExtra("intent_result", true) == true) {
                         Note newnote = (Note) data.getSerializableExtra("modify_note");
-                        int NoteListClickPos = data.getIntExtra("modify_note_pos",0);
-                        NoteList.set(NoteListClickPos,newnote);
-                        // mainData.setNoteItem(NoteListClickPos, newnote);
+                        NoteList.set(SelectedNoteItem, newnote);
                         noteAdapter.notifyDataSetChanged();
                     }
                     break;

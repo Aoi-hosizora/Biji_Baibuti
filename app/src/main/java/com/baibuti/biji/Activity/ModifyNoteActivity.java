@@ -502,15 +502,14 @@ public class ModifyNoteActivity extends AppCompatActivity implements View.OnClic
 
 
         if (TitleEditText.getText().toString().isEmpty()) {
-
-            Content = Content.replaceAll("<img src=.*>", " 图片 ");
 //            if ("".equals(Content))
 //                Content = "图片";
+            String Con = Content.replaceAll("<img src=.*", " 图片 ");
 
             if (Content.length() > CUT_LENGTH + 3)
-                TitleEditText.setText(Content.substring(0, CUT_LENGTH) + "...");
+                TitleEditText.setText(Con.substring(0, CUT_LENGTH) + "...");
             else
-                TitleEditText.setText(Content);
+                TitleEditText.setText(Con);
 
         }
         //////////////////////////////////////////////////
