@@ -2,6 +2,7 @@ package com.baibuti.biji.Fragment;
 
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.graphics.Color;
 import android.media.Image;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
@@ -17,20 +18,29 @@ import android.view.ViewGroup;
 import android.support.v7.widget.ActionMenuView;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
+import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ListView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.baibuti.biji.Activity.MainActivity;
 import com.baibuti.biji.Activity.ModifyNoteActivity;
 import com.baibuti.biji.Data.Data;
+import com.baibuti.biji.Data.Group;
+import com.baibuti.biji.Data.GroupAdapter;
 import com.baibuti.biji.Data.Note;
 import com.baibuti.biji.Data.NoteAdapter;
 import com.baibuti.biji.R;
+import com.baibuti.biji.RainbowPalette;
 import com.baibuti.biji.View.SimplerSearcherView;
+import com.baibuti.biji.db.GroupDao;
 import com.baibuti.biji.db.NoteDao;
+import com.baibuti.biji.util.CommonUtil;
 import com.getbase.floatingactionbutton.FloatingActionButton;
 import com.jeremyfeinstein.slidingmenu.lib.SlidingMenu;
+
+import org.w3c.dom.Text;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -42,7 +52,10 @@ public class NoteFragment extends Fragment implements View.OnClickListener {
     private ListView mNoteList;
 
     private Data mainData;
+
     private List<Note> NoteList;
+    private List<Group> GroupList;
+
     private com.wyt.searchbox.SearchFragment searchFragment;
 //    private SwipeRefreshLayout mSwipeRefresh;
     private SlidingMenu slidingMenu;
@@ -84,7 +97,7 @@ public class NoteFragment extends Fragment implements View.OnClickListener {
 
     }
 
-    private NoteAdapter noteAdapter;
+
 
     private void initToolbar(View view){
         Toolbar toolbar = view.findViewById(R.id.note_toolbar);
@@ -97,7 +110,7 @@ public class NoteFragment extends Fragment implements View.OnClickListener {
                         searchFragment.show(getActivity().getSupportFragmentManager(),com.wyt.searchbox.SearchFragment.TAG);
                         break;
                     case R.id.action_modifygroup:
-
+                        showModifyGroup();
                         break;
                 }
                 return true;
@@ -138,24 +151,33 @@ public class NoteFragment extends Fragment implements View.OnClickListener {
             }
         });
     }
+    private NoteAdapter noteAdapter;
+    private GroupAdapter groupAdapter;
 
     private NoteDao noteDao;
+    private GroupDao groupDao;
+
     private void initDatas() {
 
 //        mainData = Data.getData();
 //        NoteList = mainData.getNote();
 
-        if (noteDao == null)
+        if (noteDao == null) {
             noteDao = new NoteDao(this.getContext());
-        NoteList = noteDao.queryNotesAll(0);
+            groupDao = new GroupDao(this.getContext());
+        }
+        NoteList = noteDao.queryNotesAll();
+        GroupList = groupDao.queryGroupAll();
 
         noteAdapter = new NoteAdapter(getActivity(), R.layout.notelistview, NoteList,this);
         mNoteList.setAdapter(noteAdapter);
     }
 
     public void refreshNoteList() {
-        if (noteDao == null)
+        if (noteDao == null) {
             noteDao = new NoteDao(this.getContext());
+            groupDao = new GroupDao(this.getContext());
+        }
         NoteList = noteDao.queryNotesAll(0);
         noteAdapter.notifyDataSetChanged();
     }
@@ -181,6 +203,101 @@ public class NoteFragment extends Fragment implements View.OnClickListener {
 //            }
 //        }).start();
 //    }
+
+    private void showModifyGroup() {
+        groupAdapter = new GroupAdapter(getContext(), GroupList);
+        AlertDialog GroupDialog = new AlertDialog
+                .Builder(getContext())
+                .setTitle("笔记分类")//设置对话框的标题
+                .setNegativeButton("取消", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.dismiss();
+                    }
+                })
+                .setNeutralButton("添加", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        ShowAddGroupDialog();
+                    }
+                })
+                .setPositiveButton("确定", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.dismiss();
+                    }
+                })
+                .setSingleChoiceItems(groupAdapter, 0, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        Toast.makeText(getContext(), GroupList.get(which).getName(), Toast.LENGTH_SHORT).show();
+                    }
+                }).create();
+        GroupDialog.show();
+    }
+
+
+    private void ShowAddGroupDialog() {
+        View view = getLayoutInflater().inflate(R.layout.modifygroup_addgroup_dialog, null);
+
+        final EditText editText = (EditText) view.findViewById(R.id.id_addgroup_name);
+        final TextView colorText = (TextView) view.findViewById(R.id.id_addgroup_colortext);
+        final RainbowPalette colorPalette = (RainbowPalette) view.findViewById(R.id.id_addgroup_colorpalettle);
+
+        colorPalette.setOnChangeListen(new RainbowPalette.OnColorChangedListen() {
+            @Override
+            public void onColorChange(int color) {
+                colorText.setText("笔记代表颜色："+ CommonUtil.toHexEncoding(color));
+            }
+        });
+        AlertDialog addGroupNamedialog = new AlertDialog
+                .Builder(getContext())
+                .setTitle("添加笔记类型标签")
+                .setView(view)
+                .setCancelable(false)
+                .setNegativeButton("取消", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.dismiss();
+                    }
+                })
+                .setPositiveButton("确定", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+
+                        String newGroupName = editText.getText().toString();
+                        int newGroupOrder = 0;
+                        String newGroupColor = CommonUtil.toHexEncoding(colorPalette.getColor());
+                        Log.e("COLOR", newGroupColor);
+
+
+                        if (editText.getText().toString().isEmpty()) {
+                            AlertDialog emptyDialog = new AlertDialog
+                                    .Builder(getContext())
+                                    .setTitle("没有输入类型，请补全内容")
+                                    .setPositiveButton("确定", new DialogInterface.OnClickListener() {
+                                        @Override
+                                        public void onClick(DialogInterface dialog, int which) {
+                                            dialog.dismiss();
+                                        }
+                                    }).create();
+                            emptyDialog.show();
+                        }
+                        else {
+                            Group newGroup = new Group(newGroupName, newGroupOrder, newGroupColor);
+                            try {
+                                groupDao.insertGroup(newGroup);
+                            } catch (Exception ex) {
+                                ex.printStackTrace();
+                            }
+                            GroupList = groupDao.queryGroupAll();
+                            groupAdapter.notifyDataSetChanged();
+                        }
+                    }
+                }).create();
+        addGroupNamedialog.show();
+
+    }
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {

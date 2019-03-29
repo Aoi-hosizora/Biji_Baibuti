@@ -3,15 +3,13 @@ package com.baibuti.biji.db;
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
+import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
+import android.database.sqlite.SQLiteStatement;
 import android.util.Log;
 
 import com.baibuti.biji.Data.Group;
-import com.baibuti.biji.util.CommonUtil;
-
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 import static android.content.ContentValues.TAG;
@@ -38,15 +36,13 @@ public class GroupDao {
         Group group ;
         Cursor cursor = null;
         try {
-            cursor = db.query("db_group", null, null, null, null, null, "g_create_time asc");
+            cursor = db.query("db_group", null, null, null, null, null, "null");
             while (cursor.moveToNext()) {
 
                 int groupId = cursor.getInt(cursor.getColumnIndex("g_id"));
                 String groupName = cursor.getString(cursor.getColumnIndex("g_name"));
                 int order = cursor.getInt(cursor.getColumnIndex("g_order"));
                 String color = cursor.getString(cursor.getColumnIndex("g_color"));
-                String createTime = cursor.getString(cursor.getColumnIndex("g_create_time"));
-                String updateTime = cursor.getString(cursor.getColumnIndex("g_update_time"));
 
                 //生成一个分类
 
@@ -55,8 +51,6 @@ public class GroupDao {
                 group.setName(groupName);
                 group.setOrder(order);
                 group.setColor(color);
-                group.setCreateTime(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").parse(createTime));
-                group.setUpdateTime(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").parse(updateTime));
 
                 groupList.add(group);
             }
@@ -94,9 +88,6 @@ public class GroupDao {
 
                 String color = cursor.getString(cursor.getColumnIndex("g_color"));
 
-                String createTime = cursor.getString(cursor.getColumnIndex("g_create_time"));
-                String updateTime = cursor.getString(cursor.getColumnIndex("g_update_time"));
-
                 //生成一个分类
 
                 group = new Group();
@@ -107,9 +98,6 @@ public class GroupDao {
                 group.setOrder(order);
 
                 group.setColor(color);
-
-                group.setCreateTime(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").parse(createTime));
-                group.setUpdateTime(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").parse(updateTime));
 
             }
         } catch (Exception e) {
@@ -144,8 +132,6 @@ public class GroupDao {
 
                 String groupName = cursor.getString(cursor.getColumnIndex("g_name"));
 
-                String createTime = cursor.getString(cursor.getColumnIndex("g_create_time"));
-                String updateTime = cursor.getString(cursor.getColumnIndex("g_update_time"));
 
                 //生成一个订单
 
@@ -157,9 +143,6 @@ public class GroupDao {
                 group.setOrder(order);
 
                 group.setColor(color);
-
-                group.setCreateTime(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").parse(createTime));
-                group.setUpdateTime(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").parse(updateTime));
 
             }
         } catch (Exception e) {
@@ -178,34 +161,31 @@ public class GroupDao {
     /**
      * 添加一个分类
      */
-    public void insertGroup(String groupName) {
+    public long insertGroup(Group group) {
         SQLiteDatabase db = helper.getWritableDatabase();
+        String sql = "insert into db_group(g_name,g_order,g_color) values(?,?,?)";
 
-        Cursor cursor = null;
+        long ret = 0;
+
+        SQLiteStatement stat = db.compileStatement(sql);
+        db.beginTransaction();
         try {
-            cursor = db.query("group", null, "g_name=?", new String[]{groupName}, null, null, null);
-            if (!cursor.moveToNext()) {//如果订单不存在
-                ContentValues values = new ContentValues();
 
-                values.put("g_name", groupName);
+            stat.bindString(1, group.getName());
+            stat.bindLong(2, group.getOrder());
+            stat.bindString(3, group.getColor());
 
-                values.put("g_color", "#FFFFFF");
-
-                values.put("g_create_time", CommonUtil.date2string(new Date()));
-                values.put("g_update_time", CommonUtil.date2string(new Date()));
-
-                db.insert("db_group", null, values);
-            }
+            ret = stat.executeInsert();
+            db.setTransactionSuccessful();
+        } catch (SQLException e) {
+            e.printStackTrace();
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
-            if (cursor != null && !cursor.isClosed()) {
-                cursor.close();
-            }
-            if (db != null) {
-                db.close();
-            }
+            db.endTransaction();
+            db.close();
         }
+        return ret;
     }
 
     /**
@@ -222,8 +202,6 @@ public class GroupDao {
             values.put("g_order", group.getOrder());
 
             values.put("g_color", group.getColor());
-
-            values.put("update_time", CommonUtil.date2string(new Date()));
 
             db.update("db_group", values, "g_id=?", new String[]{group.getId() + ""});
         } catch (Exception e) {

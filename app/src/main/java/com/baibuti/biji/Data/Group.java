@@ -12,14 +12,24 @@ public class Group implements Serializable {
 
     private String color;//分类颜色，存储颜色代码
 
-    private Date createTime;//创建时间
-    private Date updateTime;//修改时间
-
     public Group() {
         id = order = 0;
         name = "默认笔记";
         color = "#FFFFFF";
-        updateTime = new Date();
+    }
+
+    public Group(int id, String name, int order, String color) {
+        this.id = id;
+        this.name = name;
+        this.order = order;
+        this.color = color;
+    }
+
+    public Group(String name, int order, String color) {
+        this.id = id;
+        this.name = name;
+        this.order = order;
+        this.color = color;
     }
 
     public int getId() {
@@ -28,7 +38,6 @@ public class Group implements Serializable {
 
     public void setId(int id) {
         this.id = id;
-        this.updateTime = new Date();
     }
 
     public String getName() {
@@ -37,7 +46,6 @@ public class Group implements Serializable {
 
     public void setName(String name) {
         this.name = name;
-        this.updateTime = new Date();
     }
 
     public int getOrder() {
@@ -46,7 +54,6 @@ public class Group implements Serializable {
 
     public void setOrder(int order) {
         this.order = order;
-        this.updateTime = new Date();
     }
 
     public String getColor() {
@@ -55,23 +62,5 @@ public class Group implements Serializable {
 
     public void setColor(String color) {
         this.color = color;
-        this.updateTime = new Date();
     }
-
-    public Date getCreateTime() {
-        return createTime;
-    }
-
-    public void setCreateTime(Date createTime) {
-        this.createTime = createTime;
-    }
-
-    public Date getUpdateTime() {
-        return updateTime;
-    }
-
-    public void setUpdateTime(Date updateTime) {
-        this.updateTime = updateTime;
-    }
-
 }

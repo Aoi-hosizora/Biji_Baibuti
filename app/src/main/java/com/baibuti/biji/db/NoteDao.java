@@ -88,6 +88,10 @@ public class NoteDao {
         return noteList;
     }
 
+    public List<Note> queryNotesAll() { // ArrayList
+        return queryNotesAll(-1);
+    }
+
     /**
      * 插入笔记
      */
@@ -164,7 +168,6 @@ public class NoteDao {
 
     /**
      * 批量删除笔记
-     *
      * @param mNotes
      */
     public int deleteNote(List<Note> mNotes) {
