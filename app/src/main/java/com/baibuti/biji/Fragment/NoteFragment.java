@@ -98,7 +98,8 @@ public class NoteFragment extends Fragment implements View.OnClickListener {
 
         initToolbar(view);
         initFloatingActionBar(view);
-        initData();
+        initData(); // GetDao & List
+        initAdapter();
         initListView();
         return view;
     }
@@ -108,9 +109,7 @@ public class NoteFragment extends Fragment implements View.OnClickListener {
 
     }
 
-
-
-    private void initToolbar(View view){
+    private void initToolbar(View view) {
         Toolbar toolbar = view.findViewById(R.id.note_toolbar);
         toolbar.inflateMenu(R.menu.notefragment_actionbar);
         toolbar.setOnMenuItemClickListener(new Toolbar.OnMenuItemClickListener() {
@@ -163,19 +162,71 @@ public class NoteFragment extends Fragment implements View.OnClickListener {
         });
     }
 
+    private NoteAdapter noteAdapter;
+    private GroupAdapter groupAdapter;
+
+    private NoteDao noteDao;
+    private GroupDao groupDao;
+
+    public void initData() {
+        if (noteDao == null) {
+            noteDao = new NoteDao(this.getContext());
+            groupDao = new GroupDao(this.getContext());
+        }
+
+        NoteList = noteDao.queryNotesAll();
+        GroupList = groupDao.queryGroupAll();
+    }
+
+    public void initAdapter() {
+        noteAdapter = new NoteAdapter();
+        groupAdapter = new GroupAdapter(getContext(), GroupList);
+    }
+
+//    private void refreshdata() {
+//        new Thread(new Runnable() {
+//            @Override
+//            public void run() {
+//                try {
+//                    Thread.sleep(500);
+//                } catch (InterruptedException e) {
+//                    e.printStackTrace();
+//                }
+//                getActivity().runOnUiThread(new Runnable() {
+//                    @Override
+//                    public void run() {
+//                        initDatas();
+//                        noteAdapter.notifyDataSetChanged();
+//                        mSwipeRefresh.setRefreshing(false);
+//                    }
+//                });
+//            }
+//        }).start();
+//    }
+
+    public void refreshNoteList() {
+        // initData();
+        NoteList = noteDao.queryNotesAll();
+        Collections.sort(NoteList);
+        noteAdapter.notifyDataSetChanged();
+    }
+
+    public void refreshGroupList() {
+        GroupList = groupDao.queryGroupAll();
+        groupAdapter = new GroupAdapter(getContext(), GroupList); // 必要
+        groupAdapter.notifyDataSetChanged();
+    }
+
+
     private int SelectedNoteItem;
 
     private void initListView() {
-
-//        noteAdapter = new NoteAdapter(getActivity(), R.layout.notelistview, NoteList,this);
-//        mNoteList.setAdapter(noteAdapter);
 
         mNoteList.addItemDecoration(new SpacesItemDecoration(0));//设置item间距
         LinearLayoutManager layoutManager = new LinearLayoutManager(getContext());
         layoutManager.setOrientation(LinearLayoutManager.VERTICAL);//竖向列表
         mNoteList.setLayoutManager(layoutManager);
 
-        noteAdapter = new NoteAdapter();
         Collections.sort(NoteList);
         noteAdapter.setmNotes(NoteList);
 
@@ -239,61 +290,14 @@ public class NoteFragment extends Fragment implements View.OnClickListener {
             }
         });
     }
-    private NoteAdapter noteAdapter;
-    private GroupAdapter groupAdapter;
 
-    private NoteDao noteDao;
-    private GroupDao groupDao;
+    //////////////////////////////////////////////////
 
-    public void initData() {
+    public AlertDialog GroupDialog;
+    public AlertDialog.Builder addGroupNamedialog;
 
-//        mainData = Data.getData();
-//        NoteList = mainData.getNote();
-
-        if (noteDao == null) {
-            noteDao = new NoteDao(this.getContext());
-            groupDao = new GroupDao(this.getContext());
-        }
-        NoteList = noteDao.queryNotesAll();
-        GroupList = groupDao.queryGroupAll();
-
-        groupAdapter = new GroupAdapter(getContext(), GroupList);
-    }
-
-    public void refreshNoteList() {
-        initData();
-
-        noteAdapter.notifyDataSetChanged();
-    }
-
-
-//    private void refreshdata() {
-//        new Thread(new Runnable() {
-//            @Override
-//            public void run() {
-//                try {
-//                    Thread.sleep(500);
-//                } catch (InterruptedException e) {
-//                    e.printStackTrace();
-//                }
-//                getActivity().runOnUiThread(new Runnable() {
-//                    @Override
-//                    public void run() {
-//                        initDatas();
-//                        noteAdapter.notifyDataSetChanged();
-//                        mSwipeRefresh.setRefreshing(false);
-//                    }
-//                });
-//            }
-//        }).start();
-//    }
-
-    private AlertDialog GroupDialog;
-    private AlertDialog.Builder addGroupNamedialog;
-
-    private void showModifyGroup() {
-        GroupList = groupDao.queryGroupAll();
-        groupAdapter.notifyDataSetChanged();
+    public void showModifyGroup() {
+        refreshGroupList();
 
         GroupDialog = new AlertDialog
                 .Builder(getContext())
@@ -302,7 +306,7 @@ public class NoteFragment extends Fragment implements View.OnClickListener {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         ShowAddGroupDialog(null);
-                        dialog.cancel();
+                        dialog.dismiss();
                     }
                 })
                 .setPositiveButton("确定", new DialogInterface.OnClickListener() {
@@ -315,14 +319,20 @@ public class NoteFragment extends Fragment implements View.OnClickListener {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         ShowAddGroupDialog(GroupList.get(which));
-                        dialog.cancel();
+                        dialog.dismiss();
+                    }
+                })
+                .setOnCancelListener(new DialogInterface.OnCancelListener() {
+                    @Override
+                    public void onCancel(DialogInterface dialog) {
+                        refreshGroupList();
                     }
                 }).create();
 
         GroupDialog.show();
     }
 
-    private void ShowAddGroupDialog(final Group group) {
+    public void ShowAddGroupDialog(final Group group) {
         View view = getLayoutInflater().inflate(R.layout.modifygroup_addgroup_dialog, null);
 
         final EditText editText = (EditText) view.findViewById(R.id.id_addgroup_name);
@@ -332,9 +342,10 @@ public class NoteFragment extends Fragment implements View.OnClickListener {
         if (group != null) {
             editText.setText(group.getName());
             colorText.setText("笔记代表颜色："+ group.getColor());
-
             colorPalette.setColor(CommonUtil.ColorHex_IntEncoding(group.getColor()));
-
+        } else {
+            colorText.setText("笔记代表颜色：#FFFFFF");
+            colorPalette.setColor(CommonUtil.ColorHex_IntEncoding("#FFFFFF"));
         }
 
         colorPalette.setOnChangeListen(new RainbowPalette.OnColorChangedListen() {
@@ -378,9 +389,10 @@ public class NoteFragment extends Fragment implements View.OnClickListener {
                                 .setOnCancelListener(new DialogInterface.OnCancelListener() {
                                     @Override
                                     public void onCancel(DialogInterface dialog) {
-                                        addGroupNamedialog.show();
+                                        ShowAddGroupDialog(group);
                                     }
                                 }).create();
+                            dialog.dismiss();
                             emptyDialog.show();
                         }
                         else {
@@ -402,16 +414,9 @@ public class NoteFragment extends Fragment implements View.OnClickListener {
                                     ex.printStackTrace();
                                 }
                             }
-                            GroupList = groupDao.queryGroupAll();
-                            groupAdapter.notifyDataSetChanged();
+                            /// DB Finish
                             dialog.cancel();
                         }
-                    }
-                })
-                .setOnCancelListener(new DialogInterface.OnCancelListener() {
-                    @Override
-                    public void onCancel(DialogInterface dialog) {
-                        showModifyGroup();
                     }
                 });
 
@@ -421,7 +426,15 @@ public class NoteFragment extends Fragment implements View.OnClickListener {
                 public void onClick(DialogInterface dialog, int which) {
                     AlertDialog deleteDialog = new AlertDialog
                         .Builder(getContext())
-                        .setTitle("确定要删除类型 " + group.getName() + " 吗")
+                        .setTitle("提示")
+                        .setMessage("确定要删除类型 " + group.getName() + " 吗")
+                        .setNegativeButton("取消", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                ShowAddGroupDialog(group);
+                                dialog.dismiss();
+                            }
+                        })
                         .setPositiveButton("确定", new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
@@ -430,31 +443,36 @@ public class NoteFragment extends Fragment implements View.OnClickListener {
                                 } catch (Exception ex) {
                                     ex.printStackTrace();
                                 }
-                                GroupList = groupDao.queryGroupAll();
-                                groupAdapter.notifyDataSetChanged();
-                                dialog.cancel();
-                            }
-                        })
-                        .setNegativeButton("取消", new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int which) {
                                 dialog.cancel();
                             }
                         })
                         .setOnCancelListener(new DialogInterface.OnCancelListener() {
                             @Override
                             public void onCancel(DialogInterface dialog) {
+                                refreshGroupList();
                                 showModifyGroup();
                             }
                         }).create();
+
+                    dialog.dismiss();
                     deleteDialog.show();
                 }
             });
         }
 
+        addGroupNamedialog.setOnCancelListener(new DialogInterface.OnCancelListener() {
+            @Override
+            public void onCancel(DialogInterface dialog) {
+                refreshGroupList();
+                showModifyGroup();
+            }
+        });
+
         addGroupNamedialog.show();
 
     }
+
+    //////////////////////////////////////////////////
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -483,4 +501,5 @@ public class NoteFragment extends Fragment implements View.OnClickListener {
                 break;
         }
     }
+
 }

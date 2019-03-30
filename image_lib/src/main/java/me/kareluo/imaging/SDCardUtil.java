@@ -16,6 +16,9 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.Locale;
 
 public class SDCardUtil {
     public static String SDCardRoot = Environment.getExternalStorageDirectory().getAbsolutePath() + File.separator;
@@ -51,7 +54,8 @@ public class SDCardUtil {
      * @return
      */
     public static String saveToSdCard(Bitmap bitmap) {
-        String imageUrl = getPictureDir() + System.currentTimeMillis() + "_Edited.jpg"; //////////
+        String time = new SimpleDateFormat("yyyyMMddHHmmssSSS", Locale.CHINA).format(new Date());
+        String imageUrl = getPictureDir() + time + "_Edited.jpg"; //////////
         File file = new File(imageUrl);
         try {
             FileOutputStream out = new FileOutputStream(file);

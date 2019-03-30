@@ -53,7 +53,8 @@ public class SDCardUtil {
      * @return
      */
     public static String saveToSdCard(Bitmap bitmap) {
-        String imageUrl = getPictureDir() + System.currentTimeMillis() + "-"; //////////
+        String time = new SimpleDateFormat("yyyyMMddHHmmssSSS", Locale.CHINA).format(new Date());
+        String imageUrl = getPictureDir() + time + "_Small.jpg"; //////////
         File file = new File(imageUrl);
         try {
             FileOutputStream out = new FileOutputStream(file);
