@@ -4,6 +4,7 @@ import android.app.ActivityManager;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Color;
 import android.net.Uri;
 import android.os.PowerManager;
 import android.util.DisplayMetrics;
@@ -144,4 +145,26 @@ public class CommonUtil {
         return strDate;
     }
 
+    // 将十进制color转化成十六进制
+    public static String ColorInt_HexEncoding(int color) {
+        String R, G, B;
+        StringBuffer sb = new StringBuffer();
+        R = Integer.toHexString(Color.red(color));
+        G = Integer.toHexString(Color.green(color));
+        B = Integer.toHexString(Color.blue(color));
+        //判断获取到的R,G,B值的长度 如果长度等于1 给R,G,B值的前边添0
+        R = R.length() == 1 ? "0" + R : R;
+        G = G.length() == 1 ? "0" + G : G;
+        B = B.length() == 1 ? "0" + B : B;
+        sb.append("#");
+        sb.append(R);
+        sb.append(G);
+        sb.append(B);
+        return sb.toString();
+    }
+
+    // 将十六进制color转化成十进制
+    public static int ColorHex_IntEncoding(String color) {
+        return Color.parseColor(color);
+    }
 }

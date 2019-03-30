@@ -3,9 +3,13 @@
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <item
+        android:id="@+id/action_modifygroup"
+        app:showAsAction="always"
+        android:title="@string/notefragment_menu_modifygroup"/>
+
+    <item
         android:id="@+id/action_search"
         android:icon="@drawable/search"
         app:showAsAction="always"
         android:title="@string/notefragment_menu_search"/>
-
 </menu>

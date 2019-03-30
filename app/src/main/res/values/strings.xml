@@ -3,4 +3,5 @@
     <string name="notefragment_menu_search">search</string>
     <string name="note_header">笔记</string>
     <string name="file_header">资料</string>
+    <string name="notefragment_menu_modifygroup">分类</string>
 </resources>

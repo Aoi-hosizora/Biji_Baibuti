@@ -16,10 +16,13 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.Locale;
 
 public class SDCardUtil {
     public static String SDCardRoot = Environment.getExternalStorageDirectory().getAbsolutePath() + File.separator;
-    public static String APP_NAME = "XRichText";
+    public static String APP_NAME = "Biji";
 
     /**
      * 检查是否存在SDCard
@@ -50,7 +53,8 @@ public class SDCardUtil {
      * @return
      */
     public static String saveToSdCard(Bitmap bitmap) {
-        String imageUrl = getPictureDir() + System.currentTimeMillis() + "-"; //////////
+        String time = new SimpleDateFormat("yyyyMMddHHmmssSSS", Locale.CHINA).format(new Date());
+        String imageUrl = getPictureDir() + time + "_Small.jpg"; //////////
         File file = new File(imageUrl);
         try {
             FileOutputStream out = new FileOutputStream(file);

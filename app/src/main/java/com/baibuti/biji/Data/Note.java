@@ -1,6 +1,7 @@
 package com.baibuti.biji.Data;
 
 import android.media.Image;
+import android.support.annotation.NonNull;
 
 import java.io.Serializable;
 import java.text.SimpleDateFormat;
@@ -11,7 +12,7 @@ import java.util.Date;
  * Created by Windows 10 on 016 2019/02/16.
  */
 
-public class Note implements Serializable, Comparator<Note> {
+public class Note implements Serializable, Comparable<Note> {
 
     private int Id;
 
@@ -36,13 +37,13 @@ public class Note implements Serializable, Comparator<Note> {
         this.Title = Title;
         this.Content = Content;
         this.UpdateTime = new Date();
+        this.CreateTime = new Date(); // //////////
         this.GroupLabel = new Group();
     }
 
-
     @Override
-    public int compare(Note o1, Note o2) {
-        return o1.getUpdateTime().compareTo(o2.getUpdateTime());
+    public int compareTo(@NonNull Note o) {
+        return o.getUpdateTime().compareTo(this.getUpdateTime());
     }
     //////////////////////////////////////////////////
 
@@ -136,7 +137,7 @@ public class Note implements Serializable, Comparator<Note> {
         if (fmt.format(new Date()).equals(fmt.format(getUpdateTime())))
             return getUpdateTime_TimeString();
         else
-            return getUpdateTime_DateString();
+            return getUpdateTime_DateString() + " " + getUpdateTime_TimeString();
     }
 
 }
