@@ -295,9 +295,11 @@ public class ModifyNoteActivity extends AppCompatActivity implements View.OnClic
                 .setNeutralButton("修改分组信息", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        GroupDialog.setupGroupDialog(ModifyNoteActivity.this, groupAdapter, GroupList, groupDao, getLayoutInflater())
-                                .showModifyGroup();
                         dialog.cancel();
+
+                        GroupDialog.setupGroupDialog(ModifyNoteActivity.this,
+                                groupAdapter, GroupList, groupDao, getLayoutInflater())
+                                .showModifyGroup();
                     }
                 })
                 .setNegativeButton("取消", new DialogInterface.OnClickListener() {
@@ -602,25 +604,35 @@ public class ModifyNoteActivity extends AppCompatActivity implements View.OnClic
         else
             note.setGroupLabel(groupDao.queryGroupById(0));
 
+        Intent intent = new Intent();
+
         if (flag == 0) { // NEW
             long noteId = noteDao.insertNote(note);
             note.setId((int)noteId);
-            flag = 1;
 
+            intent.putExtra("open_view",true);
         }
-        else  // MODIFY
+        else   // MODIFY
             if (isModify)
                 noteDao.updateNote(note);
 
         closeSoftKeyInput();
-        Intent intent = new Intent();
+
         intent.putExtra("isModify", isModify);
         intent.putExtra("modify_note",note);
 
         setResult(RESULT_OK,intent);
 
-        if (isExit)
+        if (flag == 0) { // NEW
+            Intent openviewintent=new Intent(ModifyNoteActivity.this, ViewModifyNoteActivity.class);
+            openviewintent.putExtra("notedata",note);
+            openviewintent.putExtra("flag",NOTE_UPDATE); // UPDATE
+            startActivity(openviewintent);
             finish();
+        }
+        else
+            if (isExit)
+                finish();
     }
 
 

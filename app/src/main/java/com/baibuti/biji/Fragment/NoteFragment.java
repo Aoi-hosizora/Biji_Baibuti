@@ -213,11 +213,11 @@ public class NoteFragment extends Fragment implements View.OnClickListener {
         noteAdapter.notifyDataSetChanged();
     }
 
-    public void refreshGroupList() {
-        GroupList = groupDao.queryGroupAll();
-        groupAdapter = new GroupAdapter(getContext(), GroupList); // 必要
-        groupAdapter.notifyDataSetChanged();
-    }
+//    public void refreshGroupList() {
+//        GroupList = groupDao.queryGroupAll();
+//        groupAdapter = new GroupAdapter(getContext(), GroupList); // 必要
+//        groupAdapter.notifyDataSetChanged();
+//    }
 
 
     private int SelectedNoteItem;

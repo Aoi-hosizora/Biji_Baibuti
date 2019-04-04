@@ -117,11 +117,7 @@ public class Note implements Serializable, Comparable<Note> {
     }
 
     public String getUpdateTime_TimeString() {
-        SimpleDateFormat df;
-        if (new Date().getDate() == this.UpdateTime.getDate())
-            df = new SimpleDateFormat("HH:mm");
-        else
-            df = new SimpleDateFormat("MM-dd");
+        SimpleDateFormat df = new SimpleDateFormat("HH:mm");
 
         return df.format(this.UpdateTime);
     }
