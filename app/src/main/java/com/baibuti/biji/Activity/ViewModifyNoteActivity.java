@@ -140,17 +140,7 @@ public class ViewModifyNoteActivity extends AppCompatActivity implements View.On
 
             case android.R.id.home:
             case R.id.id_menu_modifynote_viewcancel:
-                Intent motointent = new Intent();
-
-                if (isModify) {
-                    motointent.putExtra("modify_note",note);
-//                    motointent.putExtra("modify_note_pos", notePos);
-                    setResult(RESULT_OK,motointent);
-                }
-                else
-                    setResult(RESULT_CANCELED,motointent);
-
-                finish();
+                BackToActivity();
                 break;
 
             case R.id.id_menu_modifynote_viewinfo:
@@ -160,6 +150,24 @@ public class ViewModifyNoteActivity extends AppCompatActivity implements View.On
         return true;
     }
 
+    @Override
+    public void onBackPressed() {
+        BackToActivity();
+    }
+
+    private void BackToActivity() {
+        Intent motointent = new Intent();
+
+        if (isModify) {
+            motointent.putExtra("modify_note",note);
+//                    motointent.putExtra("modify_note_pos", notePos);
+            setResult(RESULT_OK,motointent);
+        }
+        else
+            setResult(RESULT_CANCELED,motointent);
+
+        finish();
+    }
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {

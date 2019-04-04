@@ -44,6 +44,7 @@ import android.widget.Toast;
 import com.baibuti.biji.Data.Group;
 import com.baibuti.biji.Data.GroupAdapter;
 import com.baibuti.biji.Data.Note;
+import com.baibuti.biji.Dialog.GroupDialog;
 import com.baibuti.biji.Fragment.NoteFragment;
 import com.baibuti.biji.R;
 import com.baibuti.biji.db.GroupDao;
@@ -136,22 +137,25 @@ public class ModifyNoteActivity extends AppCompatActivity implements View.OnClic
         insertDialog.setMessage("正在插入图片...");
         insertDialog.setCanceledOnTouchOutside(false);
 
+        groupDao = new GroupDao(this);
+        noteDao = new NoteDao(this);
+        GroupList = groupDao.queryGroupAll();
+        groupAdapter = new GroupAdapter(this, GroupList);
+        groupAdapter.notifyDataSetChanged();
+
         note = (Note) getIntent().getSerializableExtra("notedata");
         flag = getIntent().getIntExtra("flag",0);
 
-        if (flag == NOTE_NEW)
+        if (flag == NOTE_NEW) {
             setTitle("新建笔记");
+            note.setGroupLabel(groupDao.queryDefaultGroup());
+        }
         else
             setTitle("编辑笔记");
 
         screenWidth = CommonUtil.getScreenWidth(this);
         screenHeight = CommonUtil.getScreenHeight(this);
 
-        groupDao = new GroupDao(this);
-        noteDao = new NoteDao(this);
-        GroupList = groupDao.queryGroupAll();
-        groupAdapter = new GroupAdapter(this, GroupList);
-        groupAdapter.notifyDataSetChanged();
 
         TitleEditText = (EditText) findViewById(R.id.id_modifynote_title);
         UpdateTimeTextView = (TextView) findViewById(R.id.id_modifynote_updatetime);
@@ -190,6 +194,11 @@ public class ModifyNoteActivity extends AppCompatActivity implements View.OnClic
         getMenuInflater().inflate(R.menu.modifynoteactivity_menu,menu);
         this.menu=menu;
         return true;
+    }
+
+    @Override
+    public void onBackPressed() {
+        CancelSaveNoteData();
     }
 
     // 点击顶部菜单项
@@ -243,52 +252,51 @@ public class ModifyNoteActivity extends AppCompatActivity implements View.OnClic
                         }
                     }).create();
             savedialog.show();
+        } else {
+            final String Info = "标题：" + note.getTitle() + "\n" +
+                    "创建时间：" + note.getCreateTime_FullString() + "\n" +
+                    "最近修改时间：" + note.getUpdateTime_FullString() + "\n\n" +
+                    "分类：" + note.getGroupLabel().getName();
+            AlertDialog infodialog = new AlertDialog.Builder(this)
+                    .setTitle("详细信息")
+                    .setMessage(Info)
+                    .setNeutralButton("复制", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            ClipboardManager clipboardManager = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
+                            ClipData clip = ClipData.newPlainText("text", Info);
+                            clipboardManager.setPrimaryClip(clip);
+                            Toast.makeText(ModifyNoteActivity.this, "信息复制成功。", Toast.LENGTH_SHORT).show();
+                            dialog.dismiss();
+                        }
+                    })
+                    .setNegativeButton("确定", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            dialog.dismiss();
+                        }
+                    }).create();
+            infodialog.show();
         }
+    }
 
-        final String Info = "标题：" + note.getTitle() + "\n" +
-                "创建时间：" + note.getCreateTime_FullString() + "\n" +
-                "最近修改时间：" + note.getUpdateTime_FullString() + "\n\n" +
-                "分类：" + note.getGroupLabel().getName();
-        AlertDialog dialog = new AlertDialog.Builder(this)
-                .setTitle("详细信息")
-                .setMessage(Info)
-                .setNeutralButton("复制", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        ClipboardManager clipboardManager = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
-                        ClipData clip = ClipData.newPlainText("text", Info);
-                        clipboardManager.setPrimaryClip(clip);
-                        Toast.makeText(ModifyNoteActivity.this, "信息复制成功。", Toast.LENGTH_SHORT).show();
-                        dialog.dismiss();
-                    }
-                })
-                .setNegativeButton("确定", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        dialog.dismiss();
-                    }
-                }).create();
-        dialog.show();
-
+    private void refreshGroupList() {
+        GroupList = groupDao.queryGroupAll();
+        groupAdapter = new GroupAdapter(this, GroupList); // 必要
+        groupAdapter.notifyDataSetChanged();
     }
 
     private void showGroupSetting() {
-        groupAdapter.notifyDataSetChanged();
+        refreshGroupList();
 
         AlertDialog GroupSettingDialog = new AlertDialog
                 .Builder(this)
-                .setTitle("笔记分类")//设置对话框的标题
-                .setNeutralButton("修改", new DialogInterface.OnClickListener() {
+                .setTitle("笔记分类")
+                .setNeutralButton("修改分组信息", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        // ShowAddGroupDialog(null);
-                        dialog.cancel();
-                    }
-                })
-                .setPositiveButton("设置", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        // ....
+                        GroupDialog.setupGroupDialog(ModifyNoteActivity.this, groupAdapter, GroupList, groupDao, getLayoutInflater())
+                                .showModifyGroup();
                         dialog.cancel();
                     }
                 })
@@ -533,13 +541,13 @@ public class ModifyNoteActivity extends AppCompatActivity implements View.OnClic
             AlertDialog alertDialog = new AlertDialog.Builder(this)
                     .setTitle("确定要取消编辑吗？")
                     .setMessage("您的修改将不会保存。")
-                    .setPositiveButton("确定", new DialogInterface.OnClickListener() {
+                    .setNegativeButton("离开", new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialogInterface, int i) {
                             finish();
                         }
                     })
-                    .setNegativeButton("取消", new DialogInterface.OnClickListener() {
+                    .setPositiveButton("取消", new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialogInterface, int i) {
                         }
