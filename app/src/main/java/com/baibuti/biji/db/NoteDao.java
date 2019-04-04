@@ -22,9 +22,11 @@ import java.util.List;
 
 public class NoteDao {
     private MyOpenHelper helper;
+    private GroupDao groupDao;
 
     public NoteDao(Context context) {
         helper = new MyOpenHelper(context);
+        groupDao = new GroupDao(context);
     }
 
     /**
@@ -57,11 +59,13 @@ public class NoteDao {
                 note.setTitle(cursor.getString(cursor.getColumnIndex("n_title")));
                 note.setContent(cursor.getString(cursor.getColumnIndex("n_content")));
 
-                Group grouptmp = new Group();
+                Group grouptmp = groupDao.queryGroupById(cursor.getInt(cursor.getColumnIndex("n_group_id")));
+                if (grouptmp == null)
+                    grouptmp = groupDao.queryDefaultGroup();
 
-                grouptmp.setId(cursor.getInt(cursor.getColumnIndex("n_group_id")));
-                grouptmp.setName(cursor.getString(cursor.getColumnIndex("n_group_name")));
-
+//                Group grouptmp = new Group();
+//                grouptmp.setId(cursor.getInt(cursor.getColumnIndex("n_group_id")));
+//                grouptmp.setName(cursor.getString(cursor.getColumnIndex("n_group_name")));
                 note.setGroupLabel(grouptmp);
 
                 note.setCreateTime(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").parse(

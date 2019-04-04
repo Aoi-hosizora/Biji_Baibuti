@@ -9,6 +9,8 @@ import android.database.sqlite.SQLiteStatement;
 import android.util.Log;
 
 import com.baibuti.biji.Data.Group;
+
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -17,11 +19,9 @@ import static android.content.ContentValues.TAG;
 
 public class GroupDao {
     private MyOpenHelper helper;
-    private NoteDao noteDataDao;
 
     public GroupDao(Context context) {
         helper = new MyOpenHelper(context);
-        noteDataDao = new NoteDao(context);
     }
 
     /**
@@ -158,6 +158,38 @@ public class GroupDao {
         return group;
     }
 
+    public Group queryDefaultGroup() {
+        Group group = null;
+
+        group = this.queryGroupByName("Default");
+        if (group != null)
+            return group;
+
+        group = this.queryGroupByName("Default Note");
+        if (group != null)
+            return group;
+
+        group = this.queryGroupByName("默认");
+        if (group != null)
+            return group;
+
+        group = this.queryGroupByName("默认笔记");
+        if (group != null)
+            return group;
+
+        return insertDefaultGroup();
+    }
+
+    private Group insertDefaultGroup() {
+        Group def = new Group();
+        def.setOrder(0);
+        def.setColor("#FFFFFF");
+        def.setName("默认笔记");
+        this.insertGroup(def);
+
+        return this.queryGroupByName("默认笔记");
+    }
+
     /**
      * 添加一个分类
      */
@@ -222,8 +254,6 @@ public class GroupDao {
         int ret = 0;
         try {
             ret = db.delete("db_group", "g_id=?", new String[]{groupId + ""});
-            //Group group = queryGroupByName("默认笔记");
-            //noteDataDao.updateNote2(groupId, group.getGroupId());
         } catch (Exception e) {
             e.printStackTrace();
         } finally {

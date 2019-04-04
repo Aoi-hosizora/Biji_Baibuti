@@ -36,6 +36,8 @@ import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
 
+import static com.baibuti.biji.util.CommonUtil.ColorHex_IntEncoding;
+
 public class ViewModifyNoteActivity extends AppCompatActivity implements View.OnClickListener {
 
     private TextView TitleEditText_View;
@@ -76,6 +78,7 @@ public class ViewModifyNoteActivity extends AppCompatActivity implements View.On
         TitleEditText_View.setText(note.getTitle());
         UpdateTimeTextView_View.setText(note.getUpdateTime_ShortString());
         GroupNameTextView_View.setText(note.getGroupLabel().getName());
+        GroupNameTextView_View.setTextColor(ColorHex_IntEncoding(note.getGroupLabel().getColor()));
 
         //////////////////////////////////////////////////
         ContentEditText_View.post(new Runnable() {
@@ -164,7 +167,7 @@ public class ViewModifyNoteActivity extends AppCompatActivity implements View.On
             case 1: // MODIFY
                 if (resultCode == RESULT_OK) {
                         Note newnote = (Note) data.getSerializableExtra("modify_note");
-                        isModify = data.getBooleanExtra("isModify", false);
+                        isModify = data.getBooleanExtra("isModify", true);
 
                         if (isModify) {
                             note = new Note(newnote);
@@ -172,6 +175,7 @@ public class ViewModifyNoteActivity extends AppCompatActivity implements View.On
                             TitleEditText_View.setText(note.getTitle());
                             UpdateTimeTextView_View.setText(note.getUpdateTime_ShortString());
                             GroupNameTextView_View.setText(note.getGroupLabel().getName());
+                            GroupNameTextView_View.setTextColor(ColorHex_IntEncoding(note.getGroupLabel().getColor()));
                             ContentEditText_View.post(new Runnable() {
                                 @Override
                                 public void run() {

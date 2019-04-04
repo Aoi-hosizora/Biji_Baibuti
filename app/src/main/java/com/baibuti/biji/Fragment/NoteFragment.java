@@ -1,15 +1,11 @@
 package com.baibuti.biji.Fragment;
 
-import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.graphics.Color;
-import android.media.Image;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
-import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -19,26 +15,19 @@ import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.support.v7.widget.ActionMenuView;
-import android.view.inputmethod.InputMethodManager;
-import android.widget.AdapterView;
 import android.widget.EditText;
-import android.widget.ImageButton;
-import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.baibuti.biji.Activity.MainActivity;
 import com.baibuti.biji.Activity.ModifyNoteActivity;
 import com.baibuti.biji.Activity.ViewModifyNoteActivity;
-import com.baibuti.biji.Data.Data;
 import com.baibuti.biji.Data.Group;
 import com.baibuti.biji.Data.GroupAdapter;
 import com.baibuti.biji.Data.Note;
 import com.baibuti.biji.Data.NoteAdapter;
 import com.baibuti.biji.R;
 import com.baibuti.biji.RainbowPalette;
-import com.baibuti.biji.View.SimplerSearcherView;
 import com.baibuti.biji.View.SpacesItemDecoration;
 import com.baibuti.biji.db.GroupDao;
 import com.baibuti.biji.db.NoteDao;
@@ -46,9 +35,6 @@ import com.baibuti.biji.util.CommonUtil;
 import com.getbase.floatingactionbutton.FloatingActionButton;
 import com.jeremyfeinstein.slidingmenu.lib.SlidingMenu;
 
-import org.w3c.dom.Text;
-
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
@@ -57,8 +43,6 @@ import static android.app.Activity.RESULT_OK;
 public class NoteFragment extends Fragment implements View.OnClickListener {
 
     private RecyclerView mNoteList;
-
-    private Data mainData;
 
     private List<Note> NoteList;
     private List<Group> GroupList;

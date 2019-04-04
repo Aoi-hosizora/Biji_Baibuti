@@ -119,6 +119,7 @@ public class ModifyNoteActivity extends AppCompatActivity implements View.OnClic
     private static final int NOTE_NEW = 0; // new
     private static final int NOTE_UPDATE = 1; // modify
 
+    private int selectedGropId = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -162,7 +163,7 @@ public class ModifyNoteActivity extends AppCompatActivity implements View.OnClic
         UpdateTimeTextView.setText(note.getUpdateTime_ShortString());
         GroupNameTextView.setText(note.getGroupLabel().getName());
         GroupNameTextView.setTextColor(CommonUtil.ColorHex_IntEncoding(note.getGroupLabel().getColor()));
-
+        selectedGropId = note.getGroupLabel().getId();
         //////////////////////////////////////////////////
         // ContentEditText
 
@@ -176,7 +177,9 @@ public class ModifyNoteActivity extends AppCompatActivity implements View.OnClic
 
     // 确定是否修改了内容
     private Boolean CheckIsModify() {
-        if (!TitleEditText.getText().toString().equals(note.getTitle()) || !getEditData().equals(note.getContent()))
+        if (!TitleEditText.getText().toString().equals(note.getTitle()) ||
+            !GroupNameTextView.getText().toString().equals(note.getGroupLabel().getName()) ||
+            !getEditData().equals(note.getContent()))
             return true;
         return false;
     }
@@ -275,7 +278,7 @@ public class ModifyNoteActivity extends AppCompatActivity implements View.OnClic
         AlertDialog GroupSettingDialog = new AlertDialog
                 .Builder(this)
                 .setTitle("笔记分类")//设置对话框的标题
-                .setNeutralButton("添加", new DialogInterface.OnClickListener() {
+                .setNeutralButton("修改", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         // ShowAddGroupDialog(null);
@@ -299,7 +302,8 @@ public class ModifyNoteActivity extends AppCompatActivity implements View.OnClic
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         // ShowAddGroupDialog(GroupList.get(which));
-                        note.setGroupLabel(GroupList.get(which));
+                        // note.setGroupLabel(GroupList.get(which));
+                        selectedGropId = GroupList.get(which).getId();
                         GroupNameTextView.setText(GroupList.get(which).getName());
                         GroupNameTextView.setTextColor(CommonUtil.ColorHex_IntEncoding(GroupList.get(which).getColor()));
                         dialog.cancel();
@@ -547,7 +551,7 @@ public class ModifyNoteActivity extends AppCompatActivity implements View.OnClic
     }
 
     // 文件保存活动处理
-    private void saveNoteData(boolean isFinish) {
+    private void saveNoteData(boolean isExit) {
 
         String Content = getEditData();
 
@@ -577,10 +581,18 @@ public class ModifyNoteActivity extends AppCompatActivity implements View.OnClic
                 TitleEditText.setText(Con);
 
         }
+
         //////////////////////////////////////////////////
+
         boolean isModify = CheckIsModify();
         note.setTitle(TitleEditText.getText().toString());
         note.setContent(Content);
+
+        Group re = groupDao.queryGroupById(selectedGropId);
+        if (re != null)
+            note.setGroupLabel(re);
+        else
+            note.setGroupLabel(groupDao.queryGroupById(0));
 
         if (flag == 0) { // NEW
             long noteId = noteDao.insertNote(note);
@@ -599,7 +611,7 @@ public class ModifyNoteActivity extends AppCompatActivity implements View.OnClic
 
         setResult(RESULT_OK,intent);
 
-        if (isFinish)
+        if (isExit)
             finish();
     }
 
