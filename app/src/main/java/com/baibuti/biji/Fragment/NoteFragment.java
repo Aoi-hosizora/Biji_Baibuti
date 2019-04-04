@@ -37,6 +37,7 @@ import com.getbase.floatingactionbutton.FloatingActionButton;
 import com.getbase.floatingactionbutton.FloatingActionsMenu;
 import com.jeremyfeinstein.slidingmenu.lib.SlidingMenu;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
@@ -50,6 +51,7 @@ public class NoteFragment extends Fragment implements View.OnClickListener {
     private List<Group> GroupList;
 
     private FloatingActionsMenu m_fabmenu;
+    private FloatingActionButton m_fabback;
     private com.wyt.searchbox.SearchFragment searchFragment;
 //    private SwipeRefreshLayout mSwipeRefresh;
     private SlidingMenu slidingMenu;
@@ -64,18 +66,12 @@ public class NoteFragment extends Fragment implements View.OnClickListener {
         setHasOptionsMenu(true);
 
         m_fabmenu = (FloatingActionsMenu) view.findViewById(R.id.note_fabmenu);
+        m_fabback = (FloatingActionButton) view.findViewById(R.id.note_searchback);
+
         slidingMenu = ((MainActivity)getActivity()).getSlidingMenu();
         mNoteList = view.findViewById(R.id.note_list);
-        //添加搜索框
-        searchFragment = com.wyt.searchbox.SearchFragment.newInstance();
-        searchFragment.setAllowReturnTransitionOverlap(true);
-        searchFragment.setOnSearchClickListener(new com.wyt.searchbox.custom.IOnSearchClickListener() {
-            @Override
-            public void OnSearchClick(String keyword) {
-                Toast.makeText(getContext(),"This is note_search", Toast.LENGTH_SHORT).show();
-                //添加逻辑处理
-            }
-        });
+
+        m_fabback.setOnClickListener(this);
 
 //        mSwipeRefresh.setColorSchemeResources(R.color.colorPrimary);
 //        mSwipeRefresh.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
@@ -89,13 +85,20 @@ public class NoteFragment extends Fragment implements View.OnClickListener {
         initFloatingActionBar(view);
         initData(); // GetDao & List
         initAdapter();
-        initListView();
+        initListView(NoteList);
+        initSearchFrag();
         return view;
     }
 
-    @Override
-    public void onClick(View v) {
+    private List<Note> search(String str) {
+        List<Note> notelist = new ArrayList<>();
 
+        for (Note note : NoteList) {
+            if (note.getTitle().contains(str) || note.getContent().contains(str))
+                notelist.add(note);
+        }
+
+        return notelist;
     }
 
     private void initToolbar(View view) {
@@ -210,6 +213,7 @@ public class NoteFragment extends Fragment implements View.OnClickListener {
         // initData();
         NoteList = noteDao.queryNotesAll();
         Collections.sort(NoteList);
+        // groupAdapter = new GroupAdapter(getContext(), GroupList);
         noteAdapter.notifyDataSetChanged();
     }
 
@@ -222,17 +226,18 @@ public class NoteFragment extends Fragment implements View.OnClickListener {
 
     private int SelectedNoteItem;
 
-    private void initListView() {
+    private void initListView(final List<Note> nlist) {
 
         mNoteList.addItemDecoration(new SpacesItemDecoration(0));//设置item间距
         LinearLayoutManager layoutManager = new LinearLayoutManager(getContext());
         layoutManager.setOrientation(LinearLayoutManager.VERTICAL);//竖向列表
         mNoteList.setLayoutManager(layoutManager);
 
-        Collections.sort(NoteList);
-        noteAdapter.setmNotes(NoteList);
+        Collections.sort(nlist);
+        noteAdapter.setmNotes(nlist);
 
         mNoteList.setAdapter(noteAdapter);
+        noteAdapter.notifyDataSetChanged();
 
         noteAdapter.setOnItemClickListener(new NoteAdapter.OnItemClickListener() {
             @Override
@@ -241,7 +246,7 @@ public class NoteFragment extends Fragment implements View.OnClickListener {
                 SelectedNoteItem = position;
 
                 Intent intent=new Intent(getContext(), ViewModifyNoteActivity.class);
-                intent.putExtra("notedata",NoteList.get(position));
+                intent.putExtra("notedata",nlist.get(position));
                 intent.putExtra("flag",NOTE_UPDATE); // UPDATE
                 startActivityForResult(intent,1); // 1 from List
             }
@@ -292,6 +297,38 @@ public class NoteFragment extends Fragment implements View.OnClickListener {
             }
         });
     }
+
+    private void initSearchFrag() {
+        // 添加搜索框
+        searchFragment = com.wyt.searchbox.SearchFragment.newInstance();
+        searchFragment.setAllowReturnTransitionOverlap(true);
+        searchFragment.setOnSearchClickListener(new com.wyt.searchbox.custom.IOnSearchClickListener() {
+            @Override
+            public void OnSearchClick(String keyword) {
+                if (keyword.isEmpty()) {
+
+                }
+                else {
+                    initListView(search(keyword));
+                    m_fabmenu.setVisibility(View.GONE);
+                    m_fabback.setVisibility(View.VISIBLE);
+                }
+            }
+        });
+    }
+
+
+    @Override
+    public void onClick(View v) {
+        switch (v.getId()) {
+            case R.id.note_searchback:
+                NoteList = noteDao.queryNotesAll();
+                initListView(NoteList);
+                m_fabback.setVisibility(View.GONE);
+                m_fabmenu.setVisibility(View.VISIBLE);
+        }
+    }
+
 
     //////////////////////////////////////////////////
 
