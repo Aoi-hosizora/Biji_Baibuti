@@ -93,7 +93,18 @@ public class NoteDao {
     }
 
     public List<Note> queryNotesAll() { // ArrayList
+        List<Note> Re = queryNotesAll(-1);
+        if (Re.isEmpty())
+            insertDefaultNote();
+
         return queryNotesAll(-1);
+    }
+
+    public Note insertDefaultNote() {
+        Note dft = new Note("默认笔记", "");
+        dft.setGroupLabel(groupDao.queryDefaultGroup());
+        dft.setId((int) this.insertNote(dft));
+        return dft;
     }
 
     /**

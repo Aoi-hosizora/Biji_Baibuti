@@ -64,6 +64,10 @@ public class GroupDao {
                 db.close();
             }
         }
+
+        if (groupList.isEmpty())
+            groupList.add(queryDefaultGroup());
+
         return groupList;
     }
 
