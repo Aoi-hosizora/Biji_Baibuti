@@ -298,7 +298,7 @@ public class ModifyNoteActivity extends AppCompatActivity implements View.OnClic
                         dialog.cancel();
 
                         GroupDialog.setupGroupDialog(ModifyNoteActivity.this,
-                                groupAdapter, GroupList, groupDao, getLayoutInflater())
+                                groupAdapter, GroupList, groupDao, noteDao, getLayoutInflater())
                                 .showModifyGroup();
                     }
                 })

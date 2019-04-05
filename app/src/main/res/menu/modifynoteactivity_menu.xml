@@ -2,28 +2,32 @@
 <menu  xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
-    <item
-        android:id="@+id/id_menu_modifynote_img"
-        android:title="图片"
-        app:showAsAction="always"/>
-    <!--android:icon="@drawable/ic_fab_star"/>-->
+    <group android:id="@+id/id_menu_modifynote_f1">
+        <item
+            android:id="@+id/id_menu_modifynote_img"
+            android:title="图片"
+            app:showAsAction="always"/>
+        <!--android:icon="@drawable/ic_fab_star"/>-->
+        <item
+            android:id="@+id/id_menu_modifynote_finish"
+            android:title="完成"
+            app:showAsAction="always"/>
+        <!--android:icon="@drawable/ic_done"/>-->
+    </group>
 
-    <item
-        android:id="@+id/id_menu_modifynote_finish"
-        android:title="完成"
-        app:showAsAction="always"/>
-    <!--android:icon="@drawable/ic_done"/>-->
+    <group android:id="@+id/id_menu_modifynote_f2">
+        <item
+            android:id="@+id/id_menu_modifynote_group"
+            android:title="更改分组" />
+    </group>
 
-    <item
-        android:id="@+id/id_menu_modifynote_group"
-        android:title="更改分组" />
-
-    <item
-        android:id="@+id/id_menu_modifynote_info"
-        android:title="详细信息" />
-
-    <item
-        android:id="@+id/id_menu_modifynote_cancel"
-        android:title="取消" />
+    <group android:id="@+id/id_menu_modifynote_f3">
+        <item
+            android:id="@+id/id_menu_modifynote_info"
+            android:title="详细信息" />
+        <item
+            android:id="@+id/id_menu_modifynote_cancel"
+            android:title="取消" />
+    </group>
 
 </menu>

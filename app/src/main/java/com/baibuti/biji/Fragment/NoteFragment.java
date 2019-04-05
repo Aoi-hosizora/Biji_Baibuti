@@ -6,6 +6,7 @@ import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -53,7 +54,7 @@ public class NoteFragment extends Fragment implements View.OnClickListener {
     private FloatingActionsMenu m_fabmenu;
     private FloatingActionButton m_fabback;
     private com.wyt.searchbox.SearchFragment searchFragment;
-//    private SwipeRefreshLayout mSwipeRefresh;
+    private SwipeRefreshLayout mSwipeRefresh;
     private SlidingMenu slidingMenu;
 
     private static final int NOTE_NEW = 0; // new
@@ -73,13 +74,14 @@ public class NoteFragment extends Fragment implements View.OnClickListener {
 
         m_fabback.setOnClickListener(this);
 
-//        mSwipeRefresh.setColorSchemeResources(R.color.colorPrimary);
-//        mSwipeRefresh.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
-//            @Override
-//            public void onRefresh() {
-//                refreshdata();
-//            }
-//        });
+        mSwipeRefresh = (SwipeRefreshLayout) view.findViewById(R.id.note_listsrl);
+        mSwipeRefresh.setColorSchemeResources(R.color.colorPrimary);
+        mSwipeRefresh.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+            @Override
+            public void onRefresh() {
+                refreshdata();
+            }
+        });
 
         initToolbar(view);
         initFloatingActionBar(view);
@@ -112,8 +114,9 @@ public class NoteFragment extends Fragment implements View.OnClickListener {
                         searchFragment.show(getActivity().getSupportFragmentManager(),com.wyt.searchbox.SearchFragment.TAG);
                         break;
                     case R.id.action_modifygroup:
-                        GroupDialog.setupGroupDialog(getContext(), groupAdapter, GroupList, groupDao, getLayoutInflater())
+                        GroupDialog.setupGroupDialog(getContext(), groupAdapter, GroupList, groupDao, noteDao, getLayoutInflater())
                                 .showModifyGroup();
+                        refreshdata();
                         break;
                 }
                 return true;
@@ -188,40 +191,44 @@ public class NoteFragment extends Fragment implements View.OnClickListener {
         groupAdapter = new GroupAdapter(getContext(), GroupList);
     }
 
-//    private void refreshdata() {
-//        new Thread(new Runnable() {
-//            @Override
-//            public void run() {
-//                try {
-//                    Thread.sleep(500);
-//                } catch (InterruptedException e) {
-//                    e.printStackTrace();
-//                }
-//                getActivity().runOnUiThread(new Runnable() {
-//                    @Override
-//                    public void run() {
-//                        initDatas();
-//                        noteAdapter.notifyDataSetChanged();
-//                        mSwipeRefresh.setRefreshing(false);
-//                    }
-//                });
-//            }
-//        }).start();
-//    }
+    private void refreshdata() {
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    Thread.sleep(500);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+                getActivity().runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        initData();
+                        initAdapter();
+                        refreshNoteList();
+                        refreshGroupList();
+                        initListView(NoteList);
+
+                        mSwipeRefresh.setRefreshing(false);
+                    }
+                });
+            }
+        }).start();
+    }
 
     public void refreshNoteList() {
-        // initData();
         NoteList = noteDao.queryNotesAll();
         Collections.sort(NoteList);
-        // groupAdapter = new GroupAdapter(getContext(), GroupList);
+        noteAdapter = new NoteAdapter();
+        noteAdapter.setmNotes(NoteList);
         noteAdapter.notifyDataSetChanged();
     }
 
-//    public void refreshGroupList() {
-//        GroupList = groupDao.queryGroupAll();
-//        groupAdapter = new GroupAdapter(getContext(), GroupList); // 必要
-//        groupAdapter.notifyDataSetChanged();
-//    }
+    public void refreshGroupList() {
+        GroupList = groupDao.queryGroupAll();
+        groupAdapter = new GroupAdapter(getContext(), GroupList); // 必要
+        groupAdapter.notifyDataSetChanged();
+    }
 
 
     private int SelectedNoteItem;

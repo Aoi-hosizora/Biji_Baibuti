@@ -35,6 +35,17 @@ public class GroupDao {
      * @return
      */
     public List<Group> queryGroupAll() { // ArrayList
+
+        List<Group> groupList = selectAllGroup();
+
+        if (groupList.isEmpty())
+            groupList.add(insertDefaultGroup());
+
+        return groupList;
+    }
+
+    // 内部 select
+    private List<Group> selectAllGroup() {
         SQLiteDatabase db = helper.getWritableDatabase();
         List<Group> groupList = new ArrayList<Group>();
 
@@ -69,21 +80,9 @@ public class GroupDao {
                 db.close();
             }
         }
-
-        Log.e("0", "queryGroupAll: "+groupList.isEmpty() );
-        if (groupList.isEmpty())
-            groupList.add(insertDefaultGroup());
-
-
         return groupList;
     }
 
-    /**
-     * 根据分类名查询分类
-     *
-     * @param groupName
-     * @return
-     */
     public Group queryGroupByName(String groupName) {
         SQLiteDatabase db = helper.getWritableDatabase();
 
@@ -124,11 +123,6 @@ public class GroupDao {
         return group;
     }
 
-    /**
-     * 根据分类ID查询分类
-     *
-     * @return
-     */
     public Group queryGroupById(int groupId) {
         SQLiteDatabase db = helper.getWritableDatabase();
 
@@ -169,26 +163,11 @@ public class GroupDao {
         return group;
     }
 
+
     public Group queryDefaultGroup() {
         Group group = null;
 
-        group = this.queryGroupByName("Default");
-        if (group != null)
-            return group;
-
-        group = this.queryGroupByName("Default Group");
-        if (group != null)
-            return group;
-
-        group = this.queryGroupByName("默认");
-        if (group != null)
-            return group;
-
         group = this.queryGroupByName("默认分组");
-        if (group != null)
-            return group;
-
-        group = this.queryGroupByName("默认分类");
         if (group != null)
             return group;
 
@@ -200,35 +179,14 @@ public class GroupDao {
         def.setOrder(0);
         def.setColor("#F0F0F0");
         def.setName("默认分组");
-        // this.insertGroup(def);
 
-        SQLiteDatabase db = helper.getWritableDatabase();
-        String sql = "insert into db_group(g_name,g_order,g_color) values(?,?,?)";
-        long ret = 0;
+        this.insertGroup(def);
 
-        SQLiteStatement stat = db.compileStatement(sql);
-        db.beginTransaction();
-        try {
-
-            stat.bindString(1, def.getName());
-            stat.bindLong(2, def.getOrder());
-            stat.bindString(3, def.getColor());
-
-            ret = stat.executeInsert();
-            db.setTransactionSuccessful();
-        } catch (SQLException e) {
-            e.printStackTrace();
-        } catch (Exception e) {
-            e.printStackTrace();
-        } finally {
-            db.endTransaction();
-            db.close();
-        }
         return this.queryGroupByName("默认分组");
     }
 
     public int checkDuplicate(Group group, Group oldgroup) {
-        List<Group> tmp = queryGroupAll();
+        List<Group> tmp = selectAllGroup();
         int cnt=0;
         if (oldgroup==null)
             oldgroup = new Group();
@@ -251,7 +209,6 @@ public class GroupDao {
      */
     public long insertGroup(Group group) {
         HandleDuplicate(group, null);
-        Log.e("0", "insertGroup: "+group.getName() );
 
         SQLiteDatabase db = helper.getWritableDatabase();
         String sql = "insert into db_group(g_name,g_order,g_color) values(?,?,?)";
@@ -295,6 +252,8 @@ public class GroupDao {
         }
         HandleDuplicate(group, oldGroup);
 
+        //////////////////////////////////////////////////
+
         SQLiteDatabase db = helper.getWritableDatabase();
 
         try {
@@ -318,12 +277,6 @@ public class GroupDao {
     }
 
     private boolean checkDefaultGroup(Group group) {
-//        if (group.getName() == "默认" ||
-//                group.getName() == "默认分组" ||
-//                group.getName() == "默认分类" ||
-//                group.getName() == "Default" ||
-//                group.getName() == "Default Group") {
-
         if (group==null) {
             Log.e("checkDefaultGroup", "checkDefaultGroup: group==null");
         }
@@ -345,8 +298,9 @@ public class GroupDao {
         catch (EditDefaultGroupException ed) {
             Toast.makeText(context, "无法删除默认分组。", Toast.LENGTH_SHORT).show();
             return -1;
-
         }
+
+        //////////////////////////////////////////////////
 
         SQLiteDatabase db = helper.getWritableDatabase();
 
@@ -362,7 +316,7 @@ public class GroupDao {
                 db.close();
             }
         }
-        if (queryGroupAll().isEmpty())
+        if (selectAllGroup().isEmpty())
             queryDefaultGroup();
 
         return ret;

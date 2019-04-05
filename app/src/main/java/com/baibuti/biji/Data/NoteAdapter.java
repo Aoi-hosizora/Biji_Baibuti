@@ -23,6 +23,7 @@ import com.baibuti.biji.Activity.ViewModifyNoteActivity;
 import com.baibuti.biji.Fragment.NoteFragment;
 import com.baibuti.biji.R;
 import com.baibuti.biji.db.NoteDao;
+import com.baibuti.biji.util.CommonUtil;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -114,6 +115,7 @@ public class NoteAdapter extends RecyclerView.Adapter<NoteAdapter.ViewHolder> im
         holder.tv_list_summary.setText(note.getContent());
         holder.tv_list_time.setText(note.getUpdateTime_ShortString());
         holder.tv_list_group.setText(note.getGroupLabel().getName());
+        holder.tv_list_group.setTextColor(CommonUtil.ColorHex_IntEncoding(note.getGroupLabel().getColor()));
     }
 
     @Override

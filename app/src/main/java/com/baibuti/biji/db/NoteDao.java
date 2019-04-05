@@ -41,8 +41,8 @@ public class NoteDao {
         String sql ;
         Cursor cursor = null;
         try {
-            if (groupId > 0){
-                sql = "select * from db_note where n_group_id =" + groupId + "order by n_create_time desc";
+            if (groupId >= 0){
+                sql = "select * from db_note where n_group_id = " + groupId;
             } else {
                 sql = "select * from db_note " ;
             }
