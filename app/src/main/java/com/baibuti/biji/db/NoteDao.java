@@ -6,6 +6,7 @@ import android.database.Cursor;
 import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteStatement;
+import android.util.Log;
 
 import com.baibuti.biji.Data.Group;
 import com.baibuti.biji.Data.Note;
@@ -95,16 +96,57 @@ public class NoteDao {
     public List<Note> queryNotesAll() { // ArrayList
         List<Note> Re = queryNotesAll(-1);
         if (Re.isEmpty())
-            insertDefaultNote();
-
-        return queryNotesAll(-1);
+            Re.add(insertDefaultNote());
+        return Re;
     }
+
+    public Note queryNoteById(int noteId) {
+        SQLiteDatabase db = helper.getWritableDatabase();
+
+        Note note = null;
+        Cursor cursor = null;
+        try {
+            cursor = db.query("db_note", null, "n_id=?", new String[]{noteId + ""}, null, null, null);
+            while (cursor.moveToNext()) {
+
+                String title = cursor.getString(cursor.getColumnIndex("n_title"));
+                String content = cursor.getString(cursor.getColumnIndex("n_content"));
+
+                Group grouptmp = groupDao.queryGroupById(cursor.getInt(cursor.getColumnIndex("n_group_id")));
+                if (grouptmp == null)
+                    grouptmp = groupDao.queryDefaultGroup();
+
+                Date createTime = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").parse(
+                        cursor.getString(cursor.getColumnIndex("n_create_time"))
+                );
+
+                Date updateTime = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").parse(
+                        cursor.getString(cursor.getColumnIndex("n_update_time"))
+                );
+
+
+
+                note = new Note(noteId, title, content, grouptmp, createTime, updateTime);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            if (cursor != null && !cursor.isClosed()) {
+                cursor.close();
+            }
+            if (db != null) {
+                db.close();
+            }
+        }
+        return note;
+    }
+
 
     public Note insertDefaultNote() {
         Note dft = new Note("默认笔记", "");
         dft.setGroupLabel(groupDao.queryDefaultGroup());
-        dft.setId((int) this.insertNote(dft));
-        return dft;
+        long id = this.insertNote(dft);
+        return queryNoteById((int)id);
     }
 
     /**
@@ -141,6 +183,7 @@ public class NoteDao {
             db.endTransaction();
             db.close();
         }
+        Log.e("insertNote", "insertNote: "+ ret);
         return ret;
     }
 
