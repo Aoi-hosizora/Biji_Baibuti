@@ -22,6 +22,7 @@ import android.os.Environment;
 import android.provider.DocumentsContract;
 import android.provider.MediaStore;
 import android.support.annotation.NonNull;
+import android.support.v4.content.ContextCompat;
 import android.support.v4.content.FileProvider;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
@@ -40,6 +41,7 @@ import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
+import android.graphics.BitmapFactory;
 
 import com.baibuti.biji.Data.Group;
 import com.baibuti.biji.Data.GroupAdapter;
@@ -52,13 +54,20 @@ import com.baibuti.biji.util.CommonUtil;
 import com.baibuti.biji.util.ImageUtils;
 import com.baibuti.biji.util.SDCardUtil;
 import com.baibuti.biji.util.StringUtils;
+import com.baibuti.biji.util.ExtractUtil;
+import com.baibuti.biji.util.BitmapUtils;
 import com.sendtion.xrichtext.RichTextEditor;
 
+import static com.baibuti.biji.util.SDUtils.assets2SD;
+
 import java.io.File;
+import java.io.IOException;
+import java.net.URI;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
+import java.io.*;
 
 import io.reactivex.Observable;
 import io.reactivex.ObservableEmitter;
@@ -118,6 +127,12 @@ public class ModifyNoteActivity extends AppCompatActivity implements View.OnClic
 
     private static final int NOTE_NEW = 0; // new
     private static final int NOTE_UPDATE = 1; // modify
+    /**
+     * 权限请求值
+     */
+    private static final int PERMISSION_REQUEST_CODE = 0;
+
+    private static final int PICK_REQUEST_CODE = 10;
 
 
     @Override
@@ -136,7 +151,7 @@ public class ModifyNoteActivity extends AppCompatActivity implements View.OnClic
         insertDialog.setCanceledOnTouchOutside(false);
 
         note = (Note) getIntent().getSerializableExtra("notedata");
-        flag = getIntent().getIntExtra("flag",0);
+        flag = getIntent().getIntExtra("flag", 0);
 
         if (flag == NOTE_NEW)
             setTitle("新建笔记");
@@ -172,6 +187,7 @@ public class ModifyNoteActivity extends AppCompatActivity implements View.OnClic
                 dealWithContent();
             }
         });
+        checkPermissions();
     }
 
     // 确定是否修改了内容
@@ -184,8 +200,8 @@ public class ModifyNoteActivity extends AppCompatActivity implements View.OnClic
     // 获取 Menu 实例
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.modifynoteactivity_menu,menu);
-        this.menu=menu;
+        getMenuInflater().inflate(R.menu.modifynoteactivity_menu, menu);
+        this.menu = menu;
         return true;
     }
 
@@ -198,24 +214,24 @@ public class ModifyNoteActivity extends AppCompatActivity implements View.OnClic
         switch (item.getItemId()) {
             case R.id.id_menu_modifynote_finish:
                 saveNoteData(true);
-            break;
+                break;
 
             case android.R.id.home:
             case R.id.id_menu_modifynote_cancel:
                 CancelSaveNoteData();
-            break;
+                break;
 
             case R.id.id_menu_modifynote_img:
                 ShowPopMenu();
-            break;
+                break;
 
             case R.id.id_menu_modifynote_info:
                 showDetailInfo();
-            break;
+                break;
 
             case R.id.id_menu_modifynote_group:
                 showGroupSetting();
-            break;
+                break;
         }
         return super.onOptionsItemSelected(item);
     }
@@ -377,7 +393,7 @@ public class ModifyNoteActivity extends AppCompatActivity implements View.OnClic
                     WeiXinEditImg(data.getData(), false);
 
 
-                break;
+                    break;
 
 
                 // 拍照并进行裁剪
@@ -385,25 +401,24 @@ public class ModifyNoteActivity extends AppCompatActivity implements View.OnClic
 //                    Log.e("000", "onActivityResult: " + getFilePathByUri(getApplicationContext(),imgUri));
                     // cropPhoto(imgUri, true);
                     WeiXinEditImg(imgUri, true);
-                break;
-
+                    break;
 
 
                 //////////////////////////////////////////////////////////////////////
 
                 // 裁剪后设置图片 <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
                 case REQUEST_CROP: // 裁剪
-                    Log.i("/////////////1212///", "onActivityResult: "+ data.getData());
+                    Log.i("/////////////1212///", "onActivityResult: " + data.getData());
 
                     if (isTakePhoto_Delete) {
                         if (SDCardUtil.deleteFile(getFilePathByUri(this, imgUri)))
-                            Log.e("DELETE", "Delete finish:"+getFilePathByUri(this, imgUri));
+                            Log.e("DELETE", "Delete finish:" + getFilePathByUri(this, imgUri));
                     }
 
                     mCutUri = data.getData();
                     insertImagesSync(mCutUri); // URI
                     // Log.e("S", "onActivityResult: imgUri:REQUEST_CROP:" + mCutUri.toString());
-                break;
+                    break;
             }
         }
     }
@@ -439,7 +454,7 @@ public class ModifyNoteActivity extends AppCompatActivity implements View.OnClic
 
 //            intent.putExtra(IMGEditActivity.EXTRA_IMAGE_SAVE_PATH, uri+" - edited");
             //intent.putExtra(IMGEditActivity.EXTRA_IMAGE_SAVE_PATH,);
-            startActivityForResult(intent,REQUEST_CROP);
+            startActivityForResult(intent, REQUEST_CROP);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -455,7 +470,7 @@ public class ModifyNoteActivity extends AppCompatActivity implements View.OnClic
             file.mkdirs();
         }
         // 要保存的图片文件
-        File imgFile = new File(file+File.separator+ fileName + ".jpg");
+        File imgFile = new File(file + File.separator + fileName + ".jpg");
 
 //        Log.e("00011", "takePhone: "+path+fileName + ".jpg" );
         // 将file转换成uri
@@ -541,8 +556,7 @@ public class ModifyNoteActivity extends AppCompatActivity implements View.OnClic
                         }
                     }).create();
             alertDialog.show();
-        }
-        else
+        } else
             finish();
     }
 
@@ -584,20 +598,19 @@ public class ModifyNoteActivity extends AppCompatActivity implements View.OnClic
 
         if (flag == 0) { // NEW
             long noteId = noteDao.insertNote(note);
-            note.setId((int)noteId);
+            note.setId((int) noteId);
             flag = 1;
 
-        }
-        else  // MODIFY
+        } else  // MODIFY
             if (isModify)
                 noteDao.updateNote(note);
 
         closeSoftKeyInput();
         Intent intent = new Intent();
         intent.putExtra("isModify", isModify);
-        intent.putExtra("modify_note",note);
+        intent.putExtra("modify_note", note);
 
-        setResult(RESULT_OK,intent);
+        setResult(RESULT_OK, intent);
 
         if (isFinish)
             finish();
@@ -651,18 +664,14 @@ public class ModifyNoteActivity extends AppCompatActivity implements View.OnClic
 
             // MediaProvider
 
-            final String[] fin = (uri+"").split(File.separator);
-            final String filename = SDCardUtil.getPictureDir()+fin[4];
+            final String[] fin = (uri + "").split(File.separator);
+            final String filename = SDCardUtil.getPictureDir() + fin[4];
 
             return filename;
         }
 
 
-
-
-
-
-            // 以 content:// 开头的，比如 content://media/extenral/images/media/17766
+        // 以 content:// 开头的，比如 content://media/extenral/images/media/17766
         if (ContentResolver.SCHEME_CONTENT.equals(uri.getScheme()) && Build.VERSION.SDK_INT < Build.VERSION_CODES.KITKAT) {
             Cursor cursor = context.getContentResolver().query(uri, new String[]{MediaStore.Images.Media.DATA}, null, null, null);
             if (cursor != null) {
@@ -727,7 +736,7 @@ public class ModifyNoteActivity extends AppCompatActivity implements View.OnClic
 
         File picPath = new File(externalPubPath, imageName);
         Uri uri = null;
-        if(picPath.exists()) {
+        if (picPath.exists()) {
             uri = Uri.fromFile(picPath);
         }
 
@@ -778,6 +787,7 @@ public class ModifyNoteActivity extends AppCompatActivity implements View.OnClic
     public static boolean isAppDocument(Uri uri) {
         return "com.baibuti.biji.FileProvider".equals(uri.getAuthority());
     }
+
     /**
      * @param uri The Uri to check.
      * @return Whether the Uri authority is Google Photos.
@@ -799,7 +809,7 @@ public class ModifyNoteActivity extends AppCompatActivity implements View.OnClic
             // 检查是否有存储和拍照权限
             if (checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED
                     && checkSelfPermission(Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED
-            ) {
+                    ) {
                 hasPermission = true;
 //                takePhone();
             } else {
@@ -819,6 +829,11 @@ public class ModifyNoteActivity extends AppCompatActivity implements View.OnClic
             } else {
                 Toast.makeText(this, "权限授予失败！", Toast.LENGTH_SHORT).show();
                 hasPermission = false;
+            }
+        } else if (requestCode == PERMISSION_REQUEST_CODE) {
+            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                // Log.i(TAG, "onRequestPermissionsResult: copy");
+                assets2SD(getApplicationContext(), ExtractUtil.LANGUAGE_PATH, ExtractUtil.DEFAULT_LANGUAGE_NAME);
             }
         }
     }
@@ -865,21 +880,48 @@ public class ModifyNoteActivity extends AppCompatActivity implements View.OnClic
         // 图片点击事件
         ContentEditText.setOnRtImageClickListener(new RichTextEditor.OnRtImageClickListener() {
             @Override
-            public void onRtImageClick(String imagePath) {
-                if (!TextUtils.isEmpty(getEditData())){
+            public void onRtImageClick(final String imagePath) {
+                if (!TextUtils.isEmpty(getEditData())) {
                     List<String> imageList = StringUtils.getTextFromHtml(getEditData(), true);
                     if (!TextUtils.isEmpty(imagePath)) {
                         int currentPosition = imageList.indexOf(imagePath);
-                        Toast.makeText(ModifyNoteActivity.this, "点击图片：" + currentPosition + "：" + imagePath , Toast.LENGTH_SHORT).show();
+                        AlertDialog.Builder dialog = new AlertDialog.Builder(ModifyNoteActivity.this);
+                        dialog.setTitle("要进行文字识别吗？");
 
+                        dialog.setMessage(imagePath);
+                        dialog.setCancelable(false);
+                        dialog.setPositiveButton("好", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+
+
+                            
+
+                                Bitmap bitmap = BitmapUtils.getBitmapFromFile(imagePath);
+
+                                final String extaText = ExtractUtil.recognition(bitmap, ModifyNoteActivity.this);
+                                ClipboardManager clipboardManager = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
+                                ClipData clip = ClipData.newPlainText("text", extaText);
+                                clipboardManager.setPrimaryClip(clip);
+                                Toast.makeText(ModifyNoteActivity.this,"识别结果：\n"+extaText+"\n已复制",Toast.LENGTH_SHORT).show();
+                            }
+                        });
+                        dialog.setNegativeButton("取消", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+
+                            }
+                        });
+                        dialog.show();
                     }
                 }
             }
         });
     }
 
+
     // 异步显示数据
-    private void showDataSync(final String html){
+    private void showDataSync(final String html) {
         Observable.create(new ObservableOnSubscribe<String>() {
             @Override
             public void subscribe(ObservableEmitter<String> emitter) {
@@ -892,7 +934,7 @@ public class ModifyNoteActivity extends AppCompatActivity implements View.OnClic
                 .subscribe(new Observer<String>() {
                     @Override
                     public void onComplete() {
-                        if (loadingDialog != null){
+                        if (loadingDialog != null) {
                             loadingDialog.dismiss();
                         }
                         if (ContentEditText != null) {
@@ -903,7 +945,7 @@ public class ModifyNoteActivity extends AppCompatActivity implements View.OnClic
 
                     @Override
                     public void onError(Throwable e) {
-                        if (loadingDialog != null){
+                        if (loadingDialog != null) {
                             loadingDialog.dismiss();
                         }
                         Toast.makeText(ModifyNoteActivity.this, "解析错误：图片不存在或已损坏", Toast.LENGTH_SHORT).show();
@@ -940,31 +982,29 @@ public class ModifyNoteActivity extends AppCompatActivity implements View.OnClic
                 emitter.onNext(text);
             }
             emitter.onComplete();
-        }catch (Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
             emitter.onError(e);
         }
     }
 
     // 异步由Uri插入图片
-    private void insertImagesSync(final Uri data){
+    private void insertImagesSync(final Uri data) {
         insertDialog.show();
-
-
 
 
         Observable.create(new ObservableOnSubscribe<String>() {
             @Override
             public void subscribe(ObservableEmitter<String> emitter) {
-                try{
+                try {
                     ContentEditText.measure(0, 0);
                     Log.e("0", "###data=" + data);
-                    String imagePath = SDCardUtil.getFilePathFromUri(getApplicationContext(),  data);
+                    String imagePath = SDCardUtil.getFilePathFromUri(getApplicationContext(), data);
                     Log.e("0", "###path=" + imagePath);
-                    Bitmap bitmap = ImageUtils.getSmallBitmap(data+"", screenWidth, screenHeight);//压缩图片
+                    Bitmap bitmap = ImageUtils.getSmallBitmap(data + "", screenWidth, screenHeight);//压缩图片
                     //bitmap = BitmapFactory.decodeFile(imagePath);
                     imagePath = SDCardUtil.saveToSdCard(bitmap);
-                    Log.e("1", "###imagePath="+imagePath);
+                    Log.e("1", "###imagePath=" + imagePath);
                     emitter.onNext(imagePath);
 
 
@@ -972,7 +1012,7 @@ public class ModifyNoteActivity extends AppCompatActivity implements View.OnClic
                     //subscriber.onNext("http://p695w3yko.bkt.clouddn.com/18-5-5/30271511.jpg");
 
                     emitter.onComplete();
-                }catch (Exception e){
+                } catch (Exception e) {
                     e.printStackTrace();
                     emitter.onError(e);
                 }

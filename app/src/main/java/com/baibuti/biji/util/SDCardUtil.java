@@ -158,5 +158,18 @@ public class SDCardUtil {
             isOk = file.delete(); // 删除文件
         return isOk;
     }
+    public static Uri getImageStreamFromExternal(String imageName) {
+        File externalPubPath = Environment.getExternalStoragePublicDirectory(
+                Environment.DIRECTORY_PICTURES
+        );
+
+        File picPath = new File(externalPubPath, imageName);
+        Uri uri = null;
+        if(picPath.exists()) {
+            uri = Uri.fromFile(picPath);
+        }
+
+        return uri;
+    }
 
 }
