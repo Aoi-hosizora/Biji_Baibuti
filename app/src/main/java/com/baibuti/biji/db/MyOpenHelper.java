@@ -42,11 +42,6 @@ public class MyOpenHelper extends SQLiteOpenHelper {
                 "n_group_id integer, " +
                 "n_create_time datetime, " +
                 "n_update_time datetime )");
-
-        
-
-//        db.execSQL("insert into db_note(n_title, n_content, n_group_id, n_create_time, n_update_time)" +
-//                "values(?,?,?,?,?)", new String[]{"默认笔记", "", "0", CommonUtil.date2string(new Date()),CommonUtil.date2string(new Date())});
     }
 
     @Override
