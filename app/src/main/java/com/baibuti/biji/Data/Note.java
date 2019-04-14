@@ -41,6 +41,14 @@ public class Note implements Serializable, Comparable<Note> {
         this.GroupLabel = new Group();
     }
 
+    public Note(int id, String title, String content, Group groupLabel, Date createTime, Date updateTime) {
+        this(title, content);
+        this.setId(id);
+        this.setGroupLabel(groupLabel);
+        this.setCreateTime(createTime);
+        this.setUpdateTime(updateTime);
+    }
+
     @Override
     public int compareTo(@NonNull Note o) {
         return o.getUpdateTime().compareTo(this.getUpdateTime());
@@ -117,11 +125,7 @@ public class Note implements Serializable, Comparable<Note> {
     }
 
     public String getUpdateTime_TimeString() {
-        SimpleDateFormat df;
-        if (new Date().getDate() == this.UpdateTime.getDate())
-            df = new SimpleDateFormat("HH:mm");
-        else
-            df = new SimpleDateFormat("MM-dd");
+        SimpleDateFormat df = new SimpleDateFormat("HH:mm");
 
         return df.format(this.UpdateTime);
     }

@@ -23,6 +23,7 @@ import com.baibuti.biji.Activity.ViewModifyNoteActivity;
 import com.baibuti.biji.Fragment.NoteFragment;
 import com.baibuti.biji.R;
 import com.baibuti.biji.db.NoteDao;
+import com.baibuti.biji.util.CommonUtil;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -30,83 +31,6 @@ import java.util.List;
 /**
  * Created by Windows 10 on 016 2019/02/16.
  */
-
-//public class NoteAdapter extends ArrayAdapter<Note> {
-//
-//    private int resourceId;
-//    private Fragment fragment;
-//    private NoteDao noteDao;
-//
-//    public NoteAdapter(Context context, int textViewResourceId, List<Note> objects, Fragment fragment) {
-//        super(context, textViewResourceId, objects);
-//        resourceId = textViewResourceId;
-//        this.fragment = fragment;
-//        this.noteDao = new NoteDao(getContext());
-//    }
-//
-//    @Override
-//    public View getView(final int position, final View convertView, final ViewGroup parent) {
-//        final Note note = getItem(position);
-//        View view = LayoutInflater.from(getContext()).inflate(resourceId, parent, false);
-//        TextView Title = (TextView) view.findViewById(R.id.id_notelistview_title);
-//        TextView MakeTime = (TextView) view.findViewById(R.id.id_notelistview_maketime);
-//        TextView Type = (TextView) view.findViewById(R.id.id_notelistview_type);
-//
-//        Title.setText(note.getTitle());
-//        MakeTime.setText(note.getUpdateTime_ShortString());
-//
-//        CardView cardview = (CardView) view.findViewById(R.id.tab_note_card);
-//        cardview.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View view) {
-//                Intent intent=new Intent(getContext(), ViewModifyNoteActivity.class);
-//                intent.putExtra("notedata",note);
-//                intent.putExtra("notepos", position);
-//                intent.putExtra("flag",1); // UPDATE
-//                fragment.startActivityForResult(intent,1); // 1 from CardView
-//            }
-//        });
-//
-//
-//
-////        final Note DeletedNoteTmp = new Note(note);
-////        final NoteDao noteDao = new NoteDao(getContext());
-//
-//        cardview.setOnLongClickListener(new View.OnLongClickListener() {
-//            @Override
-//            public boolean onLongClick(View v) {
-//                AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
-//                builder.setTitle("提示");
-//                builder.setMessage("确定删除笔记？");
-//                builder.setCancelable(false);
-//                builder.setPositiveButton("确定", new DialogInterface.OnClickListener() {
-//                    @Override
-//                    public void onClick(DialogInterface dialog, int which) {
-//                        int ret = noteDao.deleteNote(note.getId());
-//                        if (ret > 0) {
-//                             Toast.makeText(getContext(), "删除成功", Toast.LENGTH_SHORT).show();
-//
-////                            Snackbar.make(getView(position, convertView, parent), "删除成功", Snackbar.LENGTH_SHORT).setAction("撤销删除", new View.OnClickListener() {
-////                                @Override
-////                                public void onClick(View v) {
-////                                    long noteId = noteDao.insertNote(DeletedNoteTmp);
-////                                    DeletedNoteTmp.setId((int)noteId);
-////                                }
-////                            }).show();
-//                        }
-//                    }
-//                });
-//                builder.setNegativeButton("取消", null);
-//                builder.create().show();
-//
-//                return false;
-//            }
-//        });
-//        return view;
-//    }
-//
-//}
-
 public class NoteAdapter extends RecyclerView.Adapter<NoteAdapter.ViewHolder> implements View.OnClickListener, View.OnLongClickListener {
 
     private Context mContext;
@@ -191,6 +115,7 @@ public class NoteAdapter extends RecyclerView.Adapter<NoteAdapter.ViewHolder> im
         holder.tv_list_summary.setText(note.getContent());
         holder.tv_list_time.setText(note.getUpdateTime_ShortString());
         holder.tv_list_group.setText(note.getGroupLabel().getName());
+        holder.tv_list_group.setTextColor(CommonUtil.ColorHex_IntEncoding(note.getGroupLabel().getColor()));
     }
 
     @Override

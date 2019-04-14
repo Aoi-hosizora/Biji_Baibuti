@@ -4,25 +4,12 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
-import android.support.v4.widget.SwipeRefreshLayout;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
-import android.widget.ListView;
-import android.widget.Toast;
 
 
-import com.baibuti.biji.Data.Data;
-import com.baibuti.biji.Data.Note;
-import com.baibuti.biji.Data.NoteAdapter;
-import com.baibuti.biji.Activity.ModifyNoteActivity;
 import com.baibuti.biji.R;
-
-import java.util.ArrayList;
-import java.util.Date;
-
-import static android.app.Activity.RESULT_OK;
 
 public class SearchFragment extends Fragment implements View.OnClickListener {
 

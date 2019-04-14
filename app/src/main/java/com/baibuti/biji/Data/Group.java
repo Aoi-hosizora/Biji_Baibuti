@@ -12,10 +12,22 @@ public class Group implements Serializable {
 
     private String color;//分类颜色，存储颜色代码
 
+    @Override
+    public boolean equals(Object obj) {
+        Group that = (Group) obj;
+        if (this.id == that.id &&
+            this.name.equals(that.name) &&
+            this.order == that.order &&
+            this.color.equals(that.color))
+            return true;
+
+        return false;
+    }
+
     public Group() {
         id = order = 0;
-        name = "默认笔记";
-        color = "#FFFFFF";
+        name = "";
+        color = "#F0F0F0";
     }
 
     public Group(int id, String name, int order, String color) {

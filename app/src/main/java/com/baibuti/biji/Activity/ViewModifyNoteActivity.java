@@ -36,6 +36,8 @@ import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
 
+import static com.baibuti.biji.util.CommonUtil.ColorHex_IntEncoding;
+
 public class ViewModifyNoteActivity extends AppCompatActivity implements View.OnClickListener {
 
     private TextView TitleEditText_View;
@@ -76,6 +78,7 @@ public class ViewModifyNoteActivity extends AppCompatActivity implements View.On
         TitleEditText_View.setText(note.getTitle());
         UpdateTimeTextView_View.setText(note.getUpdateTime_ShortString());
         GroupNameTextView_View.setText(note.getGroupLabel().getName());
+        GroupNameTextView_View.setTextColor(ColorHex_IntEncoding(note.getGroupLabel().getColor()));
 
         //////////////////////////////////////////////////
         ContentEditText_View.post(new Runnable() {
@@ -137,17 +140,7 @@ public class ViewModifyNoteActivity extends AppCompatActivity implements View.On
 
             case android.R.id.home:
             case R.id.id_menu_modifynote_viewcancel:
-                Intent motointent = new Intent();
-
-                if (isModify) {
-                    motointent.putExtra("modify_note",note);
-//                    motointent.putExtra("modify_note_pos", notePos);
-                    setResult(RESULT_OK,motointent);
-                }
-                else
-                    setResult(RESULT_CANCELED,motointent);
-
-                finish();
+                BackToActivity();
                 break;
 
             case R.id.id_menu_modifynote_viewinfo:
@@ -157,6 +150,24 @@ public class ViewModifyNoteActivity extends AppCompatActivity implements View.On
         return true;
     }
 
+    @Override
+    public void onBackPressed() {
+        BackToActivity();
+    }
+
+    private void BackToActivity() {
+        Intent motointent = new Intent();
+
+        if (isModify) {
+            motointent.putExtra("modify_note",note);
+//                    motointent.putExtra("modify_note_pos", notePos);
+            setResult(RESULT_OK,motointent);
+        }
+        else
+            setResult(RESULT_CANCELED,motointent);
+
+        finish();
+    }
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -164,7 +175,7 @@ public class ViewModifyNoteActivity extends AppCompatActivity implements View.On
             case 1: // MODIFY
                 if (resultCode == RESULT_OK) {
                         Note newnote = (Note) data.getSerializableExtra("modify_note");
-                        isModify = data.getBooleanExtra("isModify", false);
+                        isModify = data.getBooleanExtra("isModify", true);
 
                         if (isModify) {
                             note = new Note(newnote);
@@ -172,6 +183,7 @@ public class ViewModifyNoteActivity extends AppCompatActivity implements View.On
                             TitleEditText_View.setText(note.getTitle());
                             UpdateTimeTextView_View.setText(note.getUpdateTime_ShortString());
                             GroupNameTextView_View.setText(note.getGroupLabel().getName());
+                            GroupNameTextView_View.setTextColor(ColorHex_IntEncoding(note.getGroupLabel().getColor()));
                             ContentEditText_View.post(new Runnable() {
                                 @Override
                                 public void run() {
