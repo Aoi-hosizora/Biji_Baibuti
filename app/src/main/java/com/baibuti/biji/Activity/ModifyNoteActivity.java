@@ -96,6 +96,10 @@ public class ModifyNoteActivity extends AppCompatActivity implements View.OnClic
     private Disposable subsLoading;
     private Disposable subsInsert;
 
+    private AlertDialog.Builder idenDialog;
+    private ProgressDialog idenLoadingDialog;
+    private AlertDialog.Builder resultDialog;
+
     private Menu menu;
 
     private Note note;
@@ -885,34 +889,26 @@ public class ModifyNoteActivity extends AppCompatActivity implements View.OnClic
                     List<String> imageList = StringUtils.getTextFromHtml(getEditData(), true);
                     if (!TextUtils.isEmpty(imagePath)) {
                         int currentPosition = imageList.indexOf(imagePath);
-                        AlertDialog.Builder dialog = new AlertDialog.Builder(ModifyNoteActivity.this);
-                        dialog.setTitle("要进行文字识别吗？");
+                        idenDialog = new AlertDialog.Builder(ModifyNoteActivity.this);
+                        idenDialog.setTitle("要进行文字识别吗？");
 
-                        dialog.setMessage(imagePath);
-                        dialog.setCancelable(false);
-                        dialog.setPositiveButton("好", new DialogInterface.OnClickListener() {
+                        idenDialog.setMessage(imagePath);
+                        idenDialog.setCancelable(false);
+                        idenDialog.setPositiveButton("好", new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
-
-
-                            
 
                                 Bitmap bitmap = BitmapUtils.getBitmapFromFile(imagePath);
-
-                                final String extaText = ExtractUtil.recognition(bitmap, ModifyNoteActivity.this);
-                                ClipboardManager clipboardManager = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
-                                ClipData clip = ClipData.newPlainText("text", extaText);
-                                clipboardManager.setPrimaryClip(clip);
-                                Toast.makeText(ModifyNoteActivity.this,"识别结果：\n"+extaText+"\n已复制",Toast.LENGTH_SHORT).show();
+                                idenWordsSync(bitmap);
                             }
                         });
-                        dialog.setNegativeButton("取消", new DialogInterface.OnClickListener() {
+                        idenDialog.setNegativeButton("取消", new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
 
                             }
                         });
-                        dialog.show();
+                        idenDialog.show();
                     }
                 }
             }
@@ -1049,4 +1045,69 @@ public class ModifyNoteActivity extends AppCompatActivity implements View.OnClic
                     }
                 });
     }
+
+    //异步识别文字
+    private void idenWordsSync(final Bitmap bitmap) {
+        idenLoadingDialog = new ProgressDialog(ModifyNoteActivity.this);
+        idenLoadingDialog.setTitle("识别中……");
+        idenLoadingDialog.show();
+        Observable.create(new ObservableOnSubscribe<String>() {
+            @Override
+            public void subscribe(ObservableEmitter<String> emitter) throws Exception {
+                final String extaText = ExtractUtil.recognition(bitmap, ModifyNoteActivity.this);
+                emitter.onNext(extaText);
+                emitter.onComplete();
+            }
+        })
+                //.onBackpressureBuffer()
+                .subscribeOn(Schedulers.io())//生产事件在io
+                .observeOn(AndroidSchedulers.mainThread())//消费事件在UI线程
+                .subscribe(new Observer<String>() {
+                    @Override
+                    public void onComplete() {
+                        //Toast.makeText(ModifyNoteActivity.this, "文字复制成功", Toast.LENGTH_SHORT).show();
+                    }
+
+                    @Override
+                    public void onError(Throwable e) {
+                        if (idenLoadingDialog != null && idenLoadingDialog.isShowing()) {
+                            idenLoadingDialog.dismiss();
+                        }
+                        Toast.makeText(ModifyNoteActivity.this, "文字识别失败", Toast.LENGTH_SHORT).show();
+                    }
+
+                    @Override
+                    public void onSubscribe(Disposable d) {
+                        subsInsert = d;
+                    }
+
+                    @Override
+                    public void onNext(final String extaText) {
+                        if (idenLoadingDialog != null && idenLoadingDialog.isShowing()) {
+                            idenLoadingDialog.dismiss();
+                        }
+                        final EditText et = new EditText(ModifyNoteActivity.this);
+                        resultDialog = new AlertDialog.Builder(ModifyNoteActivity.this);
+                        resultDialog.setTitle("识别结果：");
+                        resultDialog.setView(et);
+                        et.setText(extaText);
+                        resultDialog.setCancelable(true);
+                        resultDialog.setPositiveButton("复制全部", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                ClipboardManager clipboardManager = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
+                                ClipData clip = ClipData.newPlainText("text", extaText);
+                                clipboardManager.setPrimaryClip(clip);
+                            }
+                        });
+                        resultDialog.setNegativeButton("返回", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                            }
+                        });
+                        resultDialog.show();
+                    }
+                });
+    }
 }
+
