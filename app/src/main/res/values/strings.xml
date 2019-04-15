@@ -24,8 +24,6 @@
 
     <!-- View Modify Note -->
 
-        <!-- UI -->
-
         <!-- OnCreate -->
         <string name="VMNoteActivity_Title">笔记详情</string>
         <string name="VMNoteActivity_LoadingData">数据加载中...</string>
@@ -44,7 +42,10 @@
 
     <!-- Modify Note -->
 
-        <!-- UI -->
+        <!-- Bottom Menu -->
+        <string name="MNoteActivity_BottomMenuCamera">拍照</string>
+        <string name="MNoteActivity_BottomMenuGallery">从相册中选取</string>
+        <string name="MNoteActivity_BottomMenuCancel">取消</string>
 
         <!-- OnCreate -->
         <string name="MNoteActivity_LoadingData">数据加载中...</string>
@@ -103,9 +104,19 @@
         <string name="MNoteActivity_insertImagesSyncSuccess">图片插入成功</string>
         <string name="MNoteActivity_insertImagesSyncError">图片插入失败</string>
 
+    <!-- Content New UI -->
+        <string name="ContentNew_NoteTitleHint">请输入标题</string>
+        <string name="ContentNew_GroupTitleHint">默认笔记</string>
+        <string name="ContentNew_NoteContentHint">在这里输入内容</string>
+
     <!-- Group Dialog -->
 
-        <!-- Show Modify Group Dialog -->
+        <!-- Adapter UI -->
+        <string name="GroupAdapter_GroupTitle">笔记分类名...</string>
+        <string name="GroupAdapter_GroupColor">笔记代表颜色：#000000</string>
+
+
+    <!-- Show Modify Group Dialog -->
         <string name="GroupDialog_ModifyAlertTitle">笔记分组</string>
         <string name="GroupDialog_ModifyAlertNeutralButtonForAdd">添加</string>
         <string name="GroupDialog_ModifyAlertPositiveButtonForBack">返回</string>

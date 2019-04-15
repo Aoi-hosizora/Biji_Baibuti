@@ -16,7 +16,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="@null"
-        android:hint="请输入标题"
+        android:hint="@string/ContentNew_NoteTitleHint"
         android:textSize="@dimen/text_size_18"
         android:textColor="@color/grey_700"
         android:padding="@dimen/activity_margin_16"/>
@@ -46,7 +46,7 @@
             android:textColor="@color/grey_500"
             android:layout_alignParentRight="true"
             android:layout_alignParentEnd="true"
-            tools:text="默认笔记"/>
+            tools:text="@string/ContentNew_GroupTitleHint"/>
     </RelativeLayout>
 
     <!--et_new_content-->
@@ -58,7 +58,7 @@
         app:rt_editor_text_line_space="6dp"
         app:rt_editor_image_height="500"
         app:rt_editor_image_bottom="10"
-        app:rt_editor_text_init_hint="在这里输入内容"
+        app:rt_editor_text_init_hint="@string/ContentNew_NoteContentHint"
         app:rt_editor_text_size="16sp"
         app:rt_editor_text_color="@color/grey_900"/>
 
