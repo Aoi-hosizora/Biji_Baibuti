@@ -58,17 +58,14 @@ public class ViewModifyNoteActivity extends AppCompatActivity implements View.On
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_viewmodifyplainnote);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        setTitle("笔记详情");
+        setTitle(R.string.VMNoteActivity_Title);
 
         loadingDialog = new ProgressDialog(this);
-        loadingDialog.setMessage("数据加载中...");
+        loadingDialog.setMessage(getResources().getString(R.string.VMNoteActivity_LoadingData));
         loadingDialog.setCanceledOnTouchOutside(false);
         loadingDialog.show();
 
-//        Bundle bundle = getIntent().getBundleExtra("data");
-//        note = (Note) bundle.getSerializable("notedata");
         note = (Note) getIntent().getSerializableExtra("notedata");
-//        notePos = getIntent().getIntExtra("notepos",0);
 
         TitleEditText_View = (TextView) findViewById(R.id.id_modifynote_viewtitle);
         UpdateTimeTextView_View = (TextView) findViewById(R.id.id_modifynote_viewupdatetime);
@@ -198,24 +195,25 @@ public class ViewModifyNoteActivity extends AppCompatActivity implements View.On
     }
 
     private void showDetailInfo() {
-        final String Info = "标题：" + note.getTitle() + "\n" +
-                "创建时间：" + note.getCreateTime_FullString() + "\n" +
-                "最近修改时间：" + note.getUpdateTime_FullString() + "\n\n" +
-                "分类：" + note.getGroupLabel().getName();
+        final String Info = getResources().getString(R.string.VMNoteActivity_InfoTitle) + note.getTitle() + "\n" +
+                            getResources().getString(R.string.VMNoteActivity_InfoCreateTime) + note.getCreateTime_FullString() + "\n" +
+                            getResources().getString(R.string.VMNoteActivity_InfoUpdateTime) + note.getUpdateTime_FullString() + "\n\n" +
+                            getResources().getString(R.string.VMNoteActivity_InfoGroupLabelTitle) + note.getGroupLabel().getName();
+
         AlertDialog dialog = new AlertDialog.Builder(this)
-                .setTitle("详细信息")
+                .setTitle(R.string.VMNoteActivity_InfoAlertTitle)
                 .setMessage(Info)
-                .setNeutralButton("复制", new DialogInterface.OnClickListener() {
+                .setNeutralButton(R.string.VMNoteActivity_InfoAlertNeutralButtonForCopy, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         ClipboardManager clipboardManager = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
-                        ClipData clip = ClipData.newPlainText("text", Info);
+                        ClipData clip = ClipData.newPlainText(getResources().getString(R.string.VMNoteActivity_InfoAlertClipDataLabel), Info);
                         clipboardManager.setPrimaryClip(clip);
-                        Toast.makeText(ViewModifyNoteActivity.this, "信息复制成功。", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(ViewModifyNoteActivity.this, R.string.VMNoteActivity_InfoAlertCopySuccess, Toast.LENGTH_SHORT).show();
                         dialog.dismiss();
                     }
                 })
-                .setNegativeButton("确定", new DialogInterface.OnClickListener() {
+                .setNegativeButton(R.string.VMNoteActivity_InfoAlertNegativeButtonForOK, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         dialog.dismiss();

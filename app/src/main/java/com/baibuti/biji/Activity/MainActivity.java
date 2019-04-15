@@ -67,7 +67,7 @@ public class MainActivity extends FragmentActivity implements OnClickListener, S
 
     @Override
     public void onSearcherClick(String content) {
-        Toast.makeText(this, "This is searcher", Toast.LENGTH_LONG).show();
+        // Toast.makeText(this, "This is searcher", Toast.LENGTH_LONG).show();
     }
 
     private void initDatas() {

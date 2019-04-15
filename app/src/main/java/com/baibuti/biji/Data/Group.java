@@ -12,6 +12,8 @@ public class Group implements Serializable {
 
     private String color;//分类颜色，存储颜色代码
 
+    public static String GetDefaultGroupName = "默认分组";
+
     @Override
     public boolean equals(Object obj) {
         Group that = (Group) obj;

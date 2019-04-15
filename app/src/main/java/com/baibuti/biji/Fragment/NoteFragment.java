@@ -262,25 +262,28 @@ public class NoteFragment extends Fragment implements View.OnClickListener {
         noteAdapter.setOnItemLongClickListener(new NoteAdapter.OnRecyclerViewItemLongClickListener() {
             @Override
             public void onItemLongClick(final View view, final Note note) {
+                DeleteNote(view, note);
+            }
+        });
+    }
 
-//                final Note notetmp = note;
+    private void DeleteNote(final View view, final Note note) {
+        AlertDialog deleteAlert = new AlertDialog
+                .Builder(getContext())
+                .setTitle(R.string.DeleteAlert_Title)
+                .setMessage(String.format(getResources().getString(R.string.DeleteAlert_Msg), note.getTitle()))
+                .setPositiveButton(R.string.DeleteAlert_PositiveButton, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
 
-                AlertDialog deleteAlert = new AlertDialog
-                    .Builder(getContext())
-                    .setTitle("提示")
-                    .setMessage("确定删除笔记 \"" + note.getTitle() + "\" 吗？")
-                    .setPositiveButton("确定", new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int which) {
+                        int ret = noteDao.deleteNote(note.getId());
 
-                            int ret = noteDao.deleteNote(note.getId());
+                        if (ret > 0) {
+                            NoteList.remove(note);
+                            noteAdapter.notifyDataSetChanged();
 
-                            if (ret > 0) {
-                                NoteList.remove(note);
-                                noteAdapter.notifyDataSetChanged();
-
-                                Snackbar.make(view ,"删除成功", Snackbar.LENGTH_LONG)
-                                    .setAction("撤销", new View.OnClickListener() {
+                            Snackbar.make(view , R.string.DeleteAlert_DeleteSuccess, Snackbar.LENGTH_LONG)
+                                    .setAction(R.string.DeleteAlert_Undo, new View.OnClickListener() {
                                         @Override
                                         public void onClick(View v) {
                                             try {
@@ -291,18 +294,16 @@ public class NoteFragment extends Fragment implements View.OnClickListener {
                                             } catch (Exception ex) {
                                                 ex.printStackTrace();
                                             }
-                                            Snackbar.make(view, "已恢复", Snackbar.LENGTH_SHORT).show();
+                                            Snackbar.make(view, R.string.DeleteAlert_UndoSuccess, Snackbar.LENGTH_SHORT).show();
                                         }
                                     }).show();
-                            }
                         }
-                    })
-                    .setNegativeButton("取消", null)
-                    .create();
+                    }
+                })
+                .setNegativeButton(R.string.DeleteAlert_NegativeButton, null)
+                .create();
 
-                deleteAlert.show();
-            }
-        });
+        deleteAlert.show();
     }
 
     private void initSearchFrag() {

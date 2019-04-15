@@ -167,7 +167,7 @@ public class GroupDao {
     public Group queryDefaultGroup() {
         Group group = null;
 
-        group = this.queryGroupByName("默认分组");
+        group = this.queryGroupByName(Group.GetDefaultGroupName);
         if (group != null)
             return group;
 
@@ -178,13 +178,16 @@ public class GroupDao {
         Group def = new Group();
         def.setOrder(0);
         def.setColor("#F0F0F0");
-        def.setName("默认分组");
+        def.setName(Group.GetDefaultGroupName);
 
         this.insertGroup(def);
 
-        return this.queryGroupByName("默认分组");
+        return this.queryGroupByName(Group.GetDefaultGroupName);
     }
 
+    /**
+     * 检查是否有重复
+     */
     public int checkDuplicate(Group group, Group oldgroup) {
         List<Group> tmp = selectAllGroup();
         int cnt=0;
@@ -196,6 +199,9 @@ public class GroupDao {
         return cnt;
     }
 
+    /**
+     * 处理重复插入
+     */
     private Group HandleDuplicate(Group group, Group oldgroup) {
         int cnt = checkDuplicate(group, oldgroup);
         if (cnt!=0)
@@ -276,12 +282,15 @@ public class GroupDao {
         }
     }
 
+    /**
+     * 检查是否为默认分组
+     */
     private boolean checkDefaultGroup(Group group) {
         if (group==null) {
             Log.e("checkDefaultGroup", "checkDefaultGroup: group==null");
         }
         else
-            if ("默认分组".equals(group.getName())) {
+            if (Group.GetDefaultGroupName.equals(group.getName())) {
                 return true;
             }
         return false;
@@ -290,15 +299,9 @@ public class GroupDao {
     /**
      * 删除一个分类
      */
-    public int deleteGroup(int groupId) {
-        try {
-            if (checkDefaultGroup(queryGroupById(groupId)))
-                throw new EditDefaultGroupException();
-        }
-        catch (EditDefaultGroupException ed) {
-            Toast.makeText(context, "无法删除默认分组。", Toast.LENGTH_SHORT).show();
-            return -1;
-        }
+    public int deleteGroup(int groupId) throws EditDefaultGroupException {
+        if (checkDefaultGroup(queryGroupById(groupId)))
+            throw new EditDefaultGroupException();
 
         //////////////////////////////////////////////////
 

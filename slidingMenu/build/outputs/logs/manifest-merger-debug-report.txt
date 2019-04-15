@@ -1,37 +1,37 @@
 -- Merging decision tree log ---
 manifest
-ADDED from D:\asTodo\Biji_Baibuti\slidingMenu\AndroidManifest.xml:2:1-7:12
-INJECTED from D:\asTodo\Biji_Baibuti\slidingMenu\AndroidManifest.xml:2:1-7:12
-INJECTED from D:\asTodo\Biji_Baibuti\slidingMenu\AndroidManifest.xml:2:1-7:12
-INJECTED from D:\asTodo\Biji_Baibuti\slidingMenu\AndroidManifest.xml:2:1-7:12
-INJECTED from D:\asTodo\Biji_Baibuti\slidingMenu\AndroidManifest.xml:2:1-7:12
-INJECTED from D:\asTodo\Biji_Baibuti\slidingMenu\AndroidManifest.xml:2:1-7:12
-INJECTED from D:\asTodo\Biji_Baibuti\slidingMenu\AndroidManifest.xml:2:1-7:12
+ADDED from F:\Android_Ren\Biji\slidingMenu\AndroidManifest.xml:2:1-7:12
+INJECTED from F:\Android_Ren\Biji\slidingMenu\AndroidManifest.xml:2:1-7:12
+INJECTED from F:\Android_Ren\Biji\slidingMenu\AndroidManifest.xml:2:1-7:12
+INJECTED from F:\Android_Ren\Biji\slidingMenu\AndroidManifest.xml:2:1-7:12
+INJECTED from F:\Android_Ren\Biji\slidingMenu\AndroidManifest.xml:2:1-7:12
+INJECTED from F:\Android_Ren\Biji\slidingMenu\AndroidManifest.xml:2:1-7:12
+INJECTED from F:\Android_Ren\Biji\slidingMenu\AndroidManifest.xml:2:1-7:12
 	package
-		ADDED from D:\asTodo\Biji_Baibuti\slidingMenu\AndroidManifest.xml:3:5-50
-		INJECTED from D:\asTodo\Biji_Baibuti\slidingMenu\AndroidManifest.xml
-		INJECTED from D:\asTodo\Biji_Baibuti\slidingMenu\AndroidManifest.xml
+		ADDED from F:\Android_Ren\Biji\slidingMenu\AndroidManifest.xml:3:5-50
+		INJECTED from F:\Android_Ren\Biji\slidingMenu\AndroidManifest.xml
+		INJECTED from F:\Android_Ren\Biji\slidingMenu\AndroidManifest.xml
 	android:versionName
-		ADDED from D:\asTodo\Biji_Baibuti\slidingMenu\AndroidManifest.xml:5:5-30
-		INJECTED from D:\asTodo\Biji_Baibuti\slidingMenu\AndroidManifest.xml
-		INJECTED from D:\asTodo\Biji_Baibuti\slidingMenu\AndroidManifest.xml
+		ADDED from F:\Android_Ren\Biji\slidingMenu\AndroidManifest.xml:5:5-30
+		INJECTED from F:\Android_Ren\Biji\slidingMenu\AndroidManifest.xml
+		INJECTED from F:\Android_Ren\Biji\slidingMenu\AndroidManifest.xml
 	xmlns:android
-		ADDED from D:\asTodo\Biji_Baibuti\slidingMenu\AndroidManifest.xml:2:11-69
+		ADDED from F:\Android_Ren\Biji\slidingMenu\AndroidManifest.xml:2:11-69
 	android:versionCode
-		ADDED from D:\asTodo\Biji_Baibuti\slidingMenu\AndroidManifest.xml:4:5-28
-		INJECTED from D:\asTodo\Biji_Baibuti\slidingMenu\AndroidManifest.xml
-		INJECTED from D:\asTodo\Biji_Baibuti\slidingMenu\AndroidManifest.xml
+		ADDED from F:\Android_Ren\Biji\slidingMenu\AndroidManifest.xml:4:5-28
+		INJECTED from F:\Android_Ren\Biji\slidingMenu\AndroidManifest.xml
+		INJECTED from F:\Android_Ren\Biji\slidingMenu\AndroidManifest.xml
 uses-sdk
-INJECTED from D:\asTodo\Biji_Baibuti\slidingMenu\AndroidManifest.xml reason: use-sdk injection requested
-INJECTED from D:\asTodo\Biji_Baibuti\slidingMenu\AndroidManifest.xml
-INJECTED from D:\asTodo\Biji_Baibuti\slidingMenu\AndroidManifest.xml
-INJECTED from D:\asTodo\Biji_Baibuti\slidingMenu\AndroidManifest.xml
-INJECTED from D:\asTodo\Biji_Baibuti\slidingMenu\AndroidManifest.xml
+INJECTED from F:\Android_Ren\Biji\slidingMenu\AndroidManifest.xml reason: use-sdk injection requested
+INJECTED from F:\Android_Ren\Biji\slidingMenu\AndroidManifest.xml
+INJECTED from F:\Android_Ren\Biji\slidingMenu\AndroidManifest.xml
+INJECTED from F:\Android_Ren\Biji\slidingMenu\AndroidManifest.xml
+INJECTED from F:\Android_Ren\Biji\slidingMenu\AndroidManifest.xml
 	android:targetSdkVersion
-		INJECTED from D:\asTodo\Biji_Baibuti\slidingMenu\AndroidManifest.xml
-		ADDED from D:\asTodo\Biji_Baibuti\slidingMenu\AndroidManifest.xml
-		INJECTED from D:\asTodo\Biji_Baibuti\slidingMenu\AndroidManifest.xml
+		INJECTED from F:\Android_Ren\Biji\slidingMenu\AndroidManifest.xml
+		ADDED from F:\Android_Ren\Biji\slidingMenu\AndroidManifest.xml
+		INJECTED from F:\Android_Ren\Biji\slidingMenu\AndroidManifest.xml
 	android:minSdkVersion
-		INJECTED from D:\asTodo\Biji_Baibuti\slidingMenu\AndroidManifest.xml
-		ADDED from D:\asTodo\Biji_Baibuti\slidingMenu\AndroidManifest.xml
-		INJECTED from D:\asTodo\Biji_Baibuti\slidingMenu\AndroidManifest.xml
+		INJECTED from F:\Android_Ren\Biji\slidingMenu\AndroidManifest.xml
+		ADDED from F:\Android_Ren\Biji\slidingMenu\AndroidManifest.xml
+		INJECTED from F:\Android_Ren\Biji\slidingMenu\AndroidManifest.xml

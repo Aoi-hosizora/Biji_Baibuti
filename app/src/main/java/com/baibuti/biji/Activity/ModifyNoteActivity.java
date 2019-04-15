@@ -99,7 +99,6 @@ public class ModifyNoteActivity extends AppCompatActivity implements View.OnClic
 
     private AlertDialog.Builder idenDialog;
     private ProgressDialog idenLoadingDialog;
-    private AlertDialog.Builder resultDialog;
 
     private Menu menu;
 
@@ -148,12 +147,12 @@ public class ModifyNoteActivity extends AppCompatActivity implements View.OnClic
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
         loadingDialog = new ProgressDialog(this);
-        loadingDialog.setMessage("数据加载中...");
+        loadingDialog.setMessage(getResources().getString(R.string.MNoteActivity_LoadingData));
         loadingDialog.setCanceledOnTouchOutside(false);
         loadingDialog.show();
 
         insertDialog = new ProgressDialog(this);
-        insertDialog.setMessage("正在插入图片...");
+        insertDialog.setMessage(getResources().getString(R.string.MNoteActivity_LoadingImg));
         insertDialog.setCanceledOnTouchOutside(false);
 
         groupDao = new GroupDao(this);
@@ -166,11 +165,11 @@ public class ModifyNoteActivity extends AppCompatActivity implements View.OnClic
         flag = getIntent().getIntExtra("flag", 0);
 
         if (flag == NOTE_NEW) {
-            setTitle("新建笔记");
+            setTitle(R.string.NMoteActivity_TitleForNewNote);
             note.setGroupLabel(groupDao.queryDefaultGroup());
         }
         else
-            setTitle("编辑笔记");
+            setTitle(R.string.NMoteActivity_TitleForUpdateNote);
 
         screenWidth = CommonUtil.getScreenWidth(this);
         screenHeight = CommonUtil.getScreenHeight(this);
@@ -255,16 +254,15 @@ public class ModifyNoteActivity extends AppCompatActivity implements View.OnClic
     private void showDetailInfo() {
         if (flag == NOTE_NEW) {
             AlertDialog savedialog = new AlertDialog.Builder(this)
-                    .setTitle("详细信息")//设置对话框的标题
-                    .setMessage("当前笔记还没保存，是否要保存？")//设置对话框的内容
-                    //设置对话框的按钮
-                    .setNegativeButton("取消", new DialogInterface.OnClickListener() {
+                    .setTitle(R.string.MNoteActivity_InfoSaveAlertTitle)
+                    .setMessage(R.string.MNoteActivity_InfoSaveAlertMsg)
+                    .setNegativeButton(R.string.MNoteActivity_InfoSaveAlertNegativeButtonForCancel, new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
                             dialog.dismiss();
                         }
                     })
-                    .setPositiveButton("保存", new DialogInterface.OnClickListener() {
+                    .setPositiveButton(R.string.MNoteActivity_InfoSaveAlertNegativeButtonForSave, new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
                             saveNoteData(false);
@@ -272,25 +270,27 @@ public class ModifyNoteActivity extends AppCompatActivity implements View.OnClic
                         }
                     }).create();
             savedialog.show();
-        } else {
-            final String Info = "标题：" + note.getTitle() + "\n" +
-                    "创建时间：" + note.getCreateTime_FullString() + "\n" +
-                    "最近修改时间：" + note.getUpdateTime_FullString() + "\n\n" +
-                    "分类：" + note.getGroupLabel().getName();
+        }
+        else {
+            final String Info = getResources().getString(R.string.VMNoteActivity_InfoTitle) + note.getTitle() + "\n" +
+                                getResources().getString(R.string.VMNoteActivity_InfoCreateTime) + note.getCreateTime_FullString() + "\n" +
+                                getResources().getString(R.string.VMNoteActivity_InfoUpdateTime) + note.getUpdateTime_FullString() + "\n\n" +
+                                getResources().getString(R.string.VMNoteActivity_InfoGroupLabelTitle) + note.getGroupLabel().getName();
+
             AlertDialog infodialog = new AlertDialog.Builder(this)
-                    .setTitle("详细信息")
+                    .setTitle(R.string.VMNoteActivity_InfoAlertTitle)
                     .setMessage(Info)
-                    .setNeutralButton("复制", new DialogInterface.OnClickListener() {
+                    .setNeutralButton(R.string.VMNoteActivity_InfoAlertNeutralButtonForCopy, new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
                             ClipboardManager clipboardManager = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
-                            ClipData clip = ClipData.newPlainText("text", Info);
+                            ClipData clip = ClipData.newPlainText(getResources().getString(R.string.VMNoteActivity_InfoAlertClipDataLabel), Info);
                             clipboardManager.setPrimaryClip(clip);
-                            Toast.makeText(ModifyNoteActivity.this, "信息复制成功。", Toast.LENGTH_SHORT).show();
+                            Toast.makeText(ModifyNoteActivity.this, R.string.VMNoteActivity_InfoAlertCopySuccess, Toast.LENGTH_SHORT).show();
                             dialog.dismiss();
                         }
                     })
-                    .setNegativeButton("确定", new DialogInterface.OnClickListener() {
+                    .setNegativeButton(R.string.VMNoteActivity_InfoAlertNegativeButtonForOK, new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
                             dialog.dismiss();
@@ -311,8 +311,8 @@ public class ModifyNoteActivity extends AppCompatActivity implements View.OnClic
 
         AlertDialog GroupSettingDialog = new AlertDialog
                 .Builder(this)
-                .setTitle("笔记分类")
-                .setNeutralButton("修改分组信息", new DialogInterface.OnClickListener() {
+                .setTitle(R.string.MNoteActivity_GroupSetAlertTitle)
+                .setNeutralButton(R.string.MNoteActivity_GroupSetAlertNeutralButtonForSetGeneralGroupInfo, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         dialog.cancel();
@@ -322,7 +322,7 @@ public class ModifyNoteActivity extends AppCompatActivity implements View.OnClic
                                 .showModifyGroup();
                     }
                 })
-                .setNegativeButton("取消", new DialogInterface.OnClickListener() {
+                .setNegativeButton(R.string.MNoteActivity_GroupSetAlertNegativeButtonForCancel, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         dialog.cancel();
@@ -560,15 +560,15 @@ public class ModifyNoteActivity extends AppCompatActivity implements View.OnClic
     private void CancelSaveNoteData() {
         if (CheckIsModify()) {
             AlertDialog alertDialog = new AlertDialog.Builder(this)
-                    .setTitle("确定要取消编辑吗？")
-                    .setMessage("您的修改将不会保存。")
-                    .setNegativeButton("离开", new DialogInterface.OnClickListener() {
+                    .setTitle(R.string.MNoteActivity_CancelSaveAlertTitle)
+                    .setMessage(R.string.MNoteActivity_CancelSaveAlertMsg)
+                    .setNegativeButton(R.string.MNoteActivity_CancelSaveAlertNegativeButtonForLeave, new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialogInterface, int i) {
                             finish();
                         }
                     })
-                    .setPositiveButton("取消", new DialogInterface.OnClickListener() {
+                    .setPositiveButton(R.string.MNoteActivity_CancelSaveAlertPositiveButtonForCancel, new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialogInterface, int i) {
                         }
@@ -587,11 +587,11 @@ public class ModifyNoteActivity extends AppCompatActivity implements View.OnClic
         if (Content.isEmpty()) {
             closeSoftKeyInput();
             AlertDialog alertDialog = new AlertDialog.Builder(this)
-                    .setTitle("没有输入内容，请补全笔记内容")
-                    .setPositiveButton("确定", new DialogInterface.OnClickListener() {
+                    .setTitle(R.string.MNoteActivity_SaveAlertTitle)
+                    .setMessage(R.string.MNoteActivity_SaveAlertMsg)
+                    .setPositiveButton(R.string.MNoteActivity_SaveAlertPositiveButtonForOK, new DialogInterface.OnClickListener() {
                         @Override
-                        public void onClick(DialogInterface dialogInterface, int i) {
-                        }
+                        public void onClick(DialogInterface dialogInterface, int i) { }
                     }).create();
             alertDialog.show();
             return;
@@ -601,7 +601,7 @@ public class ModifyNoteActivity extends AppCompatActivity implements View.OnClic
         if (TitleEditText.getText().toString().isEmpty()) {
 //            if ("".equals(Content))
 //                Content = "图片";
-            String Con = Content.replaceAll("<img src=.*", "图片 ");
+            String Con = Content.replaceAll("<img src=.*", getResources().getString(R.string.MNoteActivity_SaveAlertImgReplaceMozi));
 
             if (Con.length() > CUT_LENGTH + 3)
                 TitleEditText.setText(Con.substring(0, CUT_LENGTH) + "...");
@@ -864,7 +864,7 @@ public class ModifyNoteActivity extends AppCompatActivity implements View.OnClic
 //                takePhone();
                 hasPermission = true;
             } else {
-                Toast.makeText(this, "权限授予失败！", Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, R.string.MNoteActivity_PermissionGrantedError, Toast.LENGTH_SHORT).show();
                 hasPermission = false;
             }
         } else if (requestCode == PERMISSION_REQUEST_CODE) {
@@ -909,7 +909,7 @@ public class ModifyNoteActivity extends AppCompatActivity implements View.OnClic
                 if (!TextUtils.isEmpty(imagePath)) {
                     boolean isOK = SDCardUtil.deleteFile(imagePath);
                     if (isOK) {
-                        Toast.makeText(ModifyNoteActivity.this, "删除成功：" + imagePath, Toast.LENGTH_SHORT).show();
+                        Toast.makeText(ModifyNoteActivity.this, R.string.MNoteActivity_DWCRtImageDelete + imagePath, Toast.LENGTH_SHORT).show();
                     }
                 }
             }
@@ -921,29 +921,93 @@ public class ModifyNoteActivity extends AppCompatActivity implements View.OnClic
                 if (!TextUtils.isEmpty(getEditData())) {
                     List<String> imageList = StringUtils.getTextFromHtml(getEditData(), true);
                     if (!TextUtils.isEmpty(imagePath)) {
-                        int currentPosition = imageList.indexOf(imagePath);
-                        idenDialog = new AlertDialog.Builder(ModifyNoteActivity.this);
-                        idenDialog.setTitle("要进行文字识别吗？");
-
-                        idenDialog.setMessage(imagePath);
-                        idenDialog.setCancelable(false);
-                        idenDialog.setPositiveButton("好", new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int which) {
-
-                                Bitmap bitmap = BitmapUtils.getBitmapFromFile(imagePath);
-                                idenWordsSync(bitmap);
-                            }
-                        });
-                        idenDialog.setNegativeButton("取消", new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int which) {
-
-                            }
-                        });
-                        idenDialog.show();
+                        // int currentPosition = imageList.indexOf(imagePath);
+                        ShowdealWithContentForOCR(imagePath);
                     }
                 }
+            }
+        });
+    }
+
+    // OCR
+    private void ShowdealWithContentForOCR(final String imagePath) {
+
+        idenDialog = new AlertDialog
+                .Builder(ModifyNoteActivity.this)
+                .setTitle(R.string.MNoteActivity_OCRCheckAlertTitle)
+                .setMessage(R.string.MNoteActivity_OCRCheckAlertMsg + imagePath)
+                .setCancelable(false)
+                .setPositiveButton(R.string.MNoteActivity_OCRCheckAlertPositiveButtonForOK, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+
+                        Bitmap bitmap = BitmapUtils.getBitmapFromFile(imagePath);
+                        idenWordsSync(bitmap);
+                    }
+                })
+                .setNegativeButton(R.string.MNoteActivity_OCRCheckAlertNegativeButtonForCancel, null);
+        idenDialog.show();
+    }
+
+
+    //异步识别文字
+    private void idenWordsSync(final Bitmap bitmap) {
+        idenLoadingDialog = new ProgressDialog(ModifyNoteActivity.this);
+        idenLoadingDialog.setTitle(R.string.MNoteActivity_OCRSyncAlertTitle);
+        idenLoadingDialog.show();
+        Observable.create(new ObservableOnSubscribe<String>() {
+            @Override
+            public void subscribe(ObservableEmitter<String> emitter) throws Exception {
+                final String extaText = ExtractUtil.recognition(bitmap, ModifyNoteActivity.this);
+                emitter.onNext(extaText);
+                emitter.onComplete();
+            }
+        })
+        //.onBackpressureBuffer()
+        .subscribeOn(Schedulers.io())//生产事件在io
+        .observeOn(AndroidSchedulers.mainThread())//消费事件在UI线程
+        .subscribe(new Observer<String>() {
+            @Override
+            public void onComplete() {
+                //Toast.makeText(ModifyNoteActivity.this, "文字复制成功", Toast.LENGTH_SHORT).show();
+            }
+
+            @Override
+            public void onError(Throwable e) {
+                if (idenLoadingDialog != null && idenLoadingDialog.isShowing()) {
+                    idenLoadingDialog.dismiss();
+                }
+                Toast.makeText(ModifyNoteActivity.this, R.string.MNoteActivity_OCRSyncAlertError, Toast.LENGTH_SHORT).show();
+            }
+
+            @Override
+            public void onSubscribe(Disposable d) {
+                subsInsert = d;
+            }
+
+            @Override
+            public void onNext(final String extaText) {
+                if (idenLoadingDialog != null && idenLoadingDialog.isShowing()) {
+                    idenLoadingDialog.dismiss();
+                }
+                final EditText et = new EditText(ModifyNoteActivity.this);
+                et.setText(extaText);
+                AlertDialog.Builder resultDialog = new AlertDialog
+                    .Builder(ModifyNoteActivity.this)
+                    .setTitle(R.string.MNoteActivity_OCRSyncResultAlertTitle)
+                    .setView(et)
+                    .setCancelable(true)
+                    .setPositiveButton(R.string.MNoteActivity_OCRSyncResultAlertPositiveButtonForCopy, new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                                ClipboardManager clipboardManager = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
+                                ClipData clip = ClipData.newPlainText(getResources().getString(R.string.MNoteActivity_OCRSyncResultAlertCopyClipLabel), extaText);
+                                clipboardManager.setPrimaryClip(clip);
+                            }
+                        })
+                    .setNegativeButton(R.string.MNoteActivity_OCRSyncResultAlertCopyClipLabel, null);
+
+                resultDialog.show();
             }
         });
     }
@@ -977,7 +1041,7 @@ public class ModifyNoteActivity extends AppCompatActivity implements View.OnClic
                         if (loadingDialog != null) {
                             loadingDialog.dismiss();
                         }
-                        Toast.makeText(ModifyNoteActivity.this, "解析错误：图片不存在或已损坏", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(ModifyNoteActivity.this, R.string.MNoteActivity_showDataSyncError, Toast.LENGTH_SHORT).show();
                     }
 
                     @Override
@@ -1056,7 +1120,7 @@ public class ModifyNoteActivity extends AppCompatActivity implements View.OnClic
                         if (insertDialog != null && insertDialog.isShowing()) {
                             insertDialog.dismiss();
                         }
-                        Toast.makeText(ModifyNoteActivity.this, "图片插入成功", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(ModifyNoteActivity.this, R.string.MNoteActivity_insertImagesSyncSuccess, Toast.LENGTH_SHORT).show();
                     }
 
                     @Override
@@ -1064,7 +1128,7 @@ public class ModifyNoteActivity extends AppCompatActivity implements View.OnClic
                         if (insertDialog != null && insertDialog.isShowing()) {
                             insertDialog.dismiss();
                         }
-                        Toast.makeText(ModifyNoteActivity.this, "图片插入失败", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(ModifyNoteActivity.this, R.string.MNoteActivity_insertImagesSyncError, Toast.LENGTH_SHORT).show();
                     }
 
                     @Override
@@ -1075,70 +1139,6 @@ public class ModifyNoteActivity extends AppCompatActivity implements View.OnClic
                     @Override
                     public void onNext(String imagePath) {
                         ContentEditText.insertImage(imagePath, ContentEditText.getMeasuredWidth());
-                    }
-                });
-    }
-
-    //异步识别文字
-    private void idenWordsSync(final Bitmap bitmap) {
-        idenLoadingDialog = new ProgressDialog(ModifyNoteActivity.this);
-        idenLoadingDialog.setTitle("识别中……");
-        idenLoadingDialog.show();
-        Observable.create(new ObservableOnSubscribe<String>() {
-            @Override
-            public void subscribe(ObservableEmitter<String> emitter) throws Exception {
-                final String extaText = ExtractUtil.recognition(bitmap, ModifyNoteActivity.this);
-                emitter.onNext(extaText);
-                emitter.onComplete();
-            }
-        })
-                //.onBackpressureBuffer()
-                .subscribeOn(Schedulers.io())//生产事件在io
-                .observeOn(AndroidSchedulers.mainThread())//消费事件在UI线程
-                .subscribe(new Observer<String>() {
-                    @Override
-                    public void onComplete() {
-                        //Toast.makeText(ModifyNoteActivity.this, "文字复制成功", Toast.LENGTH_SHORT).show();
-                    }
-
-                    @Override
-                    public void onError(Throwable e) {
-                        if (idenLoadingDialog != null && idenLoadingDialog.isShowing()) {
-                            idenLoadingDialog.dismiss();
-                        }
-                        Toast.makeText(ModifyNoteActivity.this, "文字识别失败", Toast.LENGTH_SHORT).show();
-                    }
-
-                    @Override
-                    public void onSubscribe(Disposable d) {
-                        subsInsert = d;
-                    }
-
-                    @Override
-                    public void onNext(final String extaText) {
-                        if (idenLoadingDialog != null && idenLoadingDialog.isShowing()) {
-                            idenLoadingDialog.dismiss();
-                        }
-                        final EditText et = new EditText(ModifyNoteActivity.this);
-                        resultDialog = new AlertDialog.Builder(ModifyNoteActivity.this);
-                        resultDialog.setTitle("识别结果：");
-                        resultDialog.setView(et);
-                        et.setText(extaText);
-                        resultDialog.setCancelable(true);
-                        resultDialog.setPositiveButton("复制全部", new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int which) {
-                                ClipboardManager clipboardManager = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
-                                ClipData clip = ClipData.newPlainText("text", extaText);
-                                clipboardManager.setPrimaryClip(clip);
-                            }
-                        });
-                        resultDialog.setNegativeButton("返回", new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int which) {
-                            }
-                        });
-                        resultDialog.show();
                     }
                 });
     }
