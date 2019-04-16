@@ -15,13 +15,12 @@ import android.view.View.OnClickListener;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.baibuti.biji.Fragment.ClassFragment;
 import com.baibuti.biji.Fragment.NoteFragment;
 import com.baibuti.biji.Fragment.SearchFragment;
 import com.baibuti.biji.Fragment.FileFragment;
-import com.baibuti.biji.IShowLog;
+import com.baibuti.biji.Interface.IShowLog;
 import com.baibuti.biji.R;
 import com.baibuti.biji.View.SimplerSearcherView;
 import com.jeremyfeinstein.slidingmenu.lib.SlidingMenu;

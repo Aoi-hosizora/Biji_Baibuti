@@ -12,17 +12,13 @@ import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.MotionEvent;
 import android.view.View;
-import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.baibuti.biji.Data.Note;
-import com.baibuti.biji.IShowLog;
+import com.baibuti.biji.Interface.IShowLog;
 import com.baibuti.biji.R;
-import com.baibuti.biji.db.GroupDao;
-import com.baibuti.biji.db.NoteDao;
 import com.baibuti.biji.util.StringUtils;
 import com.sendtion.xrichtext.RichTextView;
 
@@ -36,8 +32,6 @@ import io.reactivex.Observer;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
-
-import static com.baibuti.biji.util.CommonUtil.ColorHex_IntEncoding;
 
 public class ViewModifyNoteActivity extends AppCompatActivity implements View.OnClickListener, IShowLog {
 

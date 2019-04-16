@@ -1,35 +1,25 @@
 package com.baibuti.biji.Activity;
 
 import android.Manifest;
-import android.annotation.TargetApi;
-import android.app.Activity;
 import android.app.Dialog;
 import android.app.ProgressDialog;
 import android.content.ClipData;
 import android.content.ClipboardManager;
-import android.content.ContentResolver;
-import android.content.ContentUris;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.Environment;
-import android.provider.DocumentsContract;
 import android.provider.MediaStore;
 import android.support.annotation.NonNull;
-import android.support.v4.content.ContextCompat;
-import android.support.v4.content.FileProvider;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.Gravity;
-import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -41,14 +31,12 @@ import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
-import android.graphics.BitmapFactory;
 
 import com.baibuti.biji.Data.Group;
 import com.baibuti.biji.Data.GroupAdapter;
 import com.baibuti.biji.Data.Note;
 import com.baibuti.biji.Dialog.GroupDialog;
-import com.baibuti.biji.Fragment.NoteFragment;
-import com.baibuti.biji.IShowLog;
+import com.baibuti.biji.Interface.IShowLog;
 import com.baibuti.biji.R;
 import com.baibuti.biji.db.GroupDao;
 import com.baibuti.biji.db.NoteDao;
@@ -63,13 +51,10 @@ import com.sendtion.xrichtext.RichTextEditor;
 
 
 import java.io.File;
-import java.io.IOException;
-import java.net.URI;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
-import java.io.*;
 
 import io.reactivex.Observable;
 import io.reactivex.ObservableEmitter;

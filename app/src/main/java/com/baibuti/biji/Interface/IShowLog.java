@@ -1,4 +1,4 @@
-package com.baibuti.biji;
+package com.baibuti.biji.Interface;
 
 public interface IShowLog {
 
