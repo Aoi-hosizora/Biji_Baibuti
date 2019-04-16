@@ -138,6 +138,11 @@ public class CommonUtil {
         return outMetrics.heightPixels;
     }
 
+    /**
+     * Date -> String
+     * @param date
+     * @return
+     */
     public static String date2string(Date date) {
         String strDate = "";
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
@@ -145,7 +150,11 @@ public class CommonUtil {
         return strDate;
     }
 
-    // 将十进制color转化成十六进制
+    /**
+     * 将十进制color转化成十六进制
+     * @param color
+     * @return
+     */
     public static String ColorInt_HexEncoding(int color) {
         String R, G, B;
         StringBuffer sb = new StringBuffer();
@@ -163,7 +172,11 @@ public class CommonUtil {
         return sb.toString();
     }
 
-    // 将十六进制color转化成十进制
+    /**
+     * 将十六进制color转化成十进制
+     * @param color
+     * @return
+     */
     public static int ColorHex_IntEncoding(String color) {
         return Color.parseColor(color);
     }

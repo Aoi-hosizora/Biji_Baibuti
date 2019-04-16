@@ -8,6 +8,7 @@ import android.support.v4.view.ViewPager;
 import android.support.v4.view.ViewPager.OnPageChangeListener;
 import android.os.Bundle;
 
+import android.util.Log;
 import android.view.Display;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -20,6 +21,7 @@ import com.baibuti.biji.Fragment.ClassFragment;
 import com.baibuti.biji.Fragment.NoteFragment;
 import com.baibuti.biji.Fragment.SearchFragment;
 import com.baibuti.biji.Fragment.FileFragment;
+import com.baibuti.biji.IShowLog;
 import com.baibuti.biji.R;
 import com.baibuti.biji.View.SimplerSearcherView;
 import com.jeremyfeinstein.slidingmenu.lib.SlidingMenu;
@@ -27,7 +29,8 @@ import com.jeremyfeinstein.slidingmenu.lib.SlidingMenu;
 import java.util.ArrayList;
 import java.util.List;
 
-public class MainActivity extends FragmentActivity implements OnClickListener, SimplerSearcherView.OnSearcherClickListener {
+public class MainActivity extends FragmentActivity
+        implements OnClickListener, SimplerSearcherView.OnSearcherClickListener, IShowLog {
     //声明ViewPager
     private ViewPager mViewPager;
     //适配器
@@ -63,6 +66,13 @@ public class MainActivity extends FragmentActivity implements OnClickListener, S
         initViews();//初始化控件
         initEvents();//初始化事件
         initDatas();//初始化数据
+    }
+
+    @Override
+    public void ShowLogE(String FunctionName, String Msg) {
+        String ClassName = "MainActivity";
+        Log.e(getResources().getString(R.string.IShowLog_LogE),
+                ClassName + ": " + FunctionName + "###" + Msg); // MainActivity: initDatas###data=xxx
     }
 
     @Override

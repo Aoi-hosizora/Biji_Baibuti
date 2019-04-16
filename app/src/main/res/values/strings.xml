@@ -7,6 +7,12 @@
     <string name="file_header">资料</string>
     <string name="notefragment_menu_modifygroup">分类</string>
 
+    <!-- IShowLog -->
+    <string name="IShowLog_LogE">BijiLogE</string>
+
+    <!-- Provider / xml -->
+    <string name="FileProvider">com.baibuti.biji.FileProvider</string>
+
     <!-- Note Fragment -->
 
         <string name="note_header">笔记</string>
@@ -39,6 +45,9 @@
         <string name="VMNoteActivity_InfoAlertClipDataLabel">BijiCopyInfo</string>
         <string name="VMNoteActivity_InfoAlertCopySuccess">信息复制成功。</string>
         <string name="VMNoteActivity_InfoAlertNegativeButtonForOK">确定</string>
+
+        <!-- Show Data Sync -->
+        <string name="VMNoteActivity_showDataSyncError">解析错误：图片不存在或已损坏</string>
 
     <!-- Modify Note -->
 
