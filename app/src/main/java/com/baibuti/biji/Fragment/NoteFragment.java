@@ -1,5 +1,6 @@
 package com.baibuti.biji.Fragment;
 
+import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
@@ -11,7 +12,9 @@ import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
@@ -25,6 +28,7 @@ import com.baibuti.biji.Data.GroupAdapter;
 import com.baibuti.biji.Data.Note;
 import com.baibuti.biji.Data.NoteAdapter;
 import com.baibuti.biji.Dialog.GroupDialog;
+import com.baibuti.biji.Interface.IShowLog;
 import com.baibuti.biji.R;
 import com.baibuti.biji.View.SpacesItemDecoration;
 import com.baibuti.biji.db.GroupDao;
@@ -39,18 +43,18 @@ import java.util.List;
 
 import static android.app.Activity.RESULT_OK;
 
-public class NoteFragment extends Fragment implements View.OnClickListener {
+public class NoteFragment extends Fragment implements View.OnClickListener, IShowLog {
 
     private RecyclerView mNoteList;
 
-    private List<Note> NoteList;
-    private List<Group> GroupList;
-
     private FloatingActionsMenu m_fabmenu;
-    private FloatingActionButton m_fabback;
     private com.wyt.searchbox.SearchFragment searchFragment;
     private SwipeRefreshLayout mSwipeRefresh;
     private SlidingMenu slidingMenu;
+
+    private ProgressDialog loadingDialog;
+    private Toolbar m_toolbar;
+    // private MenuItem m_SearchBack;
 
     private static final int NOTE_NEW = 0; // new
     private static final int NOTE_UPDATE = 1; // modify
@@ -62,12 +66,9 @@ public class NoteFragment extends Fragment implements View.OnClickListener {
         setHasOptionsMenu(true);
 
         m_fabmenu = (FloatingActionsMenu) view.findViewById(R.id.note_fabmenu);
-        m_fabback = (FloatingActionButton) view.findViewById(R.id.note_searchback);
 
         slidingMenu = ((MainActivity)getActivity()).getSlidingMenu();
         mNoteList = view.findViewById(R.id.note_list);
-
-        m_fabback.setOnClickListener(this);
 
         mSwipeRefresh = (SwipeRefreshLayout) view.findViewById(R.id.note_listsrl);
         mSwipeRefresh.setColorSchemeResources(R.color.colorPrimary);
@@ -77,6 +78,10 @@ public class NoteFragment extends Fragment implements View.OnClickListener {
                 refreshdata();
             }
         });
+
+        loadingDialog = new ProgressDialog(getContext());
+        loadingDialog.setMessage(getResources().getString(R.string.NoteFragment_LoadingData));
+        loadingDialog.setCanceledOnTouchOutside(false);
 
         initToolbar(view);
         initFloatingActionBar(view);
@@ -88,19 +93,15 @@ public class NoteFragment extends Fragment implements View.OnClickListener {
     }
 
     /**
-     * 查找笔记功能，待改
-     * @param str
-     * @return
+     * IShowLog 接口，全局设置 Log 格式
+     * @param FunctionName
+     * @param Msg
      */
-    private List<Note> search(String str) {
-        List<Note> notelist = new ArrayList<>();
-
-        for (Note note : NoteList) {
-            if (note.getTitle().contains(str) || note.getContent().contains(str))
-                notelist.add(note);
-        }
-
-        return notelist;
+    @Override
+    public void ShowLogE(String FunctionName, String Msg) {
+        String ClassName = "NoteFragment";
+        Log.e(getResources().getString(R.string.IShowLog_LogE),
+                ClassName + ": " + FunctionName + "###" + Msg); // MainActivity: initDatas###data=xxx
     }
 
     /**
@@ -108,9 +109,9 @@ public class NoteFragment extends Fragment implements View.OnClickListener {
      * @param view
      */
     private void initToolbar(View view) {
-        Toolbar toolbar = view.findViewById(R.id.note_toolbar);
-        toolbar.inflateMenu(R.menu.notefragment_actionbar);
-        toolbar.setOnMenuItemClickListener(new Toolbar.OnMenuItemClickListener() {
+        m_toolbar = view.findViewById(R.id.note_toolbar);
+        m_toolbar.inflateMenu(R.menu.notefragment_actionbar);
+        m_toolbar.setOnMenuItemClickListener(new Toolbar.OnMenuItemClickListener() {
             @Override
             public boolean onMenuItemClick(MenuItem item) {
                 switch (item.getItemId()) {
@@ -120,21 +121,23 @@ public class NoteFragment extends Fragment implements View.OnClickListener {
                     case R.id.action_modifygroup:
                         GroupDialog.setupGroupDialog(getContext(), groupAdapter, GroupList, groupDao, noteDao, getLayoutInflater())
                                 .showModifyGroup();
-                        refreshdata();
+                        break;
+                    case R.id.action_search_back:
+                        SearchFracBack();
                         break;
                 }
                 return true;
             }
         });
-        toolbar.setNavigationIcon(R.mipmap.ic_launcher);
-        toolbar.setNavigationOnClickListener(new View.OnClickListener() {
+        m_toolbar.setNavigationIcon(R.mipmap.ic_launcher);
+        m_toolbar.setNavigationOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 if(slidingMenu != null)
                     slidingMenu.showMenu();
             }
         });
-        toolbar.setTitle(R.string.note_header);
+        m_toolbar.setTitle(R.string.note_header);
     }
 
     /**
@@ -174,6 +177,94 @@ public class NoteFragment extends Fragment implements View.OnClickListener {
 //        });
 
     }
+
+    public boolean IsSearching = false;
+
+    /**
+     * 查找笔记功能
+     * @param str
+     * @return
+     */
+    private List<Note> search(String str) {
+        List<Note> notelist = new ArrayList<>();
+
+        for (Note note : NoteList) {
+            if (note.getTitle().contains(str) || note.getContent().contains(str))
+                notelist.add(note);
+        }
+        if (notelist.isEmpty())
+            Toast.makeText(getContext(), "搜索不到任何数据。", Toast.LENGTH_SHORT).show();
+        return notelist;
+    }
+
+    /**
+     * 初始化搜索框
+     */
+    private void initSearchFrag() {
+        // 添加搜索框
+        searchFragment = com.wyt.searchbox.SearchFragment.newInstance();
+        searchFragment.setAllowReturnTransitionOverlap(true);
+        searchFragment.setOnSearchClickListener(new com.wyt.searchbox.custom.IOnSearchClickListener() {
+            @Override
+            public void OnSearchClick(String keyword) {
+                if (!keyword.isEmpty()) {
+                    IsSearching = true;
+                    initListView(search(keyword));
+                    m_toolbar.getMenu().findItem(R.id.action_search_back).setVisible(true);
+                    mSwipeRefresh.setEnabled(false);
+                    m_toolbar.setTitle(String.format(getContext().getString(R.string.notefragment_menu_search_content), keyword));
+                }
+            }
+        });
+    }
+
+    /**
+     * 返回原界面，退出搜索
+     */
+    private void SearchFracBack() {
+
+        loadingDialog.show();
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    Thread.sleep(200);
+                }
+                catch (InterruptedException ex) {
+                    ex.printStackTrace();
+                }
+                getActivity().runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        NoteList = noteDao.queryNotesAll();
+                        initListView(NoteList);
+
+                        mSwipeRefresh.setEnabled(true);
+                        m_toolbar.getMenu().findItem(R.id.action_search_back).setVisible(false);
+                        m_toolbar.setTitle(R.string.note_header);
+                        IsSearching = false;
+
+                        loadingDialog.dismiss();
+
+                    }
+                });
+            }
+        }).start();
+
+    }
+
+
+    @Override
+    public void onClick(View v) {
+        switch (v.getId()) {
+//            case R.id.note_searchback:
+//                NoteList = noteDao.queryNotesAll();
+//                initListView(NoteList);
+        }
+    }
+
+    private List<Note> NoteList;
+    private List<Group> GroupList;
 
     private NoteAdapter noteAdapter;
     private GroupAdapter groupAdapter;
@@ -278,11 +369,7 @@ public class NoteFragment extends Fragment implements View.OnClickListener {
             public void onItemClick(View view, int position) {
 
                 SelectedNoteItem = position;
-
-                Intent intent=new Intent(getContext(), ViewModifyNoteActivity.class);
-                intent.putExtra("notedata",nlist.get(position));
-                intent.putExtra("flag",NOTE_UPDATE); // UPDATE
-                startActivityForResult(intent,1); // 1 from List
+                ClickNoteItem(nlist, position);
             }
         });
 
@@ -292,6 +379,18 @@ public class NoteFragment extends Fragment implements View.OnClickListener {
                 DeleteNote(view, note);
             }
         });
+    }
+
+    /**
+     * 点击 NoteList 的一项，打开 ViewModifyNote 活动
+     * @param nlist List<Note>
+     * @param position
+     */
+    public void ClickNoteItem(final List<Note> nlist, int position) {
+        Intent intent=new Intent(getContext(), ViewModifyNoteActivity.class);
+        intent.putExtra("notedata",nlist.get(position));
+        intent.putExtra("flag",NOTE_UPDATE); // UPDATE
+        startActivityForResult(intent,1); // 1 from List
     }
 
     /**
@@ -338,44 +437,14 @@ public class NoteFragment extends Fragment implements View.OnClickListener {
         deleteAlert.show();
     }
 
-    /**
-     * 初始化搜索框
-     */
-    private void initSearchFrag() {
-        // 添加搜索框
-        searchFragment = com.wyt.searchbox.SearchFragment.newInstance();
-        searchFragment.setAllowReturnTransitionOverlap(true);
-        searchFragment.setOnSearchClickListener(new com.wyt.searchbox.custom.IOnSearchClickListener() {
-            @Override
-            public void OnSearchClick(String keyword) {
-                if (keyword.isEmpty()) {
-
-                }
-                else {
-                    initListView(search(keyword));
-                    m_fabmenu.setVisibility(View.GONE);
-                    m_fabback.setVisibility(View.VISIBLE);
-                }
-            }
-        });
-    }
-
-
-    @Override
-    public void onClick(View v) {
-        switch (v.getId()) {
-            case R.id.note_searchback:
-                NoteList = noteDao.queryNotesAll();
-                initListView(NoteList);
-                m_fabback.setVisibility(View.GONE);
-                m_fabmenu.setVisibility(View.VISIBLE);
-        }
-    }
-
-
     //////////////////////////////////////////////////
 
-
+    /**
+     * 处理从 View Modify Note Activity 返回的数据
+     * @param requestCode
+     * @param resultCode
+     * @param data
+     */
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
