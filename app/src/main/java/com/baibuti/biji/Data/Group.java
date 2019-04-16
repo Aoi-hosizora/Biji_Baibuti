@@ -1,5 +1,7 @@
 package com.baibuti.biji.Data;
 
+import android.graphics.Color;
+
 import java.io.Serializable;
 import java.util.Date;
 
@@ -76,5 +78,13 @@ public class Group implements Serializable {
 
     public void setColor(String color) {
         this.color = color;
+    }
+
+    public String getStringColor() {
+        return getColor();
+    }
+
+    public int getIntColor() {
+        return Color.parseColor(getColor());
     }
 }

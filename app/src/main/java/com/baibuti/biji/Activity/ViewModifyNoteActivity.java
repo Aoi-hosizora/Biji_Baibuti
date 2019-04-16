@@ -75,7 +75,7 @@ public class ViewModifyNoteActivity extends AppCompatActivity implements View.On
         TitleEditText_View.setText(note.getTitle());
         UpdateTimeTextView_View.setText(note.getUpdateTime_ShortString());
         GroupNameTextView_View.setText(note.getGroupLabel().getName());
-        GroupNameTextView_View.setTextColor(ColorHex_IntEncoding(note.getGroupLabel().getColor()));
+        GroupNameTextView_View.setTextColor(note.getGroupLabel().getIntColor());
 
         //////////////////////////////////////////////////
         ContentEditText_View.post(new Runnable() {
@@ -210,7 +210,7 @@ public class ViewModifyNoteActivity extends AppCompatActivity implements View.On
                         TitleEditText_View.setText(note.getTitle());
                         UpdateTimeTextView_View.setText(note.getUpdateTime_ShortString());
                         GroupNameTextView_View.setText(note.getGroupLabel().getName());
-                        GroupNameTextView_View.setTextColor(ColorHex_IntEncoding(note.getGroupLabel().getColor()));
+                        GroupNameTextView_View.setTextColor(note.getGroupLabel().getIntColor());
                         ContentEditText_View.post(new Runnable() {
                             @Override
                             public void run() {

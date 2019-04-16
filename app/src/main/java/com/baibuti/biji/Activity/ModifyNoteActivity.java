@@ -61,7 +61,6 @@ import com.baibuti.biji.util.ExtractUtil;
 import com.baibuti.biji.util.BitmapUtils;
 import com.sendtion.xrichtext.RichTextEditor;
 
-import static com.baibuti.biji.util.SDUtils.assets2SD;
 
 import java.io.File;
 import java.io.IOException;
@@ -80,6 +79,8 @@ import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
 import me.kareluo.imaging.IMGEditActivity;
+
+import static com.baibuti.biji.util.ExtractUtil.assets2SD;
 
 
 /**
@@ -186,7 +187,7 @@ public class ModifyNoteActivity extends AppCompatActivity implements View.OnClic
         TitleEditText.setText(note.getTitle());
         UpdateTimeTextView.setText(note.getUpdateTime_ShortString());
         GroupNameTextView.setText(note.getGroupLabel().getName());
-        GroupNameTextView.setTextColor(CommonUtil.ColorHex_IntEncoding(note.getGroupLabel().getColor()));
+        GroupNameTextView.setTextColor(note.getGroupLabel().getIntColor());
         selectedGropId = note.getGroupLabel().getId();
 
         //////////////////////////////////////////////////
@@ -371,7 +372,7 @@ public class ModifyNoteActivity extends AppCompatActivity implements View.OnClic
                     public void onClick(DialogInterface dialog, int which) {
                         selectedGropId = GroupList.get(which).getId();
                         GroupNameTextView.setText(GroupList.get(which).getName());
-                        GroupNameTextView.setTextColor(CommonUtil.ColorHex_IntEncoding(GroupList.get(which).getColor()));
+                        GroupNameTextView.setTextColor(GroupList.get(which).getIntColor());
                         dialog.cancel();
                     }
                 }).create();
@@ -757,7 +758,7 @@ public class ModifyNoteActivity extends AppCompatActivity implements View.OnClic
                         clipboardManager.setPrimaryClip(clip);
                     }
                 })
-                .setNegativeButton(R.string.MNoteActivity_OCRSyncResultAlertCopyClipLabel, null);
+                .setNegativeButton(R.string.MNoteActivity_OCRSyncResultAlertNegativeButtonForCancel, null);
 
         resultDialog.show();
     }

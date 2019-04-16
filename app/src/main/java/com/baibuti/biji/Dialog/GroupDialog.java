@@ -139,7 +139,7 @@ public class GroupDialog {
         colorPalette.setOnChangeListen(new RainbowPalette.OnColorChangedListen() {
             @Override
             public void onColorChange(int color) {
-                colorText.setText(R.string.GroupDialog_AddAlertColorText+ CommonUtil.ColorInt_HexEncoding(color));
+                colorText.setText(context.getString(R.string.GroupDialog_AddAlertColorText)+ CommonUtil.ColorInt_HexEncoding(color));
             }
         });
 
@@ -159,8 +159,8 @@ public class GroupDialog {
         }
 
         editText.setText(dis.getName());
-        colorText.setText(R.string.GroupDialog_AddAlertColorText+ dis.getColor());
-        colorPalette.setColor(CommonUtil.ColorHex_IntEncoding(dis.getColor()));
+        colorText.setText(context.getString(R.string.GroupDialog_AddAlertColorText) + dis.getStringColor());
+        colorPalette.setColor(dis.getIntColor());
 
         // 判断标题
 
@@ -192,8 +192,8 @@ public class GroupDialog {
 
                         String newGroupName = editText.getText().toString();
                         int newGroupOrder = 0;
-                        String newGroupColor = CommonUtil.ColorInt_HexEncoding(colorPalette.getColor());
-                        ShowLogE("ShowAddGroupDialog", "COLOR: " + newGroupColor);
+                         String newGroupColor = CommonUtil.ColorInt_HexEncoding(colorPalette.getColor());
+                         ShowLogE("ShowAddGroupDialog", "COLOR: " + newGroupColor);
 
                         // 更改好的分组信息
                         final Group newGroup = new Group(newGroupName, newGroupOrder, newGroupColor);
@@ -298,21 +298,21 @@ public class GroupDialog {
      */
     private static void ShowNullTitleDialog(DialogInterface dialog, final Group group,final Group newGroup) {
         AlertDialog emptyDialog = new AlertDialog
-                .Builder(context)
-                .setTitle(R.string.GroupDialog_NullTitleAlertTitle)
-                .setMessage(R.string.GroupDialog_NullTitleAlertMsg)
-                .setPositiveButton(R.string.GroupDialog_NullTitleAlertPositiveButtonForOK, new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        dialog.cancel();
-                    }
-                })
-                .setOnCancelListener(new DialogInterface.OnCancelListener() {
-                    @Override
-                    public void onCancel(DialogInterface dialog) {
-                        ShowAddGroupDialog(group, newGroup);
-                    }
-                }).create();
+            .Builder(context)
+            .setTitle(R.string.GroupDialog_NullTitleAlertTitle)
+            .setMessage(R.string.GroupDialog_NullTitleAlertMsg)
+            .setPositiveButton(R.string.GroupDialog_NullTitleAlertPositiveButtonForOK, new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    dialog.cancel();
+                }
+            })
+            .setOnCancelListener(new DialogInterface.OnCancelListener() {
+                @Override
+                public void onCancel(DialogInterface dialog) {
+                    ShowAddGroupDialog(group, newGroup);
+                }
+            }).create();
         dialog.dismiss();
         emptyDialog.show();
     }
