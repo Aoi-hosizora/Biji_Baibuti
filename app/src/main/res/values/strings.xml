@@ -128,7 +128,7 @@
 
 
     <!-- Show Modify Group Dialog -->
-        <string name="GroupDialog_ModifyAlertTitle">笔记分组</string>
+        <string name="GroupDialog_ModifyAlertTitle">笔记分组管理</string>
         <string name="GroupDialog_ModifyAlertNeutralButtonForAdd">添加</string>
         <string name="GroupDialog_ModifyAlertPositiveButtonForBack">返回</string>
 

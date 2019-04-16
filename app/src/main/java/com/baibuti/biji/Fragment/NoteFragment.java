@@ -14,7 +14,6 @@ import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.LayoutInflater;
-import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
@@ -276,10 +275,11 @@ public class NoteFragment extends Fragment implements View.OnClickListener, ISho
      * 初始化 Dao 和 List 数据
      */
     public void initData() {
-        if (noteDao == null) {
+        if (noteDao == null)
             noteDao = new NoteDao(this.getContext());
+
+        if (groupDao == null)
             groupDao = new GroupDao(this.getContext());
-        }
 
         NoteList = noteDao.queryNotesAll();
         GroupList = groupDao.queryGroupAll();
@@ -474,3 +474,5 @@ public class NoteFragment extends Fragment implements View.OnClickListener, ISho
     }
 
 }
+
+
