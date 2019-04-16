@@ -17,16 +17,16 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="10dp"
-            android:hint="笔记分类名..." />
+            android:hint="@string/GroupAdapter_GroupTitle" />
 
         <TextView
             android:id="@+id/id_addgroup_colortext"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="笔记代表颜色：#000000"
+            android:text="@string/GroupAdapter_GroupColor"
             android:layout_marginTop="5dp"/>
 
-        <com.baibuti.biji.RainbowPalette
+        <com.baibuti.biji.Widget.RainbowPalette
             android:id="@+id/id_addgroup_colorpalettle"
             app:center_circle_defcolor="#0511FB"
             android:layout_width="wrap_content"

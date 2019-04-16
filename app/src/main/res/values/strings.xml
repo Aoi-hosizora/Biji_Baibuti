@@ -1,7 +1,171 @@
 <resources>
+
+    <!-- MainActivitu -->
     <string name="app_name">笔迹</string>
     <string name="notefragment_menu_search">search</string>
-    <string name="note_header">笔记</string>
+
     <string name="file_header">资料</string>
     <string name="notefragment_menu_modifygroup">分类</string>
+
+    <!-- IShowLog -->
+    <string name="IShowLog_LogE">BijiLogE</string>
+
+    <!-- Provider / xml -->
+    <string name="FileProvider">com.baibuti.biji.FileProvider</string>
+
+    <!-- Note Fragment -->
+
+        <string name="note_header">笔记</string>
+
+        <!-- UI -->
+
+        <!-- DeleteNote -->
+        <string name="DeleteAlert_Title">提示</string>
+        <string name="DeleteAlert_Msg">确定删除笔记 \"%s\" 吗？</string>
+        <string name="DeleteAlert_PositiveButton">确定</string>
+        <string name="DeleteAlert_NegativeButton">取消</string>
+        <string name="DeleteAlert_DeleteSuccess">删除成功</string>
+        <string name="DeleteAlert_Undo">撤销</string>
+        <string name="DeleteAlert_UndoSuccess">已恢复</string>
+
+    <!-- View Modify Note -->
+
+        <!-- OnCreate -->
+        <string name="VMNoteActivity_Title">笔记详情</string>
+        <string name="VMNoteActivity_LoadingData">数据加载中...</string>
+
+        <!-- ShowInfo -->
+        <string name="VMNoteActivity_InfoTitle">标题：</string>
+        <string name="VMNoteActivity_InfoCreateTime">创建时间：</string>
+        <string name="VMNoteActivity_InfoUpdateTime">最近修改时间：</string>
+        <string name="VMNoteActivity_InfoGroupLabelTitle">分类：</string>
+
+        <string name="VMNoteActivity_InfoAlertTitle">详细信息</string>
+        <string name="VMNoteActivity_InfoAlertNeutralButtonForCopy">复制</string>
+        <string name="VMNoteActivity_InfoAlertClipDataLabel">BijiCopyInfo</string>
+        <string name="VMNoteActivity_InfoAlertCopySuccess">信息复制成功。</string>
+        <string name="VMNoteActivity_InfoAlertNegativeButtonForOK">确定</string>
+
+        <!-- Show Data Sync -->
+        <string name="VMNoteActivity_showDataSyncError">解析错误：图片不存在或已损坏</string>
+
+    <!-- Modify Note -->
+
+        <!-- Bottom Menu -->
+        <string name="MNoteActivity_BottomMenuCamera">拍照</string>
+        <string name="MNoteActivity_BottomMenuGallery">从相册中选取</string>
+        <string name="MNoteActivity_BottomMenuCancel">取消</string>
+
+        <!-- OnCreate -->
+        <string name="MNoteActivity_LoadingData">数据加载中...</string>
+        <string name="MNoteActivity_LoadingImg">图片加载中...</string>
+        <string name="NMoteActivity_TitleForNewNote">新建笔记</string>
+        <string name="NMoteActivity_TitleForUpdateNote">编辑笔记</string>
+
+        <!-- ShowInfo -->
+        <!-- Use the string in VMNote Activity -->
+        <string name="MNoteActivity_InfoSaveAlertTitle">详细信息</string>
+        <string name="MNoteActivity_InfoSaveAlertMsg">当前笔记还没保存，是否要保存？</string>
+        <string name="MNoteActivity_InfoSaveAlertNegativeButtonForCancel">取消</string>
+        <string name="MNoteActivity_InfoSaveAlertNegativeButtonForSave">保存</string>
+
+        <!-- ShowGroupSetting -->
+        <string name="MNoteActivity_GroupSetAlertTitle">笔记分类</string>
+        <string name="MNoteActivity_GroupSetAlertNeutralButtonForSetGeneralGroupInfo">修改分组信息</string>
+        <string name="MNoteActivity_GroupSetAlertNegativeButtonForCancel">取消</string>
+
+        <!-- Cancel Save Note Data -->
+        <string name="MNoteActivity_CancelSaveAlertTitle">提醒</string>
+        <string name="MNoteActivity_CancelSaveAlertMsg">确定要取消编辑吗？您的修改将不会保存。</string>
+        <string name="MNoteActivity_CancelSaveAlertNegativeButtonForLeave">离开</string>
+        <string name="MNoteActivity_CancelSaveAlertPositiveButtonForCancel">取消</string>
+
+        <!-- Save Note Data -->
+        <string name="MNoteActivity_SaveAlertTitle">提醒</string>
+        <string name="MNoteActivity_SaveAlertMsg">没有输入内容，请补全笔记内容。</string>
+        <string name="MNoteActivity_SaveAlertPositiveButtonForOK">确定</string>
+        <string name="MNoteActivity_SaveAlertImgReplaceMozi">图片</string>
+
+        <!-- Request Permissions -->
+        <string name="MNoteActivity_PermissionGrantedError">权限授予失败！</string>
+
+        <!-- dealWithContent -->
+        <string name="MNoteActivity_DWCRtImageDelete">删除成功：</string>
+
+        <!-- Content OCR Check -->
+        <string name="MNoteActivity_OCRCheckAlertTitle">确定</string>
+        <string name="MNoteActivity_OCRCheckAlertMsg">要进行文字识别吗？</string>
+        <string name="MNoteActivity_OCRCheckAlertPositiveButtonForOK">确定</string>
+        <string name="MNoteActivity_OCRCheckAlertNegativeButtonForCancel">取消</string>
+
+        <!-- Content OCR Sync -->
+        <string name="MNoteActivity_OCRSyncAlertTitle">识别中...</string>
+        <string name="MNoteActivity_OCRSyncAlertError">文字识别失败</string>
+        <string name="MNoteActivity_OCRSyncResultAlertTitle">识别结果：</string>
+        <string name="MNoteActivity_OCRSyncResultAlertPositiveButtonForCopy">复制全部</string>
+        <string name="MNoteActivity_OCRSyncResultAlertNegativeButtonForCancel">返回</string>
+        <string name="MNoteActivity_OCRSyncResultAlertCopyClipLabel">BijiCopyInfo</string>
+
+        <!-- Show Data Sync -->
+        <string name="MNoteActivity_showDataSyncError">解析错误：图片不存在或已损坏</string>
+
+        <!-- Insert Images Sync -->
+        <string name="MNoteActivity_insertImagesSyncSuccess">图片插入成功</string>
+        <string name="MNoteActivity_insertImagesSyncError">图片插入失败</string>
+
+    <!-- Content New UI -->
+        <string name="ContentNew_NoteTitleHint">请输入标题</string>
+        <string name="ContentNew_GroupTitleHint">默认笔记</string>
+        <string name="ContentNew_NoteContentHint">在这里输入内容</string>
+
+    <!-- Group Dialog -->
+
+        <!-- Adapter UI -->
+        <string name="GroupAdapter_GroupTitle">笔记分类名...</string>
+        <string name="GroupAdapter_GroupColor">笔记代表颜色：#000000</string>
+
+
+    <!-- Show Modify Group Dialog -->
+        <string name="GroupDialog_ModifyAlertTitle">笔记分组</string>
+        <string name="GroupDialog_ModifyAlertNeutralButtonForAdd">添加</string>
+        <string name="GroupDialog_ModifyAlertPositiveButtonForBack">返回</string>
+
+        <!-- Show Add Group Dialog -->
+        <string name="GroupDialog_AddAlertColorText">分组代表颜色：</string>
+        <string name="GroupDialog_AddAlertTitleForNew">添加笔记分组标签</string>
+        <string name="GroupDialog_AddAlertTitleForUpdate">修改笔记分组标签</string>
+        <string name="GroupDialog_AddAlertNegativeButtonForCancel">取消</string>
+        <string name="GroupDialog_AddAlertPositiveButtonForOK">确定</string>
+        <string name="GroupDialog_AddAlertNeutralButtonForDelete">删除</string>
+
+        <!-- Show Null Title Dialog -->
+        <string name="GroupDialog_NullTitleAlertTitle">错误</string>
+        <string name="GroupDialog_NullTitleAlertMsg">没有输入分组名，请补全内容。</string>
+        <string name="GroupDialog_NullTitleAlertPositiveButtonForOK">确定</string>
+
+        <!-- Show Duplicate Group Dialog -->
+        <string name="GroupDialog_DuplicateAlertTitle">错误</string>
+        <string name="GroupDialog_DuplicateAlertMsg">分组 %s 已存在，请修改。</string>
+        <string name="GroupDialog_DuplicateAlertOk">确定</string>
+
+        <!-- Show Modify Default Group Dialog -->
+        <string name="GroupDialog_ModifyDefaultAlertTitle">提醒</string>
+        <string name="GroupDialog_ModifyDefaultAlertPositiveButtonForOK">确定</string>
+        <string name="GroupDialog_ModifyDefaultAlertMsgForModify">不允许修改默认分组。</string>
+        <string name="GroupDialog_ModifyDefaultAlertMsgForDelete">不允许删除默认分组。</string>
+
+
+        <!-- Show Delete Group Dialog -->
+        <string name="GroupDialog_DeleteGroupAlertTitle">提示</string>
+        <string name="GroupDialog_DeleteGroupAlertMsg">确定要删除分组 %s 吗？</string>
+        <string name="GroupDialog_DeleteGroupAlertNegativeButtonForCancel">取消</string>
+        <string name="GroupDialog_DeleteGroupAlertPositiveButtonForOK">确定</string>
+
+        <!-- Show Delete Note Dialog -->
+        <string name="GroupDialog_DeleteNoteAlertTitle">删除</string>
+        <string name="GroupDialog_DeleteNoteAlertMsg">该分组有相关联的笔记，是否更改与该分组对应的笔记？</string>
+        <string name="GroupDialog_DeleteNoteAlertNeutralButtonForNoDelete">不删除分组</string>
+        <string name="GroupDialog_DeleteNoteAlertPositiveButtonForDeleteGroupAndModifyToDefaultGroup">删除分组并修改为默认分组</string>
+        <string name="GroupDialog_DeleteNoteAlertNegativeButtonForDeleteGroupAndNote">删除分组及笔记</string>
+
 </resources>

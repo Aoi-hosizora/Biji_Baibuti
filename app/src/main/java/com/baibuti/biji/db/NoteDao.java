@@ -143,7 +143,7 @@ public class NoteDao {
 
 
     public Note insertDefaultNote() {
-        Note dft = new Note("默认笔记", "");
+        Note dft = new Note(Note.GetDefaultNoteName, "");
         dft.setGroupLabel(groupDao.queryDefaultGroup());
         long id = this.insertNote(dft);
         return queryNoteById((int)id);

@@ -1,4 +1,4 @@
-package com.baibuti.biji;
+package com.baibuti.biji.Widget;
 
 import android.content.Context;
 import android.content.res.TypedArray;
@@ -17,6 +17,7 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.WindowManager;
 
+import com.baibuti.biji.R;
 
 
 /**

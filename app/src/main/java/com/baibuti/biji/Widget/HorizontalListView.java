@@ -1,4 +1,4 @@
-package com.baibuti.biji;
+package com.baibuti.biji.Widget;
 
 /*
  * HorizontalListView.java v1.5

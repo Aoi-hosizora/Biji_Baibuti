@@ -11,13 +11,10 @@ import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.EditText;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import com.baibuti.biji.Activity.MainActivity;
@@ -29,11 +26,9 @@ import com.baibuti.biji.Data.Note;
 import com.baibuti.biji.Data.NoteAdapter;
 import com.baibuti.biji.Dialog.GroupDialog;
 import com.baibuti.biji.R;
-import com.baibuti.biji.RainbowPalette;
 import com.baibuti.biji.View.SpacesItemDecoration;
 import com.baibuti.biji.db.GroupDao;
 import com.baibuti.biji.db.NoteDao;
-import com.baibuti.biji.util.CommonUtil;
 import com.getbase.floatingactionbutton.FloatingActionButton;
 import com.getbase.floatingactionbutton.FloatingActionsMenu;
 import com.jeremyfeinstein.slidingmenu.lib.SlidingMenu;
@@ -92,6 +87,11 @@ public class NoteFragment extends Fragment implements View.OnClickListener {
         return view;
     }
 
+    /**
+     * 查找笔记功能，待改
+     * @param str
+     * @return
+     */
     private List<Note> search(String str) {
         List<Note> notelist = new ArrayList<>();
 
@@ -103,6 +103,10 @@ public class NoteFragment extends Fragment implements View.OnClickListener {
         return notelist;
     }
 
+    /**
+     * 初始化菜单栏
+     * @param view
+     */
     private void initToolbar(View view) {
         Toolbar toolbar = view.findViewById(R.id.note_toolbar);
         toolbar.inflateMenu(R.menu.notefragment_actionbar);
@@ -131,11 +135,12 @@ public class NoteFragment extends Fragment implements View.OnClickListener {
             }
         });
         toolbar.setTitle(R.string.note_header);
-
-        //SimplerSearcherView seacherView = view.findViewById(R.id.note_searcher);
-        //seacherView.setOnSearcherClickListener(((MainActivity)getActivity()));
     }
 
+    /**
+     * 初始化浮动按钮菜单
+     * @param view
+     */
     private void initFloatingActionBar(View view) {
         FloatingActionButton mNotePhoto = view.findViewById(R.id.note_photo);
         FloatingActionButton mNoteEdit = view.findViewById(R.id.note_edit);
@@ -176,6 +181,9 @@ public class NoteFragment extends Fragment implements View.OnClickListener {
     private NoteDao noteDao;
     private GroupDao groupDao;
 
+    /**
+     * 初始化 Dao 和 List 数据
+     */
     public void initData() {
         if (noteDao == null) {
             noteDao = new NoteDao(this.getContext());
@@ -186,11 +194,17 @@ public class NoteFragment extends Fragment implements View.OnClickListener {
         GroupList = groupDao.queryGroupAll();
     }
 
+    /**
+     * 初始化 note/group Adapter
+     */
     public void initAdapter() {
         noteAdapter = new NoteAdapter();
         groupAdapter = new GroupAdapter(getContext(), GroupList);
     }
 
+    /**
+     * 刷新数据，用于下拉
+     */
     private void refreshdata() {
         new Thread(new Runnable() {
             @Override
@@ -216,6 +230,9 @@ public class NoteFragment extends Fragment implements View.OnClickListener {
         }).start();
     }
 
+    /**
+     * 刷新 笔记列表
+     */
     public void refreshNoteList() {
         NoteList = noteDao.queryNotesAll();
         Collections.sort(NoteList);
@@ -224,6 +241,9 @@ public class NoteFragment extends Fragment implements View.OnClickListener {
         noteAdapter.notifyDataSetChanged();
     }
 
+    /**
+     * 刷新 分组列表
+     */
     public void refreshGroupList() {
         GroupList = groupDao.queryGroupAll();
         groupAdapter = new GroupAdapter(getContext(), GroupList); // 必要
@@ -231,8 +251,15 @@ public class NoteFragment extends Fragment implements View.OnClickListener {
     }
 
 
+    /**
+     * 当前选中的笔记，用于返回时修改列表
+     */
     private int SelectedNoteItem;
 
+    /**
+     * 初始化 笔记列表 View，并处理点击笔记事件
+     * @param nlist
+     */
     private void initListView(final List<Note> nlist) {
 
         mNoteList.addItemDecoration(new SpacesItemDecoration(0));//设置item间距
@@ -262,49 +289,58 @@ public class NoteFragment extends Fragment implements View.OnClickListener {
         noteAdapter.setOnItemLongClickListener(new NoteAdapter.OnRecyclerViewItemLongClickListener() {
             @Override
             public void onItemLongClick(final View view, final Note note) {
-
-//                final Note notetmp = note;
-
-                AlertDialog deleteAlert = new AlertDialog
-                    .Builder(getContext())
-                    .setTitle("提示")
-                    .setMessage("确定删除笔记 \"" + note.getTitle() + "\" 吗？")
-                    .setPositiveButton("确定", new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int which) {
-
-                            int ret = noteDao.deleteNote(note.getId());
-
-                            if (ret > 0) {
-                                NoteList.remove(note);
-                                noteAdapter.notifyDataSetChanged();
-
-                                Snackbar.make(view ,"删除成功", Snackbar.LENGTH_LONG)
-                                    .setAction("撤销", new View.OnClickListener() {
-                                        @Override
-                                        public void onClick(View v) {
-                                            try {
-                                                noteDao.insertNote(note);
-                                                NoteList.add(note);
-                                                Collections.sort(NoteList);
-                                                noteAdapter.notifyDataSetChanged();
-                                            } catch (Exception ex) {
-                                                ex.printStackTrace();
-                                            }
-                                            Snackbar.make(view, "已恢复", Snackbar.LENGTH_SHORT).show();
-                                        }
-                                    }).show();
-                            }
-                        }
-                    })
-                    .setNegativeButton("取消", null)
-                    .create();
-
-                deleteAlert.show();
+                DeleteNote(view, note);
             }
         });
     }
 
+    /**
+     * 删除笔记
+     * @param view
+     * @param note
+     */
+    private void DeleteNote(final View view, final Note note) {
+        AlertDialog deleteAlert = new AlertDialog
+                .Builder(getContext())
+                .setTitle(R.string.DeleteAlert_Title)
+                .setMessage(String.format(getResources().getString(R.string.DeleteAlert_Msg), note.getTitle()))
+                .setPositiveButton(R.string.DeleteAlert_PositiveButton, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+
+                        int ret = noteDao.deleteNote(note.getId());
+
+                        if (ret > 0) {
+                            NoteList.remove(note);
+                            noteAdapter.notifyDataSetChanged();
+
+                            Snackbar.make(view , R.string.DeleteAlert_DeleteSuccess, Snackbar.LENGTH_LONG)
+                                .setAction(R.string.DeleteAlert_Undo, new View.OnClickListener() {
+                                    @Override
+                                    public void onClick(View v) {
+                                        try {
+                                            noteDao.insertNote(note);
+                                            NoteList.add(note);
+                                            Collections.sort(NoteList);
+                                            noteAdapter.notifyDataSetChanged();
+                                        } catch (Exception ex) {
+                                            ex.printStackTrace();
+                                        }
+                                        Snackbar.make(view, R.string.DeleteAlert_UndoSuccess, Snackbar.LENGTH_SHORT).show();
+                                    }
+                                }).show();
+                        }
+                    }
+                })
+                .setNegativeButton(R.string.DeleteAlert_NegativeButton, null)
+                .create();
+
+        deleteAlert.show();
+    }
+
+    /**
+     * 初始化搜索框
+     */
     private void initSearchFrag() {
         // 添加搜索框
         searchFragment = com.wyt.searchbox.SearchFragment.newInstance();
@@ -339,9 +375,6 @@ public class NoteFragment extends Fragment implements View.OnClickListener {
 
     //////////////////////////////////////////////////
 
-
-
-    //////////////////////////////////////////////////
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {

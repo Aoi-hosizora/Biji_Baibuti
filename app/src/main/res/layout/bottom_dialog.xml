@@ -14,7 +14,7 @@
         android:layout_width="match_parent"
         android:layout_height="42dp"
         android:gravity="center"
-        android:text="拍照"
+        android:text="@string/MNoteActivity_BottomMenuCamera"
         android:textColor="#ffffff"
         android:textSize="18sp" />
 
@@ -24,7 +24,7 @@
         android:layout_height="42dp"
         android:layout_marginTop="16dp"
         android:gravity="center"
-        android:text="从相册中选取"
+        android:text="@string/MNoteActivity_BottomMenuGallery"
         android:textColor="#ffffff"
         android:textSize="18sp" />
 
@@ -34,7 +34,7 @@
         android:layout_height="42dp"
         android:layout_marginTop="16dp"
         android:gravity="center"
-        android:text="取消"
+        android:text="@string/MNoteActivity_BottomMenuCancel"
         android:textColor="#ffffff"
         android:textSize="18sp" />
 </LinearLayout>

@@ -24,6 +24,8 @@ public class Note implements Serializable, Comparable<Note> {
     private Date CreateTime;
     private Date UpdateTime;
 
+    public static String GetDefaultNoteName = "默认笔记";
+
     public Note(Note n) {
         this.Id = n.Id;
         this.Title = n.Title;

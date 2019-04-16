@@ -12,16 +12,13 @@ import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.MotionEvent;
 import android.view.View;
-import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.baibuti.biji.Data.Note;
+import com.baibuti.biji.Interface.IShowLog;
 import com.baibuti.biji.R;
-import com.baibuti.biji.db.GroupDao;
-import com.baibuti.biji.db.NoteDao;
 import com.baibuti.biji.util.StringUtils;
 import com.sendtion.xrichtext.RichTextView;
 
@@ -36,9 +33,7 @@ import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
 
-import static com.baibuti.biji.util.CommonUtil.ColorHex_IntEncoding;
-
-public class ViewModifyNoteActivity extends AppCompatActivity implements View.OnClickListener {
+public class ViewModifyNoteActivity extends AppCompatActivity implements View.OnClickListener, IShowLog {
 
     private TextView TitleEditText_View;
     private TextView UpdateTimeTextView_View;
@@ -49,7 +44,6 @@ public class ViewModifyNoteActivity extends AppCompatActivity implements View.On
     private Disposable mDisposable;
 
     private Note note;
-//    private int notePos;
 
     private boolean isModify = false;
 
@@ -58,17 +52,14 @@ public class ViewModifyNoteActivity extends AppCompatActivity implements View.On
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_viewmodifyplainnote);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        setTitle("笔记详情");
+        setTitle(R.string.VMNoteActivity_Title);
 
         loadingDialog = new ProgressDialog(this);
-        loadingDialog.setMessage("数据加载中...");
+        loadingDialog.setMessage(getResources().getString(R.string.VMNoteActivity_LoadingData));
         loadingDialog.setCanceledOnTouchOutside(false);
         loadingDialog.show();
 
-//        Bundle bundle = getIntent().getBundleExtra("data");
-//        note = (Note) bundle.getSerializable("notedata");
         note = (Note) getIntent().getSerializableExtra("notedata");
-//        notePos = getIntent().getIntExtra("notepos",0);
 
         TitleEditText_View = (TextView) findViewById(R.id.id_modifynote_viewtitle);
         UpdateTimeTextView_View = (TextView) findViewById(R.id.id_modifynote_viewupdatetime);
@@ -78,7 +69,7 @@ public class ViewModifyNoteActivity extends AppCompatActivity implements View.On
         TitleEditText_View.setText(note.getTitle());
         UpdateTimeTextView_View.setText(note.getUpdateTime_ShortString());
         GroupNameTextView_View.setText(note.getGroupLabel().getName());
-        GroupNameTextView_View.setTextColor(ColorHex_IntEncoding(note.getGroupLabel().getColor()));
+        GroupNameTextView_View.setTextColor(note.getGroupLabel().getIntColor());
 
         //////////////////////////////////////////////////
         ContentEditText_View.post(new Runnable() {
@@ -106,12 +97,22 @@ public class ViewModifyNoteActivity extends AppCompatActivity implements View.On
 
     }
 
+    /**
+     * IShowLog 接口，全局设置 Log 格式
+     * @param FunctionName
+     * @param Msg
+     */
+    @Override
+    public void ShowLogE(String FunctionName, String Msg) {
+        String ClassName = "ViewModifyNoteActivity";
+        Log.e(getResources().getString(R.string.IShowLog_LogE),
+                ClassName + ": " + FunctionName + "###" + Msg); // MainActivity: initDatas###data=xxx
+    }
+
     @Override
     public void onClick(View v) {
         switch (v.getId()) {
-//            case R.id.id_modifynote_viewcontent:
-//                ShowModifyNoteActivity();
-//                break;
+
         }
     }
 
@@ -121,21 +122,16 @@ public class ViewModifyNoteActivity extends AppCompatActivity implements View.On
         return true;
     }
 
-    private void ShowModifyNoteActivity() {
-        Intent intent=new Intent(ViewModifyNoteActivity.this, ModifyNoteActivity.class);
-        intent.putExtra("notedata",note);
-        intent.putExtra("flag",1); // UPDATE
-        startActivityForResult(intent,1); // 1 from CardView
-    }
-
+    /**
+     * 菜单栏点击事件
+     * @param item
+     * @return
+     */
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.id_menu_modifynote_viewmodify:
-                // isModify
-
                 ShowModifyNoteActivity();
-
                 break;
 
             case android.R.id.home:
@@ -150,17 +146,25 @@ public class ViewModifyNoteActivity extends AppCompatActivity implements View.On
         return true;
     }
 
-    @Override
-    public void onBackPressed() {
-        BackToActivity();
+
+    /**
+     * 打开 ModifyNote 活动
+     */
+    private void ShowModifyNoteActivity() {
+        Intent intent=new Intent(ViewModifyNoteActivity.this, ModifyNoteActivity.class);
+        intent.putExtra("notedata",note);
+        intent.putExtra("flag",1); // UPDATE
+        startActivityForResult(intent,1); // 1 from CardView
     }
 
+    /**
+     * 返回主界面
+     */
     private void BackToActivity() {
         Intent motointent = new Intent();
 
         if (isModify) {
             motointent.putExtra("modify_note",note);
-//                    motointent.putExtra("modify_note_pos", notePos);
             setResult(RESULT_OK,motointent);
         }
         else
@@ -169,53 +173,75 @@ public class ViewModifyNoteActivity extends AppCompatActivity implements View.On
         finish();
     }
 
+    /**
+     * 返回键返回主界面
+     */
+    @Override
+    public void onBackPressed() {
+        BackToActivity();
+    }
+
+    /**
+     * 由 Modify Note 返回到 View Modify 界面处理
+     * @param requestCode
+     * @param resultCode
+     * @param data
+     */
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         switch (requestCode) {
             case 1: // MODIFY
                 if (resultCode == RESULT_OK) {
-                        Note newnote = (Note) data.getSerializableExtra("modify_note");
-                        isModify = data.getBooleanExtra("isModify", true);
+                    Note newnote = (Note) data.getSerializableExtra("modify_note");
 
-                        if (isModify) {
-                            note = new Note(newnote);
+                    // 判断是否修改
+                    isModify = data.getBooleanExtra("isModify", true);
+                    if (isModify) {
 
-                            TitleEditText_View.setText(note.getTitle());
-                            UpdateTimeTextView_View.setText(note.getUpdateTime_ShortString());
-                            GroupNameTextView_View.setText(note.getGroupLabel().getName());
-                            GroupNameTextView_View.setTextColor(ColorHex_IntEncoding(note.getGroupLabel().getColor()));
-                            ContentEditText_View.post(new Runnable() {
-                                @Override
-                                public void run() {
-                                    dealWithContent();
-                                }
-                            });
-                        }
-                    break;
+                        // 使用新的笔记数据
+                        note = new Note(newnote);
+
+                        TitleEditText_View.setText(note.getTitle());
+                        UpdateTimeTextView_View.setText(note.getUpdateTime_ShortString());
+                        GroupNameTextView_View.setText(note.getGroupLabel().getName());
+                        GroupNameTextView_View.setTextColor(note.getGroupLabel().getIntColor());
+                        ContentEditText_View.post(new Runnable() {
+                            @Override
+                            public void run() {
+                                // 处理显示数据
+                                dealWithContent();
+                            }
+                        });
+                    }
                 }
+            break;
         }
         super.onActivityResult(requestCode, resultCode, data);
     }
 
+    /**
+     * 显示笔记详细信息
+     */
     private void showDetailInfo() {
-        final String Info = "标题：" + note.getTitle() + "\n" +
-                "创建时间：" + note.getCreateTime_FullString() + "\n" +
-                "最近修改时间：" + note.getUpdateTime_FullString() + "\n\n" +
-                "分类：" + note.getGroupLabel().getName();
+        final String Info = getResources().getString(R.string.VMNoteActivity_InfoTitle) + note.getTitle() + "\n" +
+                            getResources().getString(R.string.VMNoteActivity_InfoCreateTime) + note.getCreateTime_FullString() + "\n" +
+                            getResources().getString(R.string.VMNoteActivity_InfoUpdateTime) + note.getUpdateTime_FullString() + "\n\n" +
+                            getResources().getString(R.string.VMNoteActivity_InfoGroupLabelTitle) + note.getGroupLabel().getName();
+
         AlertDialog dialog = new AlertDialog.Builder(this)
-                .setTitle("详细信息")
+                .setTitle(R.string.VMNoteActivity_InfoAlertTitle)
                 .setMessage(Info)
-                .setNeutralButton("复制", new DialogInterface.OnClickListener() {
+                .setNeutralButton(R.string.VMNoteActivity_InfoAlertNeutralButtonForCopy, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         ClipboardManager clipboardManager = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
-                        ClipData clip = ClipData.newPlainText("text", Info);
+                        ClipData clip = ClipData.newPlainText(getResources().getString(R.string.VMNoteActivity_InfoAlertClipDataLabel), Info);
                         clipboardManager.setPrimaryClip(clip);
-                        Toast.makeText(ViewModifyNoteActivity.this, "信息复制成功。", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(ViewModifyNoteActivity.this, R.string.VMNoteActivity_InfoAlertCopySuccess, Toast.LENGTH_SHORT).show();
                         dialog.dismiss();
                     }
                 })
-                .setNegativeButton("确定", new DialogInterface.OnClickListener() {
+                .setNegativeButton(R.string.VMNoteActivity_InfoAlertNegativeButtonForOK, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         dialog.dismiss();
@@ -225,8 +251,11 @@ public class ViewModifyNoteActivity extends AppCompatActivity implements View.On
 
     }
 
-
-    private void dealWithContent(){
+    /**
+     * 处理内容，重要
+     * ContentEditText.post(new Runnable() -> dealWithContent(););
+     */
+    private void dealWithContent() {
         //showEditData(myContent);
         ContentEditText_View.clearAllLayout();
         showDataSync(note.getContent());
@@ -238,6 +267,10 @@ public class ViewModifyNoteActivity extends AppCompatActivity implements View.On
                 ArrayList<String> imageList = StringUtils.getTextFromHtml(note.getContent(), true);
                 int currentPosition = imageList.indexOf(imagePath);
                // showToast("点击图片："+currentPosition+"："+imagePath);
+
+                //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+                //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+                //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
                 //点击图片预览
 //                PhotoPreview.builder()
@@ -261,50 +294,47 @@ public class ViewModifyNoteActivity extends AppCompatActivity implements View.On
                 showEditData(emitter, html);
             }
         })
-                //.onBackpressureBuffer()
-                .subscribeOn(Schedulers.io())//生产事件在io
-                .observeOn(AndroidSchedulers.mainThread())//消费事件在UI线程
-                .subscribe(new Observer<String>() {
-                    @Override
-                    public void onComplete() {
-                        if (loadingDialog != null){
-                            loadingDialog.dismiss();
+        //.onBackpressureBuffer()
+        .subscribeOn(Schedulers.io()) //生产事件在io
+        .observeOn(AndroidSchedulers.mainThread()) //消费事件在UI线程
+        .subscribe(new Observer<String>() {
+            @Override
+            public void onComplete() {
+                if (loadingDialog != null)
+                    loadingDialog.dismiss();
+            }
+
+            @Override
+            public void onError(Throwable e) {
+                if (loadingDialog != null) {
+                    loadingDialog.dismiss();
+                }
+                // Toast.makeText(ViewModifyNoteActivity.this, R.string.VMNoteActivity_showDataSyncError, Toast.LENGTH_SHORT).show();
+            }
+
+            @Override
+            public void onSubscribe(Disposable d) {
+                mDisposable = d;
+            }
+
+            @Override
+            public void onNext(String text) {
+                try {
+                    if (ContentEditText_View != null) {
+                        if (text.contains("<img") && text.contains("src=")) {
+                            // imagePath可能是本地路径，也可能是网络地址
+                            String imagePath = StringUtils.getImgSrc(text);
+                            ContentEditText_View.addImageViewAtIndex(ContentEditText_View.getLastIndex(), imagePath);
+                        } else {
+                            ContentEditText_View.addTextViewAtIndex(ContentEditText_View.getLastIndex(), text);
                         }
                     }
-
-                    @Override
-                    public void onError(Throwable e) {
-                        if (loadingDialog != null){
-                            loadingDialog.dismiss();
-                        }
-//                        showToast("解析错误：图片不存在或已损坏");
-//                        Log.e(TAG, "onError: " + e.getMessage());
-                    }
-
-                    @Override
-                    public void onSubscribe(Disposable d) {
-                        mDisposable = d;
-                    }
-
-                    @Override
-                    public void onNext(String text) {
-                        try {
-                            if (ContentEditText_View != null) {
-                                if (text.contains("<img") && text.contains("src=")) {
-                                    //imagePath可能是本地路径，也可能是网络地址
-                                    String imagePath = StringUtils.getImgSrc(text);
-                                    ContentEditText_View.addImageViewAtIndex(ContentEditText_View.getLastIndex(), imagePath);
-                                } else {
-                                    ContentEditText_View.addTextViewAtIndex(ContentEditText_View.getLastIndex(), text);
-                                }
-                            }
-                        }
-                        catch (Exception ex) {
-                            Toast.makeText(ViewModifyNoteActivity.this, "笔记中图片显示错误，可能由于源文件被删除。", Toast.LENGTH_SHORT).show();
-
-                        }
-                    }
-                });
+                }
+                catch (Exception ex) {
+                    Toast.makeText(ViewModifyNoteActivity.this, "笔记中图片显示错误，可能由于源文件被删除。", Toast.LENGTH_SHORT).show();
+                }
+            }
+        });
 
     }
 

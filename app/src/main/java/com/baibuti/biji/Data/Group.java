@@ -1,5 +1,7 @@
 package com.baibuti.biji.Data;
 
+import android.graphics.Color;
+
 import java.io.Serializable;
 import java.util.Date;
 
@@ -11,6 +13,8 @@ public class Group implements Serializable {
     private int order;//排列顺序
 
     private String color;//分类颜色，存储颜色代码
+
+    public static String GetDefaultGroupName = "默认分组";
 
     @Override
     public boolean equals(Object obj) {
@@ -74,5 +78,13 @@ public class Group implements Serializable {
 
     public void setColor(String color) {
         this.color = color;
+    }
+
+    public String getStringColor() {
+        return getColor();
+    }
+
+    public int getIntColor() {
+        return Color.parseColor(getColor());
     }
 }

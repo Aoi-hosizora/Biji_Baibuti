@@ -1,5 +1,6 @@
 package com.baibuti.biji.util;
 
+import android.content.Context;
 import android.graphics.Color;
 import android.text.Spannable;
 import android.text.SpannableStringBuilder;
@@ -122,5 +123,4 @@ public class StringUtils {
             return textList;
         }
     }
-
 }
