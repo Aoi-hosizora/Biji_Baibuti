@@ -35,7 +35,6 @@ import android.widget.Toast;
 import com.baibuti.biji.Data.Group;
 import com.baibuti.biji.Data.GroupAdapter;
 import com.baibuti.biji.Data.Note;
-import com.baibuti.biji.Dialog.GroupDialog;
 import com.baibuti.biji.Interface.IShowLog;
 import com.baibuti.biji.R;
 import com.baibuti.biji.db.GroupDao;
@@ -336,16 +335,6 @@ public class ModifyNoteActivity extends AppCompatActivity implements View.OnClic
         AlertDialog GroupSettingDialog = new AlertDialog
                 .Builder(this)
                 .setTitle(R.string.MNoteActivity_GroupSetAlertTitle)
-                .setNeutralButton(R.string.MNoteActivity_GroupSetAlertNeutralButtonForSetGeneralGroupInfo, new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        dialog.cancel();
-
-                        GroupDialog.setupGroupDialog(ModifyNoteActivity.this,
-                                groupAdapter, GroupList, groupDao, noteDao, getLayoutInflater())
-                                .showModifyGroup();
-                    }
-                })
                 .setNegativeButton(R.string.MNoteActivity_GroupSetAlertNegativeButtonForCancel, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
@@ -556,6 +545,8 @@ public class ModifyNoteActivity extends AppCompatActivity implements View.OnClic
      */
     private void saveNoteData(boolean isExit) {
 
+        int motoflag = flag;
+
         // 获得笔记内容
         String Content = getEditData();
 
@@ -625,7 +616,7 @@ public class ModifyNoteActivity extends AppCompatActivity implements View.OnClic
         setResult(RESULT_OK, intent);
 
         // NEW
-        if (flag == NOTE_NEW) {
+        if (motoflag == NOTE_NEW) {
             // 重新打开 View Modify 活动
             Intent openviewintent = new Intent(ModifyNoteActivity.this, ViewModifyNoteActivity.class);
             openviewintent.putExtra("notedata",note);

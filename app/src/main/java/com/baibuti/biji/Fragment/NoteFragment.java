@@ -17,6 +17,7 @@ import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.EditText;
 import android.widget.Toast;
 
 import com.baibuti.biji.Activity.MainActivity;
@@ -117,8 +118,24 @@ public class NoteFragment extends Fragment implements View.OnClickListener, ISho
                         searchFragment.show(getActivity().getSupportFragmentManager(),com.wyt.searchbox.SearchFragment.TAG);
                         break;
                     case R.id.action_modifygroup:
-                        GroupDialog.setupGroupDialog(getContext(), groupAdapter, GroupList, groupDao, noteDao, getLayoutInflater())
-                                .showModifyGroup();
+
+//                        GroupDialog.setupGroupDialog(getContext(), groupAdapter, GroupList, groupDao, noteDao, getLayoutInflater())
+//                                .showModifyGroup();
+
+                        GroupDialog dialog = new GroupDialog(getContext(), new GroupDialog.OnUpdateGroupListener() {
+
+                            @Override
+                            public void UpdateGroupFinished() {
+                                refreshGroupList();
+                                refreshNoteList();
+                                if (IsSearching)
+                                    initListView(search(SearchingStr));
+                                else
+                                    initListView(NoteList);
+                            }
+                        });
+                        dialog.setView(new EditText(getContext()));  //若对话框无法弹出输入法，加上这句话
+                        dialog.show();
                         break;
                     case R.id.action_search_back:
                         SearchFracBack();
@@ -482,6 +499,8 @@ public class NoteFragment extends Fragment implements View.OnClickListener, ISho
 
                         if (IsSearching)
                             initListView(search(SearchingStr));
+                        else
+                            initListView(NoteList);
                     }
                 }
                 break;
