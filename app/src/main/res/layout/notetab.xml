@@ -90,20 +90,20 @@
 
     </com.getbase.floatingactionbutton.FloatingActionsMenu>
 
-    <com.getbase.floatingactionbutton.FloatingActionButton
-        android:id="@+id/note_searchback"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginEnd="14dp"
-        android:layout_marginBottom="20dp"
-        android:src="@android:drawable/ic_menu_revert"
-        android:visibility="gone"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        fab:fab_addButtonColorNormal="@color/colorPrimary"
-        fab:fab_addButtonColorPressed="@color/colorPrimaryDark"
-        fab:fab_addButtonPlusIconColor="@color/white"
-        fab:fab_labelStyle="@style/menu_labels_style"/>
+    <!--<com.getbase.floatingactionbutton.FloatingActionButton-->
+        <!--android:id="@+id/note_searchback"-->
+        <!--android:layout_width="wrap_content"-->
+        <!--android:layout_height="wrap_content"-->
+        <!--android:layout_marginEnd="14dp"-->
+        <!--android:layout_marginBottom="20dp"-->
+        <!--android:src="@android:drawable/ic_menu_revert"-->
+        <!--android:visibility="gone"-->
+        <!--app:layout_constraintBottom_toBottomOf="parent"-->
+        <!--app:layout_constraintEnd_toEndOf="parent"-->
+        <!--fab:fab_addButtonColorNormal="@color/colorPrimary"-->
+        <!--fab:fab_addButtonColorPressed="@color/colorPrimaryDark"-->
+        <!--fab:fab_addButtonPlusIconColor="@color/white"-->
+        <!--fab:fab_labelStyle="@style/menu_labels_style"/>-->
 
 
 

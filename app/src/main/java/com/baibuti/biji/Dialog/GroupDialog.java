@@ -179,7 +179,7 @@ public class GroupDialog {
                 .setNegativeButton(R.string.GroupDialog_AddAlertNegativeButtonForCancel, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        showModifyGroup();
+                        // showModifyGroup();
                         dialog.dismiss();
                     }
                 })
@@ -244,7 +244,7 @@ public class GroupDialog {
                                             catch (Exception ex) {
                                                 ex.printStackTrace();
                                             }
-                                            showModifyGroup();
+                                            // showModifyGroup();
                                             dialog.dismiss();
                                         }
                                         else { // 重复
@@ -457,7 +457,8 @@ public class GroupDialog {
                         } catch (Exception ex) {
                             ex.printStackTrace();
                         }
-
+                        showModifyGroup();
+                        dialog.dismiss();
                     }
                 })
                 .setNegativeButton(R.string.GroupDialog_DeleteNoteAlertNegativeButtonForDeleteGroupAndNote, new DialogInterface.OnClickListener() {
@@ -476,7 +477,8 @@ public class GroupDialog {
                         } catch (Exception ex) {
                             ex.printStackTrace();
                         }
-
+                        showModifyGroup();
+                        dialog.dismiss();
                     }
                 })
                 .create();
