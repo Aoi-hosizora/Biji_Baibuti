@@ -216,7 +216,7 @@ public class GroupDialog {
                                     catch (Exception ex) {
                                         ex.printStackTrace();
                                     }
-                                    showModifyGroup();
+                                    // showModifyGroup();
                                 }
                                 else // 新建分组重复
                                     ShowDuplicateDialog(dialog, group, newGroup);
@@ -235,6 +235,11 @@ public class GroupDialog {
                                         int cnt = groupDao.checkDuplicate(newGroup, group);
 
                                         if (cnt == 0) { // 无重复
+
+                                            ////////// <<<<<<<<<<<<<<<<<<<<
+                                            ////////// <<<<<<<<<<<<<<<<<<<<
+                                            ////////// <<<<<<<<<<<<<<<<<<<<
+
                                             group.setName(newGroupName);
                                             group.setColor(newGroupColor);
                                             group.setOrder(newGroupOrder);

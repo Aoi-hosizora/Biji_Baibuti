@@ -53,7 +53,6 @@ public class NoteFragment extends Fragment implements View.OnClickListener, ISho
 
     private ProgressDialog loadingDialog;
     private Toolbar m_toolbar;
-    // private MenuItem m_SearchBack;
 
     private static final int NOTE_NEW = 0; // new
     private static final int NOTE_UPDATE = 1; // modify
@@ -177,7 +176,16 @@ public class NoteFragment extends Fragment implements View.OnClickListener, ISho
 
     }
 
-    public boolean IsSearching = false;
+    /**
+     * 用于返回数据时判断当前是否处在搜索页面
+     * 而进行下一步处理刷新 ListView
+     */
+    private boolean IsSearching = false;
+
+    /**
+     * 当 IsSearching 时表示当前所有页面的 keyWord
+     */
+    private String SearchingStr;
 
     /**
      * 查找笔记功能
@@ -208,6 +216,7 @@ public class NoteFragment extends Fragment implements View.OnClickListener, ISho
             public void OnSearchClick(String keyword) {
                 if (!keyword.isEmpty()) {
                     IsSearching = true;
+                    SearchingStr = keyword;
                     initListView(search(keyword));
                     m_toolbar.getMenu().findItem(R.id.action_search_back).setVisible(true);
                     mSwipeRefresh.setEnabled(false);
@@ -241,7 +250,9 @@ public class NoteFragment extends Fragment implements View.OnClickListener, ISho
                         mSwipeRefresh.setEnabled(true);
                         m_toolbar.getMenu().findItem(R.id.action_search_back).setVisible(false);
                         m_toolbar.setTitle(R.string.note_header);
+
                         IsSearching = false;
+                        SearchingStr = "";
 
                         loadingDialog.dismiss();
 
@@ -256,9 +267,7 @@ public class NoteFragment extends Fragment implements View.OnClickListener, ISho
     @Override
     public void onClick(View v) {
         switch (v.getId()) {
-//            case R.id.note_searchback:
-//                NoteList = noteDao.queryNotesAll();
-//                initListView(NoteList);
+
         }
     }
 
@@ -456,6 +465,9 @@ public class NoteFragment extends Fragment implements View.OnClickListener, ISho
                         NoteList.set(SelectedNoteItem, newnote);
                         Collections.sort(NoteList);
                         noteAdapter.notifyDataSetChanged();
+
+                        if (IsSearching)
+                            initListView(search(SearchingStr));
                     }
                     break;
                 }
@@ -467,6 +479,9 @@ public class NoteFragment extends Fragment implements View.OnClickListener, ISho
                         NoteList.add(NoteList.size(), newnote);
                         Collections.sort(NoteList);
                         noteAdapter.notifyDataSetChanged();
+
+                        if (IsSearching)
+                            initListView(search(SearchingStr));
                     }
                 }
                 break;
