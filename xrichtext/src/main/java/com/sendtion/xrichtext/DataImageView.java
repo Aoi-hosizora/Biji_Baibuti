@@ -73,7 +73,7 @@ public class DataImageView extends ImageView {
             //画边框
             Rect rec = canvas.getClipBounds();
             // 这两句可以使底部和右侧边框更大
-            //rec.bottom -= 2;
+            //rec.modulelayout_mainactivity_bottom -= 2;
             //rec.right -= 2;
             //画笔
             Paint paint = new Paint();

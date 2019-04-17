@@ -46,7 +46,7 @@ public class GroupAdapter extends BaseAdapter {
         ViewHolder holder;
         if (convertView == null) {
             holder = new ViewHolder();
-            convertView = inflater.inflate(R.layout.modifygroup_listview_dialog, null);
+            convertView = inflater.inflate(R.layout.modulelayout_groupdialog_grouplistitem, null);
 
             holder.GroupName = (TextView) convertView.findViewById(R.id.id_adapter_group_name);
             holder.GroupColor = (ImageView) convertView.findViewById(R.id.id_adapter_group_color);

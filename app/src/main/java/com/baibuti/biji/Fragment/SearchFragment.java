@@ -25,7 +25,7 @@ public class SearchFragment extends Fragment implements View.OnClickListener {
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.searchtab, container, false);
+        View view = inflater.inflate(R.layout.fragment_searchtab, container, false);
 
 //        mFab = view.findViewById(R.id.id_note_addfab);
 //        mSwipeRefresh = view.findViewById(R.id.swipe_refresh);

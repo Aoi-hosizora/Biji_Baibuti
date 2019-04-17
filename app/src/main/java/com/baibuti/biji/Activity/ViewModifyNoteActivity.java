@@ -50,7 +50,7 @@ public class ViewModifyNoteActivity extends AppCompatActivity implements View.On
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_viewmodifyplainnote);
+        setContentView(R.layout.activity_viewmodifynote);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         setTitle(R.string.VMNoteActivity_Title);
 

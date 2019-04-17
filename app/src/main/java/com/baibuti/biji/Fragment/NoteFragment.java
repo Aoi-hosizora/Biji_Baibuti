@@ -61,7 +61,7 @@ public class NoteFragment extends Fragment implements View.OnClickListener, ISho
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.notetab, container, false);
+        View view = inflater.inflate(R.layout.fragment_notetab, container, false);
         setHasOptionsMenu(true);
 
         m_fabmenu = (FloatingActionsMenu) view.findViewById(R.id.note_fabmenu);

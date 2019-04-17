@@ -10,7 +10,6 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.EditText;
 import android.widget.ListView;
-import android.widget.Toast;
 
 import com.baibuti.biji.Data.Group;
 import com.baibuti.biji.Data.GroupAdapter;
@@ -47,7 +46,7 @@ public class GroupDialog extends AlertDialog implements OnClickListener, IShowLo
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.groupdialog_layout);
+        setContentView(R.layout.dialog_mainalert_groupdialog);
 
         mButtonEdit = (Button)findViewById(R.id.id_GroupDialog_ButtonEdit);
         mButtonCancel = (Button)findViewById(R.id.id_GroupDialog_ButtonCancel);
@@ -113,6 +112,8 @@ public class GroupDialog extends AlertDialog implements OnClickListener, IShowLo
     public void onClick(View v) {
         switch (v.getId()) {
             case R.id.id_GroupDialog_ButtonCancel:
+                if (mListener != null)
+                    mListener.UpdateGroupFinished();
                 dismiss();
             break;
             case R.id.id_GroupDialog_ButtonEdit:

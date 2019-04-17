@@ -130,7 +130,7 @@ public class ModifyNoteActivity extends AppCompatActivity implements View.OnClic
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_modifyplainnote);
+        setContentView(R.layout.activity_modifynote);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
         loadingDialog = new ProgressDialog(this);
@@ -360,7 +360,7 @@ public class ModifyNoteActivity extends AppCompatActivity implements View.OnClic
     private void ShowPopMenu() {
         mCameraDialog = new Dialog(this, R.style.BottomDialog);
         LinearLayout root = (LinearLayout) LayoutInflater.from(this).inflate(
-                R.layout.bottom_dialog, null);
+                R.layout.dialog_mnote_bottompopupmenu, null);
 
         //初始化视图
         root.findViewById(R.id.id_popmenu_choose_img).setOnClickListener(this);
@@ -644,7 +644,7 @@ public class ModifyNoteActivity extends AppCompatActivity implements View.OnClic
         idenDialog = new AlertDialog
                 .Builder(ModifyNoteActivity.this)
                 .setTitle(R.string.MNoteActivity_OCRCheckAlertTitle)
-                .setMessage(R.string.MNoteActivity_OCRCheckAlertMsg + imagePath)
+                .setMessage(getResources().getString(R.string.MNoteActivity_OCRCheckAlertMsg) + imagePath)
                 .setCancelable(false)
                 .setPositiveButton(R.string.MNoteActivity_OCRCheckAlertPositiveButtonForOK, new DialogInterface.OnClickListener() {
                     @Override

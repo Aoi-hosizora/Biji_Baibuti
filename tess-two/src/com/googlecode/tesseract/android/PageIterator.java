@@ -73,10 +73,10 @@ public class PageIterator {
      * <ul>
      * <li> Integer coordinates are at the cracks between the pixels.
      * <li> The top-left corner of the top-left pixel in the image is at (0,0).
-     * <li> The bottom-right corner of the bottom-right pixel in the image is at
+     * <li> The modulelayout_mainactivity_bottom-right corner of the modulelayout_mainactivity_bottom-right pixel in the image is at
      * (width, height).
      * <li> Every bounding box goes from the top-left of the top-left contained
-     * pixel to the bottom-right of the bottom-right contained pixel, so
+     * pixel to the modulelayout_mainactivity_bottom-right of the modulelayout_mainactivity_bottom-right contained pixel, so
      * the bounding box of the single top-left pixel in the image is:
      * (0,0)-&gt;(1,1).
      * <li> If an image rectangle has been set in the API, then returned coordinates

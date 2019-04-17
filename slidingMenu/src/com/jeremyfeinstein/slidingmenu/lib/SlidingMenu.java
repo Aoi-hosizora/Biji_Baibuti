@@ -581,10 +581,10 @@ public class SlidingMenu extends RelativeLayout {
 	 */
 	public void setBehindOffset(int i) {
 		//		RelativeLayout.LayoutParams params = ((RelativeLayout.LayoutParams)mViewBehind.getLayoutParams());
-		//		int bottom = params.bottomMargin;
+		//		int modulelayout_mainactivity_bottom = params.bottomMargin;
 		//		int top = params.topMargin;
 		//		int left = params.leftMargin;
-		//		params.setMargins(left, top, i, bottom);
+		//		params.setMargins(left, top, i, modulelayout_mainactivity_bottom);
 		mViewBehind.setWidthOffset(i);
 	}
 

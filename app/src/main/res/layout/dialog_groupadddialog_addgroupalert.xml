@@ -72,24 +72,23 @@
             android:layout_weight="1"/>
 
         <Button
-            android:id="@+id/id_AddGroupDialog_ButtonUpdate"
+            android:id="@+id/id_AddGroupDialog_ButtonCancel"
             android:layout_width="50dp"
             android:layout_height="wrap_content"
             android:layout_marginRight="8dp"
+            android:text="取消"
+            android:background="@color/transparent"
+            android:textColor="@color/pink"/>
+        <Button
+            android:id="@+id/id_AddGroupDialog_ButtonUpdate"
+            android:layout_width="50dp"
+            android:layout_height="wrap_content"
+            android:layout_marginRight="20dp"
 
             android:text="确定"
             android:background="@color/transparent"
             android:textColor="@color/pink"/>
 
-        <Button
-            android:id="@+id/id_AddGroupDialog_ButtonCancel"
-            android:layout_width="50dp"
-            android:layout_height="wrap_content"
-            android:layout_marginRight="20dp"
-
-            android:text="取消"
-            android:background="@color/transparent"
-            android:textColor="@color/pink"/>
 
     </LinearLayout>
 
