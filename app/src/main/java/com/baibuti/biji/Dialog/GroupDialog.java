@@ -20,6 +20,8 @@ import com.baibuti.biji.db.NoteDao;
 
 import java.util.List;
 
+import static com.baibuti.biji.util.CommonUtil.ColorHex_IntEncoding;
+
 public class GroupDialog extends AlertDialog implements OnClickListener, IShowLog {
     private OnUpdateGroupListener mListener; //接口
 
@@ -57,6 +59,7 @@ public class GroupDialog extends AlertDialog implements OnClickListener, IShowLo
         mButtonAdd.setOnClickListener(this);
 
         mButtonEdit.setEnabled(false);
+        mButtonEdit.setTextColor(ColorHex_IntEncoding("#757575"));
 
         groupDao = new GroupDao(getContext());
         noteDao = new NoteDao(getContext());
@@ -72,6 +75,7 @@ public class GroupDialog extends AlertDialog implements OnClickListener, IShowLo
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 GroupListViewClickId = position;
                 mButtonEdit.setEnabled(true);
+                mButtonEdit.setTextColor(ColorHex_IntEncoding("#EC407A"));
                 showGroupAddDialog(GroupList.get(position)); // 临时
             }
         });

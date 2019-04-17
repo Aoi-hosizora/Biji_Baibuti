@@ -80,6 +80,7 @@ public class GroupAddDialog extends AlertDialog implements OnClickListener, ISho
         mButtonCancel.setOnClickListener(this);
 
         groupDao = new GroupDao(getContext());
+        noteDao = new NoteDao(getContext());
         HandleDisplay(); // 处理显示问题
     }
 
