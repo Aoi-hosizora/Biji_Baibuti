@@ -124,10 +124,6 @@ public class NoteFragment extends Fragment implements View.OnClickListener, ISho
                         searchFragment.show(getActivity().getSupportFragmentManager(),com.wyt.searchbox.SearchFragment.TAG);
                         break;
                     case R.id.action_modifygroup:
-
-//                        GroupDialog.setupGroupDialog(getContext(), groupAdapter, GroupList, groupDao, noteDao, getLayoutInflater())
-//                                .showModifyGroup();
-
                         GroupDialog dialog = new GroupDialog(getContext(), new GroupDialog.OnUpdateGroupListener() {
 
                             @Override
@@ -184,16 +180,6 @@ public class NoteFragment extends Fragment implements View.OnClickListener, ISho
                 HandleNewUpdateNote(true, null);
             }
         });
-
-//        m_fabmenu.setOnFocusChangeListener(new android.view.View.OnFocusChangeListener() {
-//            @Override
-//            public void onFocusChange(View v, boolean hasFocus) {
-//                Log.e("0", "onFocusChange: "+hasFocus );
-//                if (!hasFocus)
-//                    m_fabmenu.collapse();
-//            }
-//        });
-
     }
 
 
@@ -241,6 +227,7 @@ public class NoteFragment extends Fragment implements View.OnClickListener, ISho
                     initListView(search(keyword));
                     m_toolbar.getMenu().findItem(R.id.action_search_back).setVisible(true);
                     mSwipeRefresh.setEnabled(false);
+                    m_fabmenu.setVisibility(View.GONE);
                     m_toolbar.setTitle(String.format(getContext().getString(R.string.notefragment_menu_search_content), keyword));
                 }
             }
@@ -269,6 +256,8 @@ public class NoteFragment extends Fragment implements View.OnClickListener, ISho
                         initListView(NoteList);
 
                         mSwipeRefresh.setEnabled(true);
+                        m_fabmenu.setVisibility(View.VISIBLE);
+
                         m_toolbar.getMenu().findItem(R.id.action_search_back).setVisible(false);
                         m_toolbar.setTitle(R.string.note_header);
 
@@ -498,35 +487,41 @@ public class NoteFragment extends Fragment implements View.OnClickListener, ISho
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
-                if (resultCode == RESULT_OK) {
+            switch (requestCode) {
+                case REQ_NOTE_NEW:
+                case REQ_NOTE_UPDATE:
+                    if (resultCode == RESULT_OK) {
 
-                    int flag = data.getIntExtra("flag", NOTE_NEW);
-                    Note note = (Note) data.getSerializableExtra("notedata");
+                        int flag = data.getIntExtra("flag", NOTE_NEW);
+                        Note note = (Note) data.getSerializableExtra("notedata");
 
-                    ShowLogE("onActivityResult", (flag == NOTE_NEW)?"NEW":"UPDATE");
-                    Toast.makeText(getContext(), (flag == NOTE_NEW)?"NEW":"UPDATE", Toast.LENGTH_SHORT).show();
+                        ShowLogE("onActivityResult", (flag == NOTE_NEW)?"NEW":"UPDATE");
+                        Toast.makeText(getContext(), (flag == NOTE_NEW)?"NEW":"UPDATE", Toast.LENGTH_SHORT).show();
 
-                    if (flag == NOTE_NEW) {
-                        NoteList.add(NoteList.size(), note);
+                        if (flag == NOTE_NEW) {
+                            NoteList.add(NoteList.size(), note);
 
-                        SelectedNoteItem = NoteList.indexOf(note);
+                            SelectedNoteItem = NoteList.indexOf(note);
 
-                        HandleNewUpdateNote(false, NoteList.get(SelectedNoteItem));
+                            HandleNewUpdateNote(false, NoteList.get(SelectedNoteItem));
 
+                        }
+
+                        else {
+                            NoteList.set(SelectedNoteItem, note);
+
+                            Collections.sort(NoteList);
+                            noteAdapter.notifyDataSetChanged();
+
+                            if (IsSearching)
+                                initListView(search(SearchingStr));
+                            else
+                                initListView(NoteList);
+                        }
                     }
 
-                    else {
-                        NoteList.set(SelectedNoteItem, note);
-
-                        Collections.sort(NoteList);
-                        noteAdapter.notifyDataSetChanged();
-
-                        if (IsSearching)
-                            initListView(search(SearchingStr));
-                        else
-                            initListView(NoteList);
-                    }
-                }
+                    break;
+            }
 
     }
 
