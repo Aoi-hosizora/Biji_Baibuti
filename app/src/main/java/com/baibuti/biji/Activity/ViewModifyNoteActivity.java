@@ -45,7 +45,11 @@ public class ViewModifyNoteActivity extends AppCompatActivity implements View.On
 
     private Note note;
 
+    private static final int NOTE_NEW = 0; // new
+    private static final int NOTE_UPDATE = 1; // modify
+
     private boolean isModify = false;
+    private int flag = NOTE_NEW;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -60,6 +64,8 @@ public class ViewModifyNoteActivity extends AppCompatActivity implements View.On
         loadingDialog.show();
 
         note = (Note) getIntent().getSerializableExtra("notedata");
+        flag = getIntent().getIntExtra("flag", NOTE_NEW);
+        isModify = getIntent().getBooleanExtra("isModify", true);
 
         TitleEditText_View = (TextView) findViewById(R.id.id_modifynote_viewtitle);
         UpdateTimeTextView_View = (TextView) findViewById(R.id.id_modifynote_viewupdatetime);
@@ -152,8 +158,10 @@ public class ViewModifyNoteActivity extends AppCompatActivity implements View.On
      */
     private void ShowModifyNoteActivity() {
         Intent intent=new Intent(ViewModifyNoteActivity.this, ModifyNoteActivity.class);
+
         intent.putExtra("notedata",note);
-        intent.putExtra("flag",1); // UPDATE
+        intent.putExtra("flag",flag);
+
         startActivityForResult(intent,1); // 1 from CardView
     }
 
@@ -163,13 +171,21 @@ public class ViewModifyNoteActivity extends AppCompatActivity implements View.On
     private void BackToActivity() {
         Intent motointent = new Intent();
 
-        if (isModify) {
-            motointent.putExtra("modify_note",note);
-            setResult(RESULT_OK,motointent);
-        }
-        else
-            setResult(RESULT_CANCELED,motointent);
+        if (flag == NOTE_NEW) { // Frag -> MN ----> VMN
+            motointent.putExtra("notedata", note);
+            motointent.putExtra("flag", NOTE_NEW);
 
+        }
+        else {
+            if (isModify) { // Frag -> VMN -> MN ----> VMN
+                motointent.putExtra("notedata", note);
+                motointent.putExtra("flag", NOTE_UPDATE);
+                setResult(RESULT_OK,motointent);
+            }
+            else {
+                setResult(RESULT_CANCELED,motointent);
+            }
+        }
         finish();
     }
 
@@ -192,7 +208,7 @@ public class ViewModifyNoteActivity extends AppCompatActivity implements View.On
         switch (requestCode) {
             case 1: // MODIFY
                 if (resultCode == RESULT_OK) {
-                    Note newnote = (Note) data.getSerializableExtra("modify_note");
+                    Note newnote = (Note) data.getSerializableExtra("notedata");
 
                     // 判断是否修改
                     isModify = data.getBooleanExtra("isModify", true);

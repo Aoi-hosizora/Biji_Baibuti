@@ -101,8 +101,11 @@ public class GroupDeleteDialog {
                     public void onClick(DialogInterface dialog, int which) {
                         // 删除分组并修改为默认分组
                         try {
-                            for (Note note : noteDao.queryNotesAll(group.getId()))
+                            for (Note note : noteDao.queryNotesAll(group.getId())) {
                                 note.setGroupLabel(groupDao.queryDefaultGroup());
+                                noteDao.updateNote(note);
+                            }
+
                         }
                         catch (Exception ex) {
                             ex.printStackTrace();

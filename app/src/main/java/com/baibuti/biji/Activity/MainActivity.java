@@ -23,6 +23,7 @@ import com.baibuti.biji.Fragment.FileFragment;
 import com.baibuti.biji.Interface.IShowLog;
 import com.baibuti.biji.R;
 import com.baibuti.biji.View.SimplerSearcherView;
+import com.facebook.stetho.Stetho;
 import com.jeremyfeinstein.slidingmenu.lib.SlidingMenu;
 
 import java.util.ArrayList;
@@ -58,6 +59,9 @@ public class MainActivity extends FragmentActivity
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+
+        Stetho.initializeWithDefaults(this);
+
         //requestWindowFeature(Window.FEATURE_NO_TITLE);
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
