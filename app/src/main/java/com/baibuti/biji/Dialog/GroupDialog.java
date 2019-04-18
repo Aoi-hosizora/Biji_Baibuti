@@ -13,6 +13,7 @@ import android.widget.ListView;
 
 import com.baibuti.biji.Data.Group;
 import com.baibuti.biji.Data.GroupAdapter;
+import com.baibuti.biji.Data.GroupRadioAdapter;
 import com.baibuti.biji.Interface.IShowLog;
 import com.baibuti.biji.R;
 import com.baibuti.biji.db.GroupDao;
@@ -28,13 +29,14 @@ public class GroupDialog extends AlertDialog implements OnClickListener, IShowLo
     private Button mButtonEdit;
     private Button mButtonCancel;
     private Button mButtonAdd;
+    private Button mButtonDelete;
 
     private ListView GroupListView;
 
     /**
      * 当前被选中的项
      */
-    private int GroupListViewClickId = -1;
+    private int GroupListViewClickId = 0;
 
     public interface OnUpdateGroupListener{
         void UpdateGroupFinished(); // 修改引发的事件
@@ -53,32 +55,30 @@ public class GroupDialog extends AlertDialog implements OnClickListener, IShowLo
         mButtonEdit = (Button)findViewById(R.id.id_GroupDialog_ButtonEdit);
         mButtonCancel = (Button)findViewById(R.id.id_GroupDialog_ButtonCancel);
         mButtonAdd = (Button)findViewById(R.id.id_GroupDialog_ButtonAdd);
+        mButtonDelete = (Button)findViewById(R.id.id_GroupDialog_ButtonDelete);
 
         mButtonEdit.setOnClickListener(this);
         mButtonCancel.setOnClickListener(this);
         mButtonAdd.setOnClickListener(this);
+        mButtonDelete.setOnClickListener(this);
 
-        mButtonEdit.setEnabled(false);
-        mButtonEdit.setTextColor(ColorHex_IntEncoding("#757575"));
-
-        groupDao = new GroupDao(getContext());
         noteDao = new NoteDao(getContext());
+        groupDao = new GroupDao(getContext());
 
         refreshGroupList();
-
         GroupListView = (ListView) findViewById(R.id.id_GroupDialog_GroupListView);
         GroupListView.setAdapter(groupAdapter);
         GroupListView.setVisibility(View.VISIBLE);
 
-        GroupListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                GroupListViewClickId = position;
-                mButtonEdit.setEnabled(true);
-                mButtonEdit.setTextColor(ColorHex_IntEncoding("#EC407A"));
-                showGroupAddDialog(GroupList.get(position)); // 临时
-            }
-        });
+//        GroupListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+//            @Override
+//            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+//                GroupListViewClickId = position;
+//                mButtonEdit.setEnabled(true);
+//                mButtonEdit.setTextColor(ColorHex_IntEncoding("#EC407A"));
+//                showGroupAddDialog(GroupList.get(position)); // 临时
+//            }
+//        });
 
     }
 
@@ -95,7 +95,7 @@ public class GroupDialog extends AlertDialog implements OnClickListener, IShowLo
                 ClassName + ": " + FunctionName + "###" + Msg); // MainActivity: initDatas###data=xxx
     }
 
-    private GroupAdapter groupAdapter;
+    private GroupRadioAdapter groupAdapter;
     private List<Group> GroupList;
     private GroupDao groupDao;
     private NoteDao noteDao;
@@ -106,7 +106,15 @@ public class GroupDialog extends AlertDialog implements OnClickListener, IShowLo
     private void refreshGroupList() {
         ShowLogE("refreshGroupList", "DISOYONG");
         GroupList = groupDao.queryGroupAll();
-        groupAdapter = new GroupAdapter(getContext(), GroupList); // 必要
+        ShowLogE("refreshGroupList", "GroupList: " + GroupList.isEmpty());
+
+        groupAdapter = new GroupRadioAdapter(getContext(), GroupList, new GroupRadioAdapter.OnRadioButtonSelect() {
+            @Override
+            public void onSelect(int position) {
+                ShowLogE("refreshGroupList", "onSelect: "+ position);
+                GroupListViewClickId = position;
+            }
+        }); // 必要
         groupAdapter.notifyDataSetChanged();
         // GroupListView.setAdapter(groupAdapter);
     }
@@ -116,15 +124,16 @@ public class GroupDialog extends AlertDialog implements OnClickListener, IShowLo
     public void onClick(View v) {
         switch (v.getId()) {
             case R.id.id_GroupDialog_ButtonCancel:
-                if (mListener != null)
-                    mListener.UpdateGroupFinished();
-                dismiss();
+                DismissAndReturn(true);
             break;
             case R.id.id_GroupDialog_ButtonEdit:
                 showGroupAddDialog(GroupList.get(GroupListViewClickId));
             break;
             case R.id.id_GroupDialog_ButtonAdd:
                 showGroupAddDialog(null);
+            break;
+            case R.id.id_GroupDialog_ButtonDelete:
+                showGroupDeleteDialog(GroupList.get(GroupListViewClickId));
             break;
         }
     }
@@ -141,13 +150,34 @@ public class GroupDialog extends AlertDialog implements OnClickListener, IShowLo
             @Override
             public void UpdateGroupFinished() {
                 refreshGroupList();
+                groupAdapter.setValue(GroupListViewClickId);
                 GroupListView.setAdapter(groupAdapter); // 必要
+                DismissAndReturn(false);
 
-                if (mListener != null)
-                    mListener.UpdateGroupFinished(); // 同时令 Note Frac 更新分组信息
             }
         });
         dialog.setView(new EditText(getContext()));  //若对话框无法弹出输入法，加上这句话
         dialog.show();
+    }
+
+    private void DismissAndReturn(boolean isReturn) {
+        if (mListener != null)
+            mListener.UpdateGroupFinished(); // 同时令 Note Frac 更新分组信息
+        if (isReturn)
+            dismiss();
+    }
+
+    private void showGroupDeleteDialog(Group inputGroup) {
+        GroupDeleteDialog groupDeleteDialog = new GroupDeleteDialog(getContext(), inputGroup, new GroupDeleteDialog.OnDeleteGroupListener() {
+            @Override
+            public void DeleteGroupFinished() {
+                refreshGroupList();
+                GroupListViewClickId--;
+                groupAdapter.setValue(GroupListViewClickId);
+                GroupListView.setAdapter(groupAdapter); // 必要
+                DismissAndReturn(false);
+            }
+        });
+        groupDeleteDialog.showDialog();
     }
 }

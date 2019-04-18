@@ -3,7 +3,9 @@ package com.baibuti.biji.Fragment;
 import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.graphics.Color;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.annotation.Nullable;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
@@ -70,7 +72,8 @@ public class NoteFragment extends Fragment implements View.OnClickListener, ISho
         mNoteList = view.findViewById(R.id.note_list);
 
         mSwipeRefresh = (SwipeRefreshLayout) view.findViewById(R.id.note_listsrl);
-        mSwipeRefresh.setColorSchemeResources(R.color.colorPrimary);
+         mSwipeRefresh.setColorSchemeResources(R.color.colorPrimary);
+//        mSwipeRefresh.setColorSchemeColors(Color.RED,Color.BLUE,Color.GREEN);
         mSwipeRefresh.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
@@ -323,28 +326,42 @@ public class NoteFragment extends Fragment implements View.OnClickListener, ISho
      * 刷新数据，用于下拉
      */
     private void refreshdata() {
-        new Thread(new Runnable() {
+//        new Thread(new Runnable() {
+//            @Override
+//            public void run() {
+//                try {
+//                    Thread.sleep(1000);
+//                } catch (InterruptedException e) {
+//                    e.printStackTrace();
+//                }
+//                getActivity().runOnUiThread(new Runnable() {
+//                    @Override
+//                    public void run() {
+//                        initData();
+//                        initAdapter();
+//                        refreshNoteList();
+//                        refreshGroupList();
+//                        initListView(NoteList);
+//
+//                        mSwipeRefresh.setRefreshing(false);
+//                    }
+//                });
+//            }
+//        }).start();
+
+        new Handler().postDelayed(new Runnable() {
             @Override
             public void run() {
-                try {
-                    Thread.sleep(500);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-                getActivity().runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        initData();
-                        initAdapter();
-                        refreshNoteList();
-                        refreshGroupList();
-                        initListView(NoteList);
+                initData();
+                initAdapter();
+                refreshNoteList();
+                refreshGroupList();
+                initListView(NoteList);
 
-                        mSwipeRefresh.setRefreshing(false);
-                    }
-                });
+                mSwipeRefresh.setRefreshing(false);
             }
-        }).start();
+
+        }, 500);
     }
 
     /**

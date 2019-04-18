@@ -44,6 +44,16 @@
             android:layout_weight="1"/>
 
         <Button
+            android:id="@+id/id_GroupDialog_ButtonDelete"
+            android:layout_width="50dp"
+            android:layout_height="wrap_content"
+            android:layout_marginRight="8dp"
+
+            android:text="删除"
+            android:background="@color/transparent"
+            android:textColor="@color/pink"/>
+
+        <Button
             android:id="@+id/id_GroupDialog_ButtonAdd"
             android:layout_width="50dp"
             android:layout_height="wrap_content"
@@ -69,7 +79,7 @@
             android:layout_height="wrap_content"
             android:layout_marginRight="20dp"
 
-            android:text="返回"
+            android:text="完成"
             android:background="@color/transparent"
             android:textColor="@color/pink"/>
 
