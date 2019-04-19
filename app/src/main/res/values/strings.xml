@@ -12,6 +12,9 @@
     <!-- IShowLog -->
     <string name="IShowLog_LogE">BijiLogE</string>
 
+    <!-- Note Apadter -->
+    <string name="NoteAdapter_ImgStr">[图片]</string>
+
     <!-- Provider / xml -->
     <string name="FileProvider">com.baibuti.biji.FileProvider</string>
 
@@ -22,13 +25,17 @@
         <!-- UI -->
 
         <!-- DeleteNote -->
-        <string name="DeleteAlert_Title">提示</string>
-        <string name="DeleteAlert_Msg">确定删除笔记 \"%s\" 吗？</string>
-        <string name="DeleteAlert_PositiveButton">确定</string>
-        <string name="DeleteAlert_NegativeButton">取消</string>
-        <string name="DeleteAlert_DeleteSuccess">删除成功</string>
-        <string name="DeleteAlert_Undo">撤销</string>
-        <string name="DeleteAlert_UndoSuccess">已恢复</string>
+        <string name="NoteFrag_DeleteAlertTitle">提示</string>
+        <string name="NoteFrag_DeleteAlertMsg">确定删除笔记 \"%s\" 吗？</string>
+        <string name="NoteFrag_DeleteAlertPositiveButton">确定</string>
+        <string name="NoteFrag_DeleteAlertNegativeButton">取消</string>
+        <string name="NoteFrag_DeleteAlertDeleteSuccess">删除成功</string>
+        <string name="NoteFrag_DeleteAlertUndo">撤销</string>
+        <string name="NoteFrag_DeleteAlertUndoSuccess">已恢复</string>
+
+        <!-- onActivityResult -->
+        <string name="NoteFrag_ActivityReturnNewNote">笔记 %s 创建成功</string>
+        <string name="NoteFrag_ActivityReturnUpdateNote">笔记 %s 更新成功</string>
 
     <!-- View Modify Note -->
 
@@ -42,7 +49,7 @@
         <string name="VMNoteActivity_InfoUpdateTime">最近修改时间：</string>
         <string name="VMNoteActivity_InfoGroupLabelTitle">分类：</string>
 
-        <string name="VMNoteActivity_InfoAlertTitle">详细信息</string>
+        <string name="VMNoteActivity_InfoAlertTitle">修改前的笔记信息</string>
         <string name="VMNoteActivity_InfoAlertNeutralButtonForCopy">复制</string>
         <string name="VMNoteActivity_InfoAlertClipDataLabel">BijiCopyInfo</string>
         <string name="VMNoteActivity_InfoAlertCopySuccess">信息复制成功。</string>
@@ -86,7 +93,7 @@
         <string name="MNoteActivity_SaveAlertTitle">提醒</string>
         <string name="MNoteActivity_SaveAlertMsg">没有输入内容，请补全笔记内容。</string>
         <string name="MNoteActivity_SaveAlertPositiveButtonForOK">确定</string>
-        <string name="MNoteActivity_SaveAlertImgReplaceMozi">图片</string>
+        <string name="MNoteActivity_SaveAlertImgReplaceMozi">[图片]</string>
 
         <!-- Request Permissions -->
         <string name="MNoteActivity_PermissionGrantedError">权限授予失败！</string>

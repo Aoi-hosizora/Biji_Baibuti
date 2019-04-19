@@ -243,7 +243,7 @@ public class ModifyNoteActivity extends AppCompatActivity implements View.OnClic
 
         switch (item.getItemId()) {
             case R.id.id_menu_modifynote_finish:
-                saveNoteData(true);
+                saveNoteData();
                 break;
 
             case android.R.id.home:
@@ -283,7 +283,7 @@ public class ModifyNoteActivity extends AppCompatActivity implements View.OnClic
                     .setPositiveButton(R.string.MNoteActivity_InfoSaveAlertNegativeButtonForSave, new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
-                            saveNoteData(false);
+                            saveNoteData();
                             dialog.dismiss();
                         }
                     }).create();
@@ -543,9 +543,8 @@ public class ModifyNoteActivity extends AppCompatActivity implements View.OnClic
 
     /**
      * 文件保存活动处理
-     * @param isExit 判断是否同时退出
      */
-    private void saveNoteData(boolean isExit) {
+    private void saveNoteData() {
 
         // 获得笔记内容
         String Content = getEditData();

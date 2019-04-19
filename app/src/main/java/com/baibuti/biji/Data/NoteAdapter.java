@@ -98,7 +98,7 @@ public class NoteAdapter extends RecyclerView.Adapter<NoteAdapter.ViewHolder> im
         holder.itemView.setTag(note);
         //Log.e("adapter", "###record="+record);
         holder.tv_list_title.setText(note.getTitle());
-        holder.tv_list_summary.setText(note.getContent());
+        holder.tv_list_summary.setText(getShortNoteContent(note));
         holder.tv_list_time.setText(note.getUpdateTime_ShortString());
         holder.tv_list_group.setText(note.getGroupLabel().getName());
         holder.tv_list_group.setTextColor(CommonUtil.ColorHex_IntEncoding(note.getGroupLabel().getColor()));
@@ -111,6 +111,12 @@ public class NoteAdapter extends RecyclerView.Adapter<NoteAdapter.ViewHolder> im
             return mNotes.size();
         }
         return 0;
+    }
+
+    private String getShortNoteContent(Note note) {
+        String motoContent = note.getContent();
+        motoContent = motoContent.replaceAll("<img src=.*" , mContext.getString(R.string.NoteAdapter_ImgStr));
+        return motoContent;
     }
 
     //自定义的ViewHolder，持有每个Item的的所有界面元素

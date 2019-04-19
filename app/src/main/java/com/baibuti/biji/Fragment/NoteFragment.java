@@ -177,7 +177,7 @@ public class NoteFragment extends Fragment implements View.OnClickListener, ISho
             @Override
             public void onClick(View view) {
                 m_fabmenu.collapse();
-                HandleNewUpdateNote(true, null);
+                HandleNewUpdateNote(true, null, false);
             }
         });
     }
@@ -402,7 +402,7 @@ public class NoteFragment extends Fragment implements View.OnClickListener, ISho
             public void onItemClick(View view, int position) {
 
                 SelectedNoteItem = position;
-                HandleNewUpdateNote(false, nlist.get(position));
+                HandleNewUpdateNote(false, nlist.get(position), false);
             }
         });
 
@@ -422,9 +422,9 @@ public class NoteFragment extends Fragment implements View.OnClickListener, ISho
     private void DeleteNote(final View view, final Note note) {
         AlertDialog deleteAlert = new AlertDialog
                 .Builder(getContext())
-                .setTitle(R.string.DeleteAlert_Title)
-                .setMessage(String.format(getResources().getString(R.string.DeleteAlert_Msg), note.getTitle()))
-                .setPositiveButton(R.string.DeleteAlert_PositiveButton, new DialogInterface.OnClickListener() {
+                .setTitle(R.string.NoteFrag_DeleteAlertTitle)
+                .setMessage(String.format(getResources().getString(R.string.NoteFrag_DeleteAlertMsg), note.getTitle()))
+                .setPositiveButton(R.string.NoteFrag_DeleteAlertPositiveButton, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
 
@@ -434,8 +434,8 @@ public class NoteFragment extends Fragment implements View.OnClickListener, ISho
                             NoteList.remove(note);
                             noteAdapter.notifyDataSetChanged();
 
-                            Snackbar.make(view , R.string.DeleteAlert_DeleteSuccess, Snackbar.LENGTH_LONG)
-                                .setAction(R.string.DeleteAlert_Undo, new View.OnClickListener() {
+                            Snackbar.make(view , R.string.NoteFrag_DeleteAlertDeleteSuccess, Snackbar.LENGTH_LONG)
+                                .setAction(R.string.NoteFrag_DeleteAlertUndo, new View.OnClickListener() {
                                     @Override
                                     public void onClick(View v) {
                                         try {
@@ -446,13 +446,13 @@ public class NoteFragment extends Fragment implements View.OnClickListener, ISho
                                         } catch (Exception ex) {
                                             ex.printStackTrace();
                                         }
-                                        Snackbar.make(view, R.string.DeleteAlert_UndoSuccess, Snackbar.LENGTH_SHORT).show();
+                                        Snackbar.make(view, R.string.NoteFrag_DeleteAlertUndoSuccess, Snackbar.LENGTH_SHORT).show();
                                     }
                                 }).show();
                         }
                     }
                 })
-                .setNegativeButton(R.string.DeleteAlert_NegativeButton, null)
+                .setNegativeButton(R.string.NoteFrag_DeleteAlertNegativeButton, null)
                 .create();
 
         deleteAlert.show();
@@ -464,16 +464,22 @@ public class NoteFragment extends Fragment implements View.OnClickListener, ISho
      * @param isNew true 表示 新建
      * @param note false 时有用，传入原先数据
      */
-    private void HandleNewUpdateNote(boolean isNew, Note note) {
+    private void HandleNewUpdateNote(boolean isNew, Note note, boolean noteisnew) {
         if (isNew) {
+            hasNoteReturned = false;
             Intent addNote_intent=new Intent(getActivity(), ModifyNoteActivity.class);
             addNote_intent.putExtra("notedata",new Note("",""));
             addNote_intent.putExtra("flag",NOTE_NEW); // NEW
             startActivityForResult(addNote_intent,REQ_NOTE_NEW); // 2 from FloatingButton
         }
         else {
+
+            if (!noteisnew)
+                hasNoteReturned = false;
+
             Intent modifyNote_intent=new Intent(getContext(), ViewModifyNoteActivity.class);
             modifyNote_intent.putExtra("notedata", note);
+            modifyNote_intent.putExtra("isModify", noteisnew);
             modifyNote_intent.putExtra("flag",NOTE_UPDATE); // UPDATE
             startActivityForResult(modifyNote_intent,REQ_NOTE_UPDATE); // 1 from List
         }
@@ -481,6 +487,8 @@ public class NoteFragment extends Fragment implements View.OnClickListener, ISho
     }
 
     //////////////////////////////////////////////////
+
+    boolean hasNoteReturned = false; // 标识是否回退过
 
     /**
      * 处理从 View Modify Note Activity 返回的数据
@@ -496,18 +504,21 @@ public class NoteFragment extends Fragment implements View.OnClickListener, ISho
                 case REQ_NOTE_NEW:
                 case REQ_NOTE_UPDATE:
 
+                    ShowLogE("onActivityResult", "HasReturn");
                     if (resultCode == RESULT_OK) {
 
                         int flag = data.getIntExtra("flag", NOTE_NEW);
                         Note note = (Note) data.getSerializableExtra("notedata");
 
+
 //                        ShowLogE("onActivityResult", (flag == NOTE_NEW)?"NEW":"UPDATE");
 //                        Toast.makeText(getContext(), (flag == NOTE_NEW)?"NEW":"UPDATE", Toast.LENGTH_SHORT).show();
 
                         if (flag == NOTE_NEW) {
+                            hasNoteReturned = true;
                             NoteList.add(NoteList.size(), note);
                             SelectedNoteItem = NoteList.indexOf(note);
-                            HandleNewUpdateNote(false, NoteList.get(SelectedNoteItem));
+                            HandleNewUpdateNote(false, NoteList.get(SelectedNoteItem), true);
                         }
                         else {
                             NoteList.set(SelectedNoteItem, note);
@@ -521,6 +532,12 @@ public class NoteFragment extends Fragment implements View.OnClickListener, ISho
                                 initListView(search(SearchingStr));
                             else
                                 initListView(NoteList);
+
+                            if (hasNoteReturned)
+                                Toast.makeText(getContext(), String.format(getResources().getString(R.string.NoteFrag_ActivityReturnNewNote), note.getTitle()), Toast.LENGTH_SHORT).show();
+                            else
+                                Toast.makeText(getContext(), String.format(getResources().getString(R.string.NoteFrag_ActivityReturnUpdateNote), note.getTitle()), Toast.LENGTH_SHORT).show();
+
                         }
 
 

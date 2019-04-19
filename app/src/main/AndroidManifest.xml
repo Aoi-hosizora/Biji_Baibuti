@@ -15,21 +15,26 @@
         tools:ignore="GoogleAppIndexingWarning">
         <activity
             android:name=".Activity.MainActivity"
-            android:windowSoftInputMode="adjustPan|stateHidden">
+            android:windowSoftInputMode="adjustPan|stateHidden"
+            android:screenOrientation="portrait">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".Activity.ModifyNoteActivity">
+        <activity
+            android:name=".Activity.ModifyNoteActivity"
+            android:screenOrientation="portrait">
             <intent-filter>
                 <action android:name="activitytest.example.com.activitytest.ModifyNoteActivity" />
 
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </activity>
-        <activity android:name=".Activity.ViewModifyNoteActivity">
+        <activity
+            android:name=".Activity.ViewModifyNoteActivity"
+            android:screenOrientation="portrait">
             <intent-filter>
                 <action android:name="activitytest.example.com.activitytest.ViewModifyNoteActivity" />
 
