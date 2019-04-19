@@ -459,6 +459,11 @@ public class NoteFragment extends Fragment implements View.OnClickListener, ISho
     }
 
 
+    /**
+     * 处理从 fab 新建或者从 list 修改，活动转换
+     * @param isNew true 表示 新建
+     * @param note false 时有用，传入原先数据
+     */
     private void HandleNewUpdateNote(boolean isNew, Note note) {
         if (isNew) {
             Intent addNote_intent=new Intent(getActivity(), ModifyNoteActivity.class);
@@ -490,41 +495,39 @@ public class NoteFragment extends Fragment implements View.OnClickListener, ISho
             switch (requestCode) {
                 case REQ_NOTE_NEW:
                 case REQ_NOTE_UPDATE:
+
                     if (resultCode == RESULT_OK) {
 
                         int flag = data.getIntExtra("flag", NOTE_NEW);
                         Note note = (Note) data.getSerializableExtra("notedata");
 
-                        ShowLogE("onActivityResult", (flag == NOTE_NEW)?"NEW":"UPDATE");
-                        Toast.makeText(getContext(), (flag == NOTE_NEW)?"NEW":"UPDATE", Toast.LENGTH_SHORT).show();
+//                        ShowLogE("onActivityResult", (flag == NOTE_NEW)?"NEW":"UPDATE");
+//                        Toast.makeText(getContext(), (flag == NOTE_NEW)?"NEW":"UPDATE", Toast.LENGTH_SHORT).show();
 
                         if (flag == NOTE_NEW) {
                             NoteList.add(NoteList.size(), note);
-
                             SelectedNoteItem = NoteList.indexOf(note);
-
                             HandleNewUpdateNote(false, NoteList.get(SelectedNoteItem));
-
                         }
-
                         else {
                             NoteList.set(SelectedNoteItem, note);
 
+                            //////
                             Collections.sort(NoteList);
                             noteAdapter.notifyDataSetChanged();
+
 
                             if (IsSearching)
                                 initListView(search(SearchingStr));
                             else
                                 initListView(NoteList);
                         }
+
+
                     }
-
-                    break;
+                break;
             }
-
     }
-
 }
 
 

@@ -35,6 +35,7 @@ import android.widget.Toast;
 import com.baibuti.biji.Data.Group;
 import com.baibuti.biji.Data.GroupAdapter;
 import com.baibuti.biji.Data.Note;
+import com.baibuti.biji.Dialog.GroupDialog;
 import com.baibuti.biji.Interface.IShowLog;
 import com.baibuti.biji.R;
 import com.baibuti.biji.db.GroupDao;
@@ -321,6 +322,7 @@ public class ModifyNoteActivity extends AppCompatActivity implements View.OnClic
      * 刷新分组列表
      */
     private void refreshGroupList() {
+        groupDao = new GroupDao(this);
         GroupList = groupDao.queryGroupAll();
         groupAdapter = new GroupAdapter(this, GroupList); // 必要
         groupAdapter.notifyDataSetChanged();
@@ -666,9 +668,9 @@ public class ModifyNoteActivity extends AppCompatActivity implements View.OnClic
         idenLoadingDialog = new ProgressDialog(ModifyNoteActivity.this);
         idenLoadingDialog.setTitle(R.string.MNoteActivity_OCRSyncAlertTitle);
         idenLoadingDialog.setMessage(getResources().getString(R.string.MNoteActivity_OCRSyncAlertMsg));
-        idenLoadingDialog.show();
 
-        Observable.create(new ObservableOnSubscribe<String>() {
+
+        final Observable<String> mObservable = Observable.create(new ObservableOnSubscribe<String>() {
             @Override
             public void subscribe(ObservableEmitter<String> emitter) throws Exception {
 
@@ -680,11 +682,21 @@ public class ModifyNoteActivity extends AppCompatActivity implements View.OnClic
             }
         })
         .subscribeOn(Schedulers.io()) //生产事件在io
-        .observeOn(AndroidSchedulers.mainThread()) //消费事件在UI线程
-        .subscribe(new Observer<String>() {
+        .observeOn(AndroidSchedulers.mainThread()); //消费事件在UI线程
+
+
+        idenLoadingDialog.setOnCancelListener(new DialogInterface.OnCancelListener() {
+            @Override
+            public void onCancel(DialogInterface dialog) {
+                mObservable.blockingSubscribe();
+            }
+        });
+        idenLoadingDialog.show();
+
+        mObservable.subscribe(new Observer<String>() {
             @Override
             public void onComplete() {
-                Toast.makeText(ModifyNoteActivity.this, "文字复制成功", Toast.LENGTH_SHORT).show();
+
             }
 
             @Override
@@ -732,6 +744,7 @@ public class ModifyNoteActivity extends AppCompatActivity implements View.OnClic
                         ClipboardManager clipboardManager = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
                         ClipData clip = ClipData.newPlainText(getResources().getString(R.string.MNoteActivity_OCRSyncResultAlertCopyClipLabel), extaText);
                         clipboardManager.setPrimaryClip(clip);
+                        Toast.makeText(ModifyNoteActivity.this, R.string.MNoteActivity_OCRSyncAlertCopy, Toast.LENGTH_SHORT).show();
                     }
                 })
                 .setNegativeButton(R.string.MNoteActivity_OCRSyncResultAlertNegativeButtonForCancel, null);

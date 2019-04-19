@@ -16,9 +16,11 @@ import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.baibuti.biji.Data.Group;
 import com.baibuti.biji.Data.Note;
 import com.baibuti.biji.Interface.IShowLog;
 import com.baibuti.biji.R;
+import com.baibuti.biji.db.GroupDao;
 import com.baibuti.biji.util.StringUtils;
 import com.sendtion.xrichtext.RichTextView;
 
@@ -50,6 +52,7 @@ public class ViewModifyNoteActivity extends AppCompatActivity implements View.On
 
     private boolean isModify = false;
     private int flag = NOTE_NEW;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -212,6 +215,7 @@ public class ViewModifyNoteActivity extends AppCompatActivity implements View.On
 
                     // 判断是否修改
                     isModify = data.getBooleanExtra("isModify", true);
+
                     if (isModify) {
 
                         // 使用新的笔记数据
@@ -228,6 +232,7 @@ public class ViewModifyNoteActivity extends AppCompatActivity implements View.On
                                 dealWithContent();
                             }
                         });
+
                     }
                 }
             break;

@@ -103,6 +103,7 @@
         <!-- Content OCR Sync -->
         <string name="MNoteActivity_OCRSyncAlertTitle">识别</string>
         <string name="MNoteActivity_OCRSyncAlertMsg">正在识别文字...</string>
+        <string name="MNoteActivity_OCRSyncAlertCopy">文字复制成功</string>
         <string name="MNoteActivity_OCRSyncAlertError">文字识别失败</string>
         <string name="MNoteActivity_OCRSyncResultAlertTitle">识别结果：</string>
         <string name="MNoteActivity_OCRSyncResultAlertPositiveButtonForCopy">复制全部</string>

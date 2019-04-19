@@ -223,10 +223,13 @@ public class GroupAddDialog extends AlertDialog implements OnClickListener, ISho
         }
     }
 
+    /**
+     * 弹出删除判断
+     */
     private void DeleteGroup() {
         GroupDeleteDialog groupDeleteDialog = new GroupDeleteDialog(getContext(), inputGroup, new GroupDeleteDialog.OnDeleteGroupListener() {
             @Override
-            public void DeleteGroupFinished() {
+            public void DeleteGroupFinished() { // 接口事件
                 DismissAndReturn();
             }
         });

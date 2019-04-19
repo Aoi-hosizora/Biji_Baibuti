@@ -66,6 +66,9 @@ public class GroupDialog extends AlertDialog implements OnClickListener, IShowLo
         groupDao = new GroupDao(getContext());
 
         refreshGroupList();
+
+        groupAdapter.setValue(GroupListViewClickId);
+
         GroupListView = (ListView) findViewById(R.id.id_GroupDialog_GroupListView);
         GroupListView.setAdapter(groupAdapter);
         GroupListView.setVisibility(View.VISIBLE);
