@@ -3,12 +3,14 @@ package com.baibuti.biji.Data;
 import android.content.Context;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
 import com.baibuti.biji.R;
+import com.baibuti.biji.Widget.RecyclerViewEmptySupport;
 import com.baibuti.biji.util.CommonUtil;
 
 import java.util.ArrayList;
@@ -107,7 +109,7 @@ public class NoteAdapter extends RecyclerView.Adapter<NoteAdapter.ViewHolder> im
     @Override
     public int getItemCount() {
         //Log.i(TAG, "###getItemCount: ");
-        if (mNotes != null && mNotes.size()>0){
+        if (mNotes != null && mNotes.size() > 0) {
             return mNotes.size();
         }
         return 0;

@@ -3,7 +3,6 @@ package com.baibuti.biji.Fragment;
 import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.graphics.Color;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.annotation.Nullable;
@@ -13,6 +12,7 @@ import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.StaggeredGridLayoutManager;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -33,6 +33,7 @@ import com.baibuti.biji.Dialog.GroupDialog;
 import com.baibuti.biji.Interface.IShowLog;
 import com.baibuti.biji.R;
 import com.baibuti.biji.View.SpacesItemDecoration;
+import com.baibuti.biji.Widget.RecyclerViewEmptySupport;
 import com.baibuti.biji.db.GroupDao;
 import com.baibuti.biji.db.NoteDao;
 import com.getbase.floatingactionbutton.FloatingActionButton;
@@ -47,6 +48,7 @@ import static android.app.Activity.RESULT_OK;
 
 public class NoteFragment extends Fragment implements View.OnClickListener, IShowLog {
 
+    // private RecyclerViewEmptySupport mNoteList;
     private RecyclerView mNoteList;
 
     private FloatingActionsMenu m_fabmenu;
@@ -63,19 +65,25 @@ public class NoteFragment extends Fragment implements View.OnClickListener, ISho
     private static final int REQ_NOTE_NEW = 2; // 从 MNote 返回
     private static final int REQ_NOTE_UPDATE = 1; // 从 VMNote 返回
 
+//    private View ListEmptyView;
+
+    private View view;
+
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.fragment_notetab, container, false);
+        view = inflater.inflate(R.layout.fragment_notetab, container, false);
         setHasOptionsMenu(true);
 
         m_fabmenu = (FloatingActionsMenu) view.findViewById(R.id.note_fabmenu);
 
         slidingMenu = ((MainActivity)getActivity()).getSlidingMenu();
+
+//        ListEmptyView = view.findViewById(R.id.note_list_empty);
         mNoteList = view.findViewById(R.id.note_list);
 
         mSwipeRefresh = (SwipeRefreshLayout) view.findViewById(R.id.note_listsrl);
-         mSwipeRefresh.setColorSchemeResources(R.color.colorPrimary);
+        mSwipeRefresh.setColorSchemeResources(R.color.colorPrimary);
 //        mSwipeRefresh.setColorSchemeColors(Color.RED,Color.BLUE,Color.GREEN);
         mSwipeRefresh.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
@@ -88,12 +96,14 @@ public class NoteFragment extends Fragment implements View.OnClickListener, ISho
         loadingDialog.setMessage(getResources().getString(R.string.NoteFragment_LoadingData));
         loadingDialog.setCanceledOnTouchOutside(false);
 
+
         initToolbar(view);
         initFloatingActionBar(view);
         initData(); // GetDao & List
         initAdapter();
         initListView(NoteList);
         initSearchFrag();
+
         return view;
     }
 
@@ -207,7 +217,7 @@ public class NoteFragment extends Fragment implements View.OnClickListener, ISho
                 notelist.add(note);
         }
         if (notelist.isEmpty())
-            Toast.makeText(getContext(), "搜索不到任何数据。", Toast.LENGTH_SHORT).show();
+            Toast.makeText(getContext(), R.string.NoteFragment_SearchNullToast, Toast.LENGTH_SHORT).show();
         return notelist;
     }
 
@@ -224,7 +234,11 @@ public class NoteFragment extends Fragment implements View.OnClickListener, ISho
                 if (!keyword.isEmpty()) {
                     IsSearching = true;
                     SearchingStr = keyword;
+
                     initListView(search(keyword));
+
+//                    ShowLogE("initSearchFrag", search(keyword).isEmpty()+"");
+
                     m_toolbar.getMenu().findItem(R.id.action_search_back).setVisible(true);
                     mSwipeRefresh.setEnabled(false);
                     m_fabmenu.setVisibility(View.GONE);
@@ -387,14 +401,17 @@ public class NoteFragment extends Fragment implements View.OnClickListener, ISho
     private void initListView(final List<Note> nlist) {
 
         mNoteList.addItemDecoration(new SpacesItemDecoration(0));//设置item间距
-        LinearLayoutManager layoutManager = new LinearLayoutManager(getContext());
+         LinearLayoutManager layoutManager = new LinearLayoutManager(getContext());
+//        StaggeredGridLayoutManager layoutManager=new StaggeredGridLayoutManager( 2,StaggeredGridLayoutManager.VERTICAL );
         layoutManager.setOrientation(LinearLayoutManager.VERTICAL);//竖向列表
         mNoteList.setLayoutManager(layoutManager);
-
         Collections.sort(nlist);
         noteAdapter.setmNotes(nlist);
 
         mNoteList.setAdapter(noteAdapter);
+
+//        mNoteList.setEmptyView(ListEmptyView);
+
         noteAdapter.notifyDataSetChanged();
 
         noteAdapter.setOnItemClickListener(new NoteAdapter.OnItemClickListener() {

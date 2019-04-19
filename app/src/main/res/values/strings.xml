@@ -6,6 +6,8 @@
     <string name="notefragment_menu_search_back">返回</string>
     <string name="notefragment_menu_search_content">\"%s\" 的搜索结果</string>
     <string name="NoteFragment_LoadingData">加载中...</string>
+    <string name="NoteFragment_SearchNullToast">搜索不到任何数据</string>
+    <string name="NoteFragment_SearchNullView">搜索不到任何笔记</string>
     <string name="file_header">资料</string>
     <string name="notefragment_menu_modifygroup">分类</string>
 
