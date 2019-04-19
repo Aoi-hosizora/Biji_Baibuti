@@ -1,0 +1,127 @@
+package com.baibuti.biji.Data;
+
+import android.content.Context;
+import android.graphics.Color;
+import android.support.constraint.ConstraintLayout;
+import android.util.Log;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.BaseAdapter;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.RadioButton;
+import android.widget.TextView;
+import android.widget.Toast;
+
+import com.baibuti.biji.Interface.IShowLog;
+import com.baibuti.biji.R;
+
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+
+public class GroupRadioAdapter extends BaseAdapter implements IShowLog {
+
+    public List<Group> list;
+    LayoutInflater inflater;
+    OnRadioButtonSelect mOnRadioButtonSelect;
+
+    public interface OnRadioButtonSelect{
+        // void onSelect(Group g);
+        void onSelect(int position);
+    }
+
+    public GroupRadioAdapter(Context context, List<Group> list, OnRadioButtonSelect mOnRadioButtonSelect) {
+        this.list = list;
+        inflater = LayoutInflater.from(context);
+        this.mOnRadioButtonSelect=mOnRadioButtonSelect;
+    }
+
+    @Override
+    public void ShowLogE(String FunctionName, String Msg) {
+        String ClassName = "GroupRadioAdapter";
+        Log.e("BijiLogE",
+                ClassName + ": " + FunctionName + "###" + Msg); // MainActivity: initDatas###data=xxx
+    }
+
+    @Override
+    public int getCount() {
+        return list.size();
+    }
+
+    @Override
+    public Group getItem(int i) {
+        if (i == getCount() || list == null) {
+            return null;
+        }
+        return list.get(i);
+    }
+
+    @Override
+    public long getItemId(int i) {
+        return i;
+    }
+
+    public HashMap<Group, Boolean> states = new HashMap<Group, Boolean>();
+
+    @Override
+    public View getView(final int position, View convertView, ViewGroup viewGroup) {
+        ViewHolder holder;
+        if (convertView == null) {
+            holder = new ViewHolder();
+            convertView = inflater.inflate(R.layout.modulelayout_groupdialog_grouplistradioitem, null);
+            holder.GroupColor = (ImageView) convertView.findViewById(R.id.id_adapter_radiogroup_color);
+            holder.GroupSelectRadio = (RadioButton) convertView.findViewById(R.id.id_adapter_radiogroup_radioButton);
+
+            convertView.setTag(holder);
+        }
+        else {
+            holder = (ViewHolder) convertView.getTag();
+        }
+//        ShowLogE("getView", "position:" + position );
+//        ShowLogE("getView", "list:" + list.isEmpty() );
+//        ShowLogE("getView", "GroupSelectRadio:" + (holder.GroupSelectRadio == null) );
+
+        holder.GroupSelectRadio.setText(getItem(position).getName());
+        holder.GroupColor.setBackgroundColor(Color.parseColor(getItem(position).getColor()));
+
+        final RadioButton raButton = holder.GroupSelectRadio;
+
+        holder.GroupSelectRadio.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                raButton.setChecked(true);
+
+                for(Group key:states.keySet())
+                    states.put(key, false);
+                states.put(list.get(position), raButton.isChecked());
+                GroupRadioAdapter.this.notifyDataSetChanged();
+
+                if (mOnRadioButtonSelect!=null)
+                    mOnRadioButtonSelect.onSelect(position);
+            }
+        });
+
+        boolean res=false;
+        if (states.get(list.get(position)) == null || !states.get(list.get(position))) {
+            res = false;
+            states.put(list.get(position), false);
+        } else
+            res = true;
+
+        holder.GroupSelectRadio.setChecked(res);
+
+        return convertView;
+    }
+
+    public void setValue(int position) {
+        states.put(list.get(position), true);
+    }
+
+    public static class ViewHolder {
+        public RadioButton GroupSelectRadio;
+        public ImageView GroupColor;
+    }
+}

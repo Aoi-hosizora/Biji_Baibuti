@@ -1,28 +1,14 @@
 package com.baibuti.biji.Data;
 
 import android.content.Context;
-import android.content.DialogInterface;
-import android.content.IntentFilter;
-import android.support.design.widget.Snackbar;
-import android.support.v4.app.Fragment;
-import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ArrayAdapter;
 import android.widget.TextView;
-import android.content.Intent;
-import android.widget.Toast;
 
-import com.baibuti.biji.Activity.MainActivity;
-import com.baibuti.biji.Activity.ModifyNoteActivity;
-import com.baibuti.biji.Activity.ViewModifyNoteActivity;
-import com.baibuti.biji.Fragment.NoteFragment;
 import com.baibuti.biji.R;
-import com.baibuti.biji.db.NoteDao;
 import com.baibuti.biji.util.CommonUtil;
 
 import java.util.ArrayList;
@@ -97,7 +83,7 @@ public class NoteAdapter extends RecyclerView.Adapter<NoteAdapter.ViewHolder> im
         //Log.i(TAG, "###onCreateViewHolder: ");
         //inflate(R.layout.list_item_record,parent,false) 如果不这么写，cardview不能适应宽度
         mContext = parent.getContext();
-        View view = LayoutInflater.from(mContext).inflate(R.layout.list_item_note,parent,false);
+        View view = LayoutInflater.from(mContext).inflate(R.layout.modulelayout_notefrag_notelistitem,parent,false);
         //将创建的View注册点击事件
         view.setOnClickListener(this);
         view.setOnLongClickListener(this);

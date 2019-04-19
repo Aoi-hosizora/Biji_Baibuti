@@ -96,12 +96,13 @@
 
         <!-- Content OCR Check -->
         <string name="MNoteActivity_OCRCheckAlertTitle">确定</string>
-        <string name="MNoteActivity_OCRCheckAlertMsg">要进行文字识别吗？</string>
+        <string name="MNoteActivity_OCRCheckAlertMsg">要进行文字识别吗？图片所在路径为：</string>
         <string name="MNoteActivity_OCRCheckAlertPositiveButtonForOK">确定</string>
         <string name="MNoteActivity_OCRCheckAlertNegativeButtonForCancel">取消</string>
 
         <!-- Content OCR Sync -->
-        <string name="MNoteActivity_OCRSyncAlertTitle">识别中...</string>
+        <string name="MNoteActivity_OCRSyncAlertTitle">识别</string>
+        <string name="MNoteActivity_OCRSyncAlertMsg">正在识别文字...</string>
         <string name="MNoteActivity_OCRSyncAlertError">文字识别失败</string>
         <string name="MNoteActivity_OCRSyncResultAlertTitle">识别结果：</string>
         <string name="MNoteActivity_OCRSyncResultAlertPositiveButtonForCopy">复制全部</string>

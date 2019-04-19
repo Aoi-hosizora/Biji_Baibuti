@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:tools="http://schemas.android.com/tools"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:orientation="vertical">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="10dp"
+        android:orientation="vertical"
+        tools:layout_editor_absoluteX="10dp"
+        tools:layout_editor_absoluteY="10dp">
+
+        <TextView
+            android:id="@+id/id_addgroup_title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:layout_marginLeft="14dp"
+            android:layout_marginBottom="10dp"
+            android:text="@string/GroupDialog_AddAlertTitleForNew"
+            android:textSize="20dp"
+            android:textColor="#000000"/>
+
+        <EditText
+            android:id="@+id/id_addgroup_name"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="0dp"
+            android:hint="@string/GroupAdapter_GroupTitle" />
+
+        <TextView
+            android:id="@+id/id_addgroup_colortext"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="5dp"
+            android:text="@string/GroupAdapter_GroupColor" />
+
+        <com.baibuti.biji.Widget.RainbowPalette
+            android:id="@+id/id_addgroup_colorpalettle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+
+            android:layout_gravity="center"
+            app:center_circle_defcolor="#0511FB"/>
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="35dp"
+        android:orientation="horizontal"
+        android:layout_marginTop="-5dp"
+        android:layout_marginBottom="12dp">
+
+        <Button
+            android:id="@+id/id_AddGroupDialog_ButtonDelete"
+            android:layout_width="50dp"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="20dp"
+
+            android:text="删除"
+            android:background="@color/transparent"
+            android:textColor="@color/pink"/>
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"/>
+
+        <Button
+            android:id="@+id/id_AddGroupDialog_ButtonCancel"
+            android:layout_width="50dp"
+            android:layout_height="wrap_content"
+            android:layout_marginRight="8dp"
+            android:text="取消"
+            android:background="@color/transparent"
+            android:textColor="@color/pink"/>
+        <Button
+            android:id="@+id/id_AddGroupDialog_ButtonUpdate"
+            android:layout_width="50dp"
+            android:layout_height="wrap_content"
+            android:layout_marginRight="20dp"
+
+            android:text="确定"
+            android:background="@color/transparent"
+            android:textColor="@color/pink"/>
+
+
+    </LinearLayout>
+
+</LinearLayout>

@@ -7,6 +7,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.ImageView;
+import android.widget.RadioButton;
 import android.widget.TextView;
 
 import com.baibuti.biji.R;
@@ -41,12 +42,17 @@ public class GroupAdapter extends BaseAdapter {
         return i;
     }
 
+
+    // 选中当前选项时，让其他选项不被选中
+    public void select(int position) {
+
+    }
     @Override
     public View getView(int position, View convertView, ViewGroup viewGroup) {
         ViewHolder holder;
         if (convertView == null) {
             holder = new ViewHolder();
-            convertView = inflater.inflate(R.layout.modifygroup_listview_dialog, null);
+            convertView = inflater.inflate(R.layout.modulelayout_groupdialog_grouplistitem, null);
 
             holder.GroupName = (TextView) convertView.findViewById(R.id.id_adapter_group_name);
             holder.GroupColor = (ImageView) convertView.findViewById(R.id.id_adapter_group_color);

@@ -35,7 +35,6 @@ import android.widget.Toast;
 import com.baibuti.biji.Data.Group;
 import com.baibuti.biji.Data.GroupAdapter;
 import com.baibuti.biji.Data.Note;
-import com.baibuti.biji.Dialog.GroupDialog;
 import com.baibuti.biji.Interface.IShowLog;
 import com.baibuti.biji.R;
 import com.baibuti.biji.db.GroupDao;
@@ -131,7 +130,7 @@ public class ModifyNoteActivity extends AppCompatActivity implements View.OnClic
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_modifyplainnote);
+        setContentView(R.layout.activity_modifynote);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
         loadingDialog = new ProgressDialog(this);
@@ -336,16 +335,6 @@ public class ModifyNoteActivity extends AppCompatActivity implements View.OnClic
         AlertDialog GroupSettingDialog = new AlertDialog
                 .Builder(this)
                 .setTitle(R.string.MNoteActivity_GroupSetAlertTitle)
-                .setNeutralButton(R.string.MNoteActivity_GroupSetAlertNeutralButtonForSetGeneralGroupInfo, new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        dialog.cancel();
-
-                        GroupDialog.setupGroupDialog(ModifyNoteActivity.this,
-                                groupAdapter, GroupList, groupDao, noteDao, getLayoutInflater())
-                                .showModifyGroup();
-                    }
-                })
                 .setNegativeButton(R.string.MNoteActivity_GroupSetAlertNegativeButtonForCancel, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
@@ -371,7 +360,7 @@ public class ModifyNoteActivity extends AppCompatActivity implements View.OnClic
     private void ShowPopMenu() {
         mCameraDialog = new Dialog(this, R.style.BottomDialog);
         LinearLayout root = (LinearLayout) LayoutInflater.from(this).inflate(
-                R.layout.bottom_dialog, null);
+                R.layout.dialog_mnote_bottompopupmenu, null);
 
         //初始化视图
         root.findViewById(R.id.id_popmenu_choose_img).setOnClickListener(this);
@@ -574,8 +563,10 @@ public class ModifyNoteActivity extends AppCompatActivity implements View.OnClic
         // 标题空
         if (TitleEditText.getText().toString().isEmpty()) {
 
+            // 替换换行
+            String Con = Content.replaceAll("[\n|\r|\n\r|\r\n].*", "");
             // 替换HTML标签
-            String Con = Content.replaceAll("<img src=.*", getResources().getString(R.string.MNoteActivity_SaveAlertImgReplaceMozi));
+            Con = Con.replaceAll("<img src=.*", getResources().getString(R.string.MNoteActivity_SaveAlertImgReplaceMozi));
 
             // 舍去过长的内容
             if (Con.length() > CUT_LENGTH + 3)
@@ -601,41 +592,39 @@ public class ModifyNoteActivity extends AppCompatActivity implements View.OnClic
         else
             note.setGroupLabel(groupDao.queryGroupById(0));
 
-        Intent intent = new Intent();
+        //////////////////////////////////////////////////
 
-        // NEW
-        if (flag == NOTE_NEW) {
+
+        if (flag == NOTE_NEW) { // 从 Note Frag 打开的
+
             // 插入到数据库一条新信息
             long noteId = noteDao.insertNote(note);
             note.setId((int) noteId);
-            flag = NOTE_UPDATE;
+            closeSoftKeyInput();
 
+            Intent intent_fromnotefrag = new Intent();
+            intent_fromnotefrag.putExtra("notedata", note);
+            intent_fromnotefrag.putExtra("flag", NOTE_NEW); // NEW
+            setResult(RESULT_OK, intent_fromnotefrag);
+            finish();
         }
-        // MODIFY
-        else
+        else { // 从 VMNOTE 打开的
+
             if (isModify)
                 // 修改数据库
                 noteDao.updateNote(note);
+            closeSoftKeyInput();
 
-        closeSoftKeyInput();
+            Intent intent_fromvmnote = new Intent();
 
-        intent.putExtra("isModify", isModify);
-        intent.putExtra("modify_note", note);
+            intent_fromvmnote.putExtra("notedata", note);
+            intent_fromvmnote.putExtra("flag", NOTE_UPDATE); // UPDATE
+            intent_fromvmnote.putExtra("isModify", isModify);
+            setResult(RESULT_OK, intent_fromvmnote);
 
-        setResult(RESULT_OK, intent);
-
-        // NEW
-        if (flag == NOTE_NEW) {
-            // 重新打开 View Modify 活动
-            Intent openviewintent = new Intent(ModifyNoteActivity.this, ViewModifyNoteActivity.class);
-            openviewintent.putExtra("notedata",note);
-            openviewintent.putExtra("flag",NOTE_UPDATE); // UPDATE
-            startActivity(openviewintent);
             finish();
         }
-        else
-            if (isExit)
-                finish();
+
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -653,7 +642,7 @@ public class ModifyNoteActivity extends AppCompatActivity implements View.OnClic
         idenDialog = new AlertDialog
                 .Builder(ModifyNoteActivity.this)
                 .setTitle(R.string.MNoteActivity_OCRCheckAlertTitle)
-                .setMessage(R.string.MNoteActivity_OCRCheckAlertMsg + imagePath)
+                .setMessage(getResources().getString(R.string.MNoteActivity_OCRCheckAlertMsg) + imagePath)
                 .setCancelable(false)
                 .setPositiveButton(R.string.MNoteActivity_OCRCheckAlertPositiveButtonForOK, new DialogInterface.OnClickListener() {
                     @Override
@@ -662,6 +651,7 @@ public class ModifyNoteActivity extends AppCompatActivity implements View.OnClic
                         Bitmap bitmap = BitmapUtils.getBitmapFromFile(imagePath);
                         // 异步识别文字
                         idenWordsSync(bitmap);
+                        dialog.dismiss();
                     }
                 })
                 .setNegativeButton(R.string.MNoteActivity_OCRCheckAlertNegativeButtonForCancel, null);
@@ -675,6 +665,7 @@ public class ModifyNoteActivity extends AppCompatActivity implements View.OnClic
     private void idenWordsSync(final Bitmap bitmap) {
         idenLoadingDialog = new ProgressDialog(ModifyNoteActivity.this);
         idenLoadingDialog.setTitle(R.string.MNoteActivity_OCRSyncAlertTitle);
+        idenLoadingDialog.setMessage(getResources().getString(R.string.MNoteActivity_OCRSyncAlertMsg));
         idenLoadingDialog.show();
 
         Observable.create(new ObservableOnSubscribe<String>() {
@@ -693,7 +684,7 @@ public class ModifyNoteActivity extends AppCompatActivity implements View.OnClic
         .subscribe(new Observer<String>() {
             @Override
             public void onComplete() {
-                // Toast.makeText(ModifyNoteActivity.this, "文字复制成功", Toast.LENGTH_SHORT).show();
+                Toast.makeText(ModifyNoteActivity.this, "文字复制成功", Toast.LENGTH_SHORT).show();
             }
 
             @Override

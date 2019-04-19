@@ -3,7 +3,9 @@ package com.baibuti.biji.Fragment;
 import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.graphics.Color;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.annotation.Nullable;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
@@ -17,6 +19,7 @@ import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.EditText;
 import android.widget.Toast;
 
 import com.baibuti.biji.Activity.MainActivity;
@@ -53,15 +56,17 @@ public class NoteFragment extends Fragment implements View.OnClickListener, ISho
 
     private ProgressDialog loadingDialog;
     private Toolbar m_toolbar;
-    // private MenuItem m_SearchBack;
 
     private static final int NOTE_NEW = 0; // new
     private static final int NOTE_UPDATE = 1; // modify
 
+    private static final int REQ_NOTE_NEW = 2; // 从 MNote 返回
+    private static final int REQ_NOTE_UPDATE = 1; // 从 VMNote 返回
+
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.notetab, container, false);
+        View view = inflater.inflate(R.layout.fragment_notetab, container, false);
         setHasOptionsMenu(true);
 
         m_fabmenu = (FloatingActionsMenu) view.findViewById(R.id.note_fabmenu);
@@ -70,7 +75,8 @@ public class NoteFragment extends Fragment implements View.OnClickListener, ISho
         mNoteList = view.findViewById(R.id.note_list);
 
         mSwipeRefresh = (SwipeRefreshLayout) view.findViewById(R.id.note_listsrl);
-        mSwipeRefresh.setColorSchemeResources(R.color.colorPrimary);
+         mSwipeRefresh.setColorSchemeResources(R.color.colorPrimary);
+//        mSwipeRefresh.setColorSchemeColors(Color.RED,Color.BLUE,Color.GREEN);
         mSwipeRefresh.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
@@ -118,8 +124,20 @@ public class NoteFragment extends Fragment implements View.OnClickListener, ISho
                         searchFragment.show(getActivity().getSupportFragmentManager(),com.wyt.searchbox.SearchFragment.TAG);
                         break;
                     case R.id.action_modifygroup:
-                        GroupDialog.setupGroupDialog(getContext(), groupAdapter, GroupList, groupDao, noteDao, getLayoutInflater())
-                                .showModifyGroup();
+                        GroupDialog dialog = new GroupDialog(getContext(), new GroupDialog.OnUpdateGroupListener() {
+
+                            @Override
+                            public void UpdateGroupFinished() {
+                                refreshGroupList();
+                                refreshNoteList();
+                                if (IsSearching)
+                                    initListView(search(SearchingStr));
+                                else
+                                    initListView(NoteList);
+                            }
+                        });
+                        dialog.setView(new EditText(getContext()));  //若对话框无法弹出输入法，加上这句话
+                        dialog.show();
                         break;
                     case R.id.action_search_back:
                         SearchFracBack();
@@ -159,25 +177,22 @@ public class NoteFragment extends Fragment implements View.OnClickListener, ISho
             @Override
             public void onClick(View view) {
                 m_fabmenu.collapse();
-                Intent addDoc_intent=new Intent(getActivity(),ModifyNoteActivity.class);
-                addDoc_intent.putExtra("notedata",new Note("",""));
-                addDoc_intent.putExtra("flag",NOTE_NEW); // NEW
-                startActivityForResult(addDoc_intent,2); // 2 from FloatingButton
+                HandleNewUpdateNote(true, null);
             }
         });
-
-//        m_fabmenu.setOnFocusChangeListener(new android.view.View.OnFocusChangeListener() {
-//            @Override
-//            public void onFocusChange(View v, boolean hasFocus) {
-//                Log.e("0", "onFocusChange: "+hasFocus );
-//                if (!hasFocus)
-//                    m_fabmenu.collapse();
-//            }
-//        });
-
     }
 
-    public boolean IsSearching = false;
+
+    /**
+     * 用于返回数据时判断当前是否处在搜索页面
+     * 而进行下一步处理刷新 ListView
+     */
+    private boolean IsSearching = false;
+
+    /**
+     * 当 IsSearching 时表示当前所有页面的 keyWord
+     */
+    private String SearchingStr;
 
     /**
      * 查找笔记功能
@@ -208,9 +223,11 @@ public class NoteFragment extends Fragment implements View.OnClickListener, ISho
             public void OnSearchClick(String keyword) {
                 if (!keyword.isEmpty()) {
                     IsSearching = true;
+                    SearchingStr = keyword;
                     initListView(search(keyword));
                     m_toolbar.getMenu().findItem(R.id.action_search_back).setVisible(true);
                     mSwipeRefresh.setEnabled(false);
+                    m_fabmenu.setVisibility(View.GONE);
                     m_toolbar.setTitle(String.format(getContext().getString(R.string.notefragment_menu_search_content), keyword));
                 }
             }
@@ -239,9 +256,13 @@ public class NoteFragment extends Fragment implements View.OnClickListener, ISho
                         initListView(NoteList);
 
                         mSwipeRefresh.setEnabled(true);
+                        m_fabmenu.setVisibility(View.VISIBLE);
+
                         m_toolbar.getMenu().findItem(R.id.action_search_back).setVisible(false);
                         m_toolbar.setTitle(R.string.note_header);
+
                         IsSearching = false;
+                        SearchingStr = "";
 
                         loadingDialog.dismiss();
 
@@ -256,9 +277,7 @@ public class NoteFragment extends Fragment implements View.OnClickListener, ISho
     @Override
     public void onClick(View v) {
         switch (v.getId()) {
-//            case R.id.note_searchback:
-//                NoteList = noteDao.queryNotesAll();
-//                initListView(NoteList);
+
         }
     }
 
@@ -297,28 +316,42 @@ public class NoteFragment extends Fragment implements View.OnClickListener, ISho
      * 刷新数据，用于下拉
      */
     private void refreshdata() {
-        new Thread(new Runnable() {
+//        new Thread(new Runnable() {
+//            @Override
+//            public void run() {
+//                try {
+//                    Thread.sleep(1000);
+//                } catch (InterruptedException e) {
+//                    e.printStackTrace();
+//                }
+//                getActivity().runOnUiThread(new Runnable() {
+//                    @Override
+//                    public void run() {
+//                        initData();
+//                        initAdapter();
+//                        refreshNoteList();
+//                        refreshGroupList();
+//                        initListView(NoteList);
+//
+//                        mSwipeRefresh.setRefreshing(false);
+//                    }
+//                });
+//            }
+//        }).start();
+
+        new Handler().postDelayed(new Runnable() {
             @Override
             public void run() {
-                try {
-                    Thread.sleep(500);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-                getActivity().runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        initData();
-                        initAdapter();
-                        refreshNoteList();
-                        refreshGroupList();
-                        initListView(NoteList);
+                initData();
+                initAdapter();
+                refreshNoteList();
+                refreshGroupList();
+                initListView(NoteList);
 
-                        mSwipeRefresh.setRefreshing(false);
-                    }
-                });
+                mSwipeRefresh.setRefreshing(false);
             }
-        }).start();
+
+        }, 500);
     }
 
     /**
@@ -369,7 +402,7 @@ public class NoteFragment extends Fragment implements View.OnClickListener, ISho
             public void onItemClick(View view, int position) {
 
                 SelectedNoteItem = position;
-                ClickNoteItem(nlist, position);
+                HandleNewUpdateNote(false, nlist.get(position));
             }
         });
 
@@ -379,18 +412,6 @@ public class NoteFragment extends Fragment implements View.OnClickListener, ISho
                 DeleteNote(view, note);
             }
         });
-    }
-
-    /**
-     * 点击 NoteList 的一项，打开 ViewModifyNote 活动
-     * @param nlist List<Note>
-     * @param position
-     */
-    public void ClickNoteItem(final List<Note> nlist, int position) {
-        Intent intent=new Intent(getContext(), ViewModifyNoteActivity.class);
-        intent.putExtra("notedata",nlist.get(position));
-        intent.putExtra("flag",NOTE_UPDATE); // UPDATE
-        startActivityForResult(intent,1); // 1 from List
     }
 
     /**
@@ -437,6 +458,23 @@ public class NoteFragment extends Fragment implements View.OnClickListener, ISho
         deleteAlert.show();
     }
 
+
+    private void HandleNewUpdateNote(boolean isNew, Note note) {
+        if (isNew) {
+            Intent addNote_intent=new Intent(getActivity(), ModifyNoteActivity.class);
+            addNote_intent.putExtra("notedata",new Note("",""));
+            addNote_intent.putExtra("flag",NOTE_NEW); // NEW
+            startActivityForResult(addNote_intent,REQ_NOTE_NEW); // 2 from FloatingButton
+        }
+        else {
+            Intent modifyNote_intent=new Intent(getContext(), ViewModifyNoteActivity.class);
+            modifyNote_intent.putExtra("notedata", note);
+            modifyNote_intent.putExtra("flag",NOTE_UPDATE); // UPDATE
+            startActivityForResult(modifyNote_intent,REQ_NOTE_UPDATE); // 1 from List
+        }
+
+    }
+
     //////////////////////////////////////////////////
 
     /**
@@ -448,29 +486,43 @@ public class NoteFragment extends Fragment implements View.OnClickListener, ISho
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        switch (requestCode) {
-            case 1: // FROM LIST
-                if (resultCode == RESULT_OK) {
-                    if (data.getBooleanExtra("intent_result", true) == true) {
-                        Note newnote = (Note) data.getSerializableExtra("modify_note");
-                        NoteList.set(SelectedNoteItem, newnote);
-                        Collections.sort(NoteList);
-                        noteAdapter.notifyDataSetChanged();
+
+            switch (requestCode) {
+                case REQ_NOTE_NEW:
+                case REQ_NOTE_UPDATE:
+                    if (resultCode == RESULT_OK) {
+
+                        int flag = data.getIntExtra("flag", NOTE_NEW);
+                        Note note = (Note) data.getSerializableExtra("notedata");
+
+                        ShowLogE("onActivityResult", (flag == NOTE_NEW)?"NEW":"UPDATE");
+                        Toast.makeText(getContext(), (flag == NOTE_NEW)?"NEW":"UPDATE", Toast.LENGTH_SHORT).show();
+
+                        if (flag == NOTE_NEW) {
+                            NoteList.add(NoteList.size(), note);
+
+                            SelectedNoteItem = NoteList.indexOf(note);
+
+                            HandleNewUpdateNote(false, NoteList.get(SelectedNoteItem));
+
+                        }
+
+                        else {
+                            NoteList.set(SelectedNoteItem, note);
+
+                            Collections.sort(NoteList);
+                            noteAdapter.notifyDataSetChanged();
+
+                            if (IsSearching)
+                                initListView(search(SearchingStr));
+                            else
+                                initListView(NoteList);
+                        }
                     }
+
                     break;
-                }
-            case 2: // ADD
-                if (resultCode == RESULT_OK) {
-                    if (data.getBooleanExtra("intent_result", true) == true) {
-                        Note newnote = (Note) data.getSerializableExtra("modify_note");
-                        Toast.makeText(getActivity(), newnote.getTitle(), Toast.LENGTH_SHORT).show();
-                        NoteList.add(NoteList.size(), newnote);
-                        Collections.sort(NoteList);
-                        noteAdapter.notifyDataSetChanged();
-                    }
-                }
-                break;
-        }
+            }
+
     }
 
 }
