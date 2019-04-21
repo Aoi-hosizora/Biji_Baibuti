@@ -388,7 +388,6 @@ public class NoteFragment extends Fragment implements View.OnClickListener, ISho
         groupAdapter.notifyDataSetChanged();
     }
 
-
     /**
      * 当前选中的笔记，用于返回时修改列表
      */

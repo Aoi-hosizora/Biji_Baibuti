@@ -42,6 +42,12 @@ public class MyOpenHelper extends SQLiteOpenHelper {
                 "n_group_id integer, " +
                 "n_create_time datetime, " +
                 "n_update_time datetime )");
+
+        //创建文件分类表
+        db.execSQL("create table db_file_class(" +
+                "f_id integer primary key autoincrement, " +
+                "f_name varchar, " +
+                "f_order integer )");
     }
 
     @Override
