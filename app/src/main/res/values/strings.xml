@@ -180,4 +180,9 @@
     <!-- hint text -->
     <string name="tudo">TODO</string>
 
+    <!-- filefrag add fileclass Dialog -->
+    <string name="FileclassDialog_AddNewclass">新建分类</string>
+    <string name="FileclassDialog_Confirmbtn">确定</string>
+
+
 </resources>

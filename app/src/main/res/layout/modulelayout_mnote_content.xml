@@ -17,9 +17,9 @@
         android:layout_height="wrap_content"
         android:background="@null"
         android:hint="@string/ContentNew_NoteTitleHint"
-        android:textSize="@dimen/text_size_18"
-        android:textColor="@color/grey_700"
-        android:padding="@dimen/activity_margin_16"/>
+        android:padding="@dimen/activity_margin_16"
+        android:textColor="@color/grey_900"
+        android:textSize="@dimen/text_size_18" />
 
     <RelativeLayout
         android:layout_width="match_parent"
