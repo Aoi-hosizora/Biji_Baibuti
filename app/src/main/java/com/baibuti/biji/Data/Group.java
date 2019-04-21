@@ -19,6 +19,7 @@ public class Group implements Serializable {
     @Override
     public boolean equals(Object obj) {
         Group that = (Group) obj;
+
         if (this.id == that.id &&
             this.name.equals(that.name) &&
             this.order == that.order &&
