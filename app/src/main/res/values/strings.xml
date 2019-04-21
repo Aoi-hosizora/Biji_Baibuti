@@ -184,5 +184,9 @@
     <string name="FileclassDialog_AddNewclass">新建分类</string>
     <string name="FileclassDialog_Confirmbtn">确定</string>
 
+    <!-- Show Null Title File Class Dialog -->
+    <string name="FileclassDialog_NullTitleAlertTitle">错误</string>
+    <string name="FileclassDialog_NullTitleAlertMsg">没有输入分类名，请补全内容。</string>
+    <string name="FileclassDialog_NullTitleAlertPositiveButtonForOK">确定</string>
 
 </resources>
