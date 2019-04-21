@@ -1,11 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="48dp"
+    android:layout_height="wrap_content"
     android:background="#FFFFFFFF"
     android:elevation="2dp"
     android:gravity="center"
-    android:orientation="horizontal">
+    android:orientation="horizontal"
+    android:baselineAligned="false">
 
     <LinearLayout
         android:id="@+id/tab_note"
@@ -21,15 +22,16 @@
             android:layout_height="wrap_content"
             android:background="#00000000"
             android:clickable="false"
+            android:contentDescription="@string/tudo"
             android:src="@drawable/tab_note_normal" />
 
         <TextView
             android:id="@+id/tab_note_text"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="笔记"
-            android:textColor="@color/half_black"
-            android:textSize="10sp" />
+            android:text="@string/notefragment_tab_text"
+            android:textColor="@color/image_color_black"
+            android:textSize="12sp" />
     </LinearLayout>
 
     <LinearLayout
@@ -46,15 +48,16 @@
             android:layout_height="wrap_content"
             android:background="#00000000"
             android:clickable="false"
+            android:contentDescription="@string/tudo"
             android:src="@drawable/tab_search_normal" />
 
         <TextView
             android:id="@+id/tab_search_text"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="搜题"
-            android:textColor="@color/half_black"
-            android:textSize="10sp" />
+            android:text="@string/searchfragment_tab_text"
+            android:textColor="@color/image_color_black"
+            android:textSize="12sp" />
     </LinearLayout>
 
     <LinearLayout
@@ -71,15 +74,16 @@
             android:layout_height="wrap_content"
             android:background="#00000000"
             android:clickable="false"
+            android:contentDescription="@string/tudo"
             android:src="@drawable/tab_class_normal" />
 
         <TextView
             android:id="@+id/tab_class_text"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="课表"
-            android:textColor="@color/half_black"
-            android:textSize="10sp" />
+            android:text="@string/classfragment_tab_text"
+            android:textColor="@color/image_color_black"
+            android:textSize="12sp" />
     </LinearLayout>
 
     <LinearLayout
@@ -96,15 +100,16 @@
             android:layout_height="wrap_content"
             android:background="#00000000"
             android:clickable="false"
+            android:contentDescription="@string/tudo"
             android:src="@drawable/tab_file_normal" />
 
         <TextView
             android:id="@+id/tab_file_text"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="资料"
-            android:textColor="@color/half_black"
-            android:textSize="10sp" />
+            android:text="@string/filefragment_tab_text"
+            android:textColor="@color/image_color_black"
+            android:textSize="12sp" />
     </LinearLayout>
 
 </LinearLayout>

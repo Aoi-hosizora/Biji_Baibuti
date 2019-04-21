@@ -17,7 +17,7 @@
         app:layout_constraintTop_toTopOf="parent" />
 
     <SearchView
-        android:id="@+id/searchView"
+        android:id="@+id/filefragment_filesearch"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         app:layout_constraintEnd_toEndOf="parent"
@@ -31,34 +31,20 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/searchView">
+        app:layout_constraintTop_toBottomOf="@+id/filefragment_filesearch">
+
+        <ListView
+            android:id="@+id/filefragment_fileclasses"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_weight="3"
+            android:background="@color/grey_300" />
 
         <android.support.v7.widget.RecyclerView
-            android:layout_width="152dp"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:background="@color/background" />
-
-        <View
-            android:id="@+id/divider"
-            android:layout_width="1dp"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:background="?android:attr/listDivider" />
-
-        <android.support.v7.widget.RecyclerView
+            android:id="@+id/filefragment_files"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_weight="1" />
     </LinearLayout>
-
-    <android.support.constraint.Guideline
-        android:id="@+id/guideline2"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="128dp"
-        android:orientation="vertical"
-        app:layout_constraintGuide_begin="128dp"
-        app:layout_constraintStart_toStartOf="parent" />
 
 </android.support.constraint.ConstraintLayout>
