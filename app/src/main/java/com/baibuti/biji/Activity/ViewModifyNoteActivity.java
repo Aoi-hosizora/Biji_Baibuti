@@ -6,6 +6,7 @@ import android.content.ClipboardManager;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.graphics.Rect;
 import android.os.Bundle;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
@@ -16,12 +17,14 @@ import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.baibuti.biji.Data.Group;
 import com.baibuti.biji.Data.Note;
 import com.baibuti.biji.Interface.IShowLog;
 import com.baibuti.biji.R;
-import com.baibuti.biji.db.GroupDao;
+import com.baibuti.biji.View.ImageLoader;
 import com.baibuti.biji.util.StringUtils;
+import com.previewlibrary.GPreviewBuilder;
+import com.previewlibrary.ZoomMediaLoader;
+import com.previewlibrary.enitity.ThumbViewInfo;
 import com.sendtion.xrichtext.RichTextView;
 
 import java.util.ArrayList;
@@ -58,6 +61,9 @@ public class ViewModifyNoteActivity extends AppCompatActivity implements View.On
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_viewmodifynote);
+
+        ZoomMediaLoader.getInstance().init(new ImageLoader());
+
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         setTitle(R.string.VMNoteActivity_Title);
 
@@ -214,7 +220,8 @@ public class ViewModifyNoteActivity extends AppCompatActivity implements View.On
                     Note newnote = (Note) data.getSerializableExtra("notedata");
 
                     // 判断是否修改
-                    isModify = data.getBooleanExtra("isModify", true);
+                    if (!isModify)
+                        isModify = data.getBooleanExtra("isModify", true);
 
                     if (isModify) {
 
@@ -273,6 +280,36 @@ public class ViewModifyNoteActivity extends AppCompatActivity implements View.On
     }
 
     /**
+     * 点击图片后弹出预览窗口，待改
+     * @param imageList
+     * @param currentPosition
+     */
+    private void ShowClickImg(ArrayList<String> imageList, int currentPosition) {
+        ArrayList<ThumbViewInfo> mThumbViewInfoList = new ArrayList<>(); // 这个最好定义成成员变量
+        ThumbViewInfo item;
+        mThumbViewInfoList.clear();
+
+        for (int i = 0;i < imageList.size(); i++) {
+            Rect bounds = new Rect();
+            //new ThumbViewInfo(图片地址);
+            item=new ThumbViewInfo(imageList.get(i));
+            item.setBounds(bounds);
+            mThumbViewInfoList.add(item);
+        }
+
+
+        GPreviewBuilder.from(ViewModifyNoteActivity.this)
+                // .to(ImageLookActivity.class)
+                .setData(mThumbViewInfoList)
+                .setCurrentIndex(currentPosition)
+                .setSingleFling(true)
+                .setType(GPreviewBuilder.IndicatorType.Number)
+                // 小圆点
+                //  .setType(GPreviewBuilder.IndicatorType.Dot)
+                .start();//启动
+    }
+
+    /**
      * 处理内容，重要
      * ContentEditText.post(new Runnable() -> dealWithContent(););
      */
@@ -281,24 +318,19 @@ public class ViewModifyNoteActivity extends AppCompatActivity implements View.On
         ContentEditText_View.clearAllLayout();
         showDataSync(note.getContent());
 
+        final AppCompatActivity app = this;
+
         // 图片点击事件
         ContentEditText_View.setOnRtImageClickListener(new RichTextView.OnRtImageClickListener() {
             @Override
             public void onRtImageClick(String imagePath) {
                 ArrayList<String> imageList = StringUtils.getTextFromHtml(note.getContent(), true);
                 int currentPosition = imageList.indexOf(imagePath);
-               // showToast("点击图片："+currentPosition+"："+imagePath);
 
-                //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-                //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-                //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+                ShowLogE("dealWithContent", "点击图片："+currentPosition+"："+imagePath);
 
-                //点击图片预览
-//                PhotoPreview.builder()
-//                        .setPhotos(imageList)
-//                        .setCurrentItem(currentPosition)
-//                        .setShowDeleteButton(false)
-//                        .start(NoteActivity.this);
+                ShowClickImg(imageList, currentPosition);
+
             }
         });
     }

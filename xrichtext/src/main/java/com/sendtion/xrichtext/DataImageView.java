@@ -8,6 +8,7 @@ import android.graphics.Paint;
 import android.graphics.Rect;
 import android.util.AttributeSet;
 import android.widget.ImageView;
+
 /**
  * 自定义ImageView，可以存放Bitmap和Path等信息
  *
@@ -73,7 +74,7 @@ public class DataImageView extends ImageView {
             //画边框
             Rect rec = canvas.getClipBounds();
             // 这两句可以使底部和右侧边框更大
-            //rec.modulelayout_mainactivity_bottom -= 2;
+            //rec.bottom -= 2;
             //rec.right -= 2;
             //画笔
             Paint paint = new Paint();

@@ -62,6 +62,7 @@ import io.reactivex.ObservableOnSubscribe;
 import io.reactivex.Observer;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
+import io.reactivex.functions.Action;
 import io.reactivex.schedulers.Schedulers;
 import me.kareluo.imaging.IMGEditActivity;
 
@@ -184,7 +185,6 @@ public class ModifyNoteActivity extends AppCompatActivity implements View.OnClic
                 dealWithContent();
             }
         });
-        checkPermissions();
     }
 
     /**
@@ -545,6 +545,7 @@ public class ModifyNoteActivity extends AppCompatActivity implements View.OnClic
      * 文件保存活动处理
      */
     private void saveNoteData() {
+        checkPermissions();
 
         // 获得笔记内容
         String Content = getEditData();
@@ -644,7 +645,7 @@ public class ModifyNoteActivity extends AppCompatActivity implements View.OnClic
                 .Builder(ModifyNoteActivity.this)
                 .setTitle(R.string.MNoteActivity_OCRCheckAlertTitle)
                 .setMessage(getResources().getString(R.string.MNoteActivity_OCRCheckAlertMsg) + imagePath)
-                .setCancelable(false)
+                .setCancelable(true)
                 .setPositiveButton(R.string.MNoteActivity_OCRCheckAlertPositiveButtonForOK, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
@@ -668,12 +669,19 @@ public class ModifyNoteActivity extends AppCompatActivity implements View.OnClic
         idenLoadingDialog.setTitle(R.string.MNoteActivity_OCRSyncAlertTitle);
         idenLoadingDialog.setMessage(getResources().getString(R.string.MNoteActivity_OCRSyncAlertMsg));
 
+        class HasDismiss {
+            private boolean dismiss = false;
+            HasDismiss() {}
+            void setDismiss() { this.dismiss = true; }
+            boolean getDismiss() { return this.dismiss; }
+        }
+        final HasDismiss isHasDismiss = new HasDismiss();
 
         final Observable<String> mObservable = Observable.create(new ObservableOnSubscribe<String>() {
             @Override
             public void subscribe(ObservableEmitter<String> emitter) throws Exception {
 
-                // 识别 ExtractUtil.recognition
+                // 识别 ExtractUtil.recognition <<< 异步
                 final String extaText = ExtractUtil.recognition(bitmap, ModifyNoteActivity.this);
 
                 emitter.onNext(extaText); // 处理识别后响应
@@ -683,11 +691,13 @@ public class ModifyNoteActivity extends AppCompatActivity implements View.OnClic
         .subscribeOn(Schedulers.io()) //生产事件在io
         .observeOn(AndroidSchedulers.mainThread()); //消费事件在UI线程
 
-
         idenLoadingDialog.setOnCancelListener(new DialogInterface.OnCancelListener() {
             @Override
-            public void onCancel(DialogInterface dialog) {
-                mObservable.blockingSubscribe();
+            public void onCancel(DialogInterface dialog) { ////////// 待改
+                // Toast.makeText(ModifyNoteActivity.this, "d", Toast.LENGTH_SHORT).show();
+                // ExtractUtil.tessBaseAPI.clear();
+                // mObservable.onTerminateDetach();
+                isHasDismiss.setDismiss();
             }
         });
         idenLoadingDialog.show();
@@ -719,7 +729,9 @@ public class ModifyNoteActivity extends AppCompatActivity implements View.OnClic
                     idenLoadingDialog.dismiss();
                 }
                 // 处理回显
-                idenWordsNextReturn(extaText);
+                ShowLogE("idenWordsSync.onNext()", isHasDismiss.getDismiss() + "");
+                if (!isHasDismiss.getDismiss()) // GOMI Code
+                    idenWordsNextReturn(extaText);
             }
         });
     }
