@@ -274,7 +274,8 @@ public class RichTextView extends ScrollView {
                                 if (rtImageHeight > 0) {
                                     imageHeight = rtImageHeight;
                                 } else {
-                                    imageHeight = allLayout.getWidth() * resource.getHeight() / resource.getWidth();
+                                    int LayoutWidth = allLayout.getWidth() - allLayout.getPaddingLeft() - allLayout.getPaddingRight();
+                                    imageHeight = LayoutWidth * resource.getHeight() / resource.getWidth();
                                 }
                                 RelativeLayout.LayoutParams lp = new RelativeLayout.LayoutParams(
                                         LayoutParams.MATCH_PARENT, imageHeight);//固定图片高度，记得设置裁剪剧中
@@ -301,7 +302,8 @@ public class RichTextView extends ScrollView {
                     if (rtImageHeight > 0) {
                         imageHeight = rtImageHeight;
                     } else {
-                        imageHeight = allLayout.getWidth() * bmp.getHeight() / bmp.getWidth();
+                        int LayoutWidth = allLayout.getWidth() - allLayout.getPaddingLeft() - allLayout.getPaddingRight();
+                        imageHeight = LayoutWidth * bmp.getHeight() / bmp.getWidth();
                     }
                     RelativeLayout.LayoutParams lp = new RelativeLayout.LayoutParams(
                             LayoutParams.MATCH_PARENT, imageHeight);//固定图片高度，记得设置裁剪剧中

@@ -10,6 +10,7 @@
     <string name="NoteFragment_SearchNullView">搜索不到任何笔记</string>
     <string name="file_header">资料</string>
     <string name="notefragment_menu_modifygroup">分类</string>
+    <string name="onKeyDownExit">再按一次退出笔迹</string>
 
     <!-- IShowLog -->
     <string name="IShowLog_LogE">BijiLogE</string>

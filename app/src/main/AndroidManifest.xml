@@ -45,6 +45,8 @@
             </intent-filter>
         </activity>
 
+        <activity android:name=".Activity.CustomActivity" />
+
         <!-- PreLoaded Font -->
         <meta-data
             android:name="preloaded_fonts"

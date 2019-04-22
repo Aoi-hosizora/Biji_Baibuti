@@ -9,6 +9,14 @@
     <item
         android:id="@+id/id_menu_modifynote_viewinfo"
         android:title="详细信息" />
+
+    <item
+        android:id="@+id/id_menu_modifynote_sharenote"
+        android:title="分享笔记" />
+    <item
+        android:id="@+id/id_menu_modifynote_turntofile"
+        android:title="另存为文件" />
+
     <item
         android:id="@+id/id_menu_modifynote_viewcancel"
         android:title="取消" />

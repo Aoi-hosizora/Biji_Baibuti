@@ -10,11 +10,13 @@ import android.os.Bundle;
 
 import android.util.Log;
 import android.view.Display;
+import android.view.KeyEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.baibuti.biji.Fragment.ClassFragment;
 import com.baibuti.biji.Fragment.NoteFragment;
@@ -57,6 +59,11 @@ public class MainActivity extends FragmentActivity
     private TextView mTextClass;
     private TextView mTextFile;
 
+    private NoteFragment mNoteFrag = new NoteFragment();
+    private SearchFragment mSearchFrag = new SearchFragment();
+    private ClassFragment mClassFrag = new ClassFragment();
+    private FileFragment mFileFrag = new FileFragment();
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
 
@@ -87,10 +94,10 @@ public class MainActivity extends FragmentActivity
 
         mFragments = new ArrayList<>();
         //将四个Fragment加入集合中
-        mFragments.add(new NoteFragment());
-        mFragments.add(new SearchFragment());
-        mFragments.add(new ClassFragment());
-        mFragments.add(new FileFragment());
+        mFragments.add(mNoteFrag);
+        mFragments.add(mSearchFrag);
+        mFragments.add(mClassFrag);
+        mFragments.add(mFileFrag);
 
         //初始化适配器
         mAdapter = new FragmentPagerAdapter(getSupportFragmentManager()) {
@@ -248,5 +255,31 @@ public class MainActivity extends FragmentActivity
 
     public SlidingMenu getSlidingMenu() {
         return slidingMenu;
+    }
+
+
+    private long exitTime = 0;
+
+    @Override
+    public boolean onKeyDown(int keyCode, KeyEvent event) {
+        if (keyCode == KeyEvent.KEYCODE_BACK && event.getAction() == KeyEvent.ACTION_DOWN) {
+
+            // 判断是否处于笔记搜索页面
+            if (mNoteFrag.getIsSearching()) {
+                mNoteFrag.SearchFracBack();
+                return true;
+            }
+            // 不在笔记搜索页面，退出程序
+            if ((System.currentTimeMillis() - exitTime) > 2000) {
+                Toast.makeText(getApplicationContext(), R.string.onKeyDownExit, Toast.LENGTH_SHORT).show();
+                exitTime = System.currentTimeMillis();
+            }
+            else {
+                finish();
+                System.exit(0);
+            }
+            return true;
+        }
+        return super.onKeyDown(keyCode, event);
     }
 }

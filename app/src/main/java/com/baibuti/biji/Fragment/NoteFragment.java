@@ -48,7 +48,7 @@ import static android.app.Activity.RESULT_OK;
 
 public class NoteFragment extends Fragment implements View.OnClickListener, IShowLog {
 
-    // private RecyclerViewEmptySupport mNoteList;
+//     private RecyclerViewEmptySupport mNoteList;
     private RecyclerView mNoteList;
 
     private FloatingActionsMenu m_fabmenu;
@@ -141,7 +141,8 @@ public class NoteFragment extends Fragment implements View.OnClickListener, ISho
                                 refreshGroupList();
                                 refreshNoteList();
                                 if (IsSearching)
-                                    initListView(search(SearchingStr));
+                                    if (!IsSearchingNull)
+                                        initListView(search(SearchingStr));
                                 else
                                     initListView(NoteList);
                             }
@@ -198,6 +199,15 @@ public class NoteFragment extends Fragment implements View.OnClickListener, ISho
      * 而进行下一步处理刷新 ListView
      */
     private boolean IsSearching = false;
+    private boolean IsSearchingNull = false;
+
+    /**
+     * 用于判断返回键时的事件
+     * @return
+     */
+    public boolean getIsSearching() {
+        return this.IsSearching;
+    }
 
     /**
      * 当 IsSearching 时表示当前所有页面的 keyWord
@@ -216,8 +226,10 @@ public class NoteFragment extends Fragment implements View.OnClickListener, ISho
             if (note.getTitle().contains(str) || note.getContent().contains(str))
                 notelist.add(note);
         }
-        if (notelist.isEmpty())
+        IsSearchingNull = notelist.isEmpty();
+        if (IsSearchingNull)
             Toast.makeText(getContext(), R.string.NoteFragment_SearchNullToast, Toast.LENGTH_SHORT).show();
+
         return notelist;
     }
 
@@ -251,7 +263,7 @@ public class NoteFragment extends Fragment implements View.OnClickListener, ISho
     /**
      * 返回原界面，退出搜索
      */
-    private void SearchFracBack() {
+    public void SearchFracBack() {
 
         loadingDialog.show();
         new Thread(new Runnable() {
@@ -277,7 +289,7 @@ public class NoteFragment extends Fragment implements View.OnClickListener, ISho
 
                         IsSearching = false;
                         SearchingStr = "";
-
+                        IsSearchingNull = false;
                         loadingDialog.dismiss();
 
                     }

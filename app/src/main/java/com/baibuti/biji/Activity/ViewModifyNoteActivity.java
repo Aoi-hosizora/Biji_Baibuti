@@ -21,6 +21,7 @@ import com.baibuti.biji.Data.Note;
 import com.baibuti.biji.Interface.IShowLog;
 import com.baibuti.biji.R;
 import com.baibuti.biji.View.ImageLoader;
+import com.baibuti.biji.util.CommonUtil;
 import com.baibuti.biji.util.StringUtils;
 import com.previewlibrary.GPreviewBuilder;
 import com.previewlibrary.ZoomMediaLoader;
@@ -147,16 +148,25 @@ public class ViewModifyNoteActivity extends AppCompatActivity implements View.On
         switch (item.getItemId()) {
             case R.id.id_menu_modifynote_viewmodify:
                 ShowModifyNoteActivity();
-                break;
+            break;
 
             case android.R.id.home:
             case R.id.id_menu_modifynote_viewcancel:
                 BackToActivity();
-                break;
+            break;
 
             case R.id.id_menu_modifynote_viewinfo:
                 showDetailInfo();
-                break;
+            break;
+
+            case R.id.id_menu_modifynote_sharenote:
+                // 待修改
+                CommonUtil.shareTextAndImage(this, note.getTitle(), note.getContent(), null); //分享图文
+            break;
+
+            case R.id.id_menu_modifynote_turntofile:
+
+            break;
         }
         return true;
     }
@@ -299,7 +309,7 @@ public class ViewModifyNoteActivity extends AppCompatActivity implements View.On
 
 
         GPreviewBuilder.from(ViewModifyNoteActivity.this)
-                // .to(ImageLookActivity.class)
+                .to(CustomActivity.class) // 是否使用自定义预览界面，当然8.0之后因为配置问题，必须要使用
                 .setData(mThumbViewInfoList)
                 .setCurrentIndex(currentPosition)
                 .setSingleFling(true)
