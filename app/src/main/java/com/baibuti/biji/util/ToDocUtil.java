@@ -3,6 +3,7 @@ package com.baibuti.biji.util;
 
 import android.graphics.BitmapFactory;
 import android.os.Environment;
+import android.util.Log;
 
 import com.baibuti.biji.Widget.CustomXWPFDocument;
 import org.apache.poi.xwpf.usermodel.UnderlinePatterns;
@@ -28,8 +29,9 @@ public class ToDocUtil {
 
     public static int A4_WIDTH = 2480;
     public static int A4_HEIGHT = 3508;
-    public static int A4_WIDTH_OUTOFEDGE = 1775;
-    public static int A4_HEIGHT_OUTOFEDGE = 5628;
+    public static double A4_PXRATE = 215.0 / 700;
+    public static int A4_WIDTH_OUTOFEDGE = (int)(1775 * A4_PXRATE);
+    public static int A4_HEIGHT_OUTOFEDGE = (int)(5628 * A4_PXRATE);
 
     private static class Size {
         private int Height;
@@ -66,15 +68,20 @@ public class ToDocUtil {
         int width = motoSize.getWidth();
         int height = motoSize.getHeight();
 
+        Log.e("0", width + ", " + height);
+
         if (width > A4_WIDTH_OUTOFEDGE) {
-            height = height * (width / A4_WIDTH_OUTOFEDGE);
+            height = (int)(height * (A4_WIDTH_OUTOFEDGE / (double)width));
             width = A4_WIDTH_OUTOFEDGE;
         }
 
         if (height > A4_HEIGHT_OUTOFEDGE) {
-            width = width * (height / A4_HEIGHT_OUTOFEDGE);
+            width = (int)(width * (A4_HEIGHT_OUTOFEDGE / (double)height));
             height = A4_HEIGHT_OUTOFEDGE;
         }
+
+        Log.e("1", width + ", " + height);
+
         return new Size(height, width);
     }
 

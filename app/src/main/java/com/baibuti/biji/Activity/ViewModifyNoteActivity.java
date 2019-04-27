@@ -80,8 +80,7 @@ public class ViewModifyNoteActivity extends AppCompatActivity implements View.On
         setTitle(R.string.VMNoteActivity_Title);
 
         savingDialog = new ProgressDialog(this);
-        savingDialog.setMessage(getResources().getString(R.string.VMNoteActivity_SavingData));
-        savingDialog.setCanceledOnTouchOutside(false);
+        savingDialog.setCancelable(true);
 
         loadingDialog = new ProgressDialog(this);
         loadingDialog.setMessage(getResources().getString(R.string.VMNoteActivity_LoadingData));
@@ -312,7 +311,7 @@ public class ViewModifyNoteActivity extends AppCompatActivity implements View.On
     }
 
     /**
-     * 根据类型保存为 Pdf 还是 Docx
+     * 根据类型保存为 Pdf 还是 Docx，CreateFileAsNote()用
      * @param isSaveAsDocx
      * @param mnote
      */
@@ -339,10 +338,7 @@ public class ViewModifyNoteActivity extends AppCompatActivity implements View.On
                     .setPositiveButton("覆盖", new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
-                            if (isSaveAsDocx)
-                                SavingDocxAsNote(FilePath, note);
-                            else
-                                SavingPdfAsNote(FilePath, note);
+                            SavingDocxPdfAsNote(isSaveAsDocx, FilePath, note);
                         }
                     })
                     .setNegativeButton("取消", new DialogInterface.OnClickListener() {
@@ -355,60 +351,37 @@ public class ViewModifyNoteActivity extends AppCompatActivity implements View.On
             alertDialog.show();
         }
         else
-            if (isSaveAsDocx)
-                SavingDocxAsNote(FilePath, note);
-            else
-                SavingPdfAsNote(FilePath, note);
+            SavingDocxPdfAsNote(isSaveAsDocx, FilePath, note);
     }
 
     /**
-     * 具体保存笔记为 Docx，CreateFileAsNote()用
+     * 具体保存笔记过程，SavingFileAsNote()用
      * @param Path
      * @param mnote
      */
-    private void SavingDocxAsNote(final String Path, final Note mnote) {
+    private void SavingDocxPdfAsNote(final boolean isSaveAsDocx, final String Path, final Note mnote) {
         ShowLogE("SavingDocxAsNote", "Path: " + Path);
 
-        savingDialog.show();
-        new Thread(new Runnable() {
+        class HasDismiss {
+            private boolean dismiss = false;
+            HasDismiss() {}
+            void setDismiss() { this.dismiss = true; }
+            boolean getDismiss() { return this.dismiss; }
+        }
+        final HasDismiss isHasDismiss = new HasDismiss();
 
+        String Msg = String.format(getResources().getString(R.string.VMNoteActivity_SavingDataMessage), isSaveAsDocx ? "Docx" : "Pdf", Path);
+        savingDialog.setTitle(getResources().getString(R.string.VMNoteActivity_SavingData));
+        savingDialog.setMessage(Msg);
+        savingDialog.setOnCancelListener(new DialogInterface.OnCancelListener() {
             @Override
-            public void run() {
-                try {
-                    Thread.sleep(200);
-                }
-                catch (InterruptedException ex) {
-                    ex.printStackTrace();
-                }
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-
-                        try {
-                            ToDocUtil.CreateDocxByNote(Path, mnote.getTitle(), mnote.getContent(), true);
-                            if (savingDialog != null)
-                                savingDialog.dismiss();
-
-                            Toast.makeText(ViewModifyNoteActivity.this, "文件 " + Path + " 保存成功。", Toast.LENGTH_SHORT).show();
-                        }
-                        catch (Exception ex) {
-                            ex.printStackTrace();
-                        }
-                    }
-                });
+            public void onCancel(DialogInterface dialog) {
+                // 取消保存
+                isHasDismiss.setDismiss();
             }
-        }).start();
-    }
-
-    /**
-     * 保存笔记为 Pdf，CreateFileAsNote()用
-     * @param Path
-     * @param mnote
-     */
-    private void SavingPdfAsNote(final String Path, final Note mnote) {
-        ShowLogE("SavingDocxAsNote", "Path: " + Path);
-
+        });
         savingDialog.show();
+
         new Thread(new Runnable() {
 
             @Override
@@ -424,12 +397,24 @@ public class ViewModifyNoteActivity extends AppCompatActivity implements View.On
                     public void run() {
 
                         try {
-                            ToDocUtil.CreatePdfByNote(Path, mnote.getTitle(), mnote.getContent(), true);
+                            if (isSaveAsDocx)
+                                ToDocUtil.CreateDocxByNote(Path, mnote.getTitle(), mnote.getContent(), true);
+                            else
+                                ToDocUtil.CreatePdfByNote(Path, mnote.getTitle(), mnote.getContent(), true);
 
-                            if (savingDialog != null)
-                                savingDialog.dismiss();
+                            if (!isHasDismiss.getDismiss()) {
+                                if (savingDialog != null)
+                                    savingDialog.dismiss();
 
-                            Toast.makeText(ViewModifyNoteActivity.this, "文件 " + Path + " 保存成功。", Toast.LENGTH_SHORT).show();
+                                Toast.makeText(ViewModifyNoteActivity.this, "文件 " + Path + " 保存成功。", Toast.LENGTH_SHORT).show();
+                            }
+                            else {
+                                ShowLogE("SavingDocxPdfAsNote", "Saning is HasDismiss");
+                                File f = new File(Path);
+                                if (f.exists())
+                                    f.delete();
+                            }
+
                         }
                         catch (Exception ex) {
                             ex.printStackTrace();

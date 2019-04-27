@@ -44,8 +44,8 @@
         <!-- OnCreate -->
         <string name="VMNoteActivity_Title">笔记详情</string>
         <string name="VMNoteActivity_LoadingData">数据加载中...</string>
-        <string name="VMNoteActivity_SavingData">文件保存中...</string>
-
+        <string name="VMNoteActivity_SavingData">保存</string>
+        <string name="VMNoteActivity_SavingDataMessage">%s 文件正在保存中...\n\n%s</string>
         <!-- ShowInfo -->
         <string name="VMNoteActivity_InfoTitle">标题：</string>
         <string name="VMNoteActivity_InfoCreateTime">创建时间：</string>
