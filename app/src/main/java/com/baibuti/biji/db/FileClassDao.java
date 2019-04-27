@@ -2,20 +2,14 @@ package com.baibuti.biji.db;
 
 import android.content.ContentValues;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.database.Cursor;
 import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteStatement;
-import android.support.v7.app.AlertDialog;
 import android.util.Log;
-import android.widget.Toast;
 
 import com.baibuti.biji.Data.FileClass;
-import com.baibuti.biji.Data.Group;
 
-import java.io.File;
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -235,17 +229,9 @@ public class FileClassDao {
      * 更新一个分类
      */
     public void updateFileClass(FileClass fileClass) {
+
         FileClass oldFileClass = queryFileClassById(fileClass.getId());
-        try {
-            if (checkDefaultFileClass(oldFileClass)) {
-                if (!oldFileClass.getFileClassName().equals(fileClass.getFileClassName()))
-                    throw new EditDefaultGroupException();
-            }
-        }
-        catch (EditDefaultGroupException ed) {
-            Toast.makeText(context, "无法修改默认分类。", Toast.LENGTH_SHORT).show();
-            return;
-        }
+
         HandleDuplicate(fileClass, oldFileClass);
 
         //////////////////////////////////////////////////
