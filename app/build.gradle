@@ -44,6 +44,7 @@ dependencies {
 
     // 本地 Chrome 查看 SqLite 数据库
     implementation 'com.facebook.stetho:stetho:1.5.0'
+    implementation 'com.android.support:support-v4:27.1.1'
 
     ////////////////////////////////////////////////////////////
 
