@@ -7,7 +7,6 @@
     <string name="notefragment_menu_search_content">\"%s\" 的搜索结果</string>
     <string name="NoteFragment_LoadingData">加载中...</string>
     <string name="NoteFragment_SearchNullToast">搜索不到任何数据</string>
-    <string name="NoteFragment_SearchNullView">搜索不到任何笔记</string>
     <string name="file_header">资料</string>
     <string name="notefragment_menu_modifygroup">分类</string>
     <string name="onKeyDownExit">再按一次退出笔迹</string>
@@ -59,7 +58,6 @@
         <string name="VMNoteActivity_InfoAlertNegativeButtonForOK">确定</string>
 
         <!-- Show Data Sync -->
-        <string name="VMNoteActivity_showDataSyncError">解析错误：图片不存在或已损坏</string>
 
     <!-- Modify Note -->
 
@@ -83,8 +81,7 @@
 
         <!-- ShowGroupSetting -->
         <string name="MNoteActivity_GroupSetAlertTitle">笔记分类</string>
-        <string name="MNoteActivity_GroupSetAlertNeutralButtonForSetGeneralGroupInfo">修改分组信息</string>
-        <string name="MNoteActivity_GroupSetAlertNegativeButtonForCancel">取消</string>
+    <string name="MNoteActivity_GroupSetAlertNegativeButtonForCancel">取消</string>
 
         <!-- Cancel Save Note Data -->
         <string name="MNoteActivity_CancelSaveAlertTitle">提醒</string>
@@ -140,19 +137,13 @@
 
 
     <!-- Show Modify Group Dialog -->
-        <string name="GroupDialog_ModifyAlertTitle">笔记分组管理</string>
-        <string name="GroupDialog_ModifyAlertNeutralButtonForAdd">添加</string>
-        <string name="GroupDialog_ModifyAlertPositiveButtonForBack">返回</string>
 
-        <!-- Show Add Group Dialog -->
+    <!-- Show Add Group Dialog -->
         <string name="GroupDialog_AddAlertColorText">分组代表颜色：</string>
         <string name="GroupDialog_AddAlertTitleForNew">添加笔记分组标签</string>
         <string name="GroupDialog_AddAlertTitleForUpdate">修改笔记分组标签</string>
-        <string name="GroupDialog_AddAlertNegativeButtonForCancel">取消</string>
-        <string name="GroupDialog_AddAlertPositiveButtonForOK">确定</string>
-        <string name="GroupDialog_AddAlertNeutralButtonForDelete">删除</string>
 
-        <!-- Show Null Title Dialog -->
+    <!-- Show Null Title Dialog -->
         <string name="GroupDialog_NullTitleAlertTitle">错误</string>
         <string name="GroupDialog_NullTitleAlertMsg">没有输入分组名，请补全内容。</string>
         <string name="GroupDialog_NullTitleAlertPositiveButtonForOK">确定</string>

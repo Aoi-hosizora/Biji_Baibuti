@@ -14,6 +14,7 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -23,6 +24,12 @@ import com.baibuti.biji.R;
 import com.baibuti.biji.View.ImageLoader;
 import com.baibuti.biji.util.CommonUtil;
 import com.baibuti.biji.util.StringUtils;
+import com.baibuti.biji.util.ToDocUtil;
+import com.bumptech.glide.request.RequestOptions;
+import com.hitomi.tilibrary.style.index.NumberIndexIndicator;
+import com.hitomi.tilibrary.style.progress.ProgressPieIndicator;
+import com.hitomi.tilibrary.transfer.TransferConfig;
+import com.hitomi.tilibrary.transfer.Transferee;
 import com.previewlibrary.GPreviewBuilder;
 import com.previewlibrary.ZoomMediaLoader;
 import com.previewlibrary.enitity.ThumbViewInfo;
@@ -54,15 +61,19 @@ public class ViewModifyNoteActivity extends AppCompatActivity implements View.On
     private static final int NOTE_NEW = 0; // new
     private static final int NOTE_UPDATE = 1; // modify
 
+    private static final int REQ_CHOOSE_FOLDER_PATH = 2;
+
     private boolean isModify = false;
     private int flag = NOTE_NEW;
 
+    private Transferee transferee;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_viewmodifynote);
 
+        transferee = Transferee.getDefault(this);
         ZoomMediaLoader.getInstance().init(new ImageLoader());
 
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
@@ -160,17 +171,15 @@ public class ViewModifyNoteActivity extends AppCompatActivity implements View.On
             break;
 
             case R.id.id_menu_modifynote_sharenote:
-                // 待修改
-                CommonUtil.shareTextAndImage(this, note.getTitle(), note.getContent(), null); //分享图文
+                ShareNoteContent();
             break;
 
             case R.id.id_menu_modifynote_turntofile:
-
+                CreateFileAsNote();
             break;
         }
         return true;
     }
-
 
     /**
      * 打开 ModifyNote 活动
@@ -253,8 +262,35 @@ public class ViewModifyNoteActivity extends AppCompatActivity implements View.On
                     }
                 }
             break;
+
+//            case REQ_CHOOSE_FOLDER_PATH:
+//                String path = data.getStringExtra("path");
+//                Toast.makeText(getApplicationContext(), "The selected path is:" + path, Toast.LENGTH_SHORT).show();
         }
         super.onActivityResult(requestCode, resultCode, data);
+    }
+
+    /**
+     * 分享笔记，待修改
+     */
+    private void ShareNoteContent() {
+        CommonUtil.shareTextAndImage(this, note.getTitle(), note.getContent(), null); //分享图文
+    }
+
+    /**
+     * 另存为文件，待修改
+     */
+    private void CreateFileAsNote() {
+        // checkPermissions();
+//        new LFilePicker()
+//                .withActivity(this)
+//                .withRequestCode(REQ_CHOOSE_FOLDER_PATH)
+//                .withStartPath("/storage/emulated/0/Download")
+//                .withIsGreater(false)
+//                .withFileSize(500 * 1024)
+//                .start();
+
+        ToDocUtil.CreateDocByNote("", "");
     }
 
     /**
@@ -319,6 +355,9 @@ public class ViewModifyNoteActivity extends AppCompatActivity implements View.On
                 .start();//启动
     }
 
+    ////////////////////////////////////////////////////////////
+    ////////////////////////////////////////////////////////////
+
     /**
      * 处理内容，重要
      * ContentEditText.post(new Runnable() -> dealWithContent(););
@@ -340,6 +379,7 @@ public class ViewModifyNoteActivity extends AppCompatActivity implements View.On
                 ShowLogE("dealWithContent", "点击图片："+currentPosition+"："+imagePath);
 
                 ShowClickImg(imageList, currentPosition);
+
 
             }
         });

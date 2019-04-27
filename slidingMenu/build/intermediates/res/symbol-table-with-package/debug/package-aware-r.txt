@@ -104,7 +104,6 @@ id right
 id right_icon
 id right_side
 id selected_view
-id slidingmenumain
 id start
 id status_bar_latest_event_content
 id tag_transition_group

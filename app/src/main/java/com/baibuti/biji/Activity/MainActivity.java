@@ -276,7 +276,6 @@ public class MainActivity extends FragmentActivity
             }
             else {
                 finish();
-                System.exit(0);
             }
             return true;
         }
