@@ -1,10 +1,10 @@
 package com.baibuti.biji.util;
 
 
-import com.baibuti.biji.Data.Note;
+import android.graphics.BitmapFactory;
+import android.os.Environment;
 
-import org.apache.poi.hwpf.HWPFDocument;
-import org.apache.poi.hwpf.usermodel.Range;
+import com.baibuti.biji.Widget.CustomXWPFDocument;
 import org.apache.poi.xwpf.usermodel.UnderlinePatterns;
 import org.apache.poi.xwpf.usermodel.XWPFDocument;
 import org.apache.poi.xwpf.usermodel.XWPFParagraph;
@@ -12,50 +12,135 @@ import org.apache.poi.xwpf.usermodel.XWPFRun;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.List;
+
 
 /**
  * Using POI By AoiHosizora
  */
 public class ToDocUtil {
 
+    public static String SDCardRoot = Environment.getExternalStorageDirectory().getAbsolutePath() + File.separator;
+    public static String APP_NAME = "Biji";
+
+    public static int A4_WIDTH = 2480;
+    public static int A4_HEIGHT = 3508;
+    public static int A4_WIDTH_OUTOFEDGE = 1775;
+    public static int A4_HEIGHT_OUTOFEDGE = 5628;
+
+    private static class Size {
+        private int Height;
+        private int Width;
+
+        public Size(int width, int height) {
+            this.Height = height;
+            this.Width = width;
+        }
+
+        public int getHeight() {
+            return Height;
+        }
+
+        public int getWidth() {
+            return Width;
+        }
+
+        public void setHeight(int height) {
+            Height = height;
+        }
+
+        public void setWidth(int width) {
+            Width = width;
+        }
+    }
+
+    /**
+     * 貌似无效，待改
+     * @param motoSize
+     * @return
+     */
+    private static Size HandleImgSize(Size motoSize) {
+        int width = motoSize.getWidth();
+        int height = motoSize.getHeight();
+
+        if (width > A4_WIDTH_OUTOFEDGE) {
+            height = height * (width / A4_WIDTH_OUTOFEDGE);
+            width = A4_WIDTH_OUTOFEDGE;
+        }
+
+        if (height > A4_HEIGHT_OUTOFEDGE) {
+            width = width * (height / A4_HEIGHT_OUTOFEDGE);
+            height = A4_HEIGHT_OUTOFEDGE;
+        }
+        return new Size(height, width);
+    }
+
+    /**
+     * 获得 生成的文件 默认的保存位置
+     * @return
+     */
+    public static String getDefaultPath() {
+        String dir = SDCardRoot + APP_NAME + File.separator;
+        return dir;
+    }
+
+    /**
+     * 获取 Docx 默认保存位置
+     * @param FileName 文件名
+     * @return
+     */
+    public static String getDefaultDocxPath(String FileName) {
+        String dir = SDCardRoot + APP_NAME + File.separator;
+        return dir + FileName + ".docx";
+    }
+
+    /**
+     * 获取 Pdf 默认保存位置
+     * @param FileName
+     * @return
+     */
+    public static String getDefaultPdfPath(String FileName) {
+        String dir = SDCardRoot + APP_NAME + File.separator;
+        return dir + FileName + ".pdf";
+    }
+
+
+
     /**
      * 创建 Docx 文件，插入笔记标题与内容
-     * @param Path Environment.getExternalStorageDirectory().getAbsolutePath() + File.separator + "..."
+     *
+     * @param Path        Environment.getExternalStorageDirectory().getAbsolutePath() + File.separator + "..."
      * @param NoteTitle
      * @param NoteContent
      * @return
      * @throws IOException
      */
-    public static boolean CreateDocxByNote(String Path, String NoteTitle, String NoteContent) throws Exception {
+    public static boolean CreateDocxByNote(String Path, String NoteTitle, String NoteContent, boolean IsReWrite) throws Exception {
         File docFile = new File(Path);
         if (docFile.exists())
-            return false;
+            if (IsReWrite)
+                docFile.delete();
+            else
+                return false;
 
-        XWPFDocument docx = new XWPFDocument();
+        CustomXWPFDocument docx = new CustomXWPFDocument();
+
         XWPFParagraph para = docx.createParagraph();
-
         XWPFRun run = para.createRun();
-
-        // 处理标题
         run.setUnderline(UnderlinePatterns.SINGLE);
         run.setText(NoteTitle);
 
-        // 处理内容
-        para = docx.createParagraph();
-        HandleDocxRunForNoteContent(para, NoteContent);
+        HandleDocxRunForNoteContent(docx, NoteContent);
 
         OutputStream os = new FileOutputStream(Path);
-        docx.write(os);
 
+        docx.write(os);
         try {
             os.close();
-        }
-        catch (Exception ex) {
+        } catch (Exception ex) {
             ex.printStackTrace();
         }
 
@@ -63,58 +148,131 @@ public class ToDocUtil {
     }
 
     /**
-     * 处理用于 Docx 文件的 XWPFRun 插入文字与图片
-     * @param para XWPFParagraph
+     * 处理用于 Docx 文件的 XWPFRun 插入文字与图片，CreateDocxByNote() 用
+     *
+     * @param docx        CustomXWPFDocument
      * @param NoteContent 笔记内容
      */
-    private static void HandleDocxRunForNoteContent(XWPFParagraph para, String NoteContent) {
-        XWPFRun run = para.createRun();
-        run.setText(NoteContent);
+    private static void HandleDocxRunForNoteContent(CustomXWPFDocument docx, String NoteContent) throws Exception {
+        XWPFRun run;
+
+        ////////////////////////////////////////
+        List<String> textList = StringUtils.cutStringByImgTag(NoteContent);
+
+        for (int i = 0; i < textList.size(); i++) {
+            String text = textList.get(i);
+            if (text.contains("<img") && text.contains("src=")) {
+                String imagePath = StringUtils.getImgSrc(text);
+
+                //////////
+
+                FileInputStream fis = new FileInputStream(imagePath);
+
+                // 图片信息
+                BitmapFactory.Options opt = new BitmapFactory.Options();
+                opt.inJustDecodeBounds = true;
+                BitmapFactory.decodeFile(imagePath, opt);
+
+                // 后缀名
+                String ext = NoteContent.substring(NoteContent.lastIndexOf(".") + 1).toLowerCase();
+
+                // 图片尺寸
+                Size newSize = HandleImgSize(new Size(opt.outWidth, opt.outHeight));
+
+                String picId = docx.addPictureData(fis, getPictureType(ext));
+                docx.createPicture(picId, docx.getNextPicNameNumber(getPictureType(ext)), newSize.getWidth(), newSize.getHeight());
+
+            }
+            else {
+                XWPFParagraph para = docx.createParagraph();
+                run = para.createRun();
+                run.setText(text);
+            }
+        }
     }
 
     /**
-     * 创建 Doc 文件，插入笔记标题与内容
-     * @param Path Environment.getExternalStorageDirectory().getAbsolutePath() + File.separator + "..."
+     * 获取图片类型
+     *
+     * @param ext 文件后缀名
+     * @return XWPFDocument.PICTURE_TYPE_PICT
+     */
+    private static int getPictureType(String ext) {
+        int res = XWPFDocument.PICTURE_TYPE_PICT;
+
+        if (ext != null) {
+
+            if (ext.equalsIgnoreCase("png"))
+                res = XWPFDocument.PICTURE_TYPE_PNG;
+            else if (ext.equalsIgnoreCase("dib"))
+                res = XWPFDocument.PICTURE_TYPE_DIB;
+            else if (ext.equalsIgnoreCase("emf"))
+                res = XWPFDocument.PICTURE_TYPE_EMF;
+            else if (ext.equalsIgnoreCase("jpg") || ext.equalsIgnoreCase("jpeg"))
+                res = XWPFDocument.PICTURE_TYPE_JPEG;
+            else if (ext.equalsIgnoreCase("wmf"))
+                res = XWPFDocument.PICTURE_TYPE_WMF;
+        }
+        return res;
+    }
+
+    /**
+     * 创建 Pdf 文件，插入笔记标题与内容
+     *
+     * @param Path
      * @param NoteTitle
      * @param NoteContent
+     * @param IsReWrite
      * @return
-     * @throws IOException
+     * @throws Exception
      */
-    public static boolean CreateDocByNote(String Path, String NoteTitle, String NoteContent) throws IOException {
+    public static boolean CreatePdfByNote(String Path, String NoteTitle, String NoteContent, boolean IsReWrite) throws Exception {
         File docFile = new File(Path);
         if (docFile.exists())
-            return false;
-        docFile.createNewFile();
+            if (IsReWrite)
+                docFile.delete();
+            else
+                return false;
 
-        InputStream is = new FileInputStream(docFile);
-        HWPFDocument doc = new HWPFDocument(is);
+        PdfItextUtil pdfItextUtil = new PdfItextUtil(Path);
 
-        //获取Range
-        Range range = doc.getRange();
         // 处理标题
-        range.insertAfter(NoteTitle);
+        pdfItextUtil.addTitleToPdf(NoteTitle);
+
         // 处理内容
-        HandleDocRangeForNoteContent(range, NoteContent);
+        HandlePdfiTexForNoteContent(pdfItextUtil, NoteContent);
 
-        OutputStream os = new FileOutputStream(Path);
-        doc.write(os);
-
-        try {
-            is.close();
-            os.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
+        if (pdfItextUtil != null)
+            pdfItextUtil.close();
         return true;
     }
 
     /**
-     * 处理用于 Doc 文件的 Range 插入文字与图片
-     * @param range Range
-     * @param NoteContent 笔记内容
+     * 处理用于 PDF 文件的 PdfItextUtil 插入文字与图片，CreatePdfByNote() 用
+     *
+     * @param pdfItextUtil PdfItextUtil
+     * @param NoteContent  String
+     * @throws Exception
      */
-    private static void HandleDocRangeForNoteContent(Range range, String NoteContent) {
-        range.insertAfter(NoteContent);
+    private static void HandlePdfiTexForNoteContent(PdfItextUtil pdfItextUtil, String NoteContent) throws Exception {
+
+        List<String> textList = StringUtils.cutStringByImgTag(NoteContent);
+
+        for (int i = 0; i < textList.size(); i++) {
+            String text = textList.get(i);
+            if (text.contains("<img") && text.contains("src=")) {
+                String imagePath = StringUtils.getImgSrc(text);
+
+                BitmapFactory.Options opt = new BitmapFactory.Options();
+                opt.inJustDecodeBounds = true;
+                BitmapFactory.decodeFile(imagePath, opt);
+
+                Size newSize = HandleImgSize(new Size(opt.outWidth, opt.outHeight));
+                pdfItextUtil.addImageToPdfCenterH(imagePath, newSize.getWidth(), newSize.getHeight());
+            }
+            else {
+                pdfItextUtil.addTextToPdf(text);
+            }
+        }
     }
 }

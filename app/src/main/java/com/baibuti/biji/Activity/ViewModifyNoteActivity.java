@@ -53,6 +53,7 @@ public class ViewModifyNoteActivity extends AppCompatActivity implements View.On
     private com.sendtion.xrichtext.RichTextView ContentEditText_View;
 
     private ProgressDialog loadingDialog;
+    private ProgressDialog savingDialog;
     private Disposable mDisposable;
 
     private Note note;
@@ -78,10 +79,15 @@ public class ViewModifyNoteActivity extends AppCompatActivity implements View.On
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         setTitle(R.string.VMNoteActivity_Title);
 
+        savingDialog = new ProgressDialog(this);
+        savingDialog.setMessage(getResources().getString(R.string.VMNoteActivity_SavingData));
+        savingDialog.setCanceledOnTouchOutside(false);
+
         loadingDialog = new ProgressDialog(this);
         loadingDialog.setMessage(getResources().getString(R.string.VMNoteActivity_LoadingData));
         loadingDialog.setCanceledOnTouchOutside(false);
         loadingDialog.show();
+
 
         note = (Note) getIntent().getSerializableExtra("notedata");
         flag = getIntent().getIntExtra("flag", NOTE_NEW);
@@ -201,7 +207,6 @@ public class ViewModifyNoteActivity extends AppCompatActivity implements View.On
         if (flag == NOTE_NEW) { // Frag -> MN ----> VMN
             motointent.putExtra("notedata", note);
             motointent.putExtra("flag", NOTE_NEW);
-
         }
         else {
             if (isModify) { // Frag -> VMN -> MN ----> VMN
@@ -280,26 +285,159 @@ public class ViewModifyNoteActivity extends AppCompatActivity implements View.On
     }
 
     /**
-     * 另存为文件，待修改
+     * 另存为文件，选择类型
      */
     private void CreateFileAsNote() {
 
-//      enterActivityForResult(this, REQ_CHOOSE_FOLDER_PATH);
-        String Path = Environment.getExternalStorageDirectory().getAbsolutePath() + File.separator + "test.docx";
+        // 选择保存为什么类型
+        AlertDialog TypealertDialog = new AlertDialog
+                .Builder(this)
+                .setTitle("保存为文件")
+                .setMessage("请选择保存的类型，笔记将默认保存在 " + ToDocUtil.getDefaultPath())
+                .setPositiveButton("PDF", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        SavingFileAsNote(false, note);
+                    }
+                })
+                .setNegativeButton("DOCX", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        SavingFileAsNote(true, note);
+                    }
+                })
+                .setNeutralButton("取消", null).create();
+        TypealertDialog.show();
 
-        try {
-            boolean ret;
-            if (ToDocUtil.CreateDocxByNote(Path, note.getTitle(), note.getContent())) {
-                Toast.makeText(this, "文件 " + Path + " 保存成功。", Toast.LENGTH_SHORT).show();
-            }
-            else {
-                Toast.makeText(this, "文件 " + Path + " 已存在。", Toast.LENGTH_SHORT).show();
-            }
-        }
-        catch (Exception ex) {
-            ex.printStackTrace();
-        }
+    }
 
+    /**
+     * 根据类型保存为 Pdf 还是 Docx
+     * @param isSaveAsDocx
+     * @param mnote
+     */
+    public void SavingFileAsNote(final boolean isSaveAsDocx, final Note mnote) {
+
+        // 文件路径待改
+        final String Path_Docx = ToDocUtil.getDefaultDocxPath(note.getTitle());
+        final String Path_Pdf = ToDocUtil.getDefaultPdfPath(note.getTitle());
+
+        File file;
+        if (isSaveAsDocx)
+            file = new File(Path_Docx);
+        else
+            file = new File(Path_Pdf);
+
+        final String FilePath = file.getPath();
+
+        // 判断文件是否存在
+        if (file.exists()) {
+            AlertDialog alertDialog = new AlertDialog
+                    .Builder(this)
+                    .setTitle("保存")
+                    .setMessage("文件 " + FilePath + " 已存在，是否覆盖？")
+                    .setPositiveButton("覆盖", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            if (isSaveAsDocx)
+                                SavingDocxAsNote(FilePath, note);
+                            else
+                                SavingPdfAsNote(FilePath, note);
+                        }
+                    })
+                    .setNegativeButton("取消", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            dialog.dismiss();
+                            return;
+                        }
+                    }) .create();
+            alertDialog.show();
+        }
+        else
+            if (isSaveAsDocx)
+                SavingDocxAsNote(FilePath, note);
+            else
+                SavingPdfAsNote(FilePath, note);
+    }
+
+    /**
+     * 具体保存笔记为 Docx，CreateFileAsNote()用
+     * @param Path
+     * @param mnote
+     */
+    private void SavingDocxAsNote(final String Path, final Note mnote) {
+        ShowLogE("SavingDocxAsNote", "Path: " + Path);
+
+        savingDialog.show();
+        new Thread(new Runnable() {
+
+            @Override
+            public void run() {
+                try {
+                    Thread.sleep(200);
+                }
+                catch (InterruptedException ex) {
+                    ex.printStackTrace();
+                }
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+
+                        try {
+                            ToDocUtil.CreateDocxByNote(Path, mnote.getTitle(), mnote.getContent(), true);
+                            if (savingDialog != null)
+                                savingDialog.dismiss();
+
+                            Toast.makeText(ViewModifyNoteActivity.this, "文件 " + Path + " 保存成功。", Toast.LENGTH_SHORT).show();
+                        }
+                        catch (Exception ex) {
+                            ex.printStackTrace();
+                        }
+                    }
+                });
+            }
+        }).start();
+    }
+
+    /**
+     * 保存笔记为 Pdf，CreateFileAsNote()用
+     * @param Path
+     * @param mnote
+     */
+    private void SavingPdfAsNote(final String Path, final Note mnote) {
+        ShowLogE("SavingDocxAsNote", "Path: " + Path);
+
+        savingDialog.show();
+        new Thread(new Runnable() {
+
+            @Override
+            public void run() {
+                try {
+                    Thread.sleep(200);
+                }
+                catch (InterruptedException ex) {
+                    ex.printStackTrace();
+                }
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+
+                        try {
+                            ToDocUtil.CreatePdfByNote(Path, mnote.getTitle(), mnote.getContent(), true);
+
+                            if (savingDialog != null)
+                                savingDialog.dismiss();
+
+                            Toast.makeText(ViewModifyNoteActivity.this, "文件 " + Path + " 保存成功。", Toast.LENGTH_SHORT).show();
+                        }
+                        catch (Exception ex) {
+                            ex.printStackTrace();
+                        }
+                    }
+                });
+            }
+        }).start();
     }
 
     /**
