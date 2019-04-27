@@ -92,7 +92,7 @@ public class PdfItextUtil {
         try {
             // STSong-Light : Adobe的字体
             // UniGB-UCS2-H : pdf 字体
-            bf = BaseFont.createFont("STSong-Light", "UniGB-UCS2-H", BaseFont.NOT_EMBEDDED);
+            bf = BaseFont.createFont("STSong-Light" ,"UniGB-UCS2-H", BaseFont.NOT_EMBEDDED);
             fontChinese = new Font(bf, size, Font.NORMAL);
         } catch (DocumentException e) {
             e.printStackTrace();
@@ -108,7 +108,7 @@ public class PdfItextUtil {
         try {
             // STSong-Light : Adobe的字体
             // UniGB-UCS2-H : pdf 字体
-            bf = BaseFont.createFont("STSong-Light", "UniGB-UCS2-H", BaseFont.NOT_EMBEDDED);
+            bf = BaseFont.createFont("STSong-Light" ,"UniGB-UCS2-H", BaseFont.NOT_EMBEDDED);
             fontChinese = new Font(bf, size, Font.BOLD);
         } catch (DocumentException e) {
             e.printStackTrace();

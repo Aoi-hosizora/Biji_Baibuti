@@ -2,8 +2,10 @@ package com.baibuti.biji.db;
 
 
 import android.content.Context;
+import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.util.Log;
 
 import com.baibuti.biji.util.CommonUtil;
 
@@ -32,7 +34,7 @@ public class MyOpenHelper extends SQLiteOpenHelper {
     }
 
     private void Create_Db_group(SQLiteDatabase db) {
-        db.execSQL("create table db_group(" +
+        db.execSQL("create table if not exists db_group(" +
                 "g_id integer primary key autoincrement, " +
                 "g_name varchar, " +
                 "g_order integer, " +
@@ -40,7 +42,7 @@ public class MyOpenHelper extends SQLiteOpenHelper {
     }
 
     private void Create_Db_note(SQLiteDatabase db) {
-        db.execSQL("create table db_note(" +
+        db.execSQL("create table if not exists db_note(" +
                 "n_id integer primary key autoincrement, " +
                 "n_title varchar, " +
                 "n_content varchar, " +
@@ -50,7 +52,7 @@ public class MyOpenHelper extends SQLiteOpenHelper {
     }
 
     private void Create_Db_file_class(SQLiteDatabase db) {
-        db.execSQL("create table db_file_class(" +
+        db.execSQL("create table if not exists db_file_class(" +
                 "f_id integer primary key autoincrement, " +
                 "f_name varchar, " +
                 "f_order integer )");
@@ -70,9 +72,32 @@ public class MyOpenHelper extends SQLiteOpenHelper {
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-        if (oldVersion == 1 && newVersion == 2) {
-            // 升级创建文件分类表
+
+        if (oldVersion >= newVersion)
+            return;
+
+        // 相邻版本间数据库的更新
+        int version = oldVersion;
+
+        if (version == 1) {
             Create_Db_file_class(db);
+            version = 2;
         }
+    }
+
+    /**
+     * 判断表格是否存在
+     * @param table 表名
+     * @return
+     */
+    public boolean getTblExists(String table) {
+        SQLiteDatabase db = getWritableDatabase();
+        String sql = "SELECT COUNT(*) FROM sqlite_master where type='table' and name='" + table + "'";
+        Cursor cursor = db.rawQuery(sql, null);
+        if(cursor.moveToNext())
+            if (cursor.getInt(0) > 0)
+                return true;
+
+        return false;
     }
 }

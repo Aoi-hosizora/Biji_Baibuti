@@ -6,6 +6,9 @@ import android.os.Environment;
 import android.util.Log;
 
 import com.baibuti.biji.Widget.CustomXWPFDocument;
+
+import org.apache.poi.xslf.usermodel.TextAlign;
+import org.apache.poi.xwpf.usermodel.PositionInParagraph;
 import org.apache.poi.xwpf.usermodel.UnderlinePatterns;
 import org.apache.poi.xwpf.usermodel.XWPFDocument;
 import org.apache.poi.xwpf.usermodel.XWPFParagraph;
@@ -138,6 +141,7 @@ public class ToDocUtil {
         XWPFParagraph para = docx.createParagraph();
         XWPFRun run = para.createRun();
         run.setUnderline(UnderlinePatterns.SINGLE);
+        run.setTextPosition(TextAlign.CENTER.ordinal());
         run.setText(NoteTitle);
 
         HandleDocxRunForNoteContent(docx, NoteContent);

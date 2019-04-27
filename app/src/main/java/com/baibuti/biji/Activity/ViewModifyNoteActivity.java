@@ -291,21 +291,21 @@ public class ViewModifyNoteActivity extends AppCompatActivity implements View.On
         // 选择保存为什么类型
         AlertDialog TypealertDialog = new AlertDialog
                 .Builder(this)
-                .setTitle("保存为文件")
-                .setMessage("请选择保存的类型，笔记将默认保存在 " + ToDocUtil.getDefaultPath())
-                .setPositiveButton("PDF", new DialogInterface.OnClickListener() {
+                .setTitle(R.string.VMNoteActivity_CreateFileAsNoteTitle)
+                .setMessage(String.format(getString(R.string.VMNoteActivity_CreateFileAsNoteMessage), ToDocUtil.getDefaultPath()))
+                .setPositiveButton(R.string.VMNoteActivity_CreateFileAsNotePositiveForPDF, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         SavingFileAsNote(false, note);
                     }
                 })
-                .setNegativeButton("DOCX", new DialogInterface.OnClickListener() {
+                .setNegativeButton(R.string.VMNoteActivity_CreateFileAsNoteNegativeForDOCX, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         SavingFileAsNote(true, note);
                     }
                 })
-                .setNeutralButton("取消", null).create();
+                .setNeutralButton(R.string.VMNoteActivity_CreateFileAsNoteNeutralForCancel, null).create();
         TypealertDialog.show();
 
     }
@@ -333,15 +333,15 @@ public class ViewModifyNoteActivity extends AppCompatActivity implements View.On
         if (file.exists()) {
             AlertDialog alertDialog = new AlertDialog
                     .Builder(this)
-                    .setTitle("保存")
-                    .setMessage("文件 " + FilePath + " 已存在，是否覆盖？")
-                    .setPositiveButton("覆盖", new DialogInterface.OnClickListener() {
+                    .setTitle(R.string.VMNoteActivity_SavingFileAsNoteTitle)
+                    .setMessage(String.format(getResources().getString(R.string.VMNoteActivity_SavingFileAsNoteMessage), FilePath))
+                    .setPositiveButton(R.string.VMNoteActivity_SavingFileAsNotePositiveForCover, new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
                             SavingDocxPdfAsNote(isSaveAsDocx, FilePath, note);
                         }
                     })
-                    .setNegativeButton("取消", new DialogInterface.OnClickListener() {
+                    .setNegativeButton(R.string.VMNoteActivity_SavingFileAsNoteNegativeForCancel, new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
                             dialog.dismiss();

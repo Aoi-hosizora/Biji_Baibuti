@@ -52,13 +52,11 @@ public class MainActivity extends FragmentActivity
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
 
         Stetho.initializeWithDefaults(this);
 
-        //requestWindowFeature(Window.FEATURE_NO_TITLE);
-        super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
         initViews();//初始化控件
         initDatas();//初始化数据
     }

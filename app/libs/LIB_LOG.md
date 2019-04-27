@@ -6,7 +6,7 @@
 
    <https://blog.csdn.net/qq_21972583/article/details/82740281>
 
-   1. docx: `poi-3.9-20121203.jar` `poi-ooxml-3.9-20121203.jar` `poi-ooxml-schemas-3.9-20121203.jar` `dom4j-1.6.1.jar` `stax-api-1.0.1.jar` `xmlbeans-2.3.0.jar`
+   1. docx : poi-3.9-20121203.jar` `poi-ooxml-3.9-20121203.jar` `poi-ooxml-schemas-3.9-20121203.jar` `dom4j-1.6.1.jar` `stax-api-1.0.1.jar` `xmlbeans-2.3.0.jar`
    2. `org.apache.poi.hwpf` : `poi-scratchpad-3.9-20121203.jar`
 
    ```json
@@ -24,5 +24,10 @@
    }
    ```
 
-2. nil
+2. iText
+
+   1. FM : `iTextpdf.jar`
+   2. FONT : `iTextAsian.jar`
+
+3. Nil
 

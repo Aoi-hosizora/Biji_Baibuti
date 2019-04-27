@@ -38,6 +38,7 @@ dependencies {
     testImplementation 'junit:junit:4.12'
 
     // Android
+    implementation 'com.android.support:support-v4:27.1.1'
     implementation 'com.android.support:appcompat-v7:27.1.1'
     implementation 'com.android.support:design:27.1.1'
     implementation 'com.android.support:cardview-v7:27.1.1'
@@ -53,6 +54,7 @@ dependencies {
     annotationProcessor 'com.jakewharton:butterknife-compiler:8.8.1'
 
     // 本地 Chrome 查看 SqLite 数据库
+    // chrome://inspect/#devices
     implementation 'com.facebook.stetho:stetho:1.5.0'
     implementation 'com.android.support:support-v4:27.1.1'
 
@@ -88,6 +90,7 @@ dependencies {
     implementation files('libs/poi-scratchpad-3.9-20121203.jar')
     // iText
     implementation files('libs/iTextpdf.jar')
+    implementation files('libs/iTextAsian.jar')
     // 选择文件
     // implementation 'li.filechoose:FileDirChoose:1.0.3'
 }
