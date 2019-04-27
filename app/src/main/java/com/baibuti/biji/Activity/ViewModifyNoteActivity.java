@@ -8,13 +8,13 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Rect;
 import android.os.Bundle;
+import android.os.Environment;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -25,16 +25,14 @@ import com.baibuti.biji.View.ImageLoader;
 import com.baibuti.biji.util.CommonUtil;
 import com.baibuti.biji.util.StringUtils;
 import com.baibuti.biji.util.ToDocUtil;
-import com.bumptech.glide.request.RequestOptions;
-import com.hitomi.tilibrary.style.index.NumberIndexIndicator;
-import com.hitomi.tilibrary.style.progress.ProgressPieIndicator;
-import com.hitomi.tilibrary.transfer.TransferConfig;
 import com.hitomi.tilibrary.transfer.Transferee;
 import com.previewlibrary.GPreviewBuilder;
 import com.previewlibrary.ZoomMediaLoader;
 import com.previewlibrary.enitity.ThumbViewInfo;
 import com.sendtion.xrichtext.RichTextView;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -45,6 +43,7 @@ import io.reactivex.Observer;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
+
 
 public class ViewModifyNoteActivity extends AppCompatActivity implements View.OnClickListener, IShowLog {
 
@@ -263,9 +262,12 @@ public class ViewModifyNoteActivity extends AppCompatActivity implements View.On
                 }
             break;
 
-//            case REQ_CHOOSE_FOLDER_PATH:
-//                String path = data.getStringExtra("path");
-//                Toast.makeText(getApplicationContext(), "The selected path is:" + path, Toast.LENGTH_SHORT).show();
+            case REQ_CHOOSE_FOLDER_PATH:
+//                if (resultCode == RESULTCODE) {
+//                    ArrayList<String> resPath = data.getStringArrayListExtra(SELECTPATH);
+//                    Log.d("ZWW", resPath.toString());
+//                 Toast.makeText(this, resPath.toString(), Toast.LENGTH_SHORT).show();
+//                }
         }
         super.onActivityResult(requestCode, resultCode, data);
     }
@@ -281,16 +283,23 @@ public class ViewModifyNoteActivity extends AppCompatActivity implements View.On
      * 另存为文件，待修改
      */
     private void CreateFileAsNote() {
-        // checkPermissions();
-//        new LFilePicker()
-//                .withActivity(this)
-//                .withRequestCode(REQ_CHOOSE_FOLDER_PATH)
-//                .withStartPath("/storage/emulated/0/Download")
-//                .withIsGreater(false)
-//                .withFileSize(500 * 1024)
-//                .start();
 
-        ToDocUtil.CreateDocByNote("", "");
+//      enterActivityForResult(this, REQ_CHOOSE_FOLDER_PATH);
+        String Path = Environment.getExternalStorageDirectory().getAbsolutePath() + File.separator + "test.docx";
+
+        try {
+            boolean ret;
+            if (ToDocUtil.CreateDocxByNote(Path, note.getTitle(), note.getContent())) {
+                Toast.makeText(this, "文件 " + Path + " 保存成功。", Toast.LENGTH_SHORT).show();
+            }
+            else {
+                Toast.makeText(this, "文件 " + Path + " 已存在。", Toast.LENGTH_SHORT).show();
+            }
+        }
+        catch (Exception ex) {
+            ex.printStackTrace();
+        }
+
     }
 
     /**
