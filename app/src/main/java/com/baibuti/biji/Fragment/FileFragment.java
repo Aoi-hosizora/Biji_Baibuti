@@ -1,6 +1,8 @@
 package com.baibuti.biji.Fragment;
 
+import android.app.Activity;
 import android.app.AlertDialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
@@ -13,6 +15,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.widget.EditText;
 import android.widget.ListView;
@@ -23,11 +26,11 @@ import com.baibuti.biji.Data.FileClassAdapter;
 import com.baibuti.biji.R;
 import com.baibuti.biji.db.FileClassDao;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
 public class FileFragment extends Fragment {
-
 
     private List<FileClass> fileClassListItems  = new ArrayList<>();
     private ListView fileClassList;
@@ -80,6 +83,7 @@ public class FileFragment extends Fragment {
         fileClassList.setAdapter(fileClassAdapter);
         fileClassList.setSelector(R.drawable.filefrag_fileclass_selector);
         fileClassList.setVerticalScrollBarEnabled(false);
+        fileClassList.setDivider(null);
         fileClassList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int position, long id) {
@@ -102,12 +106,9 @@ public class FileFragment extends Fragment {
         });
 
         if(!fileClassListItems.get(fileClassListItems.size() - 1).getFileClassName().equals("+")) {
-            Log.d("FFFFF", "调用前"+fileClassListItems.get(fileClassListItems.size() - 1).getFileClassName());
             FileClass temp = new FileClass("+", 0);
             fileClassListItems.add(fileClassAdapter.getCount(), temp);
-            //Log.d("FILECLASSLIST", fileClassListItems.toString());
             fileClassAdapter.notifyDataSetChanged();
-            Log.d("FFFFF", "调用后"+fileClassListItems.get(fileClassListItems.size() - 1).getFileClassName());
         }
     }
 
@@ -182,7 +183,7 @@ public class FileFragment extends Fragment {
     }
 
     private void addNewFileClass(){
-        Toast.makeText(getContext(),"Add new fileclass", Toast.LENGTH_SHORT).show();
+        //Toast.makeText(getContext(),"Add new fileclass", Toast.LENGTH_SHORT).show();
         final EditText edit = new EditText(getContext());
 
         AlertDialog.Builder editDialog = new AlertDialog.Builder(getContext());
@@ -197,10 +198,17 @@ public class FileFragment extends Fragment {
                 , new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        Toast.makeText(getContext(),
-                                edit.getText().toString().trim(),Toast.LENGTH_SHORT).show();
+                        //Toast.makeText(getContext(),
+                                //edit.getText().toString().trim(),Toast.LENGTH_SHORT).show();
 
                         updateFileClassList(edit.getText().toString().trim(), TAG_NEW, null, 0);
+
+                        // Check if no view has focus:
+                        View view = getView();
+                        if (view != null) {
+                            InputMethodManager imm = (InputMethodManager)getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
+                            imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
+                        }
 
                         dialog.dismiss();
                     }

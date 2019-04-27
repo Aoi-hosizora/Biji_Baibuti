@@ -1,6 +1,8 @@
 package com.baibuti.biji.Activity;
 
 import android.graphics.Point;
+import android.support.annotation.NonNull;
+import android.support.design.widget.BottomNavigationView;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentPagerAdapter;
@@ -10,11 +12,7 @@ import android.os.Bundle;
 
 import android.util.Log;
 import android.view.Display;
-import android.view.View;
-import android.view.View.OnClickListener;
-import android.widget.ImageButton;
-import android.widget.LinearLayout;
-import android.widget.TextView;
+import android.view.MenuItem;
 
 import com.baibuti.biji.Fragment.ClassFragment;
 import com.baibuti.biji.Fragment.NoteFragment;
@@ -25,12 +23,13 @@ import com.baibuti.biji.R;
 import com.baibuti.biji.View.SimplerSearcherView;
 import com.facebook.stetho.Stetho;
 import com.jeremyfeinstein.slidingmenu.lib.SlidingMenu;
+import  com.baibuti.biji.util.BottomNavigationHelper;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class MainActivity extends FragmentActivity
-        implements OnClickListener, SimplerSearcherView.OnSearcherClickListener, IShowLog {
+        implements SimplerSearcherView.OnSearcherClickListener, IShowLog {
     //声明ViewPager
     private ViewPager mViewPager;
     //适配器
@@ -38,24 +37,10 @@ public class MainActivity extends FragmentActivity
     //装载Fragment的集合
     private List<Fragment> mFragments;
 
+    //侧拉菜单
     private SlidingMenu slidingMenu;
-
-    //四个Tab对应的布局
-    private LinearLayout mTabNote;
-    private LinearLayout mTabSearch;
-    private LinearLayout mTabClass;
-    private LinearLayout mTabFile;
-
-    //四个Tab对应的ImageButton
-    private ImageButton mImgNote;
-    private ImageButton mImgSearch;
-    private ImageButton mImgClass;
-    private ImageButton mImgFile;
-
-    private TextView mTextNote;
-    private TextView mTextSearch;
-    private TextView mTextClass;
-    private TextView mTextFile;
+    //底部导航栏
+    private BottomNavigationView  bottomNavigationView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -67,7 +52,6 @@ public class MainActivity extends FragmentActivity
         setContentView(R.layout.activity_main);
 
         initViews();//初始化控件
-        initEvents();//初始化事件
         initDatas();//初始化数据
     }
 
@@ -120,8 +104,20 @@ public class MainActivity extends FragmentActivity
             public void onPageSelected(int position) {
                 //设置position对应的集合中的Fragment
                 mViewPager.setCurrentItem(position);
-                resetImgs();
-                selectTab(position);
+                switch(position){
+                    case 0:
+                        bottomNavigationView.setSelectedItemId(R.id.item1);
+                        break;
+                    case 1:
+                        bottomNavigationView.setSelectedItemId(R.id.item2);
+                        break;
+                    case 2:
+                        bottomNavigationView.setSelectedItemId(R.id.item3);
+                        break;
+                    case 3:
+                        bottomNavigationView.setSelectedItemId(R.id.item4);
+                        break;
+                }
             }
 
             @Override
@@ -130,14 +126,6 @@ public class MainActivity extends FragmentActivity
 
             }
         });
-    }
-
-    private void initEvents() {
-        //设置四个Tab的点击事件
-        mTabNote.setOnClickListener(this);
-        mTabSearch.setOnClickListener(this);
-        mTabClass.setOnClickListener(this);
-        mTabFile.setOnClickListener(this);
     }
 
     private void initViews() {
@@ -164,86 +152,32 @@ public class MainActivity extends FragmentActivity
 
         mViewPager = findViewById(R.id.id_viewpager);
 
-        //////////
-        mTabNote = findViewById(R.id.tab_note);
-        mTabSearch = findViewById(R.id.tab_search);
-        mTabClass = findViewById(R.id.tab_class);
-        mTabFile = findViewById(R.id.tab_file);
-
-        //////////
-        mImgNote = findViewById(R.id.tab_note_img);
-        mImgSearch = findViewById(R.id.tab_search_img);
-        mImgClass = findViewById(R.id.tab_class_img);
-        mImgFile = findViewById(R.id.tab_file_img);
-
-        mTextNote = findViewById(R.id.tab_note_text);
-        mTextSearch = findViewById(R.id.tab_search_text);
-        mTextClass = findViewById(R.id.tab_class_text);
-        mTextFile = findViewById(R.id.tab_file_text);
-
-        selectTab(0);
-    }
-
-    @Override
-    public void onClick(View v) {
-        //先将四个ImageButton置为灰色
-        resetImgs();
-
-        //根据点击的Tab切换不同的页面及设置对应的ImageButton为绿色
-        switch (v.getId()) {
-            case R.id.tab_note:
-                selectTab(0);
-                break;
-            case R.id.tab_search:
-                selectTab(1);
-                break;
-            case R.id.tab_class:
-                selectTab(2);
-                break;
-            case R.id.tab_file:
-                selectTab(3);
-                break;
-        }
-    }
-
-    private void selectTab(int i) {
-        //根据点击的Tab设置对应的ImageButton为绿色
-        switch (i) {
-            case 0:
-                mTextNote.setTextColor(getResources().getColor(R.color.colorPrimary));
-                //mTabNote.setBackgroundColor(getResources().getColor(R.color.colorPrimaryDark));
-                mImgNote.setImageResource(R.drawable.tab_note_pressed);
-                break;
-            case 1:
-                mTextSearch.setTextColor(getResources().getColor(R.color.colorPrimary));
-                //mTabSearch.setBackgroundColor(getResources().getColor(R.color.colorPrimaryDark));
-                mImgSearch.setImageResource(R.drawable.tab_search_pressed);
-                break;
-            case 2:
-                mTextClass.setTextColor(getResources().getColor(R.color.colorPrimary));
-                //mTabClass.setBackgroundColor(getResources().getColor(R.color.colorPrimaryDark));
-                mImgClass.setImageResource(R.drawable.tab_class_pressed);
-                break;
-            case 3:
-                mTextFile.setTextColor(getResources().getColor(R.color.colorPrimary));
-                //mTabFile.setBackgroundColor(getResources().getColor(R.color.colorPrimaryDark));
-                mImgFile.setImageResource(R.drawable.tab_file_pressed);
-                break;
-        }
-        //设置当前点击的Tab所对应的页面
-        mViewPager.setCurrentItem(i);
-    }
-
-    private void resetImgs() {
-        mImgNote.setImageResource(R.drawable.tab_note_normal);
-        mImgSearch.setImageResource(R.drawable.tab_search_normal);
-        mImgClass.setImageResource(R.drawable.tab_class_normal);
-        mImgFile.setImageResource(R.drawable.tab_file_normal);
-
-        mTextNote.setTextColor(getResources().getColor(R.color.half_black));
-        mTextSearch.setTextColor(getResources().getColor(R.color.half_black));
-        mTextClass.setTextColor(getResources().getColor(R.color.half_black));
-        mTextFile.setTextColor(getResources().getColor(R.color.half_black));
+        bottomNavigationView = (BottomNavigationView) findViewById(R.id.id_bottomnavigation);
+        bottomNavigationView.setOnNavigationItemSelectedListener(new BottomNavigationView.OnNavigationItemSelectedListener() {
+            @Override
+            public boolean onNavigationItemSelected(@NonNull MenuItem item) {
+                switch(item.getItemId()){
+                    case R.id.item1:
+                        //设置当前点击的Tab所对应的页面
+                        mViewPager.setCurrentItem(0);
+                        break;
+                    case R.id.item2:
+                        //设置当前点击的Tab所对应的页面
+                        mViewPager.setCurrentItem(1);
+                        break;
+                    case R.id.item3:
+                        //设置当前点击的Tab所对应的页面
+                        mViewPager.setCurrentItem(2);
+                        break;
+                    case R.id.item4:
+                        //设置当前点击的Tab所对应的页面
+                        mViewPager.setCurrentItem(3);
+                        break;
+                }
+                return true;
+            }
+        });
+        BottomNavigationHelper.disableShiftMode(bottomNavigationView);
     }
 
     public SlidingMenu getSlidingMenu() {

@@ -2,11 +2,11 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:background="#FFFFFFFF"
+    android:background="#FFFFFF"
+    android:baselineAligned="false"
     android:elevation="2dp"
     android:gravity="center"
-    android:orientation="horizontal"
-    android:baselineAligned="false">
+    android:orientation="horizontal">
 
     <LinearLayout
         android:id="@+id/tab_note"
