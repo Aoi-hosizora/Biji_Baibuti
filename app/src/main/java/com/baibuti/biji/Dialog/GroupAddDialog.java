@@ -2,7 +2,6 @@ package com.baibuti.biji.Dialog;
 
 import android.app.AlertDialog;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -12,7 +11,6 @@ import android.widget.TextView;
 import android.view.View.OnClickListener;
 
 import com.baibuti.biji.Data.Group;
-import com.baibuti.biji.Data.Note;
 import com.baibuti.biji.Interface.IShowLog;
 import com.baibuti.biji.R;
 import com.baibuti.biji.Widget.RainbowPalette;
@@ -58,7 +56,7 @@ public class GroupAddDialog extends AlertDialog implements OnClickListener, ISho
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.dialog_groupadddialog_addgroupalert);
+        setContentView(R.layout.dialog_groupadddialog);
 
         editText = (EditText) findViewById(R.id.id_addgroup_name);
         colorText = (TextView) findViewById(R.id.id_addgroup_colortext);
@@ -157,7 +155,7 @@ public class GroupAddDialog extends AlertDialog implements OnClickListener, ISho
      */
     private void UpdateGroup() {
         String newGroupName = editText.getText().toString();
-        int newGroupOrder = 0;
+        int newGroupOrder = inputGroup.getOrder(); // 修改记录
         String newGroupColor = CommonUtil.ColorInt_HexEncoding(colorPalette.getColor());
         ShowLogE("UpdateGroup", "COLOR: " + newGroupColor);
 

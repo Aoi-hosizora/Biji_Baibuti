@@ -67,7 +67,7 @@ public class NoteDao {
 //                Group grouptmp = new Group();
 //                grouptmp.setId(cursor.getInt(cursor.getColumnIndex("n_group_id")));
 //                grouptmp.setName(cursor.getString(cursor.getColumnIndex("n_group_name")));
-                note.setGroupLabel(grouptmp);
+                note.setGroupLabel(grouptmp, false);
 
                 note.setCreateTime(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").parse(
                         cursor.getString(cursor.getColumnIndex("n_create_time"))
@@ -144,7 +144,7 @@ public class NoteDao {
 
     public Note insertDefaultNote() {
         Note dft = new Note(Note.GetDefaultNoteName, "");
-        dft.setGroupLabel(groupDao.queryDefaultGroup());
+        dft.setGroupLabel(groupDao.queryDefaultGroup(), true);
         long id = this.insertNote(dft);
         return queryNoteById((int)id);
     }

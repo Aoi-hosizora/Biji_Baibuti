@@ -1,11 +1,12 @@
 package com.baibuti.biji.Data;
 
 import android.graphics.Color;
+import android.support.annotation.NonNull;
 
 import java.io.Serializable;
 import java.util.Date;
 
-public class Group implements Serializable {
+public class Group implements Serializable, Comparable<Group> {
 
     private int id;//ID
     private String name;//分组名称
@@ -47,6 +48,16 @@ public class Group implements Serializable {
         this.name = name;
         this.order = order;
         this.color = color;
+    }
+
+    @Override
+    public int compareTo(@NonNull Group o) {
+        if (o.order < this.order)
+            return 1;
+        else if (o.order == this.order)
+            return 0;
+        else
+            return -1;
     }
 
     public int getId() {

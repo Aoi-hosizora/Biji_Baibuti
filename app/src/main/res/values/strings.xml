@@ -162,6 +162,9 @@
         <string name="GroupDialog_AddAlertColorText">分组代表颜色：</string>
         <string name="GroupDialog_AddAlertTitleForNew">添加笔记分组标签</string>
         <string name="GroupDialog_AddAlertTitleForUpdate">修改笔记分组标签</string>
+        <string name="GroupDialog_AddAlertOK">确定</string>
+        <string name="GroupDialog_AddAlertReturn">取消</string>
+        <string name="GroupDialog_AddAlertDelete">删除</string>
 
         <!-- Show Null Title Dialog -->
         <string name="GroupDialog_NullTitleAlertTitle">错误</string>

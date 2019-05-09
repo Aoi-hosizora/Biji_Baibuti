@@ -29,17 +29,23 @@ public class GroupDao {
         this.context = context;
     }
 
+    // region 查询全部 queryGroupAll selectAllGroup
     /**
      * 查询所有分类列表
-     *
      * @return
      */
     public List<Group> queryGroupAll() { // ArrayList
 
         List<Group> groupList = selectAllGroup();
 
+        // 处理 默认分组
         if (groupList.isEmpty())
             groupList.add(insertDefaultGroup());
+
+        // 处理 重复顺序
+        for (Group g : groupList) {
+            handleOrderDuplicateWhenUpdate(g);
+        }
 
         return groupList;
     }
@@ -62,12 +68,7 @@ public class GroupDao {
 
                 //生成一个分类
 
-                group = new Group();
-                group.setId(groupId);
-                group.setName(groupName);
-                group.setOrder(order);
-                group.setColor(color);
-
+                group = new Group(groupId, groupName, order, color);
                 groupList.add(group);
             }
         } catch (Exception e) {
@@ -83,36 +84,46 @@ public class GroupDao {
         return groupList;
     }
 
+    /**
+     * @return 返回当前数据库内有多少分组，从一开始算
+     */
+    public int queryGroupCnt() {
+        return selectAllGroup().size();
+    }
+
+    // endregion
+
+    // region 自定义查询 queryGroupByName queryGroupById queryGroupByOrder
+
+    /**
+     * 按照分组名查询
+     * @param groupName
+     * @return
+     */
     public Group queryGroupByName(String groupName) {
         SQLiteDatabase db = helper.getWritableDatabase();
 
         Group group = null;
         Cursor cursor = null;
+
         try {
-            Log.i(TAG, "###queryGroupByName: "+groupName);
-            cursor = db.query("db_group", null, "g_name=?", new String[]{groupName}, null, null, null);
+            cursor = db.query("db_group", null, "g_name=?", new String[]{groupName},
+                    null, null, null);
+
             while (cursor.moveToNext()) {
+
                 int groupId = cursor.getInt(cursor.getColumnIndex("g_id"));
-
                 int order = cursor.getInt(cursor.getColumnIndex("g_order"));
-
                 String color = cursor.getString(cursor.getColumnIndex("g_color"));
 
-                //生成一个分类
-
-                group = new Group();
-
-                group.setId(groupId);
-                group.setName(groupName);
-
-                group.setOrder(order);
-
-                group.setColor(color);
-
+                // 返回
+                group = new Group(groupId, groupName, order, color);
             }
-        } catch (Exception e) {
+        }
+        catch (Exception e) {
             e.printStackTrace();
-        } finally {
+        }
+        finally {
             if (cursor != null && !cursor.isClosed()) {
                 cursor.close();
             }
@@ -123,36 +134,90 @@ public class GroupDao {
         return group;
     }
 
+    /**
+     * 按照分组 id 查询
+     * @param groupId
+     * @return
+     */
     public Group queryGroupById(int groupId) {
         SQLiteDatabase db = helper.getWritableDatabase();
 
         Group group = null;
         Cursor cursor = null;
         try {
-            cursor = db.query("db_group", null, "g_id=?", new String[]{groupId + ""}, null, null, null);
+            cursor = db.query("db_group", null, "g_id=?", new String[]{groupId + ""},
+                    null, null, null);
+
             while (cursor.moveToNext()) {
+
                 int order = cursor.getInt(cursor.getColumnIndex("g_order"));
-
                 String color = cursor.getString(cursor.getColumnIndex("g_color"));
-
                 String groupName = cursor.getString(cursor.getColumnIndex("g_name"));
 
-
-                //生成一个订单
-
-                group = new Group();
-
-                group.setId(groupId);
-                group.setName(groupName);
-
-                group.setOrder(order);
-
-                group.setColor(color);
+                // 返回
+                group = new Group(groupId, groupName, order, color);
 
             }
-        } catch (Exception e) {
+        }
+        catch (Exception e) {
             e.printStackTrace();
-        } finally {
+        }
+        finally {
+            if (cursor != null && !cursor.isClosed()) {
+                cursor.close();
+            }
+            if (db != null) {
+                db.close();
+            }
+        }
+        return group;
+    }
+
+    /**
+     * 按照分组顺序查询，默认查询第一个
+     * @param order
+     * @return
+     */
+    public Group queryGroupByOrder(int order) {
+        return queryGroupByOrder(order, 1);
+    }
+
+    /**
+     * 按照分组顺序查询，需保证唯一
+     * @param order
+     * @param sumcnt 查询第几个分组，默认为1
+     * @return
+     */
+    public Group queryGroupByOrder(int order, int sumcnt) {
+        SQLiteDatabase db = helper.getWritableDatabase();
+
+        Group group = null;
+        Cursor cursor = null;
+        try {
+            cursor = db.query("db_group", null, "g_order=?", new String[]{order + ""},
+                    null, null, null);
+
+            int cnt = 0;
+
+            while (cursor.moveToNext()) {
+
+                cnt++;
+                if (sumcnt != cnt)
+                    continue; // 查询多少个之后
+
+                int groupId = cursor.getInt(cursor.getColumnIndex("g_id"));
+                String color = cursor.getString(cursor.getColumnIndex("g_color"));
+                String groupName = cursor.getString(cursor.getColumnIndex("g_name"));
+
+                // 返回
+                group = new Group(groupId, groupName, order, color);
+            }
+
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+        }
+        finally {
             if (cursor != null && !cursor.isClosed()) {
                 cursor.close();
             }
@@ -164,28 +229,9 @@ public class GroupDao {
     }
 
 
-    public Group queryDefaultGroup() {
-        Group group = null;
+    // endregion 自定义查询
 
-        group = this.queryGroupByName(Group.GetDefaultGroupName);
-        if (group != null)
-            return group;
-
-        return insertDefaultGroup();
-    }
-
-    private Group insertDefaultGroup() {
-        Group def = new Group();
-
-        def.setOrder(0); /////////////////
-
-        def.setColor("#F0F0F0");
-        def.setName(Group.GetDefaultGroupName);
-
-        this.insertGroup(def);
-
-        return this.queryGroupByName(Group.GetDefaultGroupName);
-    }
+    // region 查重分组名 checkDuplicate HandleDuplicate
 
     /**
      * 检查是否有重复
@@ -212,11 +258,139 @@ public class GroupDao {
         return group;
     }
 
+    // endregion
+
+    // region 查重顺序 checkOrderDuplicate handleOrderDuplicateWhenUpdate
+
+    /**
+     * 查询当前的 Order 是否已经存在
+     * @param handleGroup 要处理更新或者插入的分组
+     *
+     * @return 重复次数，可能存在多次重复情况
+     */
+    public int checkOrderDuplicate(Group handleGroup) {
+        List<Group> tmp = selectAllGroup();
+        int cnt=0;
+        for (Group g : tmp)
+            if (g.getOrder() == handleGroup.getOrder())
+                cnt++;
+        return cnt;
+    }
+
+    /**
+     * 更新时处理 Order 重复问题
+     * @param handleGroup 更新的分组
+     */
+    public void handleOrderDuplicateWhenUpdate(Group handleGroup) {
+        // 关键 !!!
+        if (checkOrderDuplicate(handleGroup) != 1) { // 为1，只存在一个，处理结束
+
+            Log.e(TAG, "handleOrderDuplicateWhenUpdate: " + handleGroup.getName());
+
+            Group firstGroup = queryGroupByOrder(handleGroup.getOrder());
+
+            if (firstGroup != null) {
+
+                if (firstGroup.equals(handleGroup))
+                    firstGroup = queryGroupByOrder(handleGroup.getOrder(), 2); // 查询第二个
+
+                // 将重复的下移，正常情况下最多只存在两个重复
+                firstGroup.setOrder(firstGroup.getOrder() + 1);
+
+                updateGroup(firstGroup); // 存进数据库才能 checkOrderDuplicate
+
+                handleOrderDuplicateWhenUpdate(firstGroup); // 递归
+                // 若checkOrderDuplicate(firstGroup) == 1，修改的分组不重复，结束递归
+            }
+        }
+
+    }
+
+    /**
+     * 删除时处理 Order 空缺问题，处理：压缩
+     */
+    public void handleOrderDuplicateWhenDelete() {
+        int order = 0;
+
+        for (int i=0; i<queryGroupCnt(); i++) {
+
+            Group nextGroup;
+            boolean hasGap = false; // 存在间隙
+
+            while ((nextGroup = queryGroupByOrder(order)) == null) {
+                // 找不到紧接着的 order
+                Log.e(TAG, "handleOrderDuplicateWhenDelete: " + order );
+                order++;
+                hasGap = true;
+            }
+            if (hasGap) {
+                nextGroup.setOrder(i); // 压缩
+                updateGroup(nextGroup);
+                handleOrderDuplicateWhenUpdate(nextGroup);
+            }
+            order++;
+        }
+    }
+
+    // endregion
+
+    // region 默认分组 queryDefaultGroup insertDefaultGroup checkDefaultGroup
+
+    /**
+     * 查询是否存在默认分组，若不存在则创建
+     * @return 默认分组引用
+     */
+    public Group queryDefaultGroup() {
+        Group group = null;
+
+        group = this.queryGroupByName(Group.GetDefaultGroupName);
+        if (group != null)
+            return group;
+
+        return insertDefaultGroup();
+    }
+
+    /**
+     * 创建默认分组
+     * @return
+     */
+    private Group insertDefaultGroup() {
+        Group def = new Group();
+
+        def.setOrder(0);
+
+        def.setColor("#F0F0F0");
+        def.setName(Group.GetDefaultGroupName);
+
+        this.insertGroup(def);
+
+        return this.queryGroupByName(Group.GetDefaultGroupName);
+    }
+
+    /**
+     * 检查是否为默认分组
+     */
+    private boolean checkDefaultGroup(Group group) {
+        if (group==null) {
+            Log.e("checkDefaultGroup", "checkDefaultGroup: group==null");
+        }
+        else
+        if (Group.GetDefaultGroupName.equals(group.getName())) {
+            return true;
+        }
+        return false;
+    }
+
+    // endregion queryDefaultGroup insertDefaultGroup
+
+    // region 数据增删改 insertGroup updateGroup deleteGroup
     /**
      * 添加一个分类
      */
     public long insertGroup(Group group) {
         HandleDuplicate(group, null);
+
+        int order = queryGroupCnt(); // 每次都插入到最后
 
         SQLiteDatabase db = helper.getWritableDatabase();
         String sql = "insert into db_group(g_name,g_order,g_color) values(?,?,?)";
@@ -226,8 +400,12 @@ public class GroupDao {
         db.beginTransaction();
         try {
 
+            Log.e(TAG, "insertGroup: order" + order);
+
             stat.bindString(1, group.getName());
-            stat.bindLong(2, group.getOrder());
+
+            stat.bindLong(2, order);
+
             stat.bindString(3, group.getColor());
 
             ret = stat.executeInsert();
@@ -285,20 +463,6 @@ public class GroupDao {
     }
 
     /**
-     * 检查是否为默认分组
-     */
-    private boolean checkDefaultGroup(Group group) {
-        if (group==null) {
-            Log.e("checkDefaultGroup", "checkDefaultGroup: group==null");
-        }
-        else
-            if (Group.GetDefaultGroupName.equals(group.getName())) {
-                return true;
-            }
-        return false;
-    }
-
-    /**
      * 删除一个分类
      */
     public int deleteGroup(int groupId) throws EditDefaultGroupException {
@@ -312,11 +476,15 @@ public class GroupDao {
         int ret = 0;
         try {
             ret = db.delete("db_group", "g_id=?", new String[]{groupId + ""});
+
+            // 处理删除间隙
+            handleOrderDuplicateWhenDelete();
         }
 
         catch (Exception e) {
-                e.printStackTrace();
-        } finally {
+            e.printStackTrace();
+        }
+        finally {
             if (db != null) {
                 db.close();
             }
@@ -326,6 +494,8 @@ public class GroupDao {
 
         return ret;
     }
+
+    // endregion
 }
 
 class EditDefaultGroupException extends Exception {

@@ -46,7 +46,7 @@ public class Note implements Serializable, Comparable<Note> {
     public Note(int id, String title, String content, Group groupLabel, Date createTime, Date updateTime) {
         this(title, content);
         this.setId(id);
-        this.setGroupLabel(groupLabel);
+        this.setGroupLabel(groupLabel, false);
         this.setCreateTime(createTime);
         this.setUpdateTime(updateTime);
     }
@@ -72,9 +72,10 @@ public class Note implements Serializable, Comparable<Note> {
         this.UpdateTime = new Date();
     }
 
-    public void setGroupLabel(Group GroupLabel) {
+    public void setGroupLabel(Group GroupLabel, boolean ischangeTime) {
         this.GroupLabel = GroupLabel;
-        this.UpdateTime = new Date();
+        if (ischangeTime)
+            this.UpdateTime = new Date();
     }
 
     public void setCreateTime(Date CreateTime) {

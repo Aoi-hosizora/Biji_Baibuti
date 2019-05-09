@@ -155,7 +155,7 @@ public class ModifyNoteActivity extends AppCompatActivity implements View.OnClic
 
         if (flag == NOTE_NEW) {
             setTitle(R.string.NMoteActivity_TitleForNewNote);
-            note.setGroupLabel(groupDao.queryDefaultGroup());
+            note.setGroupLabel(groupDao.queryDefaultGroup(), true);
         }
         else
             setTitle(R.string.NMoteActivity_TitleForUpdateNote);
@@ -590,9 +590,9 @@ public class ModifyNoteActivity extends AppCompatActivity implements View.OnClic
         // 处理分组信息
         Group re = groupDao.queryGroupById(selectedGropId);
         if (re != null)
-            note.setGroupLabel(re);
+            note.setGroupLabel(re, true);
         else
-            note.setGroupLabel(groupDao.queryGroupById(0));
+            note.setGroupLabel(groupDao.queryGroupById(0), true);
 
         //////////////////////////////////////////////////
 

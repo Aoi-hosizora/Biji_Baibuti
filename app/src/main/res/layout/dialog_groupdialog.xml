@@ -29,7 +29,8 @@
         android:layout_marginBottom="12dp">
 
         <Button
-            android:layout_width="50dp"
+            android:id="@+id/id_GroupDialog_ButtonUE"
+            android:layout_width="35dp"
             android:layout_height="wrap_content"
             android:layout_marginLeft="20dp"
 
@@ -38,7 +39,8 @@
             android:textColor="@color/pink"/>
 
         <Button
-            android:layout_width="50dp"
+            android:id="@+id/id_GroupDialog_ButtonSHITA"
+            android:layout_width="35dp"
             android:layout_height="wrap_content"
             android:layout_marginLeft="8dp"
 

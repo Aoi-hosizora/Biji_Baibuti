@@ -342,6 +342,7 @@ public class NoteFragment extends Fragment implements View.OnClickListener, ISho
     public void refreshGroupList() {
         groupDao = new GroupDao(getContext());
         GroupList = groupDao.queryGroupAll();
+        Collections.sort(GroupList);
         groupAdapter = new GroupAdapter(getContext(), GroupList); // 必要
         groupAdapter.notifyDataSetChanged();
     }

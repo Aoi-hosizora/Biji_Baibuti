@@ -4,7 +4,6 @@ import android.app.AlertDialog;
 import android.content.Context;
 import android.os.Bundle;
 import android.util.Log;
-import android.widget.AdapterView;
 import android.widget.Button;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -12,16 +11,14 @@ import android.widget.EditText;
 import android.widget.ListView;
 
 import com.baibuti.biji.Data.Group;
-import com.baibuti.biji.Data.GroupAdapter;
 import com.baibuti.biji.Data.GroupRadioAdapter;
 import com.baibuti.biji.Interface.IShowLog;
 import com.baibuti.biji.R;
 import com.baibuti.biji.db.GroupDao;
 import com.baibuti.biji.db.NoteDao;
 
+import java.util.Collections;
 import java.util.List;
-
-import static com.baibuti.biji.util.CommonUtil.ColorHex_IntEncoding;
 
 public class GroupDialog extends AlertDialog implements OnClickListener, IShowLog {
     private OnUpdateGroupListener mListener; //接口
@@ -30,6 +27,8 @@ public class GroupDialog extends AlertDialog implements OnClickListener, IShowLo
     private Button mButtonCancel;
     private Button mButtonAdd;
     private Button mButtonDelete;
+    private Button mButtonUE;
+    private Button mButtonSHITA;
 
     private ListView GroupListView;
 
@@ -50,17 +49,21 @@ public class GroupDialog extends AlertDialog implements OnClickListener, IShowLo
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.dialog_mainalert_groupdialog);
+        setContentView(R.layout.dialog_groupdialog);
 
         mButtonEdit = (Button)findViewById(R.id.id_GroupDialog_ButtonEdit);
         mButtonCancel = (Button)findViewById(R.id.id_GroupDialog_ButtonCancel);
         mButtonAdd = (Button)findViewById(R.id.id_GroupDialog_ButtonAdd);
         mButtonDelete = (Button)findViewById(R.id.id_GroupDialog_ButtonDelete);
+        mButtonUE = (Button)findViewById(R.id.id_GroupDialog_ButtonUE);
+        mButtonSHITA = (Button)findViewById(R.id.id_GroupDialog_ButtonSHITA);
 
         mButtonEdit.setOnClickListener(this);
         mButtonCancel.setOnClickListener(this);
         mButtonAdd.setOnClickListener(this);
         mButtonDelete.setOnClickListener(this);
+        mButtonUE.setOnClickListener(this);
+        mButtonSHITA.setOnClickListener(this);
 
         noteDao = new NoteDao(getContext());
         groupDao = new GroupDao(getContext());
@@ -98,7 +101,7 @@ public class GroupDialog extends AlertDialog implements OnClickListener, IShowLo
      */
     private void refreshGroupList() {
         GroupList = groupDao.queryGroupAll();
-
+        Collections.sort(GroupList);
         groupAdapter = new GroupRadioAdapter(getContext(), GroupList, new GroupRadioAdapter.OnRadioButtonSelect() {
             @Override
             public void onSelect(int position) {
@@ -123,6 +126,12 @@ public class GroupDialog extends AlertDialog implements OnClickListener, IShowLo
             break;
             case R.id.id_GroupDialog_ButtonDelete:
                 showGroupDeleteDialog(GroupList.get(GroupListViewClickId));
+            break;
+            case R.id.id_GroupDialog_ButtonUE:
+                moveGroupOrder(GroupList.get(GroupListViewClickId), true);
+            break;
+            case R.id.id_GroupDialog_ButtonSHITA:
+                moveGroupOrder(GroupList.get(GroupListViewClickId), false);
             break;
         }
     }
@@ -165,6 +174,59 @@ public class GroupDialog extends AlertDialog implements OnClickListener, IShowLo
         groupDeleteDialog.showDialog();
     }
 
+    /**
+     * 移动分组 Order
+     * @param currentGroup 当前分组
+     * @param isUP
+     *          true: UE, Order--
+     *          false: SHITA, Order++
+     */
+    private void moveGroupOrder(Group currentGroup, boolean isUP) {
+
+        ShowLogE("moveGroupOrder", "currentGroup.order: " + currentGroup.getOrder());
+
+        int currentpos = GroupListViewClickId;
+
+        if (isUP && currentpos != 1 && currentpos != 0) { // 上移
+            ShowLogE("moveGroupOrder", "UP");
+            currentGroup.setOrder(currentGroup.getOrder() - 1);
+            currentpos--;
+
+            groupDao.updateGroup(currentGroup); // 更新数据库
+            groupDao.handleOrderDuplicateWhenUpdate(currentGroup); // 处理重复 order
+            groupDao.handleOrderDuplicateWhenDelete(); // 处理错误Gap
+        }
+        else if (!isUP && currentpos != GroupList.size() - 1) { // 下移
+            ShowLogE("moveGroupOrder", "DOWN");
+            int motoorder = currentGroup.getOrder();
+
+            currentGroup.setOrder(motoorder + 1);
+
+            Group downGroup = groupDao.queryGroupByOrder(motoorder + 1); // 向下交换
+            if (downGroup != null) {
+                downGroup.setOrder(motoorder);
+                groupDao.updateGroup(downGroup);
+            }
+
+            currentpos++;
+
+            groupDao.updateGroup(currentGroup); // 更新数据库
+            groupDao.handleOrderDuplicateWhenUpdate(currentGroup); // 处理重复 order
+            groupDao.handleOrderDuplicateWhenDelete(); // 处理错误Gap
+        }
+        else {
+            return;
+        }
+
+
+
+        // 更新显示
+        refreshGroupList();
+        GroupListView.setAdapter(groupAdapter); // 必要
+        groupAdapter.setValue(currentpos);
+        GroupListViewClickId = currentpos;
+        DismissAndReturn(false);
+    }
 
     /////////////////////////////////////////////////////
 
