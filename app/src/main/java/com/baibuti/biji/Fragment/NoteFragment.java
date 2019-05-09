@@ -88,7 +88,7 @@ public class NoteFragment extends Fragment implements View.OnClickListener, ISho
         mSwipeRefresh.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
-                refreshdata();
+                refreshdata(500);
             }
         });
 
@@ -134,21 +134,7 @@ public class NoteFragment extends Fragment implements View.OnClickListener, ISho
                         searchFragment.show(getActivity().getSupportFragmentManager(),com.wyt.searchbox.SearchFragment.TAG);
                         break;
                     case R.id.action_modifygroup:
-                        GroupDialog dialog = new GroupDialog(getContext(), new GroupDialog.OnUpdateGroupListener() {
-
-                            @Override
-                            public void UpdateGroupFinished() {
-                                refreshGroupList();
-                                refreshNoteList();
-                                if (IsSearching)
-                                    if (!IsSearchingNull)
-                                        initListView(search(SearchingStr));
-                                else
-                                    initListView(NoteList);
-                            }
-                        });
-                        dialog.setView(new EditText(getContext()));  //若对话框无法弹出输入法，加上这句话
-                        dialog.show();
+                        ShowGroupDialog();
                         break;
                     case R.id.action_search_back:
                         SearchFracBack();
@@ -339,51 +325,10 @@ public class NoteFragment extends Fragment implements View.OnClickListener, ISho
     }
 
     /**
-     * 刷新数据，用于下拉
-     */
-    private void refreshdata() {
-//        new Thread(new Runnable() {
-//            @Override
-//            public void run() {
-//                try {
-//                    Thread.sleep(1000);
-//                } catch (InterruptedException e) {
-//                    e.printStackTrace();
-//                }
-//                getActivity().runOnUiThread(new Runnable() {
-//                    @Override
-//                    public void run() {
-//                        initData();
-//                        initAdapter();
-//                        refreshNoteList();
-//                        refreshGroupList();
-//                        initListView(NoteList);
-//
-//                        mSwipeRefresh.setRefreshing(false);
-//                    }
-//                });
-//            }
-//        }).start();
-
-        new Handler().postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                initData();
-                initAdapter();
-                refreshNoteList();
-                refreshGroupList();
-                initListView(NoteList);
-
-                mSwipeRefresh.setRefreshing(false);
-            }
-
-        }, 500);
-    }
-
-    /**
      * 刷新 笔记列表
      */
     public void refreshNoteList() {
+        noteDao = new NoteDao(getContext());
         NoteList = noteDao.queryNotesAll();
         Collections.sort(NoteList);
         noteAdapter = new NoteAdapter();
@@ -395,9 +340,59 @@ public class NoteFragment extends Fragment implements View.OnClickListener, ISho
      * 刷新 分组列表
      */
     public void refreshGroupList() {
+        groupDao = new GroupDao(getContext());
         GroupList = groupDao.queryGroupAll();
         groupAdapter = new GroupAdapter(getContext(), GroupList); // 必要
         groupAdapter.notifyDataSetChanged();
+    }
+
+    /**
+     * 刷新数据，用于 下拉 和 返回刷新
+     * @param ms 毫秒
+     */
+    private void refreshdata(int ms) {
+
+        new Handler().postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                refreshAll();
+                initListView(NoteList);
+
+                mSwipeRefresh.setRefreshing(false);
+            }
+
+        }, ms);
+    }
+
+    public void refreshAll() {
+        initData();
+        initAdapter();
+        refreshNoteList();
+        refreshGroupList();
+    }
+
+    /**
+     * 显示 分类 对话框
+     */
+    public void ShowGroupDialog() {
+        GroupDialog dialog = new GroupDialog(getContext(), new GroupDialog.OnUpdateGroupListener() {
+
+            @Override
+            public void UpdateGroupFinished() {
+                ShowLogE("initToolbar", "UpdateGroupFinished");
+
+                // 更新完分组信息后同时在列表中刷新数据
+                refreshdata(100);
+
+                if (IsSearching)
+                    if (!IsSearchingNull)
+                        initListView(search(SearchingStr));
+                    else
+                        initListView(NoteList);
+            }
+        });
+        // dialog.setView(new EditText(getContext()));  //若对话框无法弹出输入法，加上这句话
+        dialog.show();
     }
 
     /**

@@ -73,16 +73,6 @@ public class GroupDialog extends AlertDialog implements OnClickListener, IShowLo
         GroupListView.setAdapter(groupAdapter);
         GroupListView.setVisibility(View.VISIBLE);
 
-//        GroupListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-//            @Override
-//            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-//                GroupListViewClickId = position;
-//                mButtonEdit.setEnabled(true);
-//                mButtonEdit.setTextColor(ColorHex_IntEncoding("#EC407A"));
-//                showGroupAddDialog(GroupList.get(position)); // 临时
-//            }
-//        });
-
     }
 
     /**
@@ -107,19 +97,15 @@ public class GroupDialog extends AlertDialog implements OnClickListener, IShowLo
      * 刷新列表
      */
     private void refreshGroupList() {
-        ShowLogE("refreshGroupList", "DISOYONG");
         GroupList = groupDao.queryGroupAll();
-        ShowLogE("refreshGroupList", "GroupList: " + GroupList.isEmpty());
 
         groupAdapter = new GroupRadioAdapter(getContext(), GroupList, new GroupRadioAdapter.OnRadioButtonSelect() {
             @Override
             public void onSelect(int position) {
-                ShowLogE("refreshGroupList", "onSelect: "+ position);
                 GroupListViewClickId = position;
             }
-        }); // 必要
+        });
         groupAdapter.notifyDataSetChanged();
-        // GroupListView.setAdapter(groupAdapter);
     }
 
 
@@ -155,19 +141,13 @@ public class GroupDialog extends AlertDialog implements OnClickListener, IShowLo
                 refreshGroupList();
                 groupAdapter.setValue(GroupListViewClickId);
                 GroupListView.setAdapter(groupAdapter); // 必要
+
                 DismissAndReturn(false);
 
             }
         });
         dialog.setView(new EditText(getContext()));  //若对话框无法弹出输入法，加上这句话
         dialog.show();
-    }
-
-    private void DismissAndReturn(boolean isReturn) {
-        if (mListener != null)
-            mListener.UpdateGroupFinished(); // 同时令 Note Frac 更新分组信息
-        if (isReturn)
-            dismiss();
     }
 
     private void showGroupDeleteDialog(Group inputGroup) {
@@ -178,9 +158,24 @@ public class GroupDialog extends AlertDialog implements OnClickListener, IShowLo
                 GroupListViewClickId--;
                 groupAdapter.setValue(GroupListViewClickId);
                 GroupListView.setAdapter(groupAdapter); // 必要
+
                 DismissAndReturn(false);
             }
         });
         groupDeleteDialog.showDialog();
+    }
+
+
+    /////////////////////////////////////////////////////
+
+    private void DismissAndReturn(boolean isReturn) {
+
+        ShowLogE("DismissAndReturn", "isReturn: " + isReturn);
+
+        if (mListener != null)
+            mListener.UpdateGroupFinished(); // 同时令 Note Frac 更新分组信息
+
+        if (isReturn)
+            dismiss();
     }
 }

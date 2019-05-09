@@ -149,15 +149,21 @@
         <string name="GroupAdapter_GroupTitle">笔记分类名...</string>
         <string name="GroupAdapter_GroupColor">笔记代表颜色：#000000</string>
 
+        <!-- Main Dialog UI -->
+        <string name="GroupDialog_Title">笔记分组管理</string>
+        <string name="GroupDialog_UE">上</string>
+        <string name="GroupDialog_SHITA">下</string>
+        <string name="GroupDialog_Delete">删除</string>
+        <string name="GroupDialog_Add">添加</string>
+        <string name="GroupDialog_Edit">编辑</string>
+        <string name="GroupDialog_Return">返回</string>
 
-    <!-- Show Modify Group Dialog -->
-
-    <!-- Show Add Group Dialog -->
+        <!-- Show Add Group Dialog -->
         <string name="GroupDialog_AddAlertColorText">分组代表颜色：</string>
         <string name="GroupDialog_AddAlertTitleForNew">添加笔记分组标签</string>
         <string name="GroupDialog_AddAlertTitleForUpdate">修改笔记分组标签</string>
 
-    <!-- Show Null Title Dialog -->
+        <!-- Show Null Title Dialog -->
         <string name="GroupDialog_NullTitleAlertTitle">错误</string>
         <string name="GroupDialog_NullTitleAlertMsg">没有输入分组名，请补全内容。</string>
         <string name="GroupDialog_NullTitleAlertPositiveButtonForOK">确定</string>

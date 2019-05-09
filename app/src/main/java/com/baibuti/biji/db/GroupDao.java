@@ -176,7 +176,9 @@ public class GroupDao {
 
     private Group insertDefaultGroup() {
         Group def = new Group();
-        def.setOrder(0);
+
+        def.setOrder(0); /////////////////
+
         def.setColor("#F0F0F0");
         def.setName(Group.GetDefaultGroupName);
 

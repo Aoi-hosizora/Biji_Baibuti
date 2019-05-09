@@ -10,7 +10,7 @@
         android:layout_marginTop="18dp"
         android:layout_marginLeft="24dp"
         android:layout_marginBottom="10dp"
-        android:text="笔记分组管理"
+        android:text="@string/GroupDialog_Title"
         android:textSize="20dp"
         android:textColor="#000000"/>
 
@@ -33,7 +33,16 @@
             android:layout_height="wrap_content"
             android:layout_marginLeft="20dp"
 
-            android:text="打开"
+            android:text="@string/GroupDialog_UE"
+            android:background="@color/transparent"
+            android:textColor="@color/pink"/>
+
+        <Button
+            android:layout_width="50dp"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="8dp"
+
+            android:text="@string/GroupDialog_SHITA"
             android:background="@color/transparent"
             android:textColor="@color/pink"/>
 
@@ -48,7 +57,7 @@
             android:layout_height="wrap_content"
             android:layout_marginRight="8dp"
 
-            android:text="删除"
+            android:text="@string/GroupDialog_Delete"
             android:background="@color/transparent"
             android:textColor="@color/pink"/>
 
@@ -58,7 +67,7 @@
             android:layout_height="wrap_content"
             android:layout_marginRight="8dp"
 
-            android:text="添加"
+            android:text="@string/GroupDialog_Add"
             android:background="@color/transparent"
             android:textColor="@color/pink"/>
 
@@ -68,7 +77,7 @@
             android:layout_height="wrap_content"
             android:layout_marginRight="8dp"
 
-            android:text="编辑"
+            android:text="@string/GroupDialog_Edit"
             android:background="@color/transparent"
             android:textColor="@color/pink"/>
 
@@ -78,7 +87,7 @@
             android:layout_height="wrap_content"
             android:layout_marginRight="20dp"
 
-            android:text="完成"
+            android:text="@string/GroupDialog_Return"
             android:background="@color/transparent"
             android:textColor="@color/pink"/>
 
