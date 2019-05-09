@@ -155,7 +155,13 @@ public class GroupAddDialog extends AlertDialog implements OnClickListener, ISho
      */
     private void UpdateGroup() {
         String newGroupName = editText.getText().toString();
-        int newGroupOrder = inputGroup.getOrder(); // 修改记录
+
+        int newGroupOrder;
+        if (GROUPFLAG == UPDATE_GROUP)
+            newGroupOrder = inputGroup.getOrder();
+        else
+            newGroupOrder = 0;
+
         String newGroupColor = CommonUtil.ColorInt_HexEncoding(colorPalette.getColor());
         ShowLogE("UpdateGroup", "COLOR: " + newGroupColor);
 

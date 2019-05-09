@@ -42,6 +42,8 @@ public class GroupDao {
         if (groupList.isEmpty())
             groupList.add(insertDefaultGroup());
 
+        handleDefaultGroupOrder();
+
         // 处理 重复顺序
         for (Group g : groupList) {
             handleOrderDuplicateWhenUpdate(g);
@@ -283,16 +285,25 @@ public class GroupDao {
      */
     public void handleOrderDuplicateWhenUpdate(Group handleGroup) {
         // 关键 !!!
-        if (checkOrderDuplicate(handleGroup) != 1) { // 为1，只存在一个，处理结束
+        if (handleGroup != null && checkOrderDuplicate(handleGroup) != 1) { // 为1，只存在一个，处理结束
 
             Log.e(TAG, "handleOrderDuplicateWhenUpdate: " + handleGroup.getName());
+
+            // 绕过默认分组
+            if (handleGroup.getOrder() == 0) {
+                handleGroup.setOrder(1);
+                updateGroup(handleGroup);
+            }
 
             Group firstGroup = queryGroupByOrder(handleGroup.getOrder());
 
             if (firstGroup != null) {
 
-                if (firstGroup.equals(handleGroup))
+                if (firstGroup.equals(handleGroup)) {
                     firstGroup = queryGroupByOrder(handleGroup.getOrder(), 2); // 查询第二个
+                    if (firstGroup == null)
+                        return;
+                }
 
                 // 将重复的下移，正常情况下最多只存在两个重复
                 firstGroup.setOrder(firstGroup.getOrder() + 1);
@@ -379,6 +390,17 @@ public class GroupDao {
             return true;
         }
         return false;
+    }
+
+    /**
+     * 处理默认分组的顺序不为顶层
+     */
+    public void handleDefaultGroupOrder() {
+        Group def = queryDefaultGroup();
+        if (def.getOrder() != 0) {
+            def.setOrder(0);
+            updateGroup(def);
+        }
     }
 
     // endregion queryDefaultGroup insertDefaultGroup

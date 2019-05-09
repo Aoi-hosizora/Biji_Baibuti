@@ -142,12 +142,16 @@ public class GroupDialog extends AlertDialog implements OnClickListener, IShowLo
      *          null 新分组
      *          notnull 更新分组
      */
-    private void showGroupAddDialog(Group inputGroup) {
+    private void showGroupAddDialog(final Group inputGroup) {
         GroupAddDialog dialog = new GroupAddDialog(getContext(), inputGroup, new GroupAddDialog.OnUpdateGroupListener() {
 
             @Override
             public void UpdateGroupFinished() {
                 refreshGroupList();
+
+                if (inputGroup == null)  // 新分组
+                    GroupListViewClickId = GroupList.size() - 1; // 选择最后一项
+
                 groupAdapter.setValue(GroupListViewClickId);
                 GroupListView.setAdapter(groupAdapter); // 必要
 
@@ -196,7 +200,7 @@ public class GroupDialog extends AlertDialog implements OnClickListener, IShowLo
             groupDao.handleOrderDuplicateWhenUpdate(currentGroup); // 处理重复 order
             groupDao.handleOrderDuplicateWhenDelete(); // 处理错误Gap
         }
-        else if (!isUP && currentpos != GroupList.size() - 1) { // 下移
+        else if (!isUP && currentpos != GroupList.size() - 1 && currentpos != 0) { // 下移
             ShowLogE("moveGroupOrder", "DOWN");
             int motoorder = currentGroup.getOrder();
 
@@ -231,9 +235,6 @@ public class GroupDialog extends AlertDialog implements OnClickListener, IShowLo
     /////////////////////////////////////////////////////
 
     private void DismissAndReturn(boolean isReturn) {
-
-        ShowLogE("DismissAndReturn", "isReturn: " + isReturn);
-
         if (mListener != null)
             mListener.UpdateGroupFinished(); // 同时令 Note Frac 更新分组信息
 

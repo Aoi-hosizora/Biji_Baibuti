@@ -380,7 +380,6 @@ public class NoteFragment extends Fragment implements View.OnClickListener, ISho
 
             @Override
             public void UpdateGroupFinished() {
-                ShowLogE("initToolbar", "UpdateGroupFinished");
 
                 // 更新完分组信息后同时在列表中刷新数据
                 refreshdata(100);
@@ -392,7 +391,7 @@ public class NoteFragment extends Fragment implements View.OnClickListener, ISho
                         initListView(NoteList);
             }
         });
-        // dialog.setView(new EditText(getContext()));  //若对话框无法弹出输入法，加上这句话
+        dialog.setView(new EditText(getContext()));  //若对话框无法弹出输入法，加上这句话
         dialog.show();
     }
 
