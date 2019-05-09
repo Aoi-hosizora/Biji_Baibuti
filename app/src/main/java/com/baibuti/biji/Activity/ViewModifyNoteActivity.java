@@ -15,20 +15,22 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.WindowManager;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.baibuti.biji.Data.Note;
+import com.baibuti.biji.Dialog.ImagePopupDialog;
 import com.baibuti.biji.Interface.IShowLog;
 import com.baibuti.biji.R;
 import com.baibuti.biji.View.ImageLoader;
 import com.baibuti.biji.util.CommonUtil;
 import com.baibuti.biji.util.StringUtils;
 import com.baibuti.biji.util.ToDocUtil;
-import com.hitomi.tilibrary.transfer.Transferee;
-import com.previewlibrary.GPreviewBuilder;
-import com.previewlibrary.ZoomMediaLoader;
-import com.previewlibrary.enitity.ThumbViewInfo;
+//import com.hitomi.tilibrary.transfer.Transferee;
+//import com.previewlibrary.GPreviewBuilder;
+//import com.previewlibrary.ZoomMediaLoader;
+//import com.previewlibrary.enitity.ThumbViewInfo;
 import com.sendtion.xrichtext.RichTextView;
 
 import java.io.File;
@@ -66,15 +68,15 @@ public class ViewModifyNoteActivity extends AppCompatActivity implements View.On
     private boolean isModify = false;
     private int flag = NOTE_NEW;
 
-    private Transferee transferee;
+//    private Transferee transferee;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_viewmodifynote);
 
-        transferee = Transferee.getDefault(this);
-        ZoomMediaLoader.getInstance().init(new ImageLoader());
+//        transferee = Transferee.getDefault(this);
+//        ZoomMediaLoader.getInstance().init(new ImageLoader());
 
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         setTitle(R.string.VMNoteActivity_Title);
@@ -463,28 +465,42 @@ public class ViewModifyNoteActivity extends AppCompatActivity implements View.On
      * @param currentPosition
      */
     private void ShowClickImg(ArrayList<String> imageList, int currentPosition) {
-        ArrayList<ThumbViewInfo> mThumbViewInfoList = new ArrayList<>(); // 这个最好定义成成员变量
-        ThumbViewInfo item;
-        mThumbViewInfoList.clear();
+//        ArrayList<ThumbViewInfo> mThumbViewInfoList = new ArrayList<>(); // 这个最好定义成成员变量
+//        ThumbViewInfo item;
+//        mThumbViewInfoList.clear();
+//
+//        for (int i = 0;i < imageList.size(); i++) {
+//            Rect bounds = new Rect();
+//            //new ThumbViewInfo(图片地址);
+//            item=new ThumbViewInfo(imageList.get(i));
+//            item.setBounds(bounds);
+//            mThumbViewInfoList.add(item);
+//        }
+//
+//
+//        ////////////////////////////////////////////////////////////////////
+//
+//        GPreviewBuilder.from(ViewModifyNoteActivity.this)
+//                .to(CustomActivity.class) // 是否使用自定义预览界面，当然8.0之后因为配置问题，必须要使用
+//                .setData(mThumbViewInfoList)
+//                .setCurrentIndex(currentPosition)
+//                .setSingleFling(true)
+//                .setType(GPreviewBuilder.IndicatorType.Number)
+//                // 小圆点
+//                //  .setType(GPreviewBuilder.IndicatorType.Dot)
+//
+//                .start();//启动
 
-        for (int i = 0;i < imageList.size(); i++) {
-            Rect bounds = new Rect();
-            //new ThumbViewInfo(图片地址);
-            item=new ThumbViewInfo(imageList.get(i));
-            item.setBounds(bounds);
-            mThumbViewInfoList.add(item);
+        try {
+            String[] imgs = imageList.toArray(new String[imageList.size()]);
+            ImagePopupDialog dialog = new ImagePopupDialog(this, imgs, currentPosition);
+            dialog.show();
+        }
+        catch (Exception ex) {
+            ex.printStackTrace();
         }
 
 
-        GPreviewBuilder.from(ViewModifyNoteActivity.this)
-                .to(CustomActivity.class) // 是否使用自定义预览界面，当然8.0之后因为配置问题，必须要使用
-                .setData(mThumbViewInfoList)
-                .setCurrentIndex(currentPosition)
-                .setSingleFling(true)
-                .setType(GPreviewBuilder.IndicatorType.Number)
-                // 小圆点
-                //  .setType(GPreviewBuilder.IndicatorType.Dot)
-                .start();//启动
     }
 
     ////////////////////////////////////////////////////////////

@@ -23,7 +23,7 @@ import java.util.List;
 
 
 /**
- * Using POI By AoiHosizora
+ * Using POI & IText By AoiHosizora
  */
 public class ToDocUtil {
 
@@ -63,7 +63,7 @@ public class ToDocUtil {
     }
 
     /**
-     * 貌似无效，待改
+     * 修改图片尺寸至适合 A4
      * @param motoSize
      * @return
      */
