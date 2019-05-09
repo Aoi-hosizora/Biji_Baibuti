@@ -200,7 +200,7 @@ public class NoteDao {
 
         values.put("n_group_id", note.getGroupLabel().getId());
 
-        values.put("n_update_time", CommonUtil.date2string(new Date()));
+        values.put("n_update_time", CommonUtil.date2string(note.getUpdateTime()));
 
         db.update("db_note", values, "n_id=?", new String[]{note.getId()+""});
         db.close();

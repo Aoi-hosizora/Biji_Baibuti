@@ -314,13 +314,13 @@ public class GroupDao {
                 // 若checkOrderDuplicate(firstGroup) == 1，修改的分组不重复，结束递归
             }
         }
-
+//        handleOrderGap(); // 每次检查重复都检查一遍间隔
     }
 
     /**
      * 删除时处理 Order 空缺问题，处理：压缩
      */
-    public void handleOrderDuplicateWhenDelete() {
+    public void handleOrderGap() {
         int order = 0;
 
         for (int i=0; i<queryGroupCnt(); i++) {
@@ -330,7 +330,7 @@ public class GroupDao {
 
             while ((nextGroup = queryGroupByOrder(order)) == null) {
                 // 找不到紧接着的 order
-                Log.e(TAG, "handleOrderDuplicateWhenDelete: " + order );
+                Log.e(TAG, "handleOrderGap: " + order );
                 order++;
                 hasGap = true;
             }
@@ -500,7 +500,7 @@ public class GroupDao {
             ret = db.delete("db_group", "g_id=?", new String[]{groupId + ""});
 
             // 处理删除间隙
-            handleOrderDuplicateWhenDelete();
+            handleOrderGap();
         }
 
         catch (Exception e) {

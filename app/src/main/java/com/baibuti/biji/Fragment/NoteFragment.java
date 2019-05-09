@@ -12,7 +12,6 @@ import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.support.v7.widget.StaggeredGridLayoutManager;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -33,12 +32,12 @@ import com.baibuti.biji.Dialog.GroupDialog;
 import com.baibuti.biji.Interface.IShowLog;
 import com.baibuti.biji.R;
 import com.baibuti.biji.View.SpacesItemDecoration;
-import com.baibuti.biji.Widget.RecyclerViewEmptySupport;
 import com.baibuti.biji.db.GroupDao;
 import com.baibuti.biji.db.NoteDao;
 import com.getbase.floatingactionbutton.FloatingActionButton;
 import com.getbase.floatingactionbutton.FloatingActionsMenu;
 import com.jeremyfeinstein.slidingmenu.lib.SlidingMenu;
+import com.wyt.searchbox.SearchFragment;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -52,7 +51,7 @@ public class NoteFragment extends Fragment implements View.OnClickListener, ISho
     private RecyclerView mNoteList;
 
     private FloatingActionsMenu m_fabmenu;
-    private com.wyt.searchbox.SearchFragment searchFragment;
+    private SearchFragment searchFragment;
     private SwipeRefreshLayout mSwipeRefresh;
     private SlidingMenu slidingMenu;
 
@@ -229,19 +228,30 @@ public class NoteFragment extends Fragment implements View.OnClickListener, ISho
         searchFragment.setOnSearchClickListener(new com.wyt.searchbox.custom.IOnSearchClickListener() {
             @Override
             public void OnSearchClick(String keyword) {
-                if (!keyword.isEmpty()) {
-                    IsSearching = true;
-                    SearchingStr = keyword;
 
-                    initListView(search(keyword));
+                try {
+                    if (!keyword.isEmpty()) {
+
+                        searchFragment.onItemDeleteClick(keyword);
+                        searchFragment.onItemInsert(keyword); // 更新历史
+
+                        IsSearching = true;
+                        SearchingStr = keyword;
+
+                        initListView(search(keyword));
 
 //                    ShowLogE("initSearchFrag", search(keyword).isEmpty()+"");
 
-                    m_toolbar.getMenu().findItem(R.id.action_search_back).setVisible(true);
-                    mSwipeRefresh.setEnabled(false);
-                    m_fabmenu.setVisibility(View.GONE);
-                    m_toolbar.setTitle(String.format(getContext().getString(R.string.notefragment_menu_search_content), keyword));
+                        m_toolbar.getMenu().findItem(R.id.action_search_back).setVisible(true);
+                        mSwipeRefresh.setEnabled(false);
+                        m_fabmenu.setVisibility(View.GONE);
+                        m_toolbar.setTitle(String.format(getContext().getString(R.string.notefragment_menu_search_content), keyword));
+                    }
                 }
+                catch (Exception ex) {
+                    ex.printStackTrace();
+                }
+
             }
         });
     }

@@ -52,6 +52,7 @@ import com.sendtion.xrichtext.RichTextEditor;
 
 import java.io.File;
 import java.text.SimpleDateFormat;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
@@ -324,6 +325,7 @@ public class ModifyNoteActivity extends AppCompatActivity implements View.OnClic
     private void refreshGroupList() {
         groupDao = new GroupDao(this);
         GroupList = groupDao.queryGroupAll();
+        Collections.sort(GroupList);
         groupAdapter = new GroupAdapter(this, GroupList); // 必要
         groupAdapter.notifyDataSetChanged();
     }

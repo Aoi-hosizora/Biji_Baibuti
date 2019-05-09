@@ -5,6 +5,7 @@
       <module fileurl="file://$PROJECT_DIR$/../Biji.iml" filepath="$PROJECT_DIR$/../Biji.iml" />
       <module fileurl="file://$PROJECT_DIR$/../app/app.iml" filepath="$PROJECT_DIR$/../app/app.iml" />
       <module fileurl="file://$PROJECT_DIR$/../image_lib/image_lib.iml" filepath="$PROJECT_DIR$/../image_lib/image_lib.iml" />
+      <module fileurl="file://$PROJECT_DIR$/../searchbox/searchbox.iml" filepath="$PROJECT_DIR$/../searchbox/searchbox.iml" />
       <module fileurl="file://$PROJECT_DIR$/../slidingMenu/slidingMenu.iml" filepath="$PROJECT_DIR$/../slidingMenu/slidingMenu.iml" />
       <module fileurl="file://$PROJECT_DIR$/../xrichtext/xrichtext.iml" filepath="$PROJECT_DIR$/../xrichtext/xrichtext.iml" />
     </modules>

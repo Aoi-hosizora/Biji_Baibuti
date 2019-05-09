@@ -198,7 +198,7 @@ public class GroupDialog extends AlertDialog implements OnClickListener, IShowLo
 
             groupDao.updateGroup(currentGroup); // 更新数据库
             groupDao.handleOrderDuplicateWhenUpdate(currentGroup); // 处理重复 order
-            groupDao.handleOrderDuplicateWhenDelete(); // 处理错误Gap
+            groupDao.handleOrderGap(); // 处理错误Gap
         }
         else if (!isUP && currentpos != GroupList.size() - 1 && currentpos != 0) { // 下移
             ShowLogE("moveGroupOrder", "DOWN");
@@ -216,7 +216,7 @@ public class GroupDialog extends AlertDialog implements OnClickListener, IShowLo
 
             groupDao.updateGroup(currentGroup); // 更新数据库
             groupDao.handleOrderDuplicateWhenUpdate(currentGroup); // 处理重复 order
-            groupDao.handleOrderDuplicateWhenDelete(); // 处理错误Gap
+            groupDao.handleOrderGap(); // 处理错误Gap
         }
         else {
             return;

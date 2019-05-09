@@ -1,1 +1,1 @@
-include ':app', ':slidingMenu', ':xrichtext', ':image_lib'
+include ':app', ':slidingMenu', ':xrichtext', ':image_lib', ':searchbox'
