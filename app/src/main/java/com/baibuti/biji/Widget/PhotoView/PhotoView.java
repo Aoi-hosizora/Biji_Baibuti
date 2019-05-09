@@ -21,12 +21,7 @@ import android.widget.ImageView;
 import android.widget.OverScroller;
 import android.widget.Scroller;
 
-
-/**
- * Created by liuheng on 2015/6/21.
- * <p></p>
- * 如有任何意见和建议可邮件  bmme@vip.qq.com
- */
+// https://github.com/bm-x/PhotoView
 public class PhotoView extends android.support.v7.widget.AppCompatImageView {
 
     private final static int MIN_ROTATE = 35;
@@ -231,10 +226,11 @@ public class PhotoView extends android.support.v7.widget.AppCompatImageView {
     public void setImageResource(Bitmap bitmap) {
         Drawable drawable = null;
         try {
-            drawable = new BitmapDrawable(bitmap); ;
+            drawable = new BitmapDrawable(bitmap);
         }
-        catch (Exception e) { }
-
+        catch (Exception ex) {
+            ex.printStackTrace();
+        }
         setImageDrawable(drawable);
     }
 

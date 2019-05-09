@@ -11,8 +11,8 @@
 + [tess-two](https://github.com/rmtheis/tess-two)
 + [xrichtext](https://github.com/sendtion/XRichText)
 + [image_lib](https://github.com/zhangphil/WeiXinPictureTool)
-+ [photoview][https://github.com/bm-x/PhotoView]
++ [photoview](https://github.com/bm-x/PhotoView)
 
 
 
-+ 其他参考：[build.gradle][https://github.com/Aoi-hosizora/Biji_Baibuti/blob/master/app/build.gradle]
++ 其他参考：[build.gradle](https://github.com/Aoi-hosizora/Biji_Baibuti/blob/master/app/build.gradle)

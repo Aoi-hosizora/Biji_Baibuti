@@ -4,6 +4,8 @@ import android.view.MotionEvent;
 
 /**
  * Created by q2366 on 2015/10/12.
+ *
+ * https://github.com/bm-x/PhotoView
  */
 public class RotateGestureDetector {
 

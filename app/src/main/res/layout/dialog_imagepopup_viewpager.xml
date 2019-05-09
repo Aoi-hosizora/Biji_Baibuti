@@ -20,7 +20,12 @@
         android:text="0 / 0"
         android:textSize="18dp"
         android:textColor="@color/white"
-        android:shadowColor="@color/black"
+
+
+        android:shadowColor="#dd000000"
+        android:shadowDx="2"
+        android:shadowDy="2"
+        android:shadowRadius="1"
         />
 
 </RelativeLayout>

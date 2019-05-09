@@ -81,11 +81,6 @@ public class ImagePopupDialog extends Dialog implements IShowLog {
         setupPager();
     }
 
-//    @Override
-//    public void dismiss() {
-//        super.dismiss();
-//    }
-
     /**
      * 显示底层的页码
      * @param position
@@ -116,11 +111,12 @@ public class ImagePopupDialog extends Dialog implements IShowLog {
 
             @Override
             public Object instantiateItem(ViewGroup container, int position) {
-//                ShowLogE("setupPager", "instantiateItem: " + position);
+                // ShowLogE("setupPager", "instantiateItem: " + position);
 
                 PhotoView view = new PhotoView(getContext());
-
                 view.enable();
+                view.enableRotate();
+
                 view.setScaleType(ImageView.ScaleType.FIT_CENTER);
                 view.setImageResource(imgs[position]);
 
