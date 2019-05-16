@@ -4,6 +4,7 @@ import android.app.AlertDialog;
 import android.content.Context;
 import android.os.Bundle;
 import android.util.Log;
+import android.widget.AdapterView;
 import android.widget.Button;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -68,7 +69,11 @@ public class GroupDialog extends AlertDialog implements OnClickListener, IShowLo
         noteDao = new NoteDao(getContext());
         groupDao = new GroupDao(getContext());
 
+        handleOrder();
         refreshGroupList();
+
+        setEnabled(mButtonUE, false);
+        setEnabled(mButtonSHITA, false);
 
         groupAdapter.setValue(GroupListViewClickId);
 
@@ -106,9 +111,35 @@ public class GroupDialog extends AlertDialog implements OnClickListener, IShowLo
             @Override
             public void onSelect(int position) {
                 GroupListViewClickId = position;
+                refreshUeShitaEnabled(position);
             }
         });
         groupAdapter.notifyDataSetChanged();
+    }
+
+    private void setEnabled(Button button, boolean en) {
+        button.setEnabled(en);
+        if (en)
+            button.setTextColor(getContext().getResources().getColor(R.color.pink));
+        else
+            button.setTextColor(getContext().getResources().getColor(R.color.disable));
+    }
+
+    private void refreshUeShitaEnabled(int pos) {
+        ShowLogE("onCreate", "onItemSelected: pos = " + pos);
+
+        setEnabled(mButtonUE, true);
+        setEnabled(mButtonSHITA, true);
+
+        if (pos == 0) {
+            setEnabled(mButtonUE, false);
+            setEnabled(mButtonSHITA, false);
+        }
+        if (pos == 1)
+            setEnabled(mButtonUE, false);
+        if (pos == GroupList.size() - 1)
+            setEnabled(mButtonSHITA, false);
+
     }
 
 
@@ -193,19 +224,26 @@ public class GroupDialog extends AlertDialog implements OnClickListener, IShowLo
 
         if (isUP && currentpos != 1 && currentpos != 0) { // 上移
             ShowLogE("moveGroupOrder", "UP");
-            currentGroup.setOrder(currentGroup.getOrder() - 1);
+            int motoorder = currentGroup.getOrder();
+
+            currentGroup.setOrder(motoorder - 1);
+            Group upGroup = groupDao.queryGroupByOrder(motoorder - 1);
+            if (upGroup != null) {
+                upGroup.setOrder(motoorder);
+                groupDao.updateGroup(upGroup);
+            }
+
             currentpos--;
 
             groupDao.updateGroup(currentGroup); // 更新数据库
-            groupDao.handleOrderDuplicateWhenUpdate(currentGroup); // 处理重复 order
-            groupDao.handleOrderGap(); // 处理错误Gap
+//            groupDao.handleOrderDuplicateWhenUpdate(currentGroup); // 处理重复 order
+//            groupDao.handleOrderGap(); // 处理错误Gap
         }
         else if (!isUP && currentpos != GroupList.size() - 1 && currentpos != 0) { // 下移
             ShowLogE("moveGroupOrder", "DOWN");
             int motoorder = currentGroup.getOrder();
 
             currentGroup.setOrder(motoorder + 1);
-
             Group downGroup = groupDao.queryGroupByOrder(motoorder + 1); // 向下交换
             if (downGroup != null) {
                 downGroup.setOrder(motoorder);
@@ -215,8 +253,8 @@ public class GroupDialog extends AlertDialog implements OnClickListener, IShowLo
             currentpos++;
 
             groupDao.updateGroup(currentGroup); // 更新数据库
-            groupDao.handleOrderDuplicateWhenUpdate(currentGroup); // 处理重复 order
-            groupDao.handleOrderGap(); // 处理错误Gap
+//            groupDao.handleOrderDuplicateWhenUpdate(currentGroup); // 处理重复 order
+//            groupDao.handleOrderGap(); // 处理错误Gap
         }
         else {
             return;
@@ -229,12 +267,20 @@ public class GroupDialog extends AlertDialog implements OnClickListener, IShowLo
         GroupListView.setAdapter(groupAdapter); // 必要
         groupAdapter.setValue(currentpos);
         GroupListViewClickId = currentpos;
+        refreshUeShitaEnabled(GroupListViewClickId);
         DismissAndReturn(false);
+    }
+
+    private void handleOrder() {
+        groupDao.handleOrderDuplicate(groupDao.queryGroupAll());
+        groupDao.handleOrderGap();
     }
 
     /////////////////////////////////////////////////////
 
     private void DismissAndReturn(boolean isReturn) {
+        handleOrder();
+
         if (mListener != null)
             mListener.UpdateGroupFinished(); // 同时令 Note Frac 更新分组信息
 

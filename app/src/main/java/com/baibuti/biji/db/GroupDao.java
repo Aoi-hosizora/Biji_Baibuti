@@ -45,9 +45,7 @@ public class GroupDao {
         handleDefaultGroupOrder();
 
         // 处理 重复顺序
-        for (Group g : groupList) {
-            handleOrderDuplicateWhenUpdate(g);
-        }
+        handleOrderDuplicate(groupList);
 
         return groupList;
     }
@@ -340,6 +338,15 @@ public class GroupDao {
                 handleOrderDuplicateWhenUpdate(nextGroup);
             }
             order++;
+        }
+    }
+
+    /**
+     * 处理所有重复 Order
+     */
+    public void handleOrderDuplicate(List<Group> groupList) {
+        for (Group g : groupList) {
+            handleOrderDuplicateWhenUpdate(g);
         }
     }
 

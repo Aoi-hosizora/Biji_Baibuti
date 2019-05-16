@@ -232,9 +232,6 @@ public class NoteFragment extends Fragment implements View.OnClickListener, ISho
                 try {
                     if (!keyword.isEmpty()) {
 
-                        searchFragment.onItemDeleteClick(keyword);
-                        searchFragment.onItemInsert(keyword); // 更新历史
-
                         IsSearching = true;
                         SearchingStr = keyword;
 

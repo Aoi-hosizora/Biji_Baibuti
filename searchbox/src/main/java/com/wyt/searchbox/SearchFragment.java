@@ -254,7 +254,7 @@ public class SearchFragment extends DialogFragment implements DialogInterface.On
      */
     public void onItemInsert(String item) {
         if (!TextUtils.isEmpty(item.trim())) {
-            searchHistoryDB.insertHistory(item);//插入到数据库
+            searchHistoryDB.insertHistory(item); // 插入到数据库
         }
     }
 
@@ -268,8 +268,12 @@ public class SearchFragment extends DialogFragment implements DialogInterface.On
         if (TextUtils.isEmpty(searchKey.trim())) {
             Toast.makeText(getContext(), "请输入关键字", Toast.LENGTH_SHORT).show();
         } else {
+            /////////////////////////////////////////////////////////
+//            searchHistoryDB.deleteHistory(searchKey);
+            onItemDeleteClick(searchKey);
+            onItemInsert(searchKey);
             iOnSearchClickListener.OnSearchClick(searchKey);//接口回调
-            searchHistoryDB.insertHistory(searchKey);//插入到数据库
+//            searchHistoryDB.insertHistory(searchKey);//插入到数据库
             hideAnim();
         }
     }
