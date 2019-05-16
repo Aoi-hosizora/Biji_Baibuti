@@ -89,11 +89,11 @@ public class OpenSaveFileActivity extends AppCompatActivity implements View.OnCl
         boolean isSaving = getIntent().getBooleanExtra("isSaving", true);
         if (isSaving) {
             Select_type = SELECT_FILE_SAVE;
-            setTitle("保存文件");
+            setTitle(R.string.OpenSaceActivity_TitleForSave);
         }
         else {
             Select_type = SELECT_FILE_OPEN;
-            setTitle("打开文件");
+            setTitle(R.string.OpenSaceActivity_TitleForOpen);
         }
 
         Selected_File_Name = getIntent().getStringExtra("FileName");
@@ -109,15 +109,15 @@ public class OpenSaveFileActivity extends AppCompatActivity implements View.OnCl
         //////////
 
         m_PathDirTextView = findViewById(R.id.id_OpenSaveFile_PathDirTextView);
-        m_PathDirTextView.setText("当前路径: " + m_dir);
+        m_PathDirTextView.setText(String.format(getString(R.string.OpenSaceActivity_NowPathTextView), m_dir));
         m_dirListView = findViewById(R.id.id_OpenSaveFile_DirList);
         m_NewFolderButton = findViewById(R.id.id_OpenSaveFile_NewFolderButton);
         m_CancelButton = findViewById(R.id.id_OpenSaveFile_CancelButton);
         m_OKButton = findViewById(R.id.id_OpenSaveFile_OKButton);
         if (isSaving)
-            m_OKButton.setText("保存");
+            m_OKButton.setText(R.string.OpenSaceActivity_OKForSaveButton);
         else
-            m_OKButton.setText("打开");
+            m_OKButton.setText(R.string.OpenSaceActivity_OKForOpenButton);
 
         m_FileTypeSpinner = findViewById(R.id.id_OpenSaveFile_FileTypeSpinner);
         m_FileNameEditText = findViewById(R.id.id_OpenSaveFile_FileNameEditText);
@@ -319,31 +319,31 @@ public class OpenSaveFileActivity extends AppCompatActivity implements View.OnCl
     private void NewFolderButton_Click() {
         final EditText input = new EditText(this);
         AlertDialog new_folder_dialog = new AlertDialog.Builder(this)
-                .setTitle("新建文件夹")
+                .setTitle(R.string.OpenSaceActivity_NewFolderAlertTitle)
                 .setView(input)
-                .setPositiveButton("确定", new DialogInterface.OnClickListener() {
+                .setPositiveButton(R.string.OpenSaceActivity_NewFolderAlertOK, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int whichButton) {
                         Editable newDir = input.getText();
                         String newDirName = newDir.toString();
                         if (newDirName.isEmpty())
-                            Toast.makeText(OpenSaveFileActivity.this, "请输入文件夹名。", Toast.LENGTH_SHORT).show();
+                            Toast.makeText(OpenSaveFileActivity.this, getString(R.string.OpenSaceActivity_NewFolderAlertNullName), Toast.LENGTH_SHORT).show();
                         else {
                             if (createSubDir(m_dir + "/" + newDirName)) {
                                 // m_dir += "/" + newDirName;
                                 updateDirectory();
-                                String msg = String.format("文件夹 %s 创建成功。", newDirName);
+                                String msg = String.format(getString(R.string.OpenSaceActivity_NewFolderAlertSuccess), newDirName);
                                 Toast.makeText(OpenSaveFileActivity.this, msg, Toast.LENGTH_SHORT).show();
                             }
                             else {
-                                String msg = String.format("无法创建文件夹 %s。", newDirName);
+                                String msg = String.format(getString(R.string.OpenSaceActivity_NewFolderAlertErr), newDirName);
                                 Toast.makeText(OpenSaveFileActivity.this, msg, Toast.LENGTH_SHORT).show();
                             }
                         }
 
                     }
                 })
-                .setNegativeButton("取消", null)
+                .setNegativeButton(R.string.OpenSaceActivity_NewFolderAlertCancel, null)
                 .create();
 
         new_folder_dialog.show();
@@ -371,7 +371,7 @@ public class OpenSaveFileActivity extends AppCompatActivity implements View.OnCl
     private void updateDirectory() {
         m_subdirs.clear();
         m_subdirs.addAll(getDirectories(m_dir));
-        m_PathDirTextView.setText("当前路径: " + m_dir);
+        m_PathDirTextView.setText(String.format(getString(R.string.OpenSaceActivity_NowPathTextView), m_dir));
         m_listAdapter.notifyDataSetChanged();
         // #scorch
         if (Select_type == SELECT_FILE_SAVE || Select_type == SELECT_FILE_OPEN) {

@@ -73,42 +73,53 @@ public class NoteFragment extends Fragment implements View.OnClickListener, ISho
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        view = inflater.inflate(R.layout.fragment_notetab, container, false);
-        setHasOptionsMenu(true);
+        if (null != view) {
+            ViewGroup parent = (ViewGroup) view.getParent();
+            if (null != parent)
+                parent.removeView(view);
+        }
+        else {
+            view = inflater.inflate(R.layout.fragment_notetab, container, false);
 
-        m_fabmenu = (FloatingActionsMenu) view.findViewById(R.id.note_fabmenu);
+            ///
 
-        slidingMenu = ((MainActivity)getActivity()).getSlidingMenu();
+            setHasOptionsMenu(true);
 
-        mNoteList = view.findViewById(R.id.note_list);
-        ListEmptyView = view.findViewById(R.id.note_emptylist);
-        mNoteList.setEmptyView(ListEmptyView);
+            m_fabmenu = (FloatingActionsMenu) view.findViewById(R.id.note_fabmenu);
+
+            slidingMenu = ((MainActivity)getActivity()).getSlidingMenu();
+
+            mNoteList = view.findViewById(R.id.note_list);
+            ListEmptyView = view.findViewById(R.id.note_emptylist);
+            mNoteList.setEmptyView(ListEmptyView);
 
 
-        mSwipeRefresh = (SwipeRefreshLayout) view.findViewById(R.id.note_listsrl);
-        mSwipeRefresh.setColorSchemeResources(R.color.colorPrimary);
+            mSwipeRefresh = (SwipeRefreshLayout) view.findViewById(R.id.note_listsrl);
+            mSwipeRefresh.setColorSchemeResources(R.color.colorPrimary);
 //        mSwipeRefresh.setColorSchemeColors(Color.RED,Color.BLUE,Color.GREEN);
-        mSwipeRefresh.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
-            @Override
-            public void onRefresh() {
-                refreshdata(500);
-            }
-        });
+            mSwipeRefresh.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+                @Override
+                public void onRefresh() {
+                    refreshdata(500);
+                }
+            });
 
-        loadingDialog = new ProgressDialog(getContext());
-        loadingDialog.setMessage(getResources().getString(R.string.NoteFragment_LoadingData));
-        loadingDialog.setCanceledOnTouchOutside(false);
+            loadingDialog = new ProgressDialog(getContext());
+            loadingDialog.setMessage(getResources().getString(R.string.NoteFragment_LoadingData));
+            loadingDialog.setCanceledOnTouchOutside(false);
 
-
-        initToolbar(view);
-        initFloatingActionBar(view);
-        initData(); // GetDao & List
-        initAdapter();
-        initListView(NoteList);
-        initSearchFrag();
+            initToolbar(view);
+            initFloatingActionBar(view);
+            initData(); // GetDao & List
+            initAdapter();
+            initListView(NoteList);
+            initSearchFrag();
+        }
 
         return view;
     }
+
+
 
     /**
      * IShowLog 接口，全局设置 Log 格式
@@ -421,10 +432,11 @@ public class NoteFragment extends Fragment implements View.OnClickListener, ISho
     private void initListView(final List<Note> nlist) {
 
         mNoteList.addItemDecoration(new SpacesItemDecoration(0));//设置item间距
-         LinearLayoutManager layoutManager = new LinearLayoutManager(getContext());
-//        StaggeredGridLayoutManager layoutManager=new StaggeredGridLayoutManager( 2,StaggeredGridLayoutManager.VERTICAL );
+
+        LinearLayoutManager layoutManager = new LinearLayoutManager(getContext());
         layoutManager.setOrientation(LinearLayoutManager.VERTICAL);//竖向列表
         mNoteList.setLayoutManager(layoutManager);
+
         Collections.sort(nlist);
         noteAdapter.setmNotes(nlist);
 

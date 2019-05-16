@@ -40,26 +40,31 @@ public class FileFragment extends Fragment {
     private int TAG_NEW = 0;
     private int TAG_RENAME = 1;
 
+
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-
-        if (null != view){
+        if (null != view) {
             ViewGroup parent = (ViewGroup) view.getParent();
-            if (null != parent) {
+            if (null != parent)
                 parent.removeView(view);
-            }
-        }else {
+        }
+        else {
             view = inflater.inflate(R.layout.fragment_filetab, container, false);
-            /**
-             * 控件的初始化
-             */
+
+            ///
+
             initToolBar(view);
             initFileClassList(view);
 
         }
 
         return view;
+    }
+
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
     }
 
     private void initToolBar(View view){

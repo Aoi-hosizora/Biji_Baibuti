@@ -1,19 +1,25 @@
 package com.baibuti.biji.Activity;
 
+import android.content.Context;
 import android.graphics.Point;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.design.widget.BottomNavigationView;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentPagerAdapter;
+import android.support.v4.app.FragmentStatePagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v4.view.ViewPager.OnPageChangeListener;
 import android.os.Bundle;
 
+import android.util.AttributeSet;
 import android.util.Log;
 import android.view.Display;
 import android.view.KeyEvent;
 
+import android.view.View;
+import android.view.ViewGroup;
 import android.widget.Toast;
 import android.view.MenuItem;
 
@@ -31,12 +37,11 @@ import  com.baibuti.biji.util.BottomNavigationHelper;
 import java.util.ArrayList;
 import java.util.List;
 
-public class MainActivity extends FragmentActivity
-        implements SimplerSearcherView.OnSearcherClickListener, IShowLog {
+public class MainActivity extends FragmentActivity implements SimplerSearcherView.OnSearcherClickListener, IShowLog {
     //声明ViewPager
     private ViewPager mViewPager;
     //适配器
-    private FragmentPagerAdapter mAdapter;
+    private FragmentStatePagerAdapter mAdapter;
     //装载Fragment的集合
     private List<Fragment> mFragments;
 
@@ -45,20 +50,21 @@ public class MainActivity extends FragmentActivity
     //底部导航栏
     private BottomNavigationView  bottomNavigationView;
 
-    private NoteFragment mNoteFrag = new NoteFragment();
-    private SearchFragment mSearchFrag = new SearchFragment();
-    private ClassFragment mClassFrag = new ClassFragment();
-    private FileFragment mFileFrag = new FileFragment();
+    private NoteFragment mNoteFrag;
+    private SearchFragment mSearchFrag;
+    private ClassFragment mClassFrag;
+    private FileFragment mFileFrag;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_main);
 
         Stetho.initializeWithDefaults(this);
 
-        setContentView(R.layout.activity_main);
-        initViews();//初始化控件
-        initDatas();//初始化数据
+        initViews();
+        initadpts();
+        initsmenu();
     }
 
     @Override
@@ -73,42 +79,43 @@ public class MainActivity extends FragmentActivity
         // Toast.makeText(this, "This is searcher", Toast.LENGTH_LONG).show();
     }
 
-    private void initDatas() {
 
-        mFragments = new ArrayList<>();
-        //将四个Fragment加入集合中
-        mFragments.add(mNoteFrag);
-        mFragments.add(mSearchFrag);
-        mFragments.add(mClassFrag);
-        mFragments.add(mFileFrag);
+    private void initViews() {
 
-        //初始化适配器
-        mAdapter = new FragmentPagerAdapter(getSupportFragmentManager()) {
+        mNoteFrag = new NoteFragment();
+        mSearchFrag = new SearchFragment();
+        mClassFrag = new ClassFragment();
+        mFileFrag = new FileFragment();
+
+        bottomNavigationView = (BottomNavigationView) findViewById(R.id.id_bottomnavigation);
+        bottomNavigationView.setOnNavigationItemSelectedListener(new BottomNavigationView.OnNavigationItemSelectedListener() {
             @Override
-            public Fragment getItem(int position) {//从集合中获取对应位置的Fragment
-                return mFragments.get(position);
+            public boolean onNavigationItemSelected(@NonNull MenuItem item) {
+                switch(item.getItemId()){
+                    case R.id.item1:
+                        mViewPager.setCurrentItem(0);
+                    break;
+                    case R.id.item2:
+                        mViewPager.setCurrentItem(1);
+                    break;
+                    case R.id.item3:
+                        mViewPager.setCurrentItem(2);
+                    break;
+                    case R.id.item4:
+                        mViewPager.setCurrentItem(3);
+                    break;
+                }
+                return true;
             }
+        });
+        BottomNavigationHelper.disableShiftMode(bottomNavigationView);
 
-            @Override
-            public int getCount() {//获取集合中Fragment的总数
-                return mFragments.size();
-            }
+        mViewPager = findViewById(R.id.id_viewpager);
 
-        };
-        //不要忘记设置ViewPager的适配器
-        mViewPager.setAdapter(mAdapter);
-        //设置ViewPager的切换监听
         mViewPager.addOnPageChangeListener(new OnPageChangeListener() {
-            @Override
-            //页面滚动事件
-            public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
 
-            }
-
-            //页面选中事件
             @Override
             public void onPageSelected(int position) {
-                //设置position对应的集合中的Fragment
                 mViewPager.setCurrentItem(position);
                 switch(position){
                     case 0:
@@ -127,14 +134,50 @@ public class MainActivity extends FragmentActivity
             }
 
             @Override
-            //页面滚动状态改变事件
-            public void onPageScrollStateChanged(int state) {
+            public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) { }
 
-            }
+            @Override
+            public void onPageScrollStateChanged(int state) { }
+
+
         });
     }
 
-    private void initViews() {
+
+    private void initadpts() {
+
+        mFragments = new ArrayList<Fragment>();
+        mFragments.add(mNoteFrag);
+        mFragments.add(mSearchFrag);
+        mFragments.add(mClassFrag);
+        mFragments.add(mFileFrag);
+
+        ShowLogE("initadpts", "mFragments: " + mFragments.size());
+
+        mAdapter = new FragmentStatePagerAdapter(getSupportFragmentManager()) {
+            @Override
+            public Fragment getItem(int position) {
+                return mFragments.get(position);
+            }
+
+            @Override
+            public int getCount() {
+                return mFragments.size();
+            }
+
+            @Override
+            public void destroyItem(ViewGroup container, int position, Object object) {
+                super.destroyItem(container, position, object);
+            }
+        };
+
+        mViewPager.setOffscreenPageLimit(1);
+        mViewPager.setAdapter(mAdapter);
+        mViewPager.setCurrentItem(0);
+    }
+
+    private void initsmenu() {
+
         //获取屏幕宽度
         Display display = getWindowManager().getDefaultDisplay();
         Point size = new Point();
@@ -156,34 +199,6 @@ public class MainActivity extends FragmentActivity
         //为侧滑菜单设置布局
         slidingMenu.setMenu(R.layout.left_menu);
 
-        mViewPager = findViewById(R.id.id_viewpager);
-
-        bottomNavigationView = (BottomNavigationView) findViewById(R.id.id_bottomnavigation);
-        bottomNavigationView.setOnNavigationItemSelectedListener(new BottomNavigationView.OnNavigationItemSelectedListener() {
-            @Override
-            public boolean onNavigationItemSelected(@NonNull MenuItem item) {
-                switch(item.getItemId()){
-                    case R.id.item1:
-                        //设置当前点击的Tab所对应的页面
-                        mViewPager.setCurrentItem(0);
-                        break;
-                    case R.id.item2:
-                        //设置当前点击的Tab所对应的页面
-                        mViewPager.setCurrentItem(1);
-                        break;
-                    case R.id.item3:
-                        //设置当前点击的Tab所对应的页面
-                        mViewPager.setCurrentItem(2);
-                        break;
-                    case R.id.item4:
-                        //设置当前点击的Tab所对应的页面
-                        mViewPager.setCurrentItem(3);
-                        break;
-                }
-                return true;
-            }
-        });
-        BottomNavigationHelper.disableShiftMode(bottomNavigationView);
     }
 
     public SlidingMenu getSlidingMenu() {

@@ -234,6 +234,8 @@ public class SearchFragment extends DialogFragment implements DialogInterface.On
      */
     @Override
     public void onItemClick(String keyword) {
+        onItemDeleteClick(keyword);
+        onItemInsert(keyword);
         iOnSearchClickListener.OnSearchClick(keyword);
         hideAnim();
     }

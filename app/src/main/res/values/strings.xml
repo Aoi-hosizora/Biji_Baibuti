@@ -25,7 +25,7 @@
         <string name="note_header">笔记</string>
 
         <!-- UI -->
-
+    <string name="NoteFrag_NothingList">无内容</string>
         <!-- DeleteNote -->
         <string name="NoteFrag_DeleteAlertTitle">提示</string>
         <string name="NoteFrag_DeleteAlertMsg">确定删除笔记 \"%s\" 吗？</string>
@@ -195,6 +195,25 @@
         <string name="GroupDialog_DeleteNoteAlertNeutralButtonForNoDelete">不删除分组</string>
         <string name="GroupDialog_DeleteNoteAlertPositiveButtonForDeleteGroupAndModifyToDefaultGroup">删除分组并修改为默认分组</string>
         <string name="GroupDialog_DeleteNoteAlertNegativeButtonForDeleteGroupAndNote">删除分组及笔记</string>
+
+    <!-- Open Save Activity -->
+        <!-- UI -->
+        <string name="OpenSaceActivity_NowPathTextView">当前路径: %s</string>
+        <string name="OpenSaceActivity_NewFolderButton">新建文件夹</string>
+        <string name="OpenSaceActivity_CancelButton">返回</string>
+        <string name="OpenSaceActivity_OKForSaveButton">保存</string>
+        <string name="OpenSaceActivity_OKForOpenButton">打开</string>
+        <string name="OpenSaceActivity_TitleForSave">保存文件</string>
+        <string name="OpenSaceActivity_TitleForOpen">打开文件</string>
+
+        <!-- New Folder -->
+    <string name="OpenSaceActivity_NewFolderAlertTitle">新建文件夹</string>
+    <string name="OpenSaceActivity_NewFolderAlertOK">确定</string>
+    <string name="OpenSaceActivity_NewFolderAlertCancel">取消</string>
+    <string name="OpenSaceActivity_NewFolderAlertErr">无法创建文件夹 %s</string>
+    <string name="OpenSaceActivity_NewFolderAlertSuccess">文件夹 %s 创建成功</string>
+    <string name="OpenSaceActivity_NewFolderAlertNullName">请输入文件夹名</string>
+
 
     <!-- Tab Text -->
     <string name="notefragment_tab_text">笔记</string>
