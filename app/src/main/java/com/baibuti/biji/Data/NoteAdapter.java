@@ -19,7 +19,7 @@ import java.util.List;
 /**
  * Created by Windows 10 on 016 2019/02/16.
  */
-public class NoteAdapter extends RecyclerView.Adapter<NoteAdapter.ViewHolder> implements View.OnClickListener, View.OnLongClickListener {
+public class NoteAdapter extends RecyclerViewEmptySupport.Adapter<NoteAdapter.ViewHolder> implements View.OnClickListener, View.OnLongClickListener {
 
     private Context mContext;
     private List<Note> mNotes;
@@ -122,7 +122,7 @@ public class NoteAdapter extends RecyclerView.Adapter<NoteAdapter.ViewHolder> im
     }
 
     //自定义的ViewHolder，持有每个Item的的所有界面元素
-    public class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
+    public class ViewHolder extends RecyclerViewEmptySupport.ViewHolder implements View.OnClickListener {
         public TextView tv_list_title;//笔记标题
         public TextView tv_list_summary;//笔记摘要
         public TextView tv_list_time;//创建时间

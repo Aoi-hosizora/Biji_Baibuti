@@ -19,6 +19,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.baibuti.biji.Activity.MainActivity;
@@ -32,6 +33,7 @@ import com.baibuti.biji.Dialog.GroupDialog;
 import com.baibuti.biji.Interface.IShowLog;
 import com.baibuti.biji.R;
 import com.baibuti.biji.View.SpacesItemDecoration;
+import com.baibuti.biji.Widget.RecyclerViewEmptySupport;
 import com.baibuti.biji.db.GroupDao;
 import com.baibuti.biji.db.NoteDao;
 import com.getbase.floatingactionbutton.FloatingActionButton;
@@ -47,8 +49,8 @@ import static android.app.Activity.RESULT_OK;
 
 public class NoteFragment extends Fragment implements View.OnClickListener, IShowLog {
 
-//     private RecyclerViewEmptySupport mNoteList;
-    private RecyclerView mNoteList;
+//     private RecyclerView mNoteList;
+    private RecyclerViewEmptySupport mNoteList;
 
     private FloatingActionsMenu m_fabmenu;
     private SearchFragment searchFragment;
@@ -64,7 +66,7 @@ public class NoteFragment extends Fragment implements View.OnClickListener, ISho
     private static final int REQ_NOTE_NEW = 2; // 从 MNote 返回
     private static final int REQ_NOTE_UPDATE = 1; // 从 VMNote 返回
 
-//    private View ListEmptyView;
+    private View ListEmptyView;
 
     private View view;
 
@@ -78,8 +80,10 @@ public class NoteFragment extends Fragment implements View.OnClickListener, ISho
 
         slidingMenu = ((MainActivity)getActivity()).getSlidingMenu();
 
-//        ListEmptyView = view.findViewById(R.id.note_list_empty);
         mNoteList = view.findViewById(R.id.note_list);
+        ListEmptyView = view.findViewById(R.id.note_emptylist);
+        mNoteList.setEmptyView(ListEmptyView);
+
 
         mSwipeRefresh = (SwipeRefreshLayout) view.findViewById(R.id.note_listsrl);
         mSwipeRefresh.setColorSchemeResources(R.color.colorPrimary);
@@ -211,9 +215,12 @@ public class NoteFragment extends Fragment implements View.OnClickListener, ISho
             if (note.getTitle().contains(str) || note.getContent().contains(str))
                 notelist.add(note);
         }
+        noteAdapter.notifyDataSetChanged();
+
         IsSearchingNull = notelist.isEmpty();
-        if (IsSearchingNull)
+        if (IsSearchingNull) {
             Toast.makeText(getContext(), R.string.NoteFragment_SearchNullToast, Toast.LENGTH_SHORT).show();
+        }
 
         return notelist;
     }

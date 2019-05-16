@@ -23,13 +23,11 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
-    <!--<android.support.v4.widget.SwipeRefreshLayout-->
-        <!--android:id="@+id/swipe_refresh"-->
-        <!--android:layout_width="match_parent"-->
-        <!--android:layout_height="match_parent"-->
-        <!--app:layout_behavior="@string/appbar_scrolling_view_behavior">-->
-    <!--</android.support.v4.widget.SwipeRefreshLayout>-->
-
+    <!-- 空内容提醒，不能放在 SwipeRefreshLayout 内 -->
+    <include
+        layout="@layout/modulelayout_recycleview_emptyview"
+        android:id="@+id/note_emptylist"
+        android:visibility="gone"/>
 
     <android.support.v4.widget.SwipeRefreshLayout
         android:id="@+id/note_listsrl"
@@ -47,9 +45,7 @@
         app:layout_constraintTop_toBottomOf="@id/note_toolbar"
         app:layout_constraintVertical_bias="1.0">
 
-
-
-        <android.support.v7.widget.RecyclerView
+        <com.baibuti.biji.Widget.RecyclerViewEmptySupport
             android:id="@+id/note_list"
             android:layout_width="match_parent"
             android:layout_height="0dp"
@@ -58,10 +54,9 @@
             android:layout_marginLeft="0dp"
             android:layout_marginTop="0dp"
             android:layout_marginRight="0dp"
-
+            android:scrollbars="none"
             android:visibility="visible" />
 
-        <!--<include layout="@layout/modulelayout_notefrag_notelistemptyitem" />-->
 
     </android.support.v4.widget.SwipeRefreshLayout>
 
@@ -97,22 +92,6 @@
             fab:fab_colorPressed="@color/colorPrimary" />
 
     </com.getbase.floatingactionbutton.FloatingActionsMenu>
-
-    <!--<com.getbase.floatingactionbutton.FloatingActionButton-->
-        <!--android:id="@+id/note_searchback"-->
-        <!--android:layout_width="wrap_content"-->
-        <!--android:layout_height="wrap_content"-->
-        <!--android:layout_marginEnd="14dp"-->
-        <!--android:layout_marginBottom="20dp"-->
-        <!--android:src="@android:drawable/ic_menu_revert"-->
-        <!--android:visibility="gone"-->
-        <!--app:layout_constraintBottom_toBottomOf="parent"-->
-        <!--app:layout_constraintEnd_toEndOf="parent"-->
-        <!--fab:fab_addButtonColorNormal="@color/colorPrimary"-->
-        <!--fab:fab_addButtonColorPressed="@color/colorPrimaryDark"-->
-        <!--fab:fab_addButtonPlusIconColor="@color/white"-->
-        <!--fab:fab_labelStyle="@style/menu_labels_style"/>-->
-
 
 
 </android.support.constraint.ConstraintLayout>
