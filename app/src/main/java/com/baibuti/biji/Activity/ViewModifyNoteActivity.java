@@ -6,16 +6,13 @@ import android.content.ClipboardManager;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.graphics.Rect;
 import android.os.Bundle;
-import android.os.Environment;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.WindowManager;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -23,18 +20,12 @@ import com.baibuti.biji.Data.Note;
 import com.baibuti.biji.Dialog.ImagePopupDialog;
 import com.baibuti.biji.Interface.IShowLog;
 import com.baibuti.biji.R;
-import com.baibuti.biji.View.ImageLoader;
 import com.baibuti.biji.util.CommonUtil;
 import com.baibuti.biji.util.StringUtils;
 import com.baibuti.biji.util.ToDocUtil;
-//import com.hitomi.tilibrary.transfer.Transferee;
-//import com.previewlibrary.GPreviewBuilder;
-//import com.previewlibrary.ZoomMediaLoader;
-//import com.previewlibrary.enitity.ThumbViewInfo;
 import com.sendtion.xrichtext.RichTextView;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -68,15 +59,10 @@ public class ViewModifyNoteActivity extends AppCompatActivity implements View.On
     private boolean isModify = false;
     private int flag = NOTE_NEW;
 
-//    private Transferee transferee;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_viewmodifynote);
-
-//        transferee = Transferee.getDefault(this);
-//        ZoomMediaLoader.getInstance().init(new ImageLoader());
 
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         setTitle(R.string.VMNoteActivity_Title);
@@ -181,7 +167,7 @@ public class ViewModifyNoteActivity extends AppCompatActivity implements View.On
             break;
 
             case R.id.id_menu_modifynote_turntofile:
-                CreateFileAsNote();
+                OpenChoostFolderForCreateFileAsNote();
             break;
         }
         return true;
@@ -269,11 +255,15 @@ public class ViewModifyNoteActivity extends AppCompatActivity implements View.On
             break;
 
             case REQ_CHOOSE_FOLDER_PATH:
-//                if (resultCode == RESULTCODE) {
-//                    ArrayList<String> resPath = data.getStringArrayListExtra(SELECTPATH);
-//                    Log.d("ZWW", resPath.toString());
-//                 Toast.makeText(this, resPath.toString(), Toast.LENGTH_SHORT).show();
-//                }
+                if (resultCode == RESULT_OK) {
+                    String path = data.getStringExtra("path");
+                    String type = data.getStringExtra("type");
+                    if (!path.isEmpty()) {
+                        if (!".pdf".equals(type) && !".docx".equals(type))
+                            type = ".docx";
+                        CreateFileAsNote(path, type);
+                    }
+                }
         }
         super.onActivityResult(requestCode, resultCode, data);
     }
@@ -285,29 +275,47 @@ public class ViewModifyNoteActivity extends AppCompatActivity implements View.On
         CommonUtil.shareTextAndImage(this, note.getTitle(), note.getContent(), null); //分享图文
     }
 
+    private void OpenChoostFolderForCreateFileAsNote() {
+
+        Intent savefile_intent=new Intent(this, OpenSaveFileActivity.class);
+        savefile_intent.putExtra("isSaving", true);
+        savefile_intent.putExtra("FileType", ".docx");
+        savefile_intent.putExtra("CurrentDir", ToDocUtil.getDefaultPath());
+        savefile_intent.putExtra("FileName", note.getTitle());
+        savefile_intent.putExtra("FileFilterType", "docx|pdf");
+        startActivityForResult(savefile_intent, REQ_CHOOSE_FOLDER_PATH);
+
+    }
+
     /**
      * 另存为文件，选择类型
      */
-    private void CreateFileAsNote() {
+    private void CreateFileAsNote(String path, String type) {
 
-        // 选择保存为什么类型
+        if (".pdf".equals(type))
+            type = "PDF";
+        else
+            type = "DOCX";
+
+        final boolean isSaveAsDocx = "DOCX".equals(type);
+
+        String msg = String.format(getString(R.string.VMNoteActivity_CreateFileAsNoteMessage), type, path);
+        // 保存为 PDF 时的提醒
+        if (!isSaveAsDocx)
+            msg += getString(R.string.VMNoteActivity_CreateFileAsNoteMessageHint);
+
+//        // 选择保存为什么类型
         AlertDialog TypealertDialog = new AlertDialog
                 .Builder(this)
                 .setTitle(R.string.VMNoteActivity_CreateFileAsNoteTitle)
-                .setMessage(String.format(getString(R.string.VMNoteActivity_CreateFileAsNoteMessage), ToDocUtil.getDefaultPath()))
-                .setPositiveButton(R.string.VMNoteActivity_CreateFileAsNotePositiveForPDF, new DialogInterface.OnClickListener() {
+                .setMessage(msg)
+                .setPositiveButton(R.string.VMNoteActivity_CreateFileAsNotePositiveForOK, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        SavingFileAsNote(false, note);
+                        SavingFileAsNote(isSaveAsDocx, note);
                     }
                 })
-                .setNegativeButton(R.string.VMNoteActivity_CreateFileAsNoteNegativeForDOCX, new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        SavingFileAsNote(true, note);
-                    }
-                })
-                .setNeutralButton(R.string.VMNoteActivity_CreateFileAsNoteNeutralForCancel, null).create();
+                .setNegativeButton(R.string.VMNoteActivity_CreateFileAsNoteNegativeForCancel, null).create();
         TypealertDialog.show();
 
     }

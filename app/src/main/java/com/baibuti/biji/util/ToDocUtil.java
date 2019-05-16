@@ -28,7 +28,8 @@ import java.util.List;
 public class ToDocUtil {
 
     public static String SDCardRoot = Environment.getExternalStorageDirectory().getAbsolutePath() + File.separator;
-    public static String APP_NAME = "Biji";
+    public static String APP_NAME = "Biji" + File.separator;
+    public static String SAVE_FILETYPE = "NoteFile";
 
     public static int A4_WIDTH = 2480;
     public static int A4_HEIGHT = 3508;
@@ -93,8 +94,12 @@ public class ToDocUtil {
      * @return
      */
     public static String getDefaultPath() {
-        String dir = SDCardRoot + APP_NAME + File.separator;
-        return dir;
+        String path = SDCardRoot + APP_NAME + SAVE_FILETYPE + File.separator;
+        File dir = new File(path);
+        if (!dir.exists()) {
+            dir.mkdir();
+        }
+        return path;
     }
 
     /**
@@ -103,8 +108,7 @@ public class ToDocUtil {
      * @return
      */
     public static String getDefaultDocxPath(String FileName) {
-        String dir = SDCardRoot + APP_NAME + File.separator;
-        return dir + FileName + ".docx";
+        return getDefaultPath() + FileName + ".docx";
     }
 
     /**
@@ -113,8 +117,7 @@ public class ToDocUtil {
      * @return
      */
     public static String getDefaultPdfPath(String FileName) {
-        String dir = SDCardRoot + APP_NAME + File.separator;
-        return dir + FileName + ".pdf";
+        return getDefaultPath() + FileName + ".pdf";
     }
 
 

@@ -24,9 +24,15 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.Locale;
 
 /**
  * Created by felix on 2017/11/14 下午2:26.
+ *
+ * onDoneClick(): Modified By Aoihosizora
+ * saveToSdCard(): Add By AoiHosizora
  */
 
 public class IMGEditActivity extends IMGEditBaseActivity {
@@ -36,8 +42,13 @@ public class IMGEditActivity extends IMGEditBaseActivity {
     private static final int MAX_HEIGHT = 1024;
 
     public static final String EXTRA_IMAGE_URI = "IMAGE_URI";
-
     public static final String EXTRA_IMAGE_SAVE_PATH = "IMAGE_SAVE_PATH";
+
+    /**
+     * Add By AoiHosizora
+     * 修改后的图片保存位置
+     */
+    private static String Edited_Image_Save_Path;
 
     @Override
     public void onCreated() {
@@ -52,6 +63,8 @@ public class IMGEditActivity extends IMGEditBaseActivity {
         }
 
         Uri uri = intent.getParcelableExtra(EXTRA_IMAGE_URI);
+        Edited_Image_Save_Path = intent.getStringExtra(EXTRA_IMAGE_SAVE_PATH);
+
         if (uri == null) {
             return null;
         }
@@ -143,6 +156,34 @@ public class IMGEditActivity extends IMGEditBaseActivity {
 //        return uri;
 //    }
 
+
+    /**
+     * Add By AoiHosizora
+     * 保存编辑后的图片
+     * @param bitmap
+     * @return
+     */
+    public static String saveToSdCard(Bitmap bitmap) {
+        String time = new SimpleDateFormat("yyyyMMddHHmmssSSS", Locale.CHINA).format(new Date());
+        String imageUrl = Edited_Image_Save_Path + time + "_Edited.jpg"; //////////
+        File file = new File(imageUrl);
+        try {
+            FileOutputStream out = new FileOutputStream(file);
+            if (bitmap.compress(Bitmap.CompressFormat.JPEG, 100, out)) {
+                out.flush();
+                out.close();
+            }
+        }
+        catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
+        catch (IOException e) {
+            e.printStackTrace();
+        }
+        return file.getAbsolutePath();
+    }
+
+
     @Override
     public void onDoneClick() {
 //        String path = getIntent().getStringExtra(EXTRA_IMAGE_SAVE_PATH);
@@ -151,7 +192,7 @@ public class IMGEditActivity extends IMGEditBaseActivity {
             Bitmap bitmap = mImgView.saveBitmap();
             if (bitmap != null) {
 
-                String str = SDCardUtil.saveToSdCard(bitmap);
+                String str = saveToSdCard(bitmap);
 
 //
 //                FileOutputStream fout = null;

@@ -35,7 +35,8 @@ import java.util.ArrayList;
 /**
  * Created by Won on 2017/1/13.
  *
- * 2019/05/09 修改了 onItemInsert By AoiHosizora
+ * 2019/05/16
+ * search() Modified By AoiHosizora
  */
 
 public class SearchFragment extends DialogFragment implements DialogInterface.OnKeyListener, ViewTreeObserver.OnPreDrawListener, CircularRevealAnim.AnimListener, IOnItemClickListener, View.OnClickListener {
@@ -263,6 +264,9 @@ public class SearchFragment extends DialogFragment implements DialogInterface.On
         mCircularRevealAnim.hide(ivSearchSearch, view);
     }
 
+    /**
+     * Modify By AoiHosizora
+     */
     private void search() {
         String searchKey = etSearchKeyword.getText().toString();
         if (TextUtils.isEmpty(searchKey.trim())) {

@@ -19,14 +19,20 @@ import com.googlecode.tesseract.android.TessBaseAPI;
 import java.io.File;
 
 public class ExtractUtil {
+
+
+    public static String SDCardRoot = Environment.getExternalStorageDirectory().getAbsolutePath() + File.separator;
+    public static String APP_NAME = "Biji" + File.separator;
+    public static String SAVE_FILETYPE = "TessData";
+
     /**
      * TessBaseAPI初始化用到的第一个参数，是个目录:外部储存目录+分隔符。
      */
-    public static final String DATAPATH = Environment.getExternalStorageDirectory().getAbsolutePath() + File.separator;
+    public static final String DATAPATH = SDCardRoot + APP_NAME;
     /**
      * 在DATAPATH中新建这个目录，TessBaseAPI初始化要求必须有这个目录在DATAPATH中创建tessdata目录。
      */
-    public static final String tessdata = DATAPATH + File.separator + "tessdata";
+    public static final String tessdata = DATAPATH + File.separator + SAVE_FILETYPE;
     /**
      * TessBaseAPI初始化测第二个参数，就是识别库的名字不要后缀名。
      */

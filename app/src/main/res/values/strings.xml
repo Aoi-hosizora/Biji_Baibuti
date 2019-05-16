@@ -59,10 +59,10 @@
 
         <!-- CreateFileAsNote -->
         <string name="VMNoteActivity_CreateFileAsNoteTitle">保存为文件</string>
-        <string name="VMNoteActivity_CreateFileAsNoteMessage">请选择保存的类型，笔记将默认保存在: \n%s\n\n(注意：PDF 格式对符号支持不好)</string>
-        <string name="VMNoteActivity_CreateFileAsNoteNegativeForDOCX">DOCX</string>
-        <string name="VMNoteActivity_CreateFileAsNotePositiveForPDF">PDF</string>
-        <string name="VMNoteActivity_CreateFileAsNoteNeutralForCancel">取消</string>
+        <string name="VMNoteActivity_CreateFileAsNoteMessage">确定将笔记保存为 %s 类型，并保存在以下路径吗？\n%s</string>
+        <string name="VMNoteActivity_CreateFileAsNoteMessageHint">\n\n(注意：PDF 格式对符号支持不好)</string>
+        <string name="VMNoteActivity_CreateFileAsNotePositiveForOK">保存</string>
+        <string name="VMNoteActivity_CreateFileAsNoteNegativeForCancel">取消</string>
 
         <!-- SavingFileAsNote -->
         <string name="VMNoteActivity_SavingFileAsNoteTitle">保存</string>
@@ -117,7 +117,7 @@
 
         <!-- Content OCR Check -->
         <string name="MNoteActivity_OCRCheckAlertTitle">确定</string>
-        <string name="MNoteActivity_OCRCheckAlertMsg">要进行文字识别吗？图片所在路径为：</string>
+        <string name="MNoteActivity_OCRCheckAlertMsg">要进行文字识别吗？图片所在路径为：\n</string>
         <string name="MNoteActivity_OCRCheckAlertPositiveButtonForOK">确定</string>
         <string name="MNoteActivity_OCRCheckAlertNegativeButtonForCancel">取消</string>
 

@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="com.baibuti.biji.Activity.OpenSaveFileActivity">
+
+    <TextView
+        android:id="@+id/id_OpenSaveFile_PathDirTextView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="当前路径: /storage/emulated/0"
+        android:layout_margin="8dp"
+        android:layout_marginLeft="10dp"
+        android:layout_marginRight="10dp"
+    />
+
+    <ListView
+        android:id="@+id/id_OpenSaveFile_DirList"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1">
+
+    </ListView>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="5dp"
+
+        android:orientation="horizontal">
+        <EditText
+            android:id="@+id/id_OpenSaveFile_FileNameEditText"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:singleLine="true"
+
+            android:text="New_File" />
+
+        <android.support.v7.widget.AppCompatSpinner
+            android:id="@+id/id_OpenSaveFile_FileTypeSpinner"
+            android:layout_width="100dp"
+            android:layout_height="match_parent">
+
+
+        </android.support.v7.widget.AppCompatSpinner>
+    </LinearLayout>
+
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <Button
+            android:id="@+id/id_OpenSaveFile_NewFolderButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+
+            android:text="新建文件夹"/>
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"/>
+        <Button
+            android:id="@+id/id_OpenSaveFile_CancelButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+
+            android:text="取消"/>
+
+        <Button
+            android:id="@+id/id_OpenSaveFile_OKButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+
+            android:text="确定"/> <!-- 保存 -->
+    </LinearLayout>
+
+
+
+</LinearLayout>

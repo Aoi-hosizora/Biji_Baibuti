@@ -36,6 +36,8 @@ import java.util.regex.Pattern;
 /**
  * Created by sendtion on 2016/6/24.
  * 显示富文本
+ *
+ * addImageViewAtIndex() Modified by AoiHosizora
  */
 public class RichTextView extends ScrollView {
     private static final int EDIT_PADDING = 10; // edittext常规padding是10dp
@@ -248,6 +250,7 @@ public class RichTextView extends ScrollView {
 
     /**
      * 在特定位置添加ImageView
+     * Modify By Aoihosizora
      */
     public void addImageViewAtIndex(final int index, final String imagePath) {
         if (TextUtils.isEmpty(imagePath)){

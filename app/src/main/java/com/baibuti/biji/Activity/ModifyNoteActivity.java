@@ -35,7 +35,6 @@ import android.widget.Toast;
 import com.baibuti.biji.Data.Group;
 import com.baibuti.biji.Data.GroupAdapter;
 import com.baibuti.biji.Data.Note;
-import com.baibuti.biji.Dialog.GroupDialog;
 import com.baibuti.biji.Interface.IShowLog;
 import com.baibuti.biji.R;
 import com.baibuti.biji.db.GroupDao;
@@ -63,7 +62,6 @@ import io.reactivex.ObservableOnSubscribe;
 import io.reactivex.Observer;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
-import io.reactivex.functions.Action;
 import io.reactivex.schedulers.Schedulers;
 import me.kareluo.imaging.IMGEditActivity;
 
@@ -488,6 +486,7 @@ public class ModifyNoteActivity extends AppCompatActivity implements View.OnClic
 
             // 打开编辑页面
             intent.putExtra(IMGEditActivity.EXTRA_IMAGE_URI, uri);
+            intent.putExtra(IMGEditActivity.EXTRA_IMAGE_SAVE_PATH, SDCardUtil.getPictureDir());
             startActivityForResult(intent, REQUEST_CROP);
         } catch (Exception e) {
             e.printStackTrace();

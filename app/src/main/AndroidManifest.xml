@@ -45,7 +45,15 @@
             </intent-filter>
         </activity>
 
-        <activity android:name=".Activity.CustomActivity" />
+        <!-- OpenSaveFile Activity -->
+        <activity
+            android:name=".Activity.OpenSaveFileActivity"
+            android:screenOrientation="portrait">
+            <intent-filter>
+                <action android:name="activitytest.example.com.activitytest.ViewModifyNoteActivity" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </activity>
 
         <!-- PreLoaded Font -->
         <meta-data

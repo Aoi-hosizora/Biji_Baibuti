@@ -22,7 +22,8 @@ import java.util.Locale;
 
 public class SDCardUtil {
     public static String SDCardRoot = Environment.getExternalStorageDirectory().getAbsolutePath() + File.separator;
-    public static String APP_NAME = "Biji";
+    public static String APP_NAME = "Biji" + File.separator;
+    public static String SAVE_FILETYPE = "NoteImage";
 
     /**
      * 检查是否存在SDCard
@@ -37,10 +38,10 @@ public class SDCardUtil {
     }
 
     /**
-     * 获得文章图片保存路径
+     * 获得文章图片保存路径, /Biji/NoteImage/
      */
-    public static String getPictureDir(){
-        String imageCacheUrl = SDCardRoot + APP_NAME + File.separator;
+    public static String getPictureDir() {
+        String imageCacheUrl = SDCardRoot + APP_NAME + SAVE_FILETYPE + File.separator;
         File file = new File(imageCacheUrl);
         if(!file.exists())
             file.mkdirs();  //如果不存在则创建
