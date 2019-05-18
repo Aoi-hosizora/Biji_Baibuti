@@ -1,17 +1,11 @@
 package me.kareluo.imaging;
 
-import android.Manifest;
 import android.content.Intent;
-import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
-import android.os.Build;
-import android.os.Environment;
-import android.support.annotation.NonNull;
 import android.text.TextUtils;
 import android.util.Log;
-import android.widget.Toast;
 
 import me.kareluo.imaging.core.IMGMode;
 import me.kareluo.imaging.core.IMGText;
@@ -44,15 +38,10 @@ public class IMGEditActivity extends IMGEditBaseActivity {
     public static final String EXTRA_IMAGE_URI = "IMAGE_URI";
     public static final String EXTRA_IMAGE_SAVE_PATH = "IMAGE_SAVE_PATH";
 
-    /**
-     * Add By AoiHosizora
-     * 修改后的图片保存位置
-     */
-    private static String Edited_Image_Save_Path;
 
     @Override
     public void onCreated() {
-
+        Log.e("TAG", "onCreated: IMGEditActivity");
     }
 
     @Override
@@ -63,7 +52,6 @@ public class IMGEditActivity extends IMGEditBaseActivity {
         }
 
         Uri uri = intent.getParcelableExtra(EXTRA_IMAGE_URI);
-        Edited_Image_Save_Path = intent.getStringExtra(EXTRA_IMAGE_SAVE_PATH);
 
         if (uri == null) {
             return null;
@@ -145,16 +133,6 @@ public class IMGEditActivity extends IMGEditBaseActivity {
     public void onCancelClick() {
         finish();
     }
-//
-//    public static Uri getImageStreamFromExternal(String imageName) {
-//        File picPath = new File(SDCardUtil.getPictureDir(), imageName);
-//        Uri uri = null;
-//        if(picPath.exists()) {
-//            uri = Uri.fromFile(picPath);
-//        }
-//
-//        return uri;
-//    }
 
 
     /**
@@ -163,7 +141,11 @@ public class IMGEditActivity extends IMGEditBaseActivity {
      * @param bitmap
      * @return
      */
-    public static String saveToSdCard(Bitmap bitmap) {
+    public String saveToSdCard(Bitmap bitmap) {
+
+        Intent intent = getIntent();
+        String Edited_Image_Save_Path = intent.getStringExtra(EXTRA_IMAGE_SAVE_PATH);
+
         String time = new SimpleDateFormat("yyyyMMddHHmmssSSS", Locale.CHINA).format(new Date());
         String imageUrl = Edited_Image_Save_Path + time + "_Edited.jpg"; //////////
         File file = new File(imageUrl);
@@ -186,42 +168,17 @@ public class IMGEditActivity extends IMGEditBaseActivity {
 
     @Override
     public void onDoneClick() {
-//        String path = getIntent().getStringExtra(EXTRA_IMAGE_SAVE_PATH);
-//
-//        if (!TextUtils.isEmpty(path)) {
             Bitmap bitmap = mImgView.saveBitmap();
             if (bitmap != null) {
 
                 String str = saveToSdCard(bitmap);
 
-//
-//                FileOutputStream fout = null;
-//                try {
-//                    fout = new FileOutputStream(path);
-//                    bitmap.compress(Bitmap.CompressFormat.JPEG, 80, fout);
-//                } catch (FileNotFoundException e) {
-//                    e.printStackTrace();
-//                } finally {
-//                    if (fout != null) {
-//                        try {
-//                            fout.close();
-//                        } catch (IOException e) {
-//                            e.printStackTrace();
-//                        }
-//                    }
-//                }
                 Intent intent = new Intent();
-                //////////////////////////////////////////////////
-
-//                Log.i("//////////////////////", "onDoneClick: "+ str+" '''''"+ Uri.parse(str));
                 intent.setData(Uri.parse(str));
-
-                //////////////////////////////////////////////////
 
                 setResult(RESULT_OK, intent);
                 finish();
                 return;
-//            }
         }
         setResult(RESULT_CANCELED);
         finish();

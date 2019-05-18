@@ -40,6 +40,8 @@ import io.reactivex.schedulers.Schedulers;
 
 public class ViewModifyNoteActivity extends AppCompatActivity implements View.OnClickListener, IShowLog {
 
+    // region 声明: UI ProgressDialog
+
     private TextView TitleEditText_View;
     private TextView UpdateTimeTextView_View;
     private TextView GroupNameTextView_View;
@@ -49,15 +51,26 @@ public class ViewModifyNoteActivity extends AppCompatActivity implements View.On
     private ProgressDialog savingDialog;
     private Disposable mDisposable;
 
-    private Note note;
+    // endregion 声明: UI ProgressDialog
 
+    // region 声明: Note isModify
+
+    private Note note;
+    private boolean isModify = false;
+
+    // endregion 声明: 笔记
+
+    // region 声明: flag REQ
+
+    private int flag = NOTE_NEW;
     private static final int NOTE_NEW = 0; // new
     private static final int NOTE_UPDATE = 1; // modify
 
     private static final int REQ_CHOOSE_FOLDER_PATH = 2;
 
-    private boolean isModify = false;
-    private int flag = NOTE_NEW;
+    // endregion 声明: flag REQ
+
+    // region 菜单创建 活动返回 onCreate onCreateOptionsMenu onBackPressed onActivityResult ShowLogE
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -116,104 +129,10 @@ public class ViewModifyNoteActivity extends AppCompatActivity implements View.On
 
     }
 
-    /**
-     * IShowLog 接口，全局设置 Log 格式
-     * @param FunctionName
-     * @param Msg
-     */
-    @Override
-    public void ShowLogE(String FunctionName, String Msg) {
-        String ClassName = "ViewModifyNoteActivity";
-        Log.e(getResources().getString(R.string.IShowLog_LogE),
-                ClassName + ": " + FunctionName + "###" + Msg); // MainActivity: initDatas###data=xxx
-    }
-
-    @Override
-    public void onClick(View v) {
-        switch (v.getId()) {
-
-        }
-    }
-
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.viewmodifynoteactivity_menu,menu);
         return true;
-    }
-
-    /**
-     * 菜单栏点击事件
-     * @param item
-     * @return
-     */
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()) {
-            case R.id.id_menu_modifynote_viewmodify:
-                ShowModifyNoteActivity();
-            break;
-
-            case android.R.id.home:
-            case R.id.id_menu_modifynote_viewcancel:
-                BackToActivity();
-            break;
-
-            case R.id.id_menu_modifynote_viewinfo:
-                showDetailInfo();
-            break;
-
-            case R.id.id_menu_modifynote_sharenote:
-                ShareNoteContent();
-            break;
-
-            case R.id.id_menu_modifynote_turntofile:
-                OpenChoostFolderForCreateFileAsNote();
-            break;
-        }
-        return true;
-    }
-
-    /**
-     * 打开 ModifyNote 活动
-     */
-    private void ShowModifyNoteActivity() {
-        Intent intent=new Intent(ViewModifyNoteActivity.this, ModifyNoteActivity.class);
-
-        intent.putExtra("notedata",note);
-        intent.putExtra("flag",flag);
-
-        startActivityForResult(intent,1); // 1 from CardView
-    }
-
-    /**
-     * 返回主界面
-     */
-    private void BackToActivity() {
-        Intent motointent = new Intent();
-
-        if (flag == NOTE_NEW) { // Frag -> MN ----> VMN
-            motointent.putExtra("notedata", note);
-            motointent.putExtra("flag", NOTE_NEW);
-        }
-        else {
-            if (isModify) { // Frag -> VMN -> MN ----> VMN
-                motointent.putExtra("notedata", note);
-                motointent.putExtra("flag", NOTE_UPDATE);
-                setResult(RESULT_OK,motointent);
-            }
-            else {
-                setResult(RESULT_CANCELED,motointent);
-            }
-        }
-        finish();
-    }
-
-    /**
-     * 返回键返回主界面
-     */
-    @Override
-    public void onBackPressed() {
-        BackToActivity();
     }
 
     /**
@@ -252,45 +171,165 @@ public class ViewModifyNoteActivity extends AppCompatActivity implements View.On
 
                     }
                 }
-            break;
+                break;
 
             case REQ_CHOOSE_FOLDER_PATH:
                 if (resultCode == RESULT_OK) {
-                    String path = data.getStringExtra("path");
-                    String type = data.getStringExtra("type");
-                    if (!path.isEmpty()) {
-                        if (!".pdf".equals(type) && !".docx".equals(type))
-                            type = ".docx";
-                        CreateFileAsNote(path, type);
-                    }
+                    // 返回选择的文件夹路径
+                    requestForOpenChooseFolder(data);
                 }
         }
         super.onActivityResult(requestCode, resultCode, data);
     }
 
     /**
-     * 分享笔记，待修改
+     * 返回键返回主界面
      */
-    private void ShareNoteContent() {
-        CommonUtil.shareTextAndImage(this, note.getTitle(), note.getContent(), null); //分享图文
+    @Override
+    public void onBackPressed() {
+        BackToActivity();
     }
 
-    private void OpenChoostFolderForCreateFileAsNote() {
+    /**
+     * IShowLog 接口，全局设置 Log 格式
+     * @param FunctionName
+     * @param Msg
+     */
+    @Override
+    public void ShowLogE(String FunctionName, String Msg) {
+        String ClassName = "ViewModifyNoteActivity";
+        Log.e(getResources().getString(R.string.IShowLog_LogE),
+                ClassName + ": " + FunctionName + "###" + Msg); // MainActivity: initDatas###data=xxx
+    }
 
+    // endregion 菜单创建 活动返回
+
+    // region 工具栏事件处理 onClick onOptionsItemSelected
+
+    @Override
+    public void onClick(View v) {
+        switch (v.getId()) {
+
+        }
+    }
+
+    /**
+     * 菜单栏点击事件
+     * @param item
+     * @return
+     */
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.id_menu_modifynote_viewmodify:
+                ShowModifyNoteActivity();
+                break;
+
+            case android.R.id.home:
+            case R.id.id_menu_modifynote_viewcancel:
+                BackToActivity();
+                break;
+
+            case R.id.id_menu_modifynote_viewinfo:
+                showDetailInfo();
+                break;
+
+            case R.id.id_menu_modifynote_sharenote:
+                ShareNoteContent();
+                break;
+
+            case R.id.id_menu_modifynote_turntofile:
+                OpenChooseFolderForCreateFileAsNote();
+                break;
+        }
+        return true;
+    }
+
+    // endregion 工具栏事件处理
+
+    // region 打开编辑 返回主活动 ShowModifyNoteActivity BackToActivity
+
+    /**
+     * 打开 ModifyNote 活动
+     */
+    private void ShowModifyNoteActivity() {
+        Intent intent=new Intent(ViewModifyNoteActivity.this, ModifyNoteActivity.class);
+
+        intent.putExtra("notedata",note);
+        intent.putExtra("flag",flag);
+
+        startActivityForResult(intent,1); // 1 from CardView
+    }
+
+    /**
+     * 返回主界面
+     */
+    private void BackToActivity() {
+        Intent motointent = new Intent();
+
+        if (flag == NOTE_NEW) { // Frag -> MN ----> VMN
+            motointent.putExtra("notedata", note);
+            motointent.putExtra("flag", NOTE_NEW);
+        }
+        else {
+            if (isModify) { // Frag -> VMN -> MN ----> VMN
+                motointent.putExtra("notedata", note);
+                motointent.putExtra("flag", NOTE_UPDATE);
+                setResult(RESULT_OK,motointent);
+            }
+            else {
+                setResult(RESULT_CANCELED,motointent);
+            }
+        }
+        finish();
+    }
+
+    // endregion 打开编辑 返回主活动
+
+    // region 保存为文件 OpenChoostFolderForCreateFileAsNote requestForOpenChooseFolder CreateFileAsNote SavingFileAsNote SavingDocxPdfAsNote
+
+    /**
+     * 打开保存为文件的路径选择活动
+     */
+    private void OpenChooseFolderForCreateFileAsNote() {
         Intent savefile_intent=new Intent(this, OpenSaveFileActivity.class);
         savefile_intent.putExtra("isSaving", true);
         savefile_intent.putExtra("FileType", ".docx");
         savefile_intent.putExtra("CurrentDir", ToDocUtil.getDefaultPath());
         savefile_intent.putExtra("FileName", note.getTitle());
         savefile_intent.putExtra("FileFilterType", "docx|pdf");
-        startActivityForResult(savefile_intent, REQ_CHOOSE_FOLDER_PATH);
 
+        // 返回含后缀名的文件名，并且单独返回后缀名
+        savefile_intent.putExtra("isReturnType", "true");
+
+        startActivityForResult(savefile_intent, REQ_CHOOSE_FOLDER_PATH);
     }
 
     /**
-     * 另存为文件，选择类型
+     * 返回选择的文件路径
+     * -> OpenChooseFolderForCreateFileAsNote()访问OpenSaveFileActivity
+     * @param data Intent
      */
-    private void CreateFileAsNote(String path, String type) {
+    private void requestForOpenChooseFolder(Intent data) {
+        // isReturnType == true
+        String path = data.getStringExtra("path"); // 包含后缀名
+        String type = data.getStringExtra("type");
+
+        if (!path.isEmpty()) {
+            ShowLogE("requestForOpenChooseFolder", "path: " + path);
+
+            if (!".pdf".equals(type) && !".docx".equals(type))
+                type = ".docx";
+            CreateFileAsNote(path, type);
+        }
+    }
+
+    /**
+     * 新建笔记文件，还未分开指定类型
+     * @param path 已经包含的后缀名的路径
+     * @param type .pdf|.docx
+     */
+    private void CreateFileAsNote(final String path, String type) {
 
         if (".pdf".equals(type))
             type = "PDF";
@@ -304,7 +343,7 @@ public class ViewModifyNoteActivity extends AppCompatActivity implements View.On
         if (!isSaveAsDocx)
             msg += getString(R.string.VMNoteActivity_CreateFileAsNoteMessageHint);
 
-//        // 选择保存为什么类型
+        // 确定所选择的类型以保存
         AlertDialog TypealertDialog = new AlertDialog
                 .Builder(this)
                 .setTitle(R.string.VMNoteActivity_CreateFileAsNoteTitle)
@@ -312,7 +351,7 @@ public class ViewModifyNoteActivity extends AppCompatActivity implements View.On
                 .setPositiveButton(R.string.VMNoteActivity_CreateFileAsNotePositiveForOK, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        SavingFileAsNote(isSaveAsDocx, note);
+                        SavingFileAsNote(isSaveAsDocx, note, path);
                     }
                 })
                 .setNegativeButton(R.string.VMNoteActivity_CreateFileAsNoteNegativeForCancel, null).create();
@@ -324,19 +363,11 @@ public class ViewModifyNoteActivity extends AppCompatActivity implements View.On
      * 根据类型保存为 Pdf 还是 Docx，CreateFileAsNote()用
      * @param isSaveAsDocx
      * @param mnote
+     * @param filename 包含后缀名
      */
-    public void SavingFileAsNote(final boolean isSaveAsDocx, final Note mnote) {
+    public void SavingFileAsNote(final boolean isSaveAsDocx, final Note mnote, String filename) {
 
-        // 文件路径待改
-        final String Path_Docx = ToDocUtil.getDefaultDocxPath(note.getTitle());
-        final String Path_Pdf = ToDocUtil.getDefaultPdfPath(note.getTitle());
-
-        File file;
-        if (isSaveAsDocx)
-            file = new File(Path_Docx);
-        else
-            file = new File(Path_Pdf);
-
+        File file = new File(filename);
         final String FilePath = file.getPath();
 
         // 判断文件是否存在
@@ -348,20 +379,19 @@ public class ViewModifyNoteActivity extends AppCompatActivity implements View.On
                     .setPositiveButton(R.string.VMNoteActivity_SavingFileAsNotePositiveForCover, new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
-                            SavingDocxPdfAsNote(isSaveAsDocx, FilePath, note);
+                            SavingDocxPdfAsNote(isSaveAsDocx, FilePath, mnote);
                         }
                     })
                     .setNegativeButton(R.string.VMNoteActivity_SavingFileAsNoteNegativeForCancel, new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
                             dialog.dismiss();
-                            return;
                         }
                     }) .create();
             alertDialog.show();
         }
         else
-            SavingDocxPdfAsNote(isSaveAsDocx, FilePath, note);
+            SavingDocxPdfAsNote(isSaveAsDocx, FilePath, mnote);
     }
 
     /**
@@ -380,6 +410,7 @@ public class ViewModifyNoteActivity extends AppCompatActivity implements View.On
         }
         final HasDismiss isHasDismiss = new HasDismiss();
 
+        // %s 文件正在保存中...\n\n%s\n
         String Msg = String.format(getResources().getString(R.string.VMNoteActivity_SavingDataMessage), isSaveAsDocx ? "Docx" : "Pdf", Path);
         savingDialog.setTitle(getResources().getString(R.string.VMNoteActivity_SavingData));
         savingDialog.setMessage(Msg);
@@ -435,14 +466,18 @@ public class ViewModifyNoteActivity extends AppCompatActivity implements View.On
         }).start();
     }
 
+    // endregion 其他功能
+
+    // region 其他功能 showDetailInfo ShowClickImg ShareNoteContent
+
     /**
      * 显示笔记详细信息
      */
     private void showDetailInfo() {
         final String Info = getResources().getString(R.string.VMNoteActivity_InfoTitle) + note.getTitle() + "\n" +
-                            getResources().getString(R.string.VMNoteActivity_InfoCreateTime) + note.getCreateTime_FullString() + "\n" +
-                            getResources().getString(R.string.VMNoteActivity_InfoUpdateTime) + note.getUpdateTime_FullString() + "\n\n" +
-                            getResources().getString(R.string.VMNoteActivity_InfoGroupLabelTitle) + note.getGroupLabel().getName();
+                getResources().getString(R.string.VMNoteActivity_InfoCreateTime) + note.getCreateTime_FullString() + "\n" +
+                getResources().getString(R.string.VMNoteActivity_InfoUpdateTime) + note.getUpdateTime_FullString() + "\n\n" +
+                getResources().getString(R.string.VMNoteActivity_InfoGroupLabelTitle) + note.getGroupLabel().getName();
 
         AlertDialog dialog = new AlertDialog.Builder(this)
                 .setTitle(R.string.VMNoteActivity_InfoAlertTitle)
@@ -473,32 +508,6 @@ public class ViewModifyNoteActivity extends AppCompatActivity implements View.On
      * @param currentPosition
      */
     private void ShowClickImg(ArrayList<String> imageList, int currentPosition) {
-//        ArrayList<ThumbViewInfo> mThumbViewInfoList = new ArrayList<>(); // 这个最好定义成成员变量
-//        ThumbViewInfo item;
-//        mThumbViewInfoList.clear();
-//
-//        for (int i = 0;i < imageList.size(); i++) {
-//            Rect bounds = new Rect();
-//            //new ThumbViewInfo(图片地址);
-//            item=new ThumbViewInfo(imageList.get(i));
-//            item.setBounds(bounds);
-//            mThumbViewInfoList.add(item);
-//        }
-//
-//
-//        ////////////////////////////////////////////////////////////////////
-//
-//        GPreviewBuilder.from(ViewModifyNoteActivity.this)
-//                .to(CustomActivity.class) // 是否使用自定义预览界面，当然8.0之后因为配置问题，必须要使用
-//                .setData(mThumbViewInfoList)
-//                .setCurrentIndex(currentPosition)
-//                .setSingleFling(true)
-//                .setType(GPreviewBuilder.IndicatorType.Number)
-//                // 小圆点
-//                //  .setType(GPreviewBuilder.IndicatorType.Dot)
-//
-//                .start();//启动
-
         try {
             String[] imgs = imageList.toArray(new String[imageList.size()]);
             ImagePopupDialog dialog = new ImagePopupDialog(this, imgs, currentPosition);
@@ -511,8 +520,16 @@ public class ViewModifyNoteActivity extends AppCompatActivity implements View.On
 
     }
 
-    ////////////////////////////////////////////////////////////
-    ////////////////////////////////////////////////////////////
+    /**
+     * 分享笔记，待修改
+     */
+    private void ShareNoteContent() {
+        CommonUtil.shareTextAndImage(this, note.getTitle(), note.getContent(), null); //分享图文
+    }
+
+    // endregion 其他功能
+
+    // region 文字图片显示处理 dealWithContent showDataSync showEditData
 
     /**
      * 处理内容，重要
@@ -597,7 +614,6 @@ public class ViewModifyNoteActivity extends AppCompatActivity implements View.On
 
     }
 
-
     /**
      * 显示数据
      * @param html
@@ -615,4 +631,6 @@ public class ViewModifyNoteActivity extends AppCompatActivity implements View.On
             emitter.onError(e);
         }
     }
+
+    // endregion 文字图片显示处理
 }

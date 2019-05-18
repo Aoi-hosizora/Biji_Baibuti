@@ -38,6 +38,17 @@ public class SDCardUtil {
     }
 
     /**
+     * 获得文章图片保存路径, /Biji/
+     */
+    public static String getAppDir() {
+        String imageCacheUrl = SDCardRoot + APP_NAME;
+        File file = new File(imageCacheUrl);
+        if(!file.exists())
+            file.mkdirs();  //如果不存在则创建
+        return imageCacheUrl;
+    }
+
+    /**
      * 获得文章图片保存路径, /Biji/NoteImage/
      */
     public static String getPictureDir() {

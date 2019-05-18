@@ -103,26 +103,6 @@ public class ToDocUtil {
     }
 
     /**
-     * 获取 Docx 默认保存位置
-     * @param FileName 文件名
-     * @return
-     */
-    public static String getDefaultDocxPath(String FileName) {
-        return getDefaultPath() + FileName + ".docx";
-    }
-
-    /**
-     * 获取 Pdf 默认保存位置
-     * @param FileName
-     * @return
-     */
-    public static String getDefaultPdfPath(String FileName) {
-        return getDefaultPath() + FileName + ".pdf";
-    }
-
-
-
-    /**
      * 创建 Docx 文件，插入笔记标题与内容
      *
      * @param Path        Environment.getExternalStorageDirectory().getAbsolutePath() + File.separator + "..."
@@ -138,7 +118,7 @@ public class ToDocUtil {
                 docFile.delete();
             else
                 return false;
-
+        Log.e("TAG", "CreateDocxByNote: "+Path );
         CustomXWPFDocument docx = new CustomXWPFDocument();
 
         XWPFParagraph para = docx.createParagraph();

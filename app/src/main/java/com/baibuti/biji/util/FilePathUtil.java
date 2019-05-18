@@ -10,6 +10,7 @@ import android.os.Environment;
 import android.provider.DocumentsContract;
 import android.provider.MediaStore;
 import android.support.v4.content.FileProvider;
+import android.util.Log;
 
 import com.baibuti.biji.R;
 
@@ -59,20 +60,29 @@ public class FilePathUtil {
             return path;
         }
 
+        // content://com.android.providers.media.documents/document/image%3A172304
+        // content://com.baibuti.biji.FileProvider/images/NoteImage/20190518133507370_Photo.jpg
+
         // 2. 以 content:// 开头的
 
         // content://com.baibuti.biji.FileProvider/
         if (isAppDocument(uri)) {
-            // content://com.baibuti.biji.FileProvider/images/photo_20190323225817.jpg
-
             // MediaProvider
-
             final String[] fin = (uri + "").split(File.separator);
-            final String filename = SDCardUtil.getPictureDir() + fin[4];
-
+            String filename = "";
+            switch (fin[3]) {
+                case "images":
+                    // /images/NoteImage/20190518133854935_Photo.jpg
+                    int index = uri.getPath().indexOf("/images/");
+                    filename = uri.getPath().substring(index + "/images/".length());
+                break;
+                default:
+                break;
+            }
+            // filename == NoteImage/20190518133854935_Photo.jpg
+            filename = SDCardUtil.getAppDir() + filename;
             return filename;
         }
-
 
         // content://media/extenral/images/media/17766
         if (ContentResolver.SCHEME_CONTENT.equals(uri.getScheme()) && Build.VERSION.SDK_INT < Build.VERSION_CODES.KITKAT) {
@@ -185,6 +195,7 @@ public class FilePathUtil {
      * @return 是否是本App的Provider
      */
     private static boolean isAppDocument(Uri uri) {
+        // // content://com.baibuti.biji.FileProvider/images/NoteImage/20190518133507370_Photo.jpg
         return "com.baibuti.biji.FileProvider".equals(uri.getAuthority());
     }
 

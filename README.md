@@ -2,12 +2,12 @@
 + SCUT 百步梯项目
 
 ### 开发环境
-+ AS: 3.4
++ AS: 3.4.1
 + gradle: 3.3.2
 
 + buildToolsVersion: 28.0.3
 
-### 参考链接
+### 参考库
 
 #### 外部库修改
 + [xrichtext](https://github.com/sendtion/XRichText) (RichTextView.java - addImageViewAtIndex())

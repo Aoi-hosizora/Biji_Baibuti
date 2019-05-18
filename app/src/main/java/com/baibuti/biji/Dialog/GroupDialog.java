@@ -1,10 +1,11 @@
 package com.baibuti.biji.Dialog;
 
 import android.app.AlertDialog;
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.os.Bundle;
+import android.os.Handler;
 import android.util.Log;
-import android.widget.AdapterView;
 import android.widget.Button;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -40,6 +41,7 @@ public class GroupDialog extends AlertDialog implements OnClickListener, IShowLo
 
     public interface OnUpdateGroupListener{
         void UpdateGroupFinished(); // 修改引发的事件
+        void OnUICreateFinished(); // 显示成功
     }
 
     public GroupDialog(Context context, OnUpdateGroupListener mListener) {
@@ -81,6 +83,8 @@ public class GroupDialog extends AlertDialog implements OnClickListener, IShowLo
         GroupListView.setAdapter(groupAdapter);
         GroupListView.setVisibility(View.VISIBLE);
 
+        if (mListener != null)
+            mListener.OnUICreateFinished();
     }
 
     /**

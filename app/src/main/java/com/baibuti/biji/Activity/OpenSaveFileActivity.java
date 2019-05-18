@@ -31,6 +31,8 @@ import java.util.List;
 
 public class OpenSaveFileActivity extends AppCompatActivity implements View.OnClickListener, IShowLog {
 
+    // region 声明: Flag isReturnType
+
     private static final int SELECT_FILE_OPEN = 0;
     private static final int SELECT_FILE_SAVE = 1;
     /**
@@ -40,6 +42,17 @@ public class OpenSaveFileActivity extends AppCompatActivity implements View.OnCl
      */
     private int Select_type = SELECT_FILE_SAVE;
 
+    /**
+     * 返回时是否需要返回类型
+     *      true: 返回的文件名内含后缀名，类型为后缀名
+     *      false: 返回的文件名内含后缀名，不返回后缀名
+     */
+    private boolean isReturnType = true;
+
+    // endregion 声明: Flag
+
+    // region 声明: UI
+
     private TextView m_PathDirTextView;
     private ListView m_dirListView;
     private Button m_NewFolderButton;
@@ -47,6 +60,10 @@ public class OpenSaveFileActivity extends AppCompatActivity implements View.OnCl
     private Button m_OKButton;
     private EditText m_FileNameEditText;
     private Spinner m_FileTypeSpinner;
+
+    // endregion 声明: UI
+
+    // region 声明: FileType FileFilter SelectedName SelectedType
 
     private String[] FileType = {".docx",".pdf"};
     /**
@@ -66,10 +83,18 @@ public class OpenSaveFileActivity extends AppCompatActivity implements View.OnCl
      */
     private String FileFilterType;
 
+    // endregion 声明: FileType FileFilter SelectedName SelectedType
+
+    // region 声明: 文件夹操作信息
+
     private String m_sdcardDirectory = "";
     private String m_dir = "";
     private List<String> m_subdirs;
     private ArrayAdapter<String> m_listAdapter;
+
+    // endregion 声明: 文件夹操作信息
+
+    // region 界面 选择菜单 文件列表 onCreate setupSpinner setupDirList ShowLogE
 
     /**
      * 四个 Extra:
@@ -77,6 +102,7 @@ public class OpenSaveFileActivity extends AppCompatActivity implements View.OnCl
      *      FileName
      *      FileType
      *      CurrentDir
+     *      isReturnType
      *
      * @param savedInstanceState
      */
@@ -106,6 +132,7 @@ public class OpenSaveFileActivity extends AppCompatActivity implements View.OnCl
         m_dir = getIntent().getStringExtra("CurrentDir");
 
         FileFilterType = getIntent().getStringExtra("FileFilterType");
+        isReturnType = getIntent().getBooleanExtra("isReturnType", true);
         //////////
 
         m_PathDirTextView = findViewById(R.id.id_OpenSaveFile_PathDirTextView);
@@ -142,11 +169,38 @@ public class OpenSaveFileActivity extends AppCompatActivity implements View.OnCl
 
     }
 
-    @Override
-    public void ShowLogE(String FunctionName, String Msg) {
-        String ClassName = "OpenSaveFileActivity";
-        Log.e(getResources().getString(R.string.IShowLog_LogE),
-                ClassName + ": " + FunctionName + "###" + Msg); // MainActivity: initDatas###data=xxx
+    /**
+     * 设置文件类型选择的 Spinner 弹出菜单
+     */
+    private void setupSpinner() {
+        if (isReturnType) { // 显示后缀名 Spinner
+
+            m_FileTypeSpinner.setDropDownWidth(100);
+            m_FileTypeSpinner.setDropDownHorizontalOffset(100);
+            m_FileTypeSpinner.setDropDownVerticalOffset(-120);
+
+            // 显示
+            ArrayAdapter<String> spinnerAdapter = new ArrayAdapter<>(this,
+                    R.layout.modulelayout_opensavefile_spinneritemselect, FileType);
+            // 下拉
+            spinnerAdapter.setDropDownViewResource(R.layout.modulelayout_opensavefile_spinneritemdrop);
+            //spinnerAdapter.setDropDownViewTheme(Theme.LIGHT);
+            m_FileTypeSpinner.setAdapter(spinnerAdapter);
+
+            m_FileTypeSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+                @Override
+                public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                    Selected_File_Type = FileType[position];
+                    ShowLogE("setupSpinner", "Selected_File_Type=" + Selected_File_Type);
+                }
+
+                @Override
+                public void onNothingSelected(AdapterView<?> parent) { }
+            });
+        }
+        else {
+            // 不显示
+        }
     }
 
     /**
@@ -201,46 +255,29 @@ public class OpenSaveFileActivity extends AppCompatActivity implements View.OnCl
         });
     }
 
-    /**
-     * 设置文件类型选择的 Spinner 弹出菜单
-     */
-    private void setupSpinner() {
-        m_FileTypeSpinner.setDropDownWidth(100);
-        m_FileTypeSpinner.setDropDownHorizontalOffset(100);
-        m_FileTypeSpinner.setDropDownVerticalOffset(-120);
-
-        // 显示
-        ArrayAdapter<String> spinnerAdapter = new ArrayAdapter<>(this,
-                R.layout.modulelayout_opensavefile_spinneritemselect, FileType);
-        // 下拉
-        spinnerAdapter.setDropDownViewResource(R.layout.modulelayout_opensavefile_spinneritemdrop);
-        //spinnerAdapter.setDropDownViewTheme(Theme.LIGHT);
-        m_FileTypeSpinner.setAdapter(spinnerAdapter);
-
-        m_FileTypeSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-            @Override
-            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                Selected_File_Type = FileType[position];
-                ShowLogE("setupSpinner", "Selected_File_Type=" + Selected_File_Type);
-            }
-
-            @Override
-            public void onNothingSelected(AdapterView<?> parent) { }
-        });
+    @Override
+    public void ShowLogE(String FunctionName, String Msg) {
+        String ClassName = "OpenSaveFileActivity";
+        Log.e(getResources().getString(R.string.IShowLog_LogE),
+                ClassName + ": " + FunctionName + "###" + Msg); // MainActivity: initDatas###data=xxx
     }
+
+    // endregion 界面 选择菜单 文件列表
+
+    // region 按钮点击事件 onClick onOptionsItemSelected AndroidHome_Click OKButton_Click CancelButton_Click NewFolderButton_Click
 
     @Override
     public void onClick(View v) {
         switch (v.getId()) {
             case R.id.id_OpenSaveFile_OKButton:
                 OKButton_Click();
-            break;
+                break;
             case R.id.id_OpenSaveFile_CancelButton:
                 CancelButton_Click();
-            break;
+                break;
             case R.id.id_OpenSaveFile_NewFolderButton:
                 NewFolderButton_Click();
-            break;
+                break;
         }
     }
 
@@ -249,7 +286,7 @@ public class OpenSaveFileActivity extends AppCompatActivity implements View.OnCl
         switch (item.getItemId()) {
             case android.R.id.home:
                 AndroidHome_Click();
-            break;
+                break;
         }
         return super.onOptionsItemSelected(item);
     }
@@ -271,6 +308,7 @@ public class OpenSaveFileActivity extends AppCompatActivity implements View.OnCl
      * 确定打开或者保存
      */
     private void OKButton_Click() {
+        // 判断覆盖在各自的活动中判断
         BackToActivity(true);
     }
 
@@ -279,38 +317,6 @@ public class OpenSaveFileActivity extends AppCompatActivity implements View.OnCl
      */
     private void CancelButton_Click() {
         BackToActivity(false);
-    }
-
-    private String getFileNameWithoutEx() {
-        String filename = m_dir + "/" + Selected_File_Name;
-        if (filename.contains(".")) {
-            int dot = filename.lastIndexOf('.');
-            if ((dot > -1) && (dot < (filename.length())))
-                filename = filename.substring(0, dot);
-        }
-        return filename;
-    }
-
-    /**
-     * 返回上一活动，并且传送信息
-     * @param IsSend 是否传递信息
-     */
-    private void BackToActivity(boolean IsSend) {
-        Intent BackIntent = new Intent();
-        if (Select_type == SELECT_FILE_SAVE) {
-            if (IsSend) {
-                BackIntent.putExtra("path", getFileNameWithoutEx() + Selected_File_Type);
-                BackIntent.putExtra("type", Selected_File_Type);
-                setResult(RESULT_OK, BackIntent);
-            }
-            else {
-                setResult(RESULT_CANCELED, BackIntent);
-            }
-            finish();
-        }
-        else {
-            // 未涉及
-        }
     }
 
     /**
@@ -349,7 +355,50 @@ public class OpenSaveFileActivity extends AppCompatActivity implements View.OnCl
         new_folder_dialog.show();
     }
 
-    // region 文件夹操作 createSubDir updateDirectory getDirectories
+    // endregion 确定返回新建 按钮点击事件 返回事件
+
+    // region 返回活动 文件名处理 BackToActivity getFileNameWithoutEx
+
+    /**
+     * 返回上一活动，并且传送信息
+     * @param IsSend 是否传递信息
+     */
+    private void BackToActivity(boolean IsSend) {
+        Intent BackIntent = new Intent();
+        if (Select_type == SELECT_FILE_SAVE) {
+            if (IsSend) {
+                String filename = m_dir + "/" + m_FileNameEditText.getText();
+
+
+                BackIntent.putExtra("path", filename + Selected_File_Type);
+
+                if (isReturnType) // 单独返回类型
+                    BackIntent.putExtra("type", Selected_File_Type);
+
+                setResult(RESULT_OK, BackIntent);
+            }
+            else {
+                setResult(RESULT_CANCELED, BackIntent);
+            }
+            finish();
+        }
+        else {
+            // 未涉及
+        }
+    }
+
+    private String getFileNameWithoutEx(String filename) {
+        if (filename.contains(".")) {
+            int dot = filename.lastIndexOf('.');
+            if ((dot > -1) && (dot < (filename.length())))
+                filename = filename.substring(0, dot);
+        }
+        return filename;
+    }
+
+    // endregion 返回活动 文件名处理
+
+    // region 文件夹操作 createSubDir updateDirectory getDirectories IsFilteredFileName
 
     /**
      * 新建文件夹，NewFolderButton_Click() 用
@@ -374,9 +423,11 @@ public class OpenSaveFileActivity extends AppCompatActivity implements View.OnCl
         m_PathDirTextView.setText(String.format(getString(R.string.OpenSaceActivity_NowPathTextView), m_dir));
         m_listAdapter.notifyDataSetChanged();
         // #scorch
-        if (Select_type == SELECT_FILE_SAVE || Select_type == SELECT_FILE_OPEN) {
+        if (Select_type == SELECT_FILE_SAVE || Select_type == SELECT_FILE_OPEN)
+            if (isReturnType)
+                m_FileNameEditText.setText(getFileNameWithoutEx(Selected_File_Name));
+            else
             m_FileNameEditText.setText(Selected_File_Name);
-        }
     }
 
     /**

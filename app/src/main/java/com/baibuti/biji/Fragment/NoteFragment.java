@@ -49,7 +49,10 @@ import static android.app.Activity.RESULT_OK;
 
 public class NoteFragment extends Fragment implements View.OnClickListener, IShowLog {
 
-//     private RecyclerView mNoteList;
+    // region 声明: View UI ProgressDialog Toolbar
+
+    private View view;
+
     private RecyclerViewEmptySupport mNoteList;
 
     private FloatingActionsMenu m_fabmenu;
@@ -58,7 +61,13 @@ public class NoteFragment extends Fragment implements View.OnClickListener, ISho
     private SlidingMenu slidingMenu;
 
     private ProgressDialog loadingDialog;
+    private ProgressDialog loadingGroupDialog;
+
     private Toolbar m_toolbar;
+
+    // endregion 声明: View UI ProgressDialog Toolbar
+
+    // region 声明: flag REQ
 
     private static final int NOTE_NEW = 0; // new
     private static final int NOTE_UPDATE = 1; // modify
@@ -66,9 +75,18 @@ public class NoteFragment extends Fragment implements View.OnClickListener, ISho
     private static final int REQ_NOTE_NEW = 2; // 从 MNote 返回
     private static final int REQ_NOTE_UPDATE = 1; // 从 VMNote 返回
 
-    private View ListEmptyView;
+    // endregion 声明: flag REQ
 
-    private View view;
+    // region 声明: 一些等待的秒数
+
+    private final static int SearchReturnSecond = 200;
+    private final static int SwipeRefreshSecond = 100;
+    private final static int ShowGroupDlgSecond = 10;
+    private final static int HideGroupPrgSecond = 100;
+
+    // endregion 声明: 一些等待的秒数
+
+    // region 创建界面 菜单栏 浮动菜单 等待框 搜索框 onCreateView initToolbar initFloatingActionBar setupProgressAndSR initSearchFrag ShowLogE onClick
 
     @Nullable
     @Override
@@ -86,27 +104,13 @@ public class NoteFragment extends Fragment implements View.OnClickListener, ISho
             setHasOptionsMenu(true);
 
             m_fabmenu = (FloatingActionsMenu) view.findViewById(R.id.note_fabmenu);
-
             slidingMenu = ((MainActivity)getActivity()).getSlidingMenu();
 
             mNoteList = view.findViewById(R.id.note_list);
-            ListEmptyView = view.findViewById(R.id.note_emptylist);
+            View ListEmptyView = view.findViewById(R.id.note_emptylist);
             mNoteList.setEmptyView(ListEmptyView);
 
-
-            mSwipeRefresh = (SwipeRefreshLayout) view.findViewById(R.id.note_listsrl);
-            mSwipeRefresh.setColorSchemeResources(R.color.colorPrimary);
-//        mSwipeRefresh.setColorSchemeColors(Color.RED,Color.BLUE,Color.GREEN);
-            mSwipeRefresh.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
-                @Override
-                public void onRefresh() {
-                    refreshdata(500);
-                }
-            });
-
-            loadingDialog = new ProgressDialog(getContext());
-            loadingDialog.setMessage(getResources().getString(R.string.NoteFragment_LoadingData));
-            loadingDialog.setCanceledOnTouchOutside(false);
+            setupProgressAndSR();
 
             initToolbar(view);
             initFloatingActionBar(view);
@@ -119,22 +123,8 @@ public class NoteFragment extends Fragment implements View.OnClickListener, ISho
         return view;
     }
 
-
-
     /**
-     * IShowLog 接口，全局设置 Log 格式
-     * @param FunctionName
-     * @param Msg
-     */
-    @Override
-    public void ShowLogE(String FunctionName, String Msg) {
-        String ClassName = "NoteFragment";
-        Log.e(getResources().getString(R.string.IShowLog_LogE),
-                ClassName + ": " + FunctionName + "###" + Msg); // MainActivity: initDatas###data=xxx
-    }
-
-    /**
-     * 初始化菜单栏
+     * 初始化菜单栏以及标题
      * @param view
      */
     private void initToolbar(View view) {
@@ -193,6 +183,87 @@ public class NoteFragment extends Fragment implements View.OnClickListener, ISho
         });
     }
 
+    /**
+     * 设置 SwipeRefresh ProgressDialog
+     */
+    private void setupProgressAndSR() {
+        mSwipeRefresh = (SwipeRefreshLayout) view.findViewById(R.id.note_listsrl);
+        mSwipeRefresh.setColorSchemeResources(R.color.colorPrimary);
+        // mSwipeRefresh.setColorSchemeColors(Color.RED,Color.BLUE,Color.GREEN);
+        mSwipeRefresh.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+            @Override
+            public void onRefresh() {
+                refreshdata(500);
+            }
+        });
+
+        loadingDialog = new ProgressDialog(getContext());
+        loadingDialog.setMessage(getResources().getString(R.string.NoteFragment_LoadingData));
+        loadingDialog.setCanceledOnTouchOutside(false);
+
+        loadingGroupDialog = new ProgressDialog(getContext());
+        loadingGroupDialog.setMessage(getContext().getString(R.string.NoteFragment_LoadingGroupData));
+        loadingGroupDialog.setCanceledOnTouchOutside(false);
+    }
+
+    /**
+     * 初始化搜索框
+     */
+    private void initSearchFrag() {
+        // 添加搜索框
+        searchFragment = com.wyt.searchbox.SearchFragment.newInstance();
+        searchFragment.setAllowReturnTransitionOverlap(true);
+        searchFragment.setOnSearchClickListener(new com.wyt.searchbox.custom.IOnSearchClickListener() {
+            @Override
+            public void OnSearchClick(String keyword) {
+
+                try {
+                    if (!keyword.isEmpty()) {
+
+                        IsSearching = true;
+                        SearchingStr = keyword;
+
+                        initListView(search(keyword));
+
+//                    ShowLogE("initSearchFrag", search(keyword).isEmpty()+"");
+
+                        m_toolbar.getMenu().findItem(R.id.action_search_back).setVisible(true);
+                        mSwipeRefresh.setEnabled(false);
+                        m_fabmenu.setVisibility(View.GONE);
+                        m_toolbar.setTitle(String.format(getContext().getString(R.string.notefragment_menu_search_content), keyword));
+                    }
+                }
+                catch (Exception ex) {
+                    ex.printStackTrace();
+                }
+
+            }
+        });
+    }
+
+    /**
+     * IShowLog 接口，全局设置 Log 格式
+     * @param FunctionName
+     * @param Msg
+     */
+    @Override
+    public void ShowLogE(String FunctionName, String Msg) {
+        String ClassName = "NoteFragment";
+        Log.e(getResources().getString(R.string.IShowLog_LogE),
+                ClassName + ": " + FunctionName + "###" + Msg); // MainActivity: initDatas###data=xxx
+    }
+
+
+    @Override
+    public void onClick(View v) {
+        switch (v.getId()) {
+
+        }
+    }
+
+    // endregion 创建界面 菜单栏 浮动菜单 等待框 搜索框
+
+    // region 搜索处理 IsSearching IsSearchingNull getIsSearching SearchingStr search SearchFracBack
 
     /**
      * 用于返回数据时判断当前是否处在搜索页面
@@ -237,41 +308,6 @@ public class NoteFragment extends Fragment implements View.OnClickListener, ISho
     }
 
     /**
-     * 初始化搜索框
-     */
-    private void initSearchFrag() {
-        // 添加搜索框
-        searchFragment = com.wyt.searchbox.SearchFragment.newInstance();
-        searchFragment.setAllowReturnTransitionOverlap(true);
-        searchFragment.setOnSearchClickListener(new com.wyt.searchbox.custom.IOnSearchClickListener() {
-            @Override
-            public void OnSearchClick(String keyword) {
-
-                try {
-                    if (!keyword.isEmpty()) {
-
-                        IsSearching = true;
-                        SearchingStr = keyword;
-
-                        initListView(search(keyword));
-
-//                    ShowLogE("initSearchFrag", search(keyword).isEmpty()+"");
-
-                        m_toolbar.getMenu().findItem(R.id.action_search_back).setVisible(true);
-                        mSwipeRefresh.setEnabled(false);
-                        m_fabmenu.setVisibility(View.GONE);
-                        m_toolbar.setTitle(String.format(getContext().getString(R.string.notefragment_menu_search_content), keyword));
-                    }
-                }
-                catch (Exception ex) {
-                    ex.printStackTrace();
-                }
-
-            }
-        });
-    }
-
-    /**
      * 返回原界面，退出搜索
      */
     public void SearchFracBack() {
@@ -281,7 +317,7 @@ public class NoteFragment extends Fragment implements View.OnClickListener, ISho
             @Override
             public void run() {
                 try {
-                    Thread.sleep(200);
+                    Thread.sleep(SearchReturnSecond); // 200
                 }
                 catch (InterruptedException ex) {
                     ex.printStackTrace();
@@ -310,13 +346,9 @@ public class NoteFragment extends Fragment implements View.OnClickListener, ISho
 
     }
 
+    // endregion 搜索处理
 
-    @Override
-    public void onClick(View v) {
-        switch (v.getId()) {
-
-        }
-    }
+    // region 列表数据 初始化各种数据和适配器 下拉刷新 initData initAdapter refreshNoteList refreshGroupList refreshdata refreshAll
 
     private List<Note> NoteList;
     private List<Group> GroupList;
@@ -390,6 +422,9 @@ public class NoteFragment extends Fragment implements View.OnClickListener, ISho
         }, ms);
     }
 
+    /**
+     * 下拉刷新用
+     */
     public void refreshAll() {
         initData();
         initAdapter();
@@ -397,28 +432,53 @@ public class NoteFragment extends Fragment implements View.OnClickListener, ISho
         refreshGroupList();
     }
 
+    // endregion 初始化各种数据和适配器 下拉刷新
+
+    // region 显示分组 ShowGroupDialog
+
     /**
      * 显示 分类 对话框
      */
     public void ShowGroupDialog() {
-        GroupDialog dialog = new GroupDialog(getContext(), new GroupDialog.OnUpdateGroupListener() {
 
+        loadingGroupDialog.show();
+        new Handler().postDelayed(new Runnable() {
             @Override
-            public void UpdateGroupFinished() {
+            public void run() {
+                GroupDialog dialog = new GroupDialog(getContext(), new GroupDialog.OnUpdateGroupListener() {
 
-                // 更新完分组信息后同时在列表中刷新数据
-                refreshdata(100);
+                    @Override
+                    public void OnUICreateFinished() {
+                        // 双重等待隐藏等待对话框
+                        new Handler().postDelayed(new Runnable() {
+                            @Override
+                            public void run() {
+                                loadingGroupDialog.dismiss();
+                            }
+                        }, HideGroupPrgSecond); // 100
+                    }
 
-                if (IsSearching)
-                    if (!IsSearchingNull)
-                        initListView(search(SearchingStr));
-                    else
-                        initListView(NoteList);
+                    @Override
+                    public void UpdateGroupFinished() {
+
+                        // 更新完分组信息后同时在列表中刷新数据
+                        refreshdata(SwipeRefreshSecond); // 100
+
+                        if (IsSearching)
+                            if (!IsSearchingNull)
+                                initListView(search(SearchingStr));
+                            else
+                                initListView(NoteList);
+                    }
+                });
+                dialog.show();
             }
-        });
-        dialog.setView(new EditText(getContext()));  //若对话框无法弹出输入法，加上这句话
-        dialog.show();
+        }, ShowGroupDlgSecond); // 10
     }
+
+    // endregion 显示分组
+
+    // region 初始化笔记列表 进入笔记 SelectedNoteItem initListView
 
     /**
      * 当前选中的笔记，用于返回时修改列表
@@ -463,6 +523,10 @@ public class NoteFragment extends Fragment implements View.OnClickListener, ISho
         });
     }
 
+    // endregion 进入笔记
+
+    // region 笔记增删改 活动返回 DeleteNote HandleNewUpdateNote onActivityResult
+
     /**
      * 删除笔记
      * @param view
@@ -484,20 +548,20 @@ public class NoteFragment extends Fragment implements View.OnClickListener, ISho
                             noteAdapter.notifyDataSetChanged();
 
                             Snackbar.make(view , R.string.NoteFrag_DeleteAlertDeleteSuccess, Snackbar.LENGTH_LONG)
-                                .setAction(R.string.NoteFrag_DeleteAlertUndo, new View.OnClickListener() {
-                                    @Override
-                                    public void onClick(View v) {
-                                        try {
-                                            noteDao.insertNote(note);
-                                            NoteList.add(note);
-                                            Collections.sort(NoteList);
-                                            noteAdapter.notifyDataSetChanged();
-                                        } catch (Exception ex) {
-                                            ex.printStackTrace();
+                                    .setAction(R.string.NoteFrag_DeleteAlertUndo, new View.OnClickListener() {
+                                        @Override
+                                        public void onClick(View v) {
+                                            try {
+                                                noteDao.insertNote(note);
+                                                NoteList.add(note);
+                                                Collections.sort(NoteList);
+                                                noteAdapter.notifyDataSetChanged();
+                                            } catch (Exception ex) {
+                                                ex.printStackTrace();
+                                            }
+                                            Snackbar.make(view, R.string.NoteFrag_DeleteAlertUndoSuccess, Snackbar.LENGTH_SHORT).show();
                                         }
-                                        Snackbar.make(view, R.string.NoteFrag_DeleteAlertUndoSuccess, Snackbar.LENGTH_SHORT).show();
-                                    }
-                                }).show();
+                                    }).show();
                         }
                     }
                 })
@@ -506,7 +570,6 @@ public class NoteFragment extends Fragment implements View.OnClickListener, ISho
 
         deleteAlert.show();
     }
-
 
     /**
      * 处理从 fab 新建或者从 list 修改，活动转换
@@ -535,8 +598,6 @@ public class NoteFragment extends Fragment implements View.OnClickListener, ISho
 
     }
 
-    //////////////////////////////////////////////////
-
     boolean hasNoteReturned = false; // 标识是否回退过
 
     /**
@@ -549,51 +610,50 @@ public class NoteFragment extends Fragment implements View.OnClickListener, ISho
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
-            switch (requestCode) {
-                case REQ_NOTE_NEW:
-                case REQ_NOTE_UPDATE:
+        switch (requestCode) {
+            case REQ_NOTE_NEW:
+            case REQ_NOTE_UPDATE:
 
-                    ShowLogE("onActivityResult", "HasReturn");
-                    if (resultCode == RESULT_OK) {
+                ShowLogE("onActivityResult", "HasReturn");
+                if (resultCode == RESULT_OK) {
 
-                        int flag = data.getIntExtra("flag", NOTE_NEW);
-                        Note note = (Note) data.getSerializableExtra("notedata");
+                    int flag = data.getIntExtra("flag", NOTE_NEW);
+                    Note note = (Note) data.getSerializableExtra("notedata");
 
+                    if (flag == NOTE_NEW) {
+                        hasNoteReturned = true;
+                        NoteList.add(NoteList.size(), note);
+                        SelectedNoteItem = NoteList.indexOf(note);
+                        HandleNewUpdateNote(false, NoteList.get(SelectedNoteItem), true);
+                    }
+                    else {
+                        NoteList.set(SelectedNoteItem, note);
 
-//                        ShowLogE("onActivityResult", (flag == NOTE_NEW)?"NEW":"UPDATE");
-//                        Toast.makeText(getContext(), (flag == NOTE_NEW)?"NEW":"UPDATE", Toast.LENGTH_SHORT).show();
-
-                        if (flag == NOTE_NEW) {
-                            hasNoteReturned = true;
-                            NoteList.add(NoteList.size(), note);
-                            SelectedNoteItem = NoteList.indexOf(note);
-                            HandleNewUpdateNote(false, NoteList.get(SelectedNoteItem), true);
-                        }
-                        else {
-                            NoteList.set(SelectedNoteItem, note);
-
-                            //////
-                            Collections.sort(NoteList);
-                            noteAdapter.notifyDataSetChanged();
+                        //////
+                        Collections.sort(NoteList);
+                        noteAdapter.notifyDataSetChanged();
 
 
-                            if (IsSearching)
-                                initListView(search(SearchingStr));
-                            else
-                                initListView(NoteList);
+                        if (IsSearching)
+                            initListView(search(SearchingStr));
+                        else
+                            initListView(NoteList);
 
-                            if (hasNoteReturned)
-                                Toast.makeText(getContext(), String.format(getResources().getString(R.string.NoteFrag_ActivityReturnNewNote), note.getTitle()), Toast.LENGTH_SHORT).show();
-                            else
-                                Toast.makeText(getContext(), String.format(getResources().getString(R.string.NoteFrag_ActivityReturnUpdateNote), note.getTitle()), Toast.LENGTH_SHORT).show();
-
-                        }
-
+                        if (hasNoteReturned)
+                            Toast.makeText(getContext(), String.format(getResources().getString(R.string.NoteFrag_ActivityReturnNewNote), note.getTitle()), Toast.LENGTH_SHORT).show();
+                        else
+                            Toast.makeText(getContext(), String.format(getResources().getString(R.string.NoteFrag_ActivityReturnUpdateNote), note.getTitle()), Toast.LENGTH_SHORT).show();
 
                     }
+
+
+                }
                 break;
-            }
+        }
     }
+
+    // endregion 笔记增删改
+
 }
 
 
