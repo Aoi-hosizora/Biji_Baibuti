@@ -1,1 +1,6 @@
 include ':app', ':slidingMenu', ':xrichtext', ':image_lib', ':searchbox'
+
+project(':slidingMenu').projectDir = new File('libs/slidingMenu')
+project(':xrichtext').projectDir = new File('libs/xrichtext')
+project(':image_lib').projectDir = new File('libs/image_lib')
+project(':searchbox').projectDir = new File('libs/searchbox')

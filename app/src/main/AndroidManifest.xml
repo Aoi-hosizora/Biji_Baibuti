@@ -16,7 +16,7 @@
 
         <!-- Main Activity -->
         <activity
-            android:name=".Activity.MainActivity"
+            android:name=".UI.Activity.MainActivity"
             android:screenOrientation="portrait"
             android:windowSoftInputMode="adjustPan">
             <intent-filter>
@@ -27,7 +27,7 @@
 
         <!-- MNote Activity -->
         <activity
-            android:name=".Activity.ModifyNoteActivity"
+            android:name=".UI.Activity.ModifyNoteActivity"
             android:screenOrientation="portrait">
             <intent-filter>
                 <action android:name="activitytest.example.com.activitytest.ModifyNoteActivity" />
@@ -37,7 +37,7 @@
 
         <!-- VMNote Activity -->
         <activity
-            android:name=".Activity.ViewModifyNoteActivity"
+            android:name=".UI.Activity.ViewModifyNoteActivity"
             android:screenOrientation="portrait">
             <intent-filter>
                 <action android:name="activitytest.example.com.activitytest.ViewModifyNoteActivity" />
@@ -47,7 +47,7 @@
 
         <!-- OpenSaveFile Activity -->
         <activity
-            android:name=".Activity.OpenSaveFileActivity"
+            android:name=".UI.Activity.OpenSaveFileActivity"
             android:screenOrientation="portrait">
             <intent-filter>
                 <action android:name="activitytest.example.com.activitytest.ViewModifyNoteActivity" />

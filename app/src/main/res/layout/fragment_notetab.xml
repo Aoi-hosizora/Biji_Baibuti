@@ -45,7 +45,7 @@
         app:layout_constraintTop_toBottomOf="@id/note_toolbar"
         app:layout_constraintVertical_bias="1.0">
 
-        <com.baibuti.biji.Widget.RecyclerViewEmptySupport
+        <com.baibuti.biji.UI.Widget.RecyclerViewEmptySupport
             android:id="@+id/note_list"
             android:layout_width="match_parent"
             android:layout_height="0dp"
