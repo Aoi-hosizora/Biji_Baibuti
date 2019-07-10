@@ -5,6 +5,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
+import android.widget.ListView;
 import android.widget.TextView;
 
 import com.baibuti.biji.Data.Models.FileClass;
@@ -17,6 +18,7 @@ public class FileClassAdapter extends BaseAdapter {
     public List<FileClass> list;
     LayoutInflater inflater;
     Context context;
+    private boolean firstStart = true;
 
     public FileClassAdapter(Context context, List<FileClass> list) {
         this.list = list;
@@ -62,6 +64,12 @@ public class FileClassAdapter extends BaseAdapter {
         }
 
         holder.fileClassListItemName.setText(getItem(position).getFileClassName());
+
+        convertView.setBackgroundColor(convertView.getContext().getResources().getColor(R.color.grey_250));
+        if(firstStart && position == 0) {
+            convertView.setBackgroundColor(convertView.getContext().getResources().getColor(R.color.background));
+            firstStart = false;
+        }
 
         return convertView;
     }

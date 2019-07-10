@@ -3,10 +3,14 @@ package com.baibuti.biji.UI.Fragment;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.ContextMenu;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -16,14 +20,22 @@ import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.ListView;
+import android.widget.SearchView;
+import android.widget.TextView;
 import android.widget.Toast;
 
-import com.baibuti.biji.Data.Models.FileClass;
+import com.baibuti.biji.Data.Adapters.DocumentAdapter;
 import com.baibuti.biji.Data.Adapters.FileClassAdapter;
-import com.baibuti.biji.R;
+import com.baibuti.biji.Data.Db.DocumentDao;
 import com.baibuti.biji.Data.Db.FileClassDao;
+import com.baibuti.biji.Data.Models.Document;
+import com.baibuti.biji.Data.Models.FileClass;
+import com.baibuti.biji.R;
 
+import java.io.File;
+import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -36,6 +48,18 @@ public class FileFragment extends Fragment {
     private View view;
     private int TAG_NEW = 0;
     private int TAG_RENAME = 1;
+    private int lastPositionClicked = 0;
+
+    private SearchView documentSearchView;
+
+    private TextView documentHeader;
+    private ImageButton documentViewConvertBtn;
+    private RecyclerView documentRecyclerView;
+    private List<Document> documentListItems = new ArrayList<>();
+    private DocumentAdapter documentAdapter;
+
+    private DocumentDao documentDao;
+    private List<List<Document> > documentListsByClass = new ArrayList<>();//保存各个文件分类下的文件列表
 
 
     @Nullable
@@ -49,10 +73,9 @@ public class FileFragment extends Fragment {
         else {
             view = inflater.inflate(R.layout.fragment_filetab, container, false);
 
-            ///
-
             initToolBar(view);
             initFileClassList(view);
+            initDocumentLayout(view);
 
         }
 
@@ -75,6 +98,17 @@ public class FileFragment extends Fragment {
                 //添加菜单逻辑
             }
         });
+        documentSearchView = (SearchView) view.findViewById(R.id.filefragment_filesearch);
+        //去除searchview下划线
+        try{
+            Class<?> argClass = documentSearchView.getClass();
+            Field ownField = argClass.getDeclaredField("mSearchPlate");
+            ownField.setAccessible(true);
+            View mView = (View) ownField.get(documentSearchView);
+            mView.setBackgroundColor(Color.TRANSPARENT);
+        }catch(Exception e){
+            e.printStackTrace();
+        }
     }
 
     private void initFileClassList(View view){
@@ -83,14 +117,29 @@ public class FileFragment extends Fragment {
         fileClassAdapter = new FileClassAdapter(getContext(), fileClassListItems);
         fileClassList = (ListView) view.findViewById(R.id.filefragment_fileclasses);
         fileClassList.setAdapter(fileClassAdapter);
-        fileClassList.setSelector(R.drawable.filefrag_fileclass_selector);
         fileClassList.setVerticalScrollBarEnabled(false);
         fileClassList.setDivider(null);
         fileClassList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int position, long id) {
 
-                //获取分类下的文件
+                //点击更改item背景颜色
+                if(position != fileClassList.getCount() - 1) {
+                    int firstVisiblePosition = fileClassList.getFirstVisiblePosition();
+                    if (null != fileClassList.getChildAt(lastPositionClicked - firstVisiblePosition))
+                        fileClassList.getChildAt(lastPositionClicked - firstVisiblePosition)
+                                .setBackgroundColor(getResources().getColor(R.color.grey_250));
+                    if (null != fileClassList.getChildAt(position - firstVisiblePosition)) {
+                        fileClassList.getChildAt(position - firstVisiblePosition)
+                                .setBackgroundColor(getResources().getColor(R.color.background));
+                        lastPositionClicked = position;
+                        FileClass currentFileClass = (FileClass) fileClassListItems.get(position);
+                        //更改文件列表标题
+                        documentHeader.setText(currentFileClass.getFileClassName());
+                        //获取分类下的文件
+                        updateDocumentRecyclerview(position);
+                    }
+                }
 
                 //点击添加新类别
                 if(fileClassList.getCount() == position + 1){
@@ -112,6 +161,24 @@ public class FileFragment extends Fragment {
             fileClassListItems.add(fileClassAdapter.getCount(), temp);
             fileClassAdapter.notifyDataSetChanged();
         }
+    }
+
+    private void initDocumentLayout(View view){
+        initDocuments();
+        documentHeader = (TextView) view.findViewById(R.id.filefragment_document_list_header);
+        documentViewConvertBtn = (ImageButton) view.findViewById(R.id.filefragment_document_importfile);
+        documentHeader.setText(R.string.app_name);
+        documentViewConvertBtn.setImageResource(R.drawable.filefragment_document_import);
+        documentRecyclerView = (RecyclerView) view.findViewById(R.id.filefragment_document_list);
+        LinearLayoutManager layoutManager = new LinearLayoutManager(getContext());
+        documentRecyclerView.setLayoutManager(layoutManager);
+        documentListItems.clear();
+        documentListItems.addAll(documentListsByClass.get(0));
+        documentAdapter = new DocumentAdapter(documentListItems);
+        documentRecyclerView.setAdapter(documentAdapter);
+        /*if(null != getContext())
+            documentRecyclerView.addItemDecoration(new DividerItemDecoration(getContext(), DividerItemDecoration.VERTICAL));*/
+        //updateDocumentRecyclerview(0);
     }
 
     //选中菜单Item后触发
@@ -163,6 +230,8 @@ public class FileFragment extends Fragment {
                 try {
                     fileClassDao.deleteFileClass(fileClassListItems.get(menuInfo.position).getId());
                     fileClassListItems.remove(menuInfo.position);
+                    documentDao.deleteDocumentByClass(fileClassListItems.get(menuInfo.position).getFileClassName());
+                    documentListsByClass.remove(menuInfo.position);
                     fileClassAdapter.notifyDataSetChanged();
                 }catch (Exception e){
                     e.printStackTrace();
@@ -181,7 +250,20 @@ public class FileFragment extends Fragment {
         if (fileClassDao == null)
             fileClassDao = new FileClassDao(this.getContext());
 
+        if(documentDao == null)
+            documentDao = new DocumentDao(this.getContext());
+
+        //Test for saving files
+        documentDao.insertDocument(new Document("卧佛", "/storage/emulated/0/Biji/默认笔记.pdf"));
+        documentDao.insertDocument(new Document("哦唔去", "/storage/emulated/0/tencent/QQfile_recv/毕业设计任务书.doc"));
+
         fileClassListItems = fileClassDao.queryFileClassAll();
+        for(FileClass f: fileClassListItems){
+            if(!f.getFileClassName().equals("+")) {
+                List<Document> l = documentDao.queryDocumentAll(f.getFileClassName());
+                documentListsByClass.add(l);
+            }
+        }
     }
 
     private void addNewFileClass(){
@@ -201,7 +283,7 @@ public class FileFragment extends Fragment {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         //Toast.makeText(getContext(),
-                                //edit.getText().toString().trim(),Toast.LENGTH_SHORT).show();
+                        //edit.getText().toString().trim(),Toast.LENGTH_SHORT).show();
 
                         updateFileClassList(edit.getText().toString().trim(), TAG_NEW, null, 0);
 
@@ -243,6 +325,8 @@ public class FileFragment extends Fragment {
                     if(tag == TAG_NEW) {
                         fileClassDao.insertFileClass(newFileClass);
                         fileClassListItems.add(fileClassAdapter.getCount() - 1, newFileClass);
+                        List<Document> l = documentDao.queryDocumentAll(newFileClass.getFileClassName());
+                        documentListsByClass.add(position, l);
                     }
                     else if(tag == TAG_RENAME){
                         currentFileClass.setFileClassName(newFileClassName);
@@ -286,6 +370,37 @@ public class FileFragment extends Fragment {
                 .setNegativeButton(R.string.GroupDialog_DuplicateAlertOk, null)
                 .create();
         dupalert.show();
+    }
+
+    //Test for documentlist
+    private void initDocuments(){
+
+        File file;
+        for(List<Document> l: documentListsByClass){
+            if(l.size() == 0){
+                //所在分类文件列表为空
+                Toast.makeText(getContext(), "No files", Toast.LENGTH_LONG).show();
+            }
+            for(Document d: l){
+                file = new File(d.getDocumentPath());
+                String name = file.getName();
+                String type = name.substring(name.length() - 3);
+                d.setDocumentName(name);
+                d.setDocumentType(type);
+                Toast.makeText(getContext(), type, Toast.LENGTH_LONG).show();
+                Log.d("类型保存", "initDocuments: " + d.getDocumentType());
+            }
+        }
+    }
+
+    private void updateDocumentRecyclerview(int position){
+        documentListItems.clear();
+        documentListItems.addAll(documentListsByClass.get(position));
+        documentAdapter.notifyDataSetChanged();
+    }
+
+    private void importDocumentFromSD(){
+
     }
 
 }
