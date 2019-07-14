@@ -1,5 +1,19 @@
 <resources>
+
     <!-- Title -->
     <string name="SearchFrag_Header">搜题</string>
+
+    <!-- //////////////////////////////////////////////////// -->
+    <!-- ///////////////////  SearchFrag  ///////////////////-->
+
+    <!-- Main UI -->
+    <string name="SearchFrag_QuestionEditTextHint">题目&#8230;</string>
+    <string name="SearchFrag_SearchButtonText">搜索</string>
+    <string name="SearchFrag_SearchNullMessage">未输入查找内容</string>
+    <string name="SearchFrag_SearchingProgressText">搜索中&#8230;</string>
+
+    <!-- Dlg -->
+    <string name="SearchFrag_AlertDlg_PosButton">确定</string>
+    <string name="SearchFrag_AlertDlg_NormalTitle">提示</string>
 
 </resources>

@@ -20,5 +20,5 @@
 
 
     <!-- EmptyView -->
-    <string name="EmptyView_NothingList">无内容</string>
+    <string name="EmptyView_NothingList">什么都没找到</string>
 </resources>
