@@ -274,8 +274,6 @@ public class FileClassDao {
      * 删除一个分类
      */
     public int deleteFileClass(int fileClassId) throws EditDefaultFileClassException {
-        if (checkDefaultFileClass(queryFileClassById(fileClassId)))
-            throw new EditDefaultFileClassException();
 
         //////////////////////////////////////////////////
 

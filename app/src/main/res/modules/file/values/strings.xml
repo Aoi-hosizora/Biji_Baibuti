@@ -11,8 +11,7 @@
     <string name="FileClassDialog_NullTitleAlertTitle">错误</string>
     <string name="FileClassDialog_NullTitleAlertMsg">没有输入分类名，请补全内容。</string>
     <string name="FileClassDialog_NullTitleAlertPositiveButtonForOK">确定</string>
+    <string name="FileclassDialog_Renameclass">重命名</string>
 
-
-    <!-- Filefrag Rename Fileclass Dialog -->
-    <string name="FileClassDialog_RenameClass">重命名</string>
+    <string name="todo">TODO</string>
 </resources>
