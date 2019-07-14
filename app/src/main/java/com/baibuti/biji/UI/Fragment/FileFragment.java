@@ -33,6 +33,7 @@ import com.baibuti.biji.Data.Db.FileClassDao;
 import com.baibuti.biji.Data.Models.Document;
 import com.baibuti.biji.Data.Models.FileClass;
 import com.baibuti.biji.R;
+import com.baibuti.biji.UI.Dialog.FileImportDialog;
 
 import java.io.File;
 import java.lang.reflect.Field;
@@ -53,7 +54,7 @@ public class FileFragment extends Fragment {
     private SearchView documentSearchView;
 
     private TextView documentHeader;
-    private ImageButton documentViewConvertBtn;
+    private ImageButton documentImportBtn;
     private RecyclerView documentRecyclerView;
     private List<Document> documentListItems = new ArrayList<>();
     private DocumentAdapter documentAdapter;
@@ -139,6 +140,7 @@ public class FileFragment extends Fragment {
                         //获取分类下的文件
                         updateDocumentRecyclerview(position);
                     }
+                    documentImportBtn.setVisibility(View.VISIBLE);
                 }
 
                 //点击添加新类别
@@ -166,9 +168,9 @@ public class FileFragment extends Fragment {
     private void initDocumentLayout(View view){
         initDocuments();
         documentHeader = (TextView) view.findViewById(R.id.filefragment_document_list_header);
-        documentViewConvertBtn = (ImageButton) view.findViewById(R.id.filefragment_document_importfile);
+        documentImportBtn = (ImageButton) view.findViewById(R.id.filefragment_document_importfile);
         documentHeader.setText(R.string.app_name);
-        documentViewConvertBtn.setImageResource(R.drawable.filefragment_document_import);
+        documentImportBtn.setImageResource(R.drawable.filefragment_document_import);
         documentRecyclerView = (RecyclerView) view.findViewById(R.id.filefragment_document_list);
         LinearLayoutManager layoutManager = new LinearLayoutManager(getContext());
         documentRecyclerView.setLayoutManager(layoutManager);
@@ -179,9 +181,16 @@ public class FileFragment extends Fragment {
         /*if(null != getContext())
             documentRecyclerView.addItemDecoration(new DividerItemDecoration(getContext(), DividerItemDecoration.VERTICAL));*/
         //updateDocumentRecyclerview(0);
+        documentImportBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                FileImportDialog cdd=new FileImportDialog(getActivity());
+                cdd.show();
+            }
+        });
     }
 
-    //选中菜单Item后触发
+    //选中长按弹出的菜单项
     public boolean onContextItemSelected(MenuItem item){
 
         //关键代码在这里
@@ -225,14 +234,22 @@ public class FileFragment extends Fragment {
                 editDialog.create().show();
                 break;
             case 1:
-                //点击第二个菜单项要做的事，如获取点击的数据
+                //删除分类
                 //Toast.makeText(getContext(), ""+fileClassListItems.get(menuInfo.position).getFileClassName(), Toast.LENGTH_LONG).show();
                 try {
+
+                    if(documentHeader.getText().toString().equals(fileClassListItems.get(menuInfo.position).getFileClassName())) {
+                        documentListItems.clear();
+                        documentHeader.setText("");
+                        documentImportBtn.setVisibility(View.GONE);
+                    }
+
                     fileClassDao.deleteFileClass(fileClassListItems.get(menuInfo.position).getId());
-                    fileClassListItems.remove(menuInfo.position);
                     documentDao.deleteDocumentByClass(fileClassListItems.get(menuInfo.position).getFileClassName());
+                    fileClassListItems.remove(menuInfo.position);
                     documentListsByClass.remove(menuInfo.position);
                     fileClassAdapter.notifyDataSetChanged();
+
                 }catch (Exception e){
                     e.printStackTrace();
                     Toast.makeText(getContext(), "删除失败", Toast.LENGTH_LONG).show();

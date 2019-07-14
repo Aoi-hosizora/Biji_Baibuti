@@ -237,5 +237,6 @@
 
     <!-- Filefrag Rename Fileclass Dialog -->
     <string name="FileclassDialog_Renameclass">重命名</string>
+    <string name="todo">TODO</string>
 
 </resources>
