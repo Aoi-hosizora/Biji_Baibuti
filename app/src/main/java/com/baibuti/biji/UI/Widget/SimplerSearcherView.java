@@ -1,4 +1,4 @@
-package com.baibuti.biji.UI.View;
+package com.baibuti.biji.UI.Widget;
 
 
 import android.content.Context;

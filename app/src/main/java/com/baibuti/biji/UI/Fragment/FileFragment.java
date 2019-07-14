@@ -22,7 +22,7 @@ import android.widget.Toast;
 import com.baibuti.biji.Data.Models.FileClass;
 import com.baibuti.biji.Data.Adapters.FileClassAdapter;
 import com.baibuti.biji.R;
-import com.baibuti.biji.Data.Db.FileClassDao;
+import com.baibuti.biji.Data.DB.FileClassDao;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -66,8 +66,8 @@ public class FileFragment extends Fragment {
 
     private void initToolBar(View view){
         Toolbar mToolBar = view.findViewById(R.id.tab_file_toolbar);
-        mToolBar.setTitle(R.string.file_header);
-        mToolBar.setNavigationIcon(R.drawable.tab_file_menu);
+        mToolBar.setTitle(R.string.FileFrag_Header);
+        mToolBar.setNavigationIcon(R.drawable.tab_menu);
         mToolBar.setNavigationOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -135,14 +135,14 @@ public class FileFragment extends Fragment {
 
                 final EditText edit = new EditText(getContext());
                 AlertDialog.Builder editDialog = new AlertDialog.Builder(getContext());
-                editDialog.setTitle(getString(R.string.FileclassDialog_Renameclass));
+                editDialog.setTitle(getString(R.string.FileClassDialog_RenameClass));
                 editDialog.setIcon(R.mipmap.ic_launcher_round);
 
                 //设置dialog布局
                 editDialog.setView(edit);
 
                 //设置按钮
-                editDialog.setPositiveButton(getString(R.string.FileclassDialog_Confirmbtn)
+                editDialog.setPositiveButton(getString(R.string.FileClassDialog_ConfirmBtn)
                         , new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
@@ -189,14 +189,14 @@ public class FileFragment extends Fragment {
         final EditText edit = new EditText(getContext());
 
         AlertDialog.Builder editDialog = new AlertDialog.Builder(getContext());
-        editDialog.setTitle(getString(R.string.FileclassDialog_AddNewclass));
+        editDialog.setTitle(getString(R.string.FileClassDialog_AddNewClass));
         editDialog.setIcon(R.mipmap.ic_launcher_round);
 
         //设置dialog布局
         editDialog.setView(edit);
 
         //设置按钮
-        editDialog.setPositiveButton(getString(R.string.FileclassDialog_Confirmbtn)
+        editDialog.setPositiveButton(getString(R.string.FileClassDialog_ConfirmBtn)
                 , new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
@@ -267,9 +267,9 @@ public class FileFragment extends Fragment {
     private void HandleNullTitle() {
         android.support.v7.app.AlertDialog emptyDialog = new android.support.v7.app.AlertDialog
                 .Builder(getContext())
-                .setTitle(R.string.FileclassDialog_NullTitleAlertTitle)
-                .setMessage(R.string.FileclassDialog_NullTitleAlertMsg)
-                .setPositiveButton(R.string.FileclassDialog_NullTitleAlertPositiveButtonForOK, null)
+                .setTitle(R.string.FileClassDialog_NullTitleAlertTitle)
+                .setMessage(R.string.FileClassDialog_NullTitleAlertMsg)
+                .setPositiveButton(R.string.FileClassDialog_NullTitleAlertPositiveButtonForOK, null)
                 .create();
         emptyDialog.show();
     }

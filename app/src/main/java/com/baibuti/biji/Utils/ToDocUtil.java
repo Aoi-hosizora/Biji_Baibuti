@@ -5,8 +5,6 @@ import android.graphics.BitmapFactory;
 import android.os.Environment;
 import android.util.Log;
 
-import com.baibuti.biji.UI.Widget.CustomXWPFDocument;
-
 import org.apache.poi.xslf.usermodel.TextAlign;
 import org.apache.poi.xwpf.usermodel.UnderlinePatterns;
 import org.apache.poi.xwpf.usermodel.XWPFDocument;

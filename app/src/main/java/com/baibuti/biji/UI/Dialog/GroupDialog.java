@@ -14,8 +14,8 @@ import com.baibuti.biji.Data.Models.Group;
 import com.baibuti.biji.Data.Adapters.GroupRadioAdapter;
 import com.baibuti.biji.Interface.IShowLog;
 import com.baibuti.biji.R;
-import com.baibuti.biji.Data.Db.GroupDao;
-import com.baibuti.biji.Data.Db.NoteDao;
+import com.baibuti.biji.Data.DB.GroupDao;
+import com.baibuti.biji.Data.DB.NoteDao;
 
 import java.util.Collections;
 import java.util.List;

@@ -4,18 +4,18 @@
 
     <item
         android:id="@+id/action_search_back"
-        app:showAsAction="always"
+        app:showAsAction="ifRoom"
         android:visible="false"
-        android:title="@string/notefragment_menu_search_back"/>
+        android:title="@string/NoteFrag_menu_search_back"/>
 
     <item
         android:id="@+id/action_modifygroup"
-        app:showAsAction="always"
-        android:title="@string/notefragment_menu_modifygroup"/>
+        app:showAsAction="ifRoom"
+        android:title="@string/NoteFrag_menu_modify_group"/>
 
     <item
         android:id="@+id/action_search"
         android:icon="@drawable/search"
-        app:showAsAction="always"
-        android:title="@string/notefragment_menu_search"/>
+        app:showAsAction="ifRoom"
+        android:title="@string/NoteFrag_menu_search"/>
 </menu>

@@ -26,6 +26,20 @@ android {
     defaultConfig {
         multiDexEnabled true
     }
+
+    sourceSets {
+        main {
+            res.srcDirs = [
+                'src/main/res/modules/note',
+                'src/main/res/modules/search',
+                'src/main/res/modules/schedule',
+                'src/main/res/modules/file',
+                'src/main/res/modules/others',
+                'src/main/res/modules',
+                'src/main/res',
+            ]
+        }
+    }
 }
 
 dependencies {

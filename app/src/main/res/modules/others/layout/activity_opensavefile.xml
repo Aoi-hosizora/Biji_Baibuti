@@ -10,7 +10,7 @@
         android:id="@+id/id_OpenSaveFile_PathDirTextView"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="@string/OpenSaceActivity_NowPathTextView"
+        android:text="@string/OpenSaveActivity_NowPathTextView"
 
         android:layout_margin="8dp"
         android:layout_marginLeft="10dp"
@@ -62,7 +62,7 @@
             android:layout_height="wrap_content"
 
             android:layout_marginLeft="8dp"
-            android:text="@string/OpenSaceActivity_NewFolderButton"/>
+            android:text="@string/OpenSaveActivity_NewFolderButton"/>
 
         <TextView
             android:layout_width="0dp"
@@ -74,7 +74,7 @@
             android:layout_height="wrap_content"
 
             android:layout_marginRight="4dp"
-            android:text="@string/OpenSaceActivity_CancelButton"/>
+            android:text="@string/OpenSaveActivity_CancelButton"/>
 
         <Button
             android:id="@+id/id_OpenSaveFile_OKButton"
@@ -82,7 +82,7 @@
             android:layout_height="wrap_content"
 
             android:layout_marginRight="8dp"
-            android:text="@string/OpenSaceActivity_OKForSaveButton"/> <!-- 保存 -->
+            android:text="@string/OpenSaveActivity_OKForSaveButton"/> <!-- 保存 -->
     </LinearLayout>
 
 

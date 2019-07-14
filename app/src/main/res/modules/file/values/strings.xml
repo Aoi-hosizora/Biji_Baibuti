@@ -1,0 +1,18 @@
+<resources>
+
+    <!-- Title -->
+    <string name="FileFrag_Header">资料</string>
+
+    <!-- Filefrag Add Fileclass Dialog -->
+    <string name="FileClassDialog_AddNewClass">新建分类</string>
+    <string name="FileClassDialog_ConfirmBtn">确定</string>
+
+    <!-- Show Null Title File Class Dialog -->
+    <string name="FileClassDialog_NullTitleAlertTitle">错误</string>
+    <string name="FileClassDialog_NullTitleAlertMsg">没有输入分类名，请补全内容。</string>
+    <string name="FileClassDialog_NullTitleAlertPositiveButtonForOK">确定</string>
+
+
+    <!-- Filefrag Rename Fileclass Dialog -->
+    <string name="FileClassDialog_RenameClass">重命名</string>
+</resources>

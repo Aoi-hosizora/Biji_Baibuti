@@ -1,0 +1,24 @@
+<resources>
+    <!-- Open Save Activity -->
+
+    <!-- UI -->
+    <string name="OpenSaveActivity_NowPathTextView">当前路径: %s</string>
+    <string name="OpenSaveActivity_NewFolderButton">新建文件夹</string>
+    <string name="OpenSaveActivity_CancelButton">返回</string>
+    <string name="OpenSaveActivity_OKForSaveButton">保存</string>
+    <string name="OpenSaveActivity_OKForOpenButton">打开</string>
+    <string name="OpenSaveActivity_TitleForSave">保存文件</string>
+    <string name="OpenSaveActivity_TitleForOpen">打开文件</string>
+
+    <!-- New Folder -->
+    <string name="OpenSaveActivity_NewFolderAlertTitle">新建文件夹</string>
+    <string name="OpenSaveActivity_NewFolderAlertOK">确定</string>
+    <string name="OpenSaveActivity_NewFolderAlertCancel">取消</string>
+    <string name="OpenSaveActivity_NewFolderAlertErr">无法创建文件夹 %s</string>
+    <string name="OpenSaveActivity_NewFolderAlertSuccess">文件夹 %s 创建成功</string>
+    <string name="OpenSaveActivity_NewFolderAlertNullName">请输入文件夹名</string>
+
+
+    <!-- EmptyView -->
+    <string name="EmptyView_NothingList">无内容</string>
+</resources>

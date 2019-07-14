@@ -31,8 +31,8 @@ import com.baibuti.biji.Interface.IShowLog;
 import com.baibuti.biji.R;
 import com.baibuti.biji.UI.View.SpacesItemDecoration;
 import com.baibuti.biji.UI.Widget.RecyclerViewEmptySupport;
-import com.baibuti.biji.Data.Db.GroupDao;
-import com.baibuti.biji.Data.Db.NoteDao;
+import com.baibuti.biji.Data.DB.GroupDao;
+import com.baibuti.biji.Data.DB.NoteDao;
 import com.getbase.floatingactionbutton.FloatingActionButton;
 import com.getbase.floatingactionbutton.FloatingActionsMenu;
 import com.jeremyfeinstein.slidingmenu.lib.SlidingMenu;
@@ -98,8 +98,6 @@ public class NoteFragment extends Fragment implements View.OnClickListener, ISho
 
             ///
 
-            setHasOptionsMenu(true);
-
             m_fabmenu = (FloatingActionsMenu) view.findViewById(R.id.note_fabmenu);
             slidingMenu = ((MainActivity)getActivity()).getSlidingMenu();
 
@@ -125,7 +123,8 @@ public class NoteFragment extends Fragment implements View.OnClickListener, ISho
      * @param view
      */
     private void initToolbar(View view) {
-        m_toolbar = view.findViewById(R.id.note_toolbar);
+
+        m_toolbar = view.findViewById(R.id.NoteFrag_Toolbar);
         m_toolbar.inflateMenu(R.menu.notefragment_actionbar);
         m_toolbar.setOnMenuItemClickListener(new Toolbar.OnMenuItemClickListener() {
             @Override
@@ -144,7 +143,7 @@ public class NoteFragment extends Fragment implements View.OnClickListener, ISho
                 return true;
             }
         });
-        m_toolbar.setNavigationIcon(R.mipmap.ic_launcher);
+        m_toolbar.setNavigationIcon(R.drawable.tab_menu);
         m_toolbar.setNavigationOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -152,7 +151,7 @@ public class NoteFragment extends Fragment implements View.OnClickListener, ISho
                     slidingMenu.showMenu();
             }
         });
-        m_toolbar.setTitle(R.string.note_header);
+        m_toolbar.setTitle(R.string.NoteFrag_Header);
     }
 
     /**
@@ -195,11 +194,11 @@ public class NoteFragment extends Fragment implements View.OnClickListener, ISho
         });
 
         loadingDialog = new ProgressDialog(getContext());
-        loadingDialog.setMessage(getResources().getString(R.string.NoteFragment_LoadingData));
+        loadingDialog.setMessage(getResources().getString(R.string.NoteFrag_LoadingData));
         loadingDialog.setCanceledOnTouchOutside(false);
 
         loadingGroupDialog = new ProgressDialog(getContext());
-        loadingGroupDialog.setMessage(getContext().getString(R.string.NoteFragment_LoadingGroupData));
+        loadingGroupDialog.setMessage(getContext().getString(R.string.NoteFrag_LoadingGroupData));
         loadingGroupDialog.setCanceledOnTouchOutside(false);
     }
 
@@ -227,7 +226,7 @@ public class NoteFragment extends Fragment implements View.OnClickListener, ISho
                         m_toolbar.getMenu().findItem(R.id.action_search_back).setVisible(true);
                         mSwipeRefresh.setEnabled(false);
                         m_fabmenu.setVisibility(View.GONE);
-                        m_toolbar.setTitle(String.format(getContext().getString(R.string.notefragment_menu_search_content), keyword));
+                        m_toolbar.setTitle(String.format(getContext().getString(R.string.NoteFrag_menu_search_content), keyword));
                     }
                 }
                 catch (Exception ex) {
@@ -298,7 +297,7 @@ public class NoteFragment extends Fragment implements View.OnClickListener, ISho
 
         IsSearchingNull = notelist.isEmpty();
         if (IsSearchingNull) {
-            Toast.makeText(getContext(), R.string.NoteFragment_SearchNullToast, Toast.LENGTH_SHORT).show();
+            Toast.makeText(getContext(), R.string.NoteFrag_SearchNullToast, Toast.LENGTH_SHORT).show();
         }
 
         return notelist;
@@ -329,7 +328,7 @@ public class NoteFragment extends Fragment implements View.OnClickListener, ISho
                         m_fabmenu.setVisibility(View.VISIBLE);
 
                         m_toolbar.getMenu().findItem(R.id.action_search_back).setVisible(false);
-                        m_toolbar.setTitle(R.string.note_header);
+                        m_toolbar.setTitle(R.string.NoteFrag_Header);
 
                         IsSearching = false;
                         SearchingStr = "";

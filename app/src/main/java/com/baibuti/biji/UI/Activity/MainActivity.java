@@ -24,7 +24,7 @@ import com.baibuti.biji.UI.Fragment.SearchFragment;
 import com.baibuti.biji.UI.Fragment.FileFragment;
 import com.baibuti.biji.Interface.IShowLog;
 import com.baibuti.biji.R;
-import com.baibuti.biji.UI.View.SimplerSearcherView;
+import com.baibuti.biji.UI.Widget.SimplerSearcherView;
 import com.facebook.stetho.Stetho;
 import com.jeremyfeinstein.slidingmenu.lib.SlidingMenu;
 import  com.baibuti.biji.Utils.BottomNavigationHelper;
@@ -192,7 +192,7 @@ public class MainActivity extends FragmentActivity implements SimplerSearcherVie
         //设置渐入渐出效果的值
         slidingMenu.setFadeDegree(0.35f);
         //为侧滑菜单设置布局
-        slidingMenu.setMenu(R.layout.left_menu);
+        slidingMenu.setMenu(R.layout.modulelayout_leftmenu);
 
     }
 

@@ -6,8 +6,8 @@ import android.content.DialogInterface;
 import com.baibuti.biji.Data.Models.Group;
 import com.baibuti.biji.Data.Models.Note;
 import com.baibuti.biji.R;
-import com.baibuti.biji.Data.Db.GroupDao;
-import com.baibuti.biji.Data.Db.NoteDao;
+import com.baibuti.biji.Data.DB.GroupDao;
+import com.baibuti.biji.Data.DB.NoteDao;
 
 public class GroupDeleteDialog {
 
