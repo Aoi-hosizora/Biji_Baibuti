@@ -1,5 +1,6 @@
 package com.baibuti.biji.Utils;
 
+import android.app.Activity;
 import android.app.ActivityManager;
 import android.content.ComponentName;
 import android.content.Context;
@@ -9,12 +10,16 @@ import android.net.Uri;
 import android.os.PowerManager;
 import android.util.DisplayMetrics;
 import android.util.Log;
+import android.view.View;
 import android.view.WindowManager;
+import android.view.inputmethod.InputMethodManager;
 
 import java.io.File;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
+
+import static android.content.Context.INPUT_METHOD_SERVICE;
 
 /**
  * Created by sendtion on 2016/3/30.
@@ -36,6 +41,17 @@ public class CommonUtil {
             }
         }
         return false;
+    }
+
+    /**
+     * 关闭软键盘
+     * @param activity
+     */
+    public static void closeSoftKeyInput(Activity activity) {
+        InputMethodManager imm = (InputMethodManager) activity.getSystemService(INPUT_METHOD_SERVICE);
+        //boolean isOpen=imm.isActive();//isOpen若返回true，则表示输入法打开
+        if (imm != null && imm.isActive() && activity.getCurrentFocus() != null)
+            imm.hideSoftInputFromWindow(activity.getCurrentFocus().getWindowToken(), InputMethodManager.HIDE_NOT_ALWAYS);
     }
 
     /**

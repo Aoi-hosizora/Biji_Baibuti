@@ -26,10 +26,12 @@ import com.baibuti.biji.Interface.IShowLog;
 import com.baibuti.biji.R;
 import com.baibuti.biji.UI.View.SpacesItemDecoration;
 import com.baibuti.biji.UI.Widget.RecyclerViewEmptySupport;
+import com.baibuti.biji.Utils.CommonUtil;
 import com.baibuti.biji.Utils.SearchNetUtil;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 public class SearchFragment extends Fragment implements View.OnClickListener, IShowLog {
 
@@ -43,7 +45,25 @@ public class SearchFragment extends Fragment implements View.OnClickListener, IS
 
     private ArrayList<SearchItem> searchItems = new ArrayList<>();
     private SearchItemAdapter searchItemAdapter;
+
+    public SearchItem ITEM_MORE;
+
+    /**
+     * 判断当前是否在搜索以及回调是否显示，鸵鸟代码用
+     */
     private boolean isSearching = false;
+
+    /**
+     * 记录当前显示的页数
+     */
+    private int SearchPageCnt = 0;
+
+    private String Question = "";
+
+    /**
+     * 判断当前搜索是新搜索还是更多
+     */
+    private boolean isNewSearch = true;
 
 
     @Nullable
@@ -68,6 +88,8 @@ public class SearchFragment extends Fragment implements View.OnClickListener, IS
     private void initView() {
         initToolbar(view);
 
+        ITEM_MORE = new SearchItem(getActivity().getString(R.string.SearchFrag_SearchingRetLoadingMore), "", SearchItemAdapter.ITEM_MORE_URL);
+
         m_SearchingDialog = new ProgressDialog(getContext());
         m_SearchingDialog.setMessage(getString(R.string.SearchFrag_SearchingProgressText));
         m_SearchingDialog.setCanceledOnTouchOutside(true);
@@ -84,6 +106,14 @@ public class SearchFragment extends Fragment implements View.OnClickListener, IS
 
         m_SearchButton.setOnClickListener(this);
         initListView();
+    }
+
+    /**
+     * 更新适配器连接数据
+     */
+    private void updateListAdapter() {
+        searchItemAdapter.setSearchItems(searchItems);
+        searchItemAdapter.notifyDataSetChanged();
     }
 
     /**
@@ -135,9 +165,15 @@ public class SearchFragment extends Fragment implements View.OnClickListener, IS
         m_SearchRetList.setAdapter(searchItemAdapter);
         searchItemAdapter.notifyDataSetChanged();
         searchItemAdapter.setOnItemClickListener(new SearchItemAdapter.OnRecyclerViewItemClickListener() {
+
             @Override
             public void onItemClick(View view, SearchItem searchItem) {
-                Toast.makeText(getActivity(), searchItem.getTitle(), Toast.LENGTH_SHORT).show();
+                Toast.makeText(getActivity(), searchItem.toString(), Toast.LENGTH_SHORT).show();
+            }
+
+            @Override
+            public void onMoreClick(View view) {
+                MoreSearchButton_Click();
             }
         });
     }
@@ -174,20 +210,55 @@ public class SearchFragment extends Fragment implements View.OnClickListener, IS
      * 点击搜索，并发送信号接收处理
      */
     private void SearchButton_Click() {
-        String question = m_QuestionEditText.getText().toString();
-        if (question.isEmpty()) {
+        Question = m_QuestionEditText.getText().toString();
+        if (Question.isEmpty()) {
             ShowMessageBox(getString(R.string.SearchFrag_SearchNullMessage));
             return;
         }
+
+        isSearching = true;
+        isNewSearch = true;
+
+        CommonUtil.closeSoftKeyInput(getActivity());
+
+        if (!m_SearchingDialog.isShowing())
+            m_SearchingDialog.show();
 
         new Thread() {
 
             @Override
             public void run() {
-                isSearching = true;
 
                 // 搜索并处理，访问网络
-                searchItems = SearchNetUtil.SearchBaidu(question);
+                searchItems = SearchNetUtil.getSearchBaiduRet(Question, 1);
+
+                // 获取结果，更新数据
+                Message message = new Message();
+                message.what = HandleWhat.HND_SearchedRet;
+
+                handler.sendMessage(message);
+            }
+        }.start();
+
+    }
+
+    /**
+     * 点击更多，并发送信号接收处理
+     */
+    private void MoreSearchButton_Click() {
+        isSearching = true;
+        isNewSearch = false;
+
+        if (!m_SearchingDialog.isShowing())
+            m_SearchingDialog.show();
+
+        new Thread() {
+
+            @Override
+            public void run() {
+
+                ArrayList<SearchItem> newSearchItems = SearchNetUtil.getSearchBaiduRet(Question, SearchPageCnt + 1);
+                searchItems.addAll(newSearchItems);
 
                 // 获取结果，更新数据
 
@@ -195,35 +266,51 @@ public class SearchFragment extends Fragment implements View.OnClickListener, IS
                 message.what = HandleWhat.HND_SearchedRet;
 
                 Bundle bundle = new Bundle();
-                bundle.putSerializable(HandleWhat.BND_SearchItems, searchItems);
-
+                bundle.putInt(HandleWhat.BND_SearchMoreItemCnt, newSearchItems.size());
                 message.setData(bundle);
 
                 handler.sendMessage(message);
             }
         }.start();
-
-        isSearching = true;
-        if (!m_SearchingDialog.isShowing())
-            m_SearchingDialog.show();
     }
+
 
     /**
      * 收到更新 searchItems 列表 信号
      * @param msg
      */
     private void onHandleSearchedRet(Message msg) {
-        Bundle bundle = msg.getData();
-        ArrayList<SearchItem> searchItems = (ArrayList<SearchItem>) bundle.getSerializable(HandleWhat.BND_SearchItems);
 
-        searchItemAdapter.setSearchItems(searchItems);
-        searchItemAdapter.notifyDataSetChanged();
+        if (isSearching && searchItems != null && searchItems.size() != 0) {
+
+            ShowLogE("onHandleSearchedRet", "isNewSearch" + isNewSearch);
+
+            if (isNewSearch) { // 新搜索
+
+                SearchPageCnt = 1;
+                Toast.makeText(getActivity(), String.format(Locale.CHINA,
+                        getString(R.string.SearchFrag_NewSearchToast), searchItems.size()), Toast.LENGTH_SHORT).show();
+            }
+            else { // 更多
+
+                Bundle bundle = msg.getData();
+                int newCnt = bundle.getInt(HandleWhat.BND_SearchMoreItemCnt, 0);
+
+                SearchPageCnt++;
+                Toast.makeText(getActivity(), String.format(Locale.CHINA,
+                        getString(R.string.SearchFrag_MoreSearchToast), newCnt), Toast.LENGTH_SHORT).show();
+            }
+
+            searchItems.remove(ITEM_MORE);
+            searchItems.add(ITEM_MORE);
+            updateListAdapter();
+
+        }
         m_SearchingDialog.cancel();
     }
 
 
-
-
+    // ************************************************************************************************************** //
 
     // 处理网络
 
@@ -231,24 +318,23 @@ public class SearchFragment extends Fragment implements View.OnClickListener, IS
      * HandleWhat 和 HandleBundle 集成类
      */
     private static class HandleWhat {
+        /**
+         * 处理搜索响应
+         */
         static final int HND_SearchedRet = 1;
 
-        static final String BND_SearchItems = "BND_SearchItems";
+        static final String BND_SearchMoreItemCnt = "BND_SearchMoreItemCnt";
     }
 
     /**
      * 网络信号处理
      */
-    private final Handler handler = new Handler(new Handler.Callback() {
-
-        @Override
-        public boolean handleMessage(Message msg) {
-            switch (msg.what) {
-                case HandleWhat.HND_SearchedRet:
-                    onHandleSearchedRet(msg);
+    private final Handler handler = new Handler((Message msg) -> {
+        switch (msg.what) {
+            case HandleWhat.HND_SearchedRet:
+                onHandleSearchedRet(msg);
                 break;
-            }
-            return false;
         }
+        return false;
     });
 }

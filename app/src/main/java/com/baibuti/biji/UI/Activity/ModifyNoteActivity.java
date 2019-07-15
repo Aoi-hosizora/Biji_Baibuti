@@ -295,7 +295,7 @@ public class ModifyNoteActivity extends AppCompatActivity implements View.OnClic
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
 
-        closeSoftKeyInput();
+        CommonUtil.closeSoftKeyInput(this);
 
         switch (item.getItemId()) {
             case R.id.id_menu_modifynote_finish:
@@ -402,7 +402,7 @@ public class ModifyNoteActivity extends AppCompatActivity implements View.OnClic
 
         // 内容为空，提醒
         if (Content.isEmpty()) {
-            closeSoftKeyInput();
+            CommonUtil.closeSoftKeyInput(this);
             AlertDialog alertDialog = new AlertDialog.Builder(this)
                     .setTitle(R.string.MNoteActivity_SaveAlertTitle)
                     .setMessage(R.string.MNoteActivity_SaveAlertMsg)
@@ -452,7 +452,7 @@ public class ModifyNoteActivity extends AppCompatActivity implements View.OnClic
             // 插入到数据库一条新信息
             long noteId = noteDao.insertNote(note);
             note.setId((int) noteId);
-            closeSoftKeyInput();
+            CommonUtil.closeSoftKeyInput(this);
 
             Intent intent_fromnotefrag = new Intent();
             intent_fromnotefrag.putExtra("notedata", note);
@@ -465,7 +465,7 @@ public class ModifyNoteActivity extends AppCompatActivity implements View.OnClic
             if (isModify)
                 // 修改数据库
                 noteDao.updateNote(note);
-            closeSoftKeyInput();
+            CommonUtil.closeSoftKeyInput(this);
 
             Intent intent_fromvmnote = new Intent();
 
@@ -853,16 +853,6 @@ public class ModifyNoteActivity extends AppCompatActivity implements View.OnClic
                 assets2SD(getApplicationContext(), ExtractUtil.LANGUAGE_PATH, ExtractUtil.DEFAULT_LANGUAGE_NAME);
             }
         }
-    }
-
-    /**
-     * 关闭软键盘
-     */
-    private void closeSoftKeyInput() {
-        InputMethodManager imm = (InputMethodManager) getSystemService(INPUT_METHOD_SERVICE);
-        //boolean isOpen=imm.isActive();//isOpen若返回true，则表示输入法打开
-        if (imm != null && imm.isActive() && getCurrentFocus() != null)
-            imm.hideSoftInputFromWindow(getCurrentFocus().getWindowToken(), InputMethodManager.HIDE_NOT_ALWAYS);
     }
 
     // endregion 权限 软键盘 

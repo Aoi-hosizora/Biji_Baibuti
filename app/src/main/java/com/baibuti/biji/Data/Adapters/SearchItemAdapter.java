@@ -3,6 +3,7 @@ package com.baibuti.biji.Data.Adapters;
 import android.content.Context;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -21,6 +22,11 @@ public class SearchItemAdapter extends RecyclerView.Adapter<SearchItemAdapter.Vi
     private List<SearchItem> m_searchItems;
 
     /**
+     * 加载更多的标志 URL
+     */
+    public static final String ITEM_MORE_URL = "$more";
+
+    /**
      * 外部设置的监听
      */
     private OnRecyclerViewItemClickListener m_OnItemClickListener;
@@ -32,6 +38,7 @@ public class SearchItemAdapter extends RecyclerView.Adapter<SearchItemAdapter.Vi
 
     public interface OnRecyclerViewItemClickListener {
         void onItemClick(View view, SearchItem searchItem);
+        void onMoreClick(View view);
     }
 
     public interface OnRecyclerViewItemLongClickListener {
@@ -68,8 +75,13 @@ public class SearchItemAdapter extends RecyclerView.Adapter<SearchItemAdapter.Vi
      */
     @Override
     public void onClick(View v) {
-        if (m_OnItemClickListener != null)
-            m_OnItemClickListener.onItemClick(v, (SearchItem) v.getTag());
+        if (m_OnItemClickListener != null) {
+            SearchItem clickedItem = (SearchItem) v.getTag();
+            if (!clickedItem.getUrl().equals(ITEM_MORE_URL))
+                m_OnItemClickListener.onItemClick(v, clickedItem);
+            else
+                m_OnItemClickListener.onMoreClick(v);
+        }
     }
 
     /**
@@ -133,9 +145,22 @@ public class SearchItemAdapter extends RecyclerView.Adapter<SearchItemAdapter.Vi
         }
 
         void setupUI(SearchItem searchItem) {
-            m_title.setText(searchItem.getTitle());
-            m_content.setText(searchItem.getKeyWord());
-            m_url.setText(searchItem.getUrl());
+            if (!searchItem.getUrl().equals(ITEM_MORE_URL)) {
+                m_title.setGravity(Gravity.START);
+                m_content.setVisibility(View.VISIBLE);
+                m_url.setVisibility(View.VISIBLE);
+
+                m_title.setText(searchItem.getTitle());
+                m_content.setText(searchItem.getContent());
+                m_url.setText(searchItem.getUrl());
+            }
+            else {
+                m_title.setGravity(Gravity.CENTER);
+                m_content.setVisibility(View.GONE);
+                m_url.setVisibility(View.GONE);
+
+                m_title.setText(searchItem.getTitle());
+            }
         }
     }
 }

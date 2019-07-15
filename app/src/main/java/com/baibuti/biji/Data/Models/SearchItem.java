@@ -1,7 +1,7 @@
 package com.baibuti.biji.Data.Models;
 
-import android.os.Parcel;
-import android.os.Parcelable;
+import com.baibuti.biji.Data.Adapters.SearchItemAdapter;
+import com.baibuti.biji.R;
 
 import java.io.Serializable;
 
@@ -9,12 +9,12 @@ public class SearchItem implements Serializable {
 
     private String title;
     private String url;
-    private String keyWord;
+    private String content;
 
-    public SearchItem(String title, String url, String keyWord) {
+    public SearchItem(String title, String keyWord, String url) {
         this.title = title;
         this.url = url;
-        this.keyWord = keyWord;
+        this.content = keyWord;
     }
 
     public String getTitle() {
@@ -33,11 +33,16 @@ public class SearchItem implements Serializable {
         this.url = url;
     }
 
-    public String getKeyWord() {
-        return keyWord;
+    public String getContent() {
+        return content;
     }
 
-    public void setKeyWord(String keyWord) {
-        this.keyWord = keyWord;
+    public void setContent(String keyWord) {
+        this.content = keyWord;
+    }
+
+    @Override
+    public String toString() {
+        return "title: " + title + ", url: " + url + ", content: " + content;
     }
 }

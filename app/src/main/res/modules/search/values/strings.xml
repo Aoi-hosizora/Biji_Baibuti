@@ -11,6 +11,10 @@
     <string name="SearchFrag_SearchButtonText">搜索</string>
     <string name="SearchFrag_SearchNullMessage">未输入查找内容</string>
     <string name="SearchFrag_SearchingProgressText">搜索中&#8230;</string>
+    <string name="SearchFrag_SearchingRetLoadingMore">加载更多&#8230;</string>
+
+    <string name="SearchFrag_NewSearchToast">共获取了 %d 条新项目</string>
+    <string name="SearchFrag_MoreSearchToast">共新增了 %d 条新项目</string>
 
     <!-- Dlg -->
     <string name="SearchFrag_AlertDlg_PosButton">确定</string>
