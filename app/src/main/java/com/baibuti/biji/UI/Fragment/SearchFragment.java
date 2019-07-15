@@ -204,7 +204,8 @@ public class SearchFragment extends Fragment implements View.OnClickListener, IS
         }.start();
 
         isSearching = true;
-        m_SearchingDialog.show();
+        if (!m_SearchingDialog.isShowing())
+            m_SearchingDialog.show();
     }
 
     /**

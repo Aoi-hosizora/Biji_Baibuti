@@ -1,5 +1,7 @@
 package com.baibuti.biji.Utils;
 
+import android.util.Log;
+
 import com.baibuti.biji.Data.Models.SearchItem;
 
 import org.jsoup.Jsoup;
@@ -8,8 +10,8 @@ import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
 import java.io.IOException;
+import java.io.Reader;
 import java.util.ArrayList;
-import java.util.List;
 import java.util.Locale;
 
 import okhttp3.OkHttpClient;
@@ -30,7 +32,8 @@ public class SearchNetUtil {
      */
     public static ArrayList<SearchItem> SearchBaidu(String KeyWord) {
         String url = String.format(Locale.CHINA, BaiduUrl, KeyWord);
-        return parseBaiduRet(getResponse("https://www.bilibili.com"));
+        Reader resp = getResponse(url);
+        return parseBaiduRet(resp);
     }
 
     /**
@@ -38,14 +41,20 @@ public class SearchNetUtil {
      * @param url
      * @return
      */
-    private static String getResponse(String url) {
+    private static Reader getResponse(String url) {
         OkHttpClient okHttpClient = new OkHttpClient();
-        String htmlData = "";
+        Reader htmlData = null;
         try {
-            Request request = new Request.Builder().url(url).build();
+            Request request = new Request.Builder()
+                .url(url)
+                .addHeader("User-Agent","Mozilla/5.0 (Linux; Android 6.0.1; MI 4LTE Build/MMB29M; wv) " +
+                        "AppleWebKit/537.36 (KHTML, like Gecko) " +
+                        "Version/4.0 Chrome/51.0.2704.81 Mobile Safari/537.36")
+                .build();
 
             Response response = okHttpClient.newCall(request).execute();
-            htmlData = response.body().string();
+            htmlData = response.body().charStream();
+            // response.close();
         }
         catch (IOException ex) {
             ex.printStackTrace();
@@ -60,20 +69,66 @@ public class SearchNetUtil {
     }
 
     /**
+     * 从 Reader 获取 String
+     * @param reader
+     * @param pattern
+     */
+    private static String getUsefulStringFromCharReader(Reader reader, String pattern, int start, int length) {
+        char[] cbuf = new char[pattern.length()];
+        try {
+            Log.e("", "getUsefulStringFromCharReader: " + start + ", " +  length);
+            int len = reader.read(cbuf, 0, length);
+            String Mokuzen = String.valueOf(cbuf);
+            if (Mokuzen.contains(pattern))
+                return Mokuzen.substring(Mokuzen.indexOf(pattern)) + reader.read(cbuf);
+            else {
+                return getUsefulStringFromCharReader(reader, pattern, start + len, length);
+            }
+        }
+        catch (IOException ex) {
+            ex.printStackTrace();
+        }
+        catch (Exception ex) {
+            ex.printStackTrace();
+        }
+        return "";
+    }
+
+    /**
      * 解析百度响应 获得 SearchItem List
      * @param Resp
      * @return
      */
-    private static ArrayList<SearchItem> parseBaiduRet(String Resp) {
+    private static ArrayList<SearchItem> parseBaiduRet(Reader Resp) {
+        String pattern = "<div id=\"content_left\"";
+        String HTMLDoc = getUsefulStringFromCharReader(Resp, pattern, 0, pattern.length());
+
+        Log.e("", "parseBaiduRet: " + HTMLDoc + ", " + HTMLDoc.length());
+
         ArrayList<SearchItem> searchItems = new ArrayList<>();
+        Document document = Jsoup.parse(HTMLDoc);
 
-        Document document = Jsoup.parse(Resp);
-        // Elements elements = document.select("div.panel").first().select("ul.title a");
+        try {
+            Elements elements = document.selectFirst("#content_left").children();
+            // Log.e("", "parseBaiduRet: " + elements.text() );
+            for (Element element : elements) {
+                String title = element.selectFirst("div h3").text();
+                Element cnt = element.selectFirst("div div.c-abstract");
+                String content;
+                if (cnt != null)
+                    content = cnt.text();
+                else
+                    content = element.selectFirst("div p").nextElementSibling().text();
 
-//        for (Element element : elements) {
-//            searchItems.add(element.text());
-//        }
-        searchItems.add(new SearchItem("1", "2", "3"));
+                String url = element.selectFirst("div h3 a").attr("href");
+
+                Log.e("", "parseBaiduRet: " + title );
+                searchItems.add(new SearchItem(title, url, content));
+            }
+        }
+        catch (Exception ex) {
+            ex.printStackTrace();
+        }
 
         return searchItems;
     }
