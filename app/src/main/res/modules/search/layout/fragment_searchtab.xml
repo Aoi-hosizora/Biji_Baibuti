@@ -38,17 +38,20 @@
             android:layout_weight="1"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
+            android:singleLine="true"
             android:hint="@string/SearchFrag_QuestionEditTextHint"/>
 
         <Button
             android:id="@+id/id_SearchFrag_SearchButton"
             android:layout_marginStart="5dp"
+            android:layout_marginEnd="5dp"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/SearchFrag_SearchButtonText"/>
 
     </LinearLayout>
 
+    <!--<com.baibuti.biji.UI.Widget.SlideRecyclerViewEmptySupport-->
     <com.baibuti.biji.UI.Widget.RecyclerViewEmptySupport
         android:id="@+id/id_SearchFrag_SearchRetList"
         android:layout_width="match_parent"

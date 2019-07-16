@@ -11,10 +11,10 @@ public class SearchItem implements Serializable {
     private String url;
     private String content;
 
-    public SearchItem(String title, String keyWord, String url) {
+    public SearchItem(String title, String content, String url) {
         this.title = title;
         this.url = url;
-        this.content = keyWord;
+        this.content = content;
     }
 
     public String getTitle() {

@@ -9,4 +9,6 @@
     <dimen name="text_size_14">14sp</dimen>
     <dimen name="text_size_18">18sp</dimen>
 
+    <dimen name="toolbar_title_margin_left">18dp</dimen>
+
 </resources>

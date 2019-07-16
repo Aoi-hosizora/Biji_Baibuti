@@ -38,11 +38,11 @@ public class SearchNetUtil {
     /**
      * 连接超时时间
      */
-    private static int TIME_CONN_SEC = 2;
+    private static int TIME_CONN_SEC = 1;
     /**
      * 读取超时时间
      */
-    private static int TIME_READ_SEC = 2;
+    private static int TIME_READ_SEC = 1;
 
 
     /**

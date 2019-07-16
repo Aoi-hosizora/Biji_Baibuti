@@ -1,8 +1,12 @@
 package com.baibuti.biji.UI.Fragment;
 
+import android.app.ActionBar;
 import android.app.AlertDialog;
+import android.app.Dialog;
 import android.app.ProgressDialog;
 import android.content.DialogInterface;
+import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -11,12 +15,16 @@ import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.Window;
+import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.LinearLayout;
 import android.widget.Toast;
 
 
@@ -26,6 +34,7 @@ import com.baibuti.biji.Interface.IShowLog;
 import com.baibuti.biji.R;
 import com.baibuti.biji.UI.View.SpacesItemDecoration;
 import com.baibuti.biji.UI.Widget.RecyclerViewEmptySupport;
+import com.baibuti.biji.UI.Widget.SlideRecyclerViewEmptySupport;
 import com.baibuti.biji.Utils.CommonUtil;
 import com.baibuti.biji.Utils.SearchNetUtil;
 
@@ -42,6 +51,9 @@ public class SearchFragment extends Fragment implements View.OnClickListener, IS
     private EditText m_QuestionEditText;
     private RecyclerViewEmptySupport m_SearchRetList;
     private ProgressDialog m_SearchingDialog;
+
+    private Dialog m_LongClickItemPopupMenu;
+    private SearchItem m_LongClickedSearchItem;
 
     private ArrayList<SearchItem> searchItems = new ArrayList<>();
     private SearchItemAdapter searchItemAdapter;
@@ -91,7 +103,6 @@ public class SearchFragment extends Fragment implements View.OnClickListener, IS
         ITEM_MORE = new SearchItem(getActivity().getString(R.string.SearchFrag_SearchingRetLoadingMore), "", SearchItemAdapter.ITEM_MORE_URL);
 
         m_SearchingDialog = new ProgressDialog(getContext());
-        m_SearchingDialog.setMessage(getString(R.string.SearchFrag_SearchingProgressText));
         m_SearchingDialog.setCanceledOnTouchOutside(true);
         m_SearchingDialog.setOnCancelListener(new DialogInterface.OnCancelListener() {
             @Override
@@ -121,6 +132,7 @@ public class SearchFragment extends Fragment implements View.OnClickListener, IS
      * @param view
      */
     private void initToolbar(View view) {
+
         setHasOptionsMenu(true);
 
         m_toolbar = view.findViewById(R.id.tab_search_toolbar);
@@ -134,13 +146,14 @@ public class SearchFragment extends Fragment implements View.OnClickListener, IS
         //     return true;
         //     }
         // });
-        m_toolbar.setNavigationIcon(R.drawable.tab_menu);
-        m_toolbar.setNavigationOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Toast.makeText(getContext(), "ddd", Toast.LENGTH_SHORT).show();
-            }
-        });
+//        m_toolbar.setNavigationIcon(R.drawable.tab_menu);
+//        m_toolbar.setNavigationOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View view) {
+//                Toast.makeText(getContext(), "ddd", Toast.LENGTH_SHORT).show();
+//            }
+//        });
+        m_toolbar.setTitleMarginStart(getResources().getDimensionPixelSize(R.dimen.toolbar_title_margin_left));
         m_toolbar.setTitle(R.string.SearchFrag_Header);
     }
 
@@ -148,10 +161,6 @@ public class SearchFragment extends Fragment implements View.OnClickListener, IS
      * 设置 ListView Adapter
      */
     private void initListView() {
-        // EmptyView:
-        View ListEmptyView = view.findViewById(R.id.note_emptylist);
-        m_SearchRetList.setEmptyView(ListEmptyView);
-
         // LayoutMgr:
         m_SearchRetList.addItemDecoration(new SpacesItemDecoration(0));//设置item间距
         LinearLayoutManager layoutManager = new LinearLayoutManager(getContext());
@@ -164,16 +173,30 @@ public class SearchFragment extends Fragment implements View.OnClickListener, IS
 
         m_SearchRetList.setAdapter(searchItemAdapter);
         searchItemAdapter.notifyDataSetChanged();
+
+        // EmptyView:
+        View ListEmptyView = view.findViewById(R.id.note_emptylist);
+        m_SearchRetList.setEmptyView(ListEmptyView);
+
+        // Click:
         searchItemAdapter.setOnItemClickListener(new SearchItemAdapter.OnRecyclerViewItemClickListener() {
 
             @Override
             public void onItemClick(View view, SearchItem searchItem) {
-                Toast.makeText(getActivity(), searchItem.toString(), Toast.LENGTH_SHORT).show();
+                SearchItem_Click(searchItem);
             }
 
             @Override
             public void onMoreClick(View view) {
                 MoreSearchButton_Click();
+            }
+        });
+
+        searchItemAdapter.setOnItemLongClickListener(new SearchItemAdapter.OnRecyclerViewItemLongClickListener() {
+
+            @Override
+            public void onItemLongClick(View view, SearchItem searchItem) {
+                SearchItem_LongClick(searchItem);
             }
         });
     }
@@ -200,8 +223,24 @@ public class SearchFragment extends Fragment implements View.OnClickListener, IS
     @Override
     public void onClick(View v) {
         switch (v.getId()) {
+
+            // UI
             case R.id.id_SearchFrag_SearchButton:
                 SearchButton_Click();
+            break;
+
+            // Popup
+            case R.id.id_SearchFrag_PopupMenu_Star:
+                if (m_LongClickedSearchItem != null)
+                    SearchItem_StarClick(m_LongClickedSearchItem);
+                m_LongClickItemPopupMenu.dismiss();
+            break;
+            case R.id.id_SearchFrag_PopupMenu_Cancel:
+                m_LongClickItemPopupMenu.dismiss();
+            break;
+            case R.id.id_SearchFrag_PopupMenu_More:
+                MoreSearchButton_Click();
+                m_LongClickItemPopupMenu.dismiss();
             break;
         }
     }
@@ -221,6 +260,7 @@ public class SearchFragment extends Fragment implements View.OnClickListener, IS
 
         CommonUtil.closeSoftKeyInput(getActivity());
 
+        m_SearchingDialog.setMessage(String.format(getString(R.string.SearchFrag_SearchingProgressText), Question));
         if (!m_SearchingDialog.isShowing())
             m_SearchingDialog.show();
 
@@ -249,6 +289,7 @@ public class SearchFragment extends Fragment implements View.OnClickListener, IS
         isSearching = true;
         isNewSearch = false;
 
+        m_SearchingDialog.setMessage(String.format(getString(R.string.SearchFrag_SearchingProgressText), Question));
         if (!m_SearchingDialog.isShowing())
             m_SearchingDialog.show();
 
@@ -307,6 +348,65 @@ public class SearchFragment extends Fragment implements View.OnClickListener, IS
 
         }
         m_SearchingDialog.cancel();
+    }
+
+    /**
+     * 使用浏览器打开链接
+     * TODO ********
+     * @param searchItem
+     */
+    private void SearchItem_Click(SearchItem searchItem) {
+        Intent intent = new Intent();
+        intent.setAction("android.intent.action.VIEW");
+        Uri content_url = Uri.parse(searchItem.getUrl());
+        intent.setData(content_url);
+        startActivity(intent);
+    }
+
+    /**
+     * 长按弹出选项
+     * @param searchItem
+     */
+    private void SearchItem_LongClick(SearchItem searchItem) {
+        // 记录长按项目
+        m_LongClickedSearchItem = searchItem;
+        ShowItemLongClickPopupMenu();
+    }
+
+    /**
+     * 显示长按菜单
+     */
+    private void ShowItemLongClickPopupMenu() {
+        m_LongClickItemPopupMenu = new Dialog(getActivity(), R.style.BottomDialog);
+        LinearLayout root = (LinearLayout) LayoutInflater.from(getActivity()).inflate(
+                R.layout.dialog_searchitem_bottompopupmenu, null);
+
+        //初始化视图
+        root.findViewById(R.id.id_SearchFrag_PopupMenu_Star).setOnClickListener(this);
+        root.findViewById(R.id.id_SearchFrag_PopupMenu_Cancel).setOnClickListener(this);
+        root.findViewById(R.id.id_SearchFrag_PopupMenu_More).setOnClickListener(this);
+
+        m_LongClickItemPopupMenu.setContentView(root);
+        Window dialogWindow = m_LongClickItemPopupMenu.getWindow();
+        dialogWindow.setGravity(Gravity.BOTTOM);
+        WindowManager.LayoutParams lp = dialogWindow.getAttributes(); // 获取对话框当前的参数值
+        lp.x = 0; // 新位置X坐标
+        lp.y = 0; // 新位置Y坐标
+        lp.width = (int) getResources().getDisplayMetrics().widthPixels; // 宽度
+        root.measure(0, 0);
+        lp.height = root.getMeasuredHeight();
+        lp.alpha = 9f; // 透明度
+
+        dialogWindow.setAttributes(lp);
+
+        m_LongClickItemPopupMenu.show();
+    }
+
+    /**
+     *
+     */
+    private void SearchItem_StarClick(SearchItem searchItem) {
+        Toast.makeText(getActivity(), searchItem.getTitle(), Toast.LENGTH_SHORT).show();
     }
 
 

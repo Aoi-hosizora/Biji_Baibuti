@@ -8,6 +8,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.baibuti.biji.Data.Models.SearchItem;
 import com.baibuti.biji.R;
@@ -31,6 +32,7 @@ public class SearchItemAdapter extends RecyclerView.Adapter<SearchItemAdapter.Vi
      */
     private OnRecyclerViewItemClickListener m_OnItemClickListener;
     private OnRecyclerViewItemLongClickListener m_OnItemLongClickListener;
+//    private OnRecyclerViewItemSideClickListener m_OnItemSideClickListener;
 
     public SearchItemAdapter() {
         m_searchItems = new ArrayList<>();
@@ -44,6 +46,11 @@ public class SearchItemAdapter extends RecyclerView.Adapter<SearchItemAdapter.Vi
     public interface OnRecyclerViewItemLongClickListener {
         void onItemLongClick(View view, SearchItem searchItem);
     }
+
+
+//    public interface OnRecyclerViewItemSideClickListener {
+//        void onItemSideClick(View view, int position);
+//    }
 
     /**
      * 适配器列表内容
@@ -69,6 +76,14 @@ public class SearchItemAdapter extends RecyclerView.Adapter<SearchItemAdapter.Vi
         this.m_OnItemLongClickListener = listener;
     }
 
+//    /**
+//     * 适配器辅助按钮点击事件
+//     * @param listener
+//     */
+//    public void setOnItemSideClickListener(OnRecyclerViewItemSideClickListener listener) {
+//        this.m_OnItemSideClickListener = listener;
+//    }
+
     /**
      * 触发点击事件
      * @param v
@@ -91,8 +106,10 @@ public class SearchItemAdapter extends RecyclerView.Adapter<SearchItemAdapter.Vi
      */
     @Override
     public boolean onLongClick(View v) {
-        if (m_OnItemLongClickListener != null)
-            m_OnItemLongClickListener.onItemLongClick(v, (SearchItem) v.getTag());
+        if (!((SearchItem) v.getTag()).getUrl().equals(ITEM_MORE_URL)) {
+            if (m_OnItemLongClickListener != null)
+                m_OnItemLongClickListener.onItemLongClick(v, (SearchItem) v.getTag());
+        }
         return true;
     }
 

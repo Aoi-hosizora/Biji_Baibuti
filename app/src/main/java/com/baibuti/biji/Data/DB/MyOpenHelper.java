@@ -13,18 +13,22 @@ public class MyOpenHelper extends SQLiteOpenHelper {
 
     /**
      * 数据库版本号更新记录：
+     *
      * 1：
      * create table db_group
      * create table db_note
-     * <p>
+     *
      * 2：
      * create table db_file_class
-     * <p>
+     *
      * 3:
-     * create table ad_document
+     * create table db_document
+     *
+     * 4:
+     * create table db_search_item_star
      */
 
-    private final static int DB_VERSION = 3;// 数据库版本
+    private final static int DB_VERSION = 4;// 数据库版本
 
     public MyOpenHelper(Context context) {
         super(context, DB_NAME, null, DB_VERSION);
@@ -62,6 +66,13 @@ public class MyOpenHelper extends SQLiteOpenHelper {
                 "doc_class_name varchar )");
     }
 
+    private void Create_Db_searchItemStar(SQLiteDatabase db) {
+        db.execSQL("create table if not exists db_search_item_star (" +
+                "sis_url varchar primary key, " +
+                "sis_title varchar, " +
+                "sis_content varchar)");
+    }
+
     @Override
     public void onCreate(SQLiteDatabase db) {
         // 创建分类表
@@ -75,24 +86,39 @@ public class MyOpenHelper extends SQLiteOpenHelper {
 
         // 创建文件列表
         Create_Db_document(db);
+
+        // 创建搜索收藏表
+        Create_Db_searchItemStar(db);
     }
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-        if (oldVersion == 2 && newVersion == 3) {
-            // 升级创建文件分类表
+
+        if (oldVersion >= newVersion)
+            return;
+
+        // 相邻版本间数据库的更新
+        int version = oldVersion;
+
+        if (version == 0) {
+            Create_Db_note(db);
+            Create_Db_group(db);
+            version = 1;
+        }
+
+        if (version == 1) {
+            Create_Db_file_class(db);
+            version = 2;
+        }
+
+        if (version == 2) {
             Create_Db_document(db);
+            version = 3;
+        }
 
-            if (oldVersion >= newVersion)
-                return;
-
-            // 相邻版本间数据库的更新
-            int version = oldVersion;
-
-            if (version == 1) {
-                Create_Db_file_class(db);
-                version = 2;
-            }
+        if (version == 3) {
+            Create_Db_searchItemStar(db);
+            version = 4;
         }
     }
     /**
