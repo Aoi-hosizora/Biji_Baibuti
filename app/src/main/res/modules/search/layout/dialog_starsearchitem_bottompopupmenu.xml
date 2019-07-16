@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="220dp"
+    android:orientation="vertical"
+    android:paddingBottom="25dp"
+    android:paddingLeft="20dp"
+    android:paddingRight="20dp"
+    android:paddingTop="12dp">
+
+    <Button
+        android:id="@+id/id_SSIActivity_PopupMenu_CancelStar"
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:gravity="center"
+        android:text="@string/StarSearchItemAct_PopupMenu_CancelStar"
+        android:textColor="@color/pink"
+        android:textSize="18sp"
+        android:background="@color/white"
+        />
+
+    <Button
+        android:id="@+id/id_SSIActivity_PopupMenu_Cancel"
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:layout_marginTop="20dp"
+        android:gravity="center"
+        android:text="@string/StarSearchItemAct_PopupMenu_Cancel"
+        android:textColor="@color/pink"
+        android:textSize="18sp"
+        android:background="@color/white"/>
+</LinearLayout>

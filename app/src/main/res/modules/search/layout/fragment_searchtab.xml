@@ -51,9 +51,8 @@
 
     </LinearLayout>
 
-    <!--<com.baibuti.biji.UI.Widget.SlideRecyclerViewEmptySupport-->
-    <com.baibuti.biji.UI.Widget.RecyclerViewEmptySupport
-        android:id="@+id/id_SearchFrag_SearchRetList"
+
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="0dp"
         app:layout_constraintVertical_weight="1"
@@ -63,10 +62,29 @@
         android:scrollbars="none"
         android:visibility="visible"
         app:layout_constraintEnd_toEndOf="parent"
+        android:orientation="vertical"
 
         app:layout_constraintHorizontal_bias="1.0"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/id_SearchFrag_QuestionLinearLayout"
-        app:layout_constraintBottom_toBottomOf="parent" />
+        app:layout_constraintBottom_toBottomOf="parent">
+
+        <include
+            layout="@layout/modulelayout_recycleview_emptyview"
+            android:id="@+id/id_SearchFrag_SearchRetList_EmptyView"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:visibility="gone"/>
+
+        <!--<com.baibuti.biji.UI.Widget.SlideRecyclerViewEmptySupport-->
+        <com.baibuti.biji.UI.Widget.RecyclerViewEmptySupport
+            android:id="@+id/id_SearchFrag_SearchRetList"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:scrollbars="none"
+            android:visibility="visible" />
+
+    </LinearLayout>
+
 
 </android.support.constraint.ConstraintLayout>

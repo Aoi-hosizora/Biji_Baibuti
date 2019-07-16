@@ -25,8 +25,9 @@
                 android:id="@+id/id_adapter_SearchItem_Title"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="搜索结果标题"
+                android:text="搜索结果标题标题标题标题标题标题标题标题标题标题标题标题"
                 android:maxLines="1"
+                android:ellipsize="end"
                 android:textColor="@color/grey_900"
                 android:layout_marginEnd="@dimen/SearchItem_TitlePaddingEnd_30"
                 android:textSize="@dimen/text_size_18" />
@@ -52,12 +53,12 @@
                 android:textSize="@dimen/text_size_12"
                 android:layout_below="@id/id_adapter_SearchItem_Title"/>
 
-            <TextView
+            <com.baibuti.biji.UI.Widget.EllipsizingTextView
                 android:id="@+id/id_adapter_SearchItem_Content"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:maxLines="2"
-                android:text="搜索结果内容内容内容内容内容内容内容内容内容内容内容内容内容内容内容"
+                android:text="搜索结果内容内容内容内容内容内容内容内容内容内容内容内容内容内容内容内容内容内容内容内容内容内容内容内容内容内容内容内容内容内容内容内容内容内容内容"
                 android:layout_marginTop="2dp"
                 android:textColor="@color/grey_700"
                 android:layout_marginStart="2dp"

@@ -39,6 +39,15 @@
     <!-- //////////////////////////////////////////////////////// -->
     <!-- //////////////////  StarSearchItemAct  ///////////////// -->
 
-    <string name="StarSearchItemAct_Title">已收藏搜索结果</string>
+    <string name="StarSearchItemAct_Title">已收藏搜索结果 (共 %d 项)</string>
+
+    <!-- PopupMenu -->
+
+    <string name="StarSearchItemAct_PopupMenu_CancelStar">取消收藏</string>
+    <string name="StarSearchItemAct_PopupMenu_Cancel">取消</string>
+
+
+    <!-- ActionBar -->
+    <string name="StarSearchItemAct_ActionBar_FindStar">查找收藏</string>
 
 </resources>

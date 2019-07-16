@@ -12,7 +12,9 @@ import android.os.Handler;
 import android.os.Message;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.StaggeredGridLayoutManager;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Gravity;
@@ -97,6 +99,13 @@ public class SearchFragment extends Fragment implements View.OnClickListener, IS
         return view;
     }
 
+    @Override
+    public void onResume() {
+        super.onResume();
+        searchItemAdapter.notifyDataSetChanged();
+    }
+
+
     /**
      * 初始化界面
      */
@@ -127,6 +136,7 @@ public class SearchFragment extends Fragment implements View.OnClickListener, IS
      */
     private void updateListAdapter() {
         searchItemAdapter.setSearchItems(searchItems);
+        m_SearchRetList.setAdapter(searchItemAdapter);
         searchItemAdapter.notifyDataSetChanged();
     }
 
@@ -168,20 +178,21 @@ public class SearchFragment extends Fragment implements View.OnClickListener, IS
     private void initListView() {
         // LayoutMgr:
         m_SearchRetList.addItemDecoration(new SpacesItemDecoration(0));//设置item间距
-        LinearLayoutManager layoutManager = new LinearLayoutManager(getContext());
-        layoutManager.setOrientation(LinearLayoutManager.VERTICAL);//竖向列表
+        // LinearLayoutManager layoutManager = new LinearLayoutManager(getContext());
+        // layoutManager.setOrientation(LinearLayoutManager.VERTICAL);//竖向列表
+        // GridLayoutManager layoutManager = new GridLayoutManager(getContext(), 2);
+        StaggeredGridLayoutManager layoutManager = new StaggeredGridLayoutManager(2, StaggeredGridLayoutManager.VERTICAL);
         m_SearchRetList.setLayoutManager(layoutManager);
+
+        // EmptyView:
+        View ListEmptyView = view.findViewById(R.id.id_SearchFrag_SearchRetList_EmptyView);
+        m_SearchRetList.setEmptyView(ListEmptyView);
 
         // Adapter:
         searchItemAdapter = new SearchItemAdapter();
         searchItemAdapter.setSearchItems(searchItems);
 
-        m_SearchRetList.setAdapter(searchItemAdapter);
         searchItemAdapter.notifyDataSetChanged();
-
-        // EmptyView:
-        View ListEmptyView = view.findViewById(R.id.note_emptylist);
-        m_SearchRetList.setEmptyView(ListEmptyView);
 
         // Click:
         searchItemAdapter.setOnItemClickListener(new SearchItemAdapter.OnRecyclerViewItemClickListener() {
@@ -204,6 +215,8 @@ public class SearchFragment extends Fragment implements View.OnClickListener, IS
                 SearchItem_LongClick(searchItem);
             }
         });
+
+        m_SearchRetList.setAdapter(searchItemAdapter);
     }
 
     @Override

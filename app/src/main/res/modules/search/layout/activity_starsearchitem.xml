@@ -1,10 +1,38 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
     tools:context=".UI.Activity.StarSearchItemActivity">
+
+    <include
+        layout="@layout/modulelayout_recycleview_emptyview"
+        android:id="@+id/id_StarSearchItemActivity_StarListView_EmptyView"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:visibility="gone" />
+
+    <android.support.v4.widget.SwipeRefreshLayout
+        android:id="@+id/id_StarSearchItemActivity_Srl"
+
+        android:divider="@null"
+        android:visibility="visible"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:layout_marginStart="3dp"
+        android:layout_marginTop="5dp"
+        android:layout_marginEnd="3dp">
+
+
+        <com.baibuti.biji.UI.Widget.RecyclerViewEmptySupport
+            android:id="@+id/id_StarSearchItemActivity_StarListView"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:visibility="visible" />
+
+
+    </android.support.v4.widget.SwipeRefreshLayout>
 
 </LinearLayout>
