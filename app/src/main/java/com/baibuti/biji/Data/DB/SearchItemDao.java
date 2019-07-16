@@ -76,7 +76,7 @@ public class SearchItemDao {
         Cursor cursor = null;
 
         try {
-            String sql = "select * from " + TBL_NAME + " where " + COL_URL + " = " + Url;
+            String sql = "select * from " + TBL_NAME + " where " + COL_URL + " = \"" + Url + "\"";
             cursor = db.rawQuery(sql, null);
 
             if (cursor.moveToFirst()) {
@@ -98,6 +98,15 @@ public class SearchItemDao {
     }
 
     /**
+     * 判断是否存储收藏
+     * @param searchItem
+     * @return
+     */
+    public boolean hasStaredSearchItem(SearchItem searchItem) {
+        return queryOneStarSearchItem(searchItem.getUrl()) != null;
+    }
+
+    /**
      * 插入新收藏项
      *
      * @param searchItem
@@ -108,28 +117,25 @@ public class SearchItemDao {
         SQLiteDatabase db = helper.getWritableDatabase();
         long ret = 0;
 
-        String sql = "insert into " + TBL_NAME + " (?, ?, ?) values (?, ?, ?)";
+        String sql = "insert into " + TBL_NAME + " (" + COL_URL + ", " + COL_TTL + ", " + COL_CNT + ") values (?, ?, ?)";
 
         SQLiteStatement stat = db.compileStatement(sql);
 
         db.beginTransaction();
         try {
-
-            stat.bindString(1, COL_URL);
-            stat.bindString(2, COL_TTL);
-            stat.bindString(3, COL_CNT);
-
-            stat.bindString(4, searchItem.getUrl()); // COL_URL
-            stat.bindString(5, searchItem.getTitle()); // COL_TTL
-            stat.bindString(6, searchItem.getContent()); // COL_CNT
+            stat.bindString(1, searchItem.getUrl()); // COL_URL
+            stat.bindString(2, searchItem.getTitle()); // COL_TTL
+            stat.bindString(3, searchItem.getContent()); // COL_CNT
 
             ret = stat.executeInsert();
 
             Log.e("", "insertStarSearchItem: " + "sql = " + sql + ", ret = " + ret);
             db.setTransactionSuccessful();
-        } catch (Exception ex) {
+        }
+        catch (Exception ex) {
             ex.printStackTrace();
-        } finally {
+        }
+        finally {
             db.endTransaction();
             db.close();
         }

@@ -102,10 +102,20 @@ public class SearchNetUtil {
 
         try {
 
-            // 预处理响应
+            // 预处理响应 (百度的结果可能不存在 rs 块，尽可能缩短结果)
             int content_left_lineCnt = Resp.indexOf("<div id=\"content_left\">");
             int rs_lineCnt = Resp.indexOf("<div id=\"rs\">");
-            Resp = Resp.substring(content_left_lineCnt, rs_lineCnt);
+
+            if (rs_lineCnt > content_left_lineCnt)
+                Resp = Resp.substring(content_left_lineCnt, rs_lineCnt);
+            else {
+                int content_bottom_lineCnt = Resp.indexOf("<div id=\"content_bottom\">");
+
+                if (content_bottom_lineCnt > content_left_lineCnt)
+                    Resp = Resp.substring(content_left_lineCnt, content_bottom_lineCnt);
+                else
+                    Resp = Resp.substring(content_left_lineCnt);
+            }
 
             // Log.e("", "parseBaiduRet: " + Resp);
 

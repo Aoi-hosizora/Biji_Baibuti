@@ -7,9 +7,13 @@ import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.baibuti.biji.Data.DB.SearchItemDao;
 import com.baibuti.biji.Data.Models.SearchItem;
 import com.baibuti.biji.R;
 import com.baibuti.biji.UI.Widget.RecyclerViewEmptySupport;
@@ -150,34 +154,83 @@ public class SearchItemAdapter extends RecyclerView.Adapter<SearchItemAdapter.Vi
 
     public class ViewHolder extends RecyclerViewEmptySupport.ViewHolder {
 
-        TextView m_title;
-        TextView m_content;
-        TextView m_url;
+        private View m_view;
+
+        private TextView m_title;
+        private TextView m_content;
+        private TextView m_url;
+        private ImageView m_stared;
 
         ViewHolder(View view) {
             super(view);
+
+            m_view = view;
+
             m_title = view.findViewById(R.id.id_adapter_SearchItem_Title);
             m_content = view.findViewById(R.id.id_adapter_SearchItem_Content);
             m_url = view.findViewById(R.id.id_adapter_SearchItem_Url);
+            m_stared = view.findViewById(R.id.id_adapter_SearchItem_IsStared);
         }
 
+        /**
+         * 设置 ViewHolder UI
+         * @param searchItem
+         */
         void setupUI(SearchItem searchItem) {
-            if (!searchItem.getUrl().equals(ITEM_MORE_URL)) {
-                m_title.setGravity(Gravity.START);
-                m_content.setVisibility(View.VISIBLE);
-                m_url.setVisibility(View.VISIBLE);
+            if (!searchItem.getUrl().equals(ITEM_MORE_URL))
+                setupNormalItemUI(searchItem);
+            else
+                setupMoreItemUI(searchItem);
+        }
 
-                m_title.setText(searchItem.getTitle());
-                m_content.setText(searchItem.getContent());
-                m_url.setText(searchItem.getUrl());
+        /**
+         * 默认内容项
+         * @param searchItem
+         */
+        private void setupNormalItemUI(SearchItem searchItem) {
+
+            SearchItemDao searchItemDao = new SearchItemDao(m_view.getContext());
+
+            m_title.setGravity(Gravity.START);
+            m_content.setVisibility(View.VISIBLE);
+            m_url.setVisibility(View.VISIBLE);
+            m_stared.setVisibility(View.VISIBLE);
+
+            m_title.setText(searchItem.getTitle());
+            m_content.setText(searchItem.getContent());
+            m_url.setText(searchItem.getUrl());
+
+            if (!searchItemDao.hasStaredSearchItem(searchItem)) {
+                // not star
+                m_stared.setImageDrawable(m_view.getContext().getDrawable(R.drawable.ic_star_border_theme_24dp));
             }
             else {
-                m_title.setGravity(Gravity.CENTER);
-                m_content.setVisibility(View.GONE);
-                m_url.setVisibility(View.GONE);
-
-                m_title.setText(searchItem.getTitle());
+                // stared
+                m_stared.setImageDrawable(m_view.getContext().getDrawable(R.drawable.ic_star_theme_24dp));
             }
+
+            // layout_marginEnd
+            RelativeLayout.LayoutParams params = (RelativeLayout.LayoutParams) m_title.getLayoutParams();
+            params.setMarginEnd(m_view.getContext().getResources().getDimensionPixelSize(R.dimen.SearchItem_TitlePaddingEnd_30));
+            m_title.setLayoutParams(params);
+        }
+
+        /**
+         * 更多项
+         * @param searchItem
+         */
+        private void setupMoreItemUI(SearchItem searchItem) {
+            m_title.setGravity(Gravity.CENTER);
+            m_content.setVisibility(View.GONE);
+            m_url.setVisibility(View.GONE);
+            m_stared.setVisibility(View.GONE);
+
+            m_title.setText(searchItem.getTitle());
+
+            // layout_marginEnd
+            RelativeLayout.LayoutParams params = (RelativeLayout.LayoutParams) m_title.getLayoutParams();
+            params.setMarginEnd(m_view.getContext().getResources().getDimensionPixelSize(R.dimen.SearchItem_TitlePaddingEnd_0));
+            m_title.setLayoutParams(params);
         }
     }
 }

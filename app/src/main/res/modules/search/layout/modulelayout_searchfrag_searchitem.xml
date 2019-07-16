@@ -28,7 +28,16 @@
                 android:text="搜索结果标题"
                 android:maxLines="1"
                 android:textColor="@color/grey_900"
+                android:layout_marginEnd="@dimen/SearchItem_TitlePaddingEnd_30"
                 android:textSize="@dimen/text_size_18" />
+
+            <ImageView
+                android:id="@+id/id_adapter_SearchItem_IsStared"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="@drawable/ic_star_border_theme_24dp"
+                android:layout_toEndOf="@id/id_adapter_SearchItem_Title"
+                android:layout_marginStart="-20dp" />
 
             <TextView
                 android:id="@+id/id_adapter_SearchItem_Url"

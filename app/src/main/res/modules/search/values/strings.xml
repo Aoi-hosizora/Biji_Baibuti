@@ -4,10 +4,10 @@
     <string name="SearchFrag_Header">搜题</string>
 
     <!-- //////////////////////////////////////////////////// -->
-    <!-- ///////////////////  SearchFrag  ///////////////////-->
+    <!-- ///////////////////  SearchFrag  /////////////////// -->
 
     <!-- Main UI -->
-    <string name="SearchFrag_QuestionEditTextHint">关键字&#8230;</string>
+    <string name="SearchFrag_QuestionEditTextHint">关键词&#8230;</string>
     <string name="SearchFrag_SearchButtonText">搜索</string>
     <string name="SearchFrag_SearchNullMessage">未输入查找内容</string>
     <string name="SearchFrag_SearchingProgressText">搜索 "%s" 中&#8230;</string>
@@ -16,17 +16,29 @@
     <string name="SearchFrag_NewSearchToast">共获取了 %d 条新项目</string>
     <string name="SearchFrag_MoreSearchToast">共新增了 %d 条新项目</string>
 
+    <string name="SearchFrag_StarSuccess">收藏 %s 成功</string>
+    <string name="SearchFrag_CancelStarSuccess">取消收藏 %s 成功</string>
+    <string name="SearchFrag_StarFailed">收藏 %s 失败</string>
+    <string name="SearchFrag_CancelStarFailed">取消收藏 %s 失败</string>
+
     <!-- PopupMenu -->
     <string name="SearchFrag_PopupMenu_Star">收藏</string>
+    <string name="SearchFrag_PopupMenu_CancelStar">取消收藏</string>
     <string name="SearchFrag_PopupMenu_More">加载更多&#8230;</string>
     <string name="SearchFrag_PopupMenu_Cancel">取消</string>
 
     <!-- ActionBar -->
     <string name="SearchFrag_ActionBar_Star">收藏</string>
 
-
     <!-- Dlg -->
     <string name="SearchFrag_AlertDlg_PosButton">确定</string>
     <string name="SearchFrag_AlertDlg_NormalTitle">提示</string>
+
+
+    <!-- ///////////////////  SearchFrag End  /////////////////// -->
+    <!-- //////////////////////////////////////////////////////// -->
+    <!-- //////////////////  StarSearchItemAct  ///////////////// -->
+
+    <string name="StarSearchItemAct_Title">已收藏搜索结果</string>
 
 </resources>

@@ -24,14 +24,17 @@ import android.view.Window;
 import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.Toast;
 
 
 import com.baibuti.biji.Data.Adapters.SearchItemAdapter;
+import com.baibuti.biji.Data.DB.SearchItemDao;
 import com.baibuti.biji.Data.Models.SearchItem;
 import com.baibuti.biji.Interface.IShowLog;
 import com.baibuti.biji.R;
+import com.baibuti.biji.UI.Activity.StarSearchItemActivity;
 import com.baibuti.biji.UI.View.SpacesItemDecoration;
 import com.baibuti.biji.UI.Widget.RecyclerViewEmptySupport;
 import com.baibuti.biji.UI.Widget.SlideRecyclerViewEmptySupport;
@@ -136,16 +139,18 @@ public class SearchFragment extends Fragment implements View.OnClickListener, IS
         setHasOptionsMenu(true);
 
         m_toolbar = view.findViewById(R.id.tab_search_toolbar);
-        // m_toolbar.inflateMenu(R.menu.xxxx);
-        // m_toolbar.setOnMenuItemClickListener(new Toolbar.OnMenuItemClickListener() {
-        //     @Override
-        //     public boolean onMenuItemClick(MenuItem item) {
-        //     switch (item.getItemId()) {
-        //         //
-        //     }
-        //     return true;
-        //     }
-        // });
+         m_toolbar.inflateMenu(R.menu.actionbar_searchfrag);
+         m_toolbar.setOnMenuItemClickListener(new Toolbar.OnMenuItemClickListener() {
+             @Override
+             public boolean onMenuItemClick(MenuItem item) {
+                 switch (item.getItemId()) {
+                     case R.id.action_SearchStar:
+                         ActionBar_Star_Click();
+                     break;
+                 }
+                return true;
+             }
+         });
 //        m_toolbar.setNavigationIcon(R.drawable.tab_menu);
 //        m_toolbar.setNavigationOnClickListener(new View.OnClickListener() {
 //            @Override
@@ -249,7 +254,7 @@ public class SearchFragment extends Fragment implements View.OnClickListener, IS
      * 点击搜索，并发送信号接收处理
      */
     private void SearchButton_Click() {
-        Question = m_QuestionEditText.getText().toString();
+        Question = m_QuestionEditText.getText().toString().trim();
         if (Question.isEmpty()) {
             ShowMessageBox(getString(R.string.SearchFrag_SearchNullMessage));
             return;
@@ -370,18 +375,25 @@ public class SearchFragment extends Fragment implements View.OnClickListener, IS
     private void SearchItem_LongClick(SearchItem searchItem) {
         // 记录长按项目
         m_LongClickedSearchItem = searchItem;
-        ShowItemLongClickPopupMenu();
+        ShowItemLongClickPopupMenu(searchItem);
     }
 
     /**
      * 显示长按菜单
      */
-    private void ShowItemLongClickPopupMenu() {
+    private void ShowItemLongClickPopupMenu(SearchItem searchItem) {
         m_LongClickItemPopupMenu = new Dialog(getActivity(), R.style.BottomDialog);
         LinearLayout root = (LinearLayout) LayoutInflater.from(getActivity()).inflate(
                 R.layout.dialog_searchitem_bottompopupmenu, null);
 
+        SearchItemDao searchItemDao = new SearchItemDao(getContext());
+
         //初始化视图
+        if (searchItemDao.hasStaredSearchItem(searchItem)) // 已收藏
+            ((Button) root.findViewById(R.id.id_SearchFrag_PopupMenu_Star)).setText(R.string.SearchFrag_PopupMenu_CancelStar);
+        else // 未收藏
+            ((Button) root.findViewById(R.id.id_SearchFrag_PopupMenu_Star)).setText(R.string.SearchFrag_PopupMenu_Star);
+
         root.findViewById(R.id.id_SearchFrag_PopupMenu_Star).setOnClickListener(this);
         root.findViewById(R.id.id_SearchFrag_PopupMenu_Cancel).setOnClickListener(this);
         root.findViewById(R.id.id_SearchFrag_PopupMenu_More).setOnClickListener(this);
@@ -406,7 +418,29 @@ public class SearchFragment extends Fragment implements View.OnClickListener, IS
      *
      */
     private void SearchItem_StarClick(SearchItem searchItem) {
-        Toast.makeText(getActivity(), searchItem.getTitle(), Toast.LENGTH_SHORT).show();
+        SearchItemDao searchItemDao = new SearchItemDao(getContext());
+        if (!searchItemDao.hasStaredSearchItem(searchItem)) {
+            // 未收藏
+
+            if (searchItemDao.insertStarSearchItem(searchItem) != -1)
+                Toast.makeText(getActivity(), String.format(getString(R.string.SearchFrag_StarSuccess), searchItem.getTitle()), Toast.LENGTH_SHORT).show();
+            else
+                Toast.makeText(getActivity(), String.format(getString(R.string.SearchFrag_StarFailed), searchItem.getTitle()), Toast.LENGTH_SHORT).show();
+        }
+        else {
+            // 已收藏
+
+            if (searchItemDao.deleteStarSearchItem(searchItem) != -1)
+                Toast.makeText(getActivity(), String.format(getString(R.string.SearchFrag_CancelStarSuccess), searchItem.getTitle()), Toast.LENGTH_SHORT).show();
+            else
+                Toast.makeText(getActivity(), String.format(getString(R.string.SearchFrag_CancelStarFailed), searchItem.getTitle()), Toast.LENGTH_SHORT).show();
+        }
+        searchItemAdapter.notifyDataSetChanged();
+    }
+
+    private void ActionBar_Star_Click() {
+        Intent intent = new Intent(getActivity(), StarSearchItemActivity.class);
+        startActivity(intent);
     }
 
 

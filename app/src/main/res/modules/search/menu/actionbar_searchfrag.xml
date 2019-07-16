@@ -4,7 +4,7 @@
 
     <item
         android:id="@+id/action_SearchStar"
-        android:icon="@drawable/ic_star_24dp"
+        android:icon="@drawable/ic_star_border_24dp"
         app:showAsAction="ifRoom"
         android:title="@string/SearchFrag_ActionBar_Star"/>
 </menu>

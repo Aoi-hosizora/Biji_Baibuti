@@ -1,0 +1,6 @@
+<resources>
+
+    <dimen name="SearchItem_TitlePaddingEnd_30">30dp</dimen>
+    <dimen name="SearchItem_TitlePaddingEnd_0">0dp</dimen>
+
+</resources>

@@ -53,7 +53,17 @@
             android:name=".UI.Activity.OpenSaveFileActivity"
             android:screenOrientation="portrait">
             <intent-filter>
-                <action android:name="activitytest.example.com.activitytest.ViewModifyNoteActivity" />
+                <action android:name="activitytest.example.com.activitytest.OpenSaveFileActivity" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </activity>
+
+        <!-- StarSearchItemActivity Activity -->
+        <activity
+            android:name=".UI.Activity.StarSearchItemActivity"
+            android:screenOrientation="portrait">
+            <intent-filter>
+                <action android:name="activitytest.example.com.activitytest.StarSearchItemActivity" />
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </activity>
