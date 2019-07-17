@@ -1,6 +1,5 @@
 package com.baibuti.biji.UI.Fragment;
 
-import android.app.ActionBar;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.ProgressDialog;
@@ -12,22 +11,17 @@ import android.os.Handler;
 import android.os.Message;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
-import android.support.v7.widget.GridLayoutManager;
-import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.StaggeredGridLayoutManager;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
-import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.Window;
-import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.TextView;
 import android.widget.Toast;
 
 
@@ -39,15 +33,16 @@ import com.baibuti.biji.R;
 import com.baibuti.biji.UI.Activity.StarSearchItemActivity;
 import com.baibuti.biji.UI.View.SpacesItemDecoration;
 import com.baibuti.biji.UI.Widget.RecyclerViewEmptySupport;
-import com.baibuti.biji.UI.Widget.SlideRecyclerViewEmptySupport;
 import com.baibuti.biji.Utils.CommonUtil;
+import com.baibuti.biji.Utils.PopupMenuUtil;
 import com.baibuti.biji.Utils.SearchNetUtil;
 
 import java.util.ArrayList;
-import java.util.List;
 import java.util.Locale;
 
 public class SearchFragment extends Fragment implements View.OnClickListener, IShowLog {
+
+    // region 定义界面元素 view m_toolbar m_SearchButton m_QuestionEditText m_SearchRetList m_SearchingDialog m_LongClickItemPopupMenu m_LongClickedSearchItem
 
     private View view;
     private Toolbar m_toolbar;
@@ -60,10 +55,18 @@ public class SearchFragment extends Fragment implements View.OnClickListener, IS
     private Dialog m_LongClickItemPopupMenu;
     private SearchItem m_LongClickedSearchItem;
 
+    // endregion 定义界面元素
+
+    // region 定义数据适配器与列表元素 searchItems searchItemAdapter ITEM_MORE
+
     private ArrayList<SearchItem> searchItems = new ArrayList<>();
     private SearchItemAdapter searchItemAdapter;
 
     public SearchItem ITEM_MORE;
+
+    // endregion 定义数据适配器与列表元素
+
+    // region 定义搜索判断用的数据 isSearching SearchPageCnt Question isNewSearch
 
     /**
      * 判断当前是否在搜索以及回调是否显示，鸵鸟代码用
@@ -75,6 +78,9 @@ public class SearchFragment extends Fragment implements View.OnClickListener, IS
      */
     private int SearchPageCnt = 0;
 
+    /**
+     * 记录当前搜索中的问题，更多搜索点击查看用
+     */
     private String Question = "";
 
     /**
@@ -82,6 +88,9 @@ public class SearchFragment extends Fragment implements View.OnClickListener, IS
      */
     private boolean isNewSearch = true;
 
+    // endregion 定义搜索判断用的数据
+
+    // region 初始化界面 onCreateView initView initToolbar initListView ShowMessageBox ShowLogE
 
     @Nullable
     @Override
@@ -97,12 +106,6 @@ public class SearchFragment extends Fragment implements View.OnClickListener, IS
             initView();
         }
         return view;
-    }
-
-    @Override
-    public void onResume() {
-        super.onResume();
-        searchItemAdapter.notifyDataSetChanged();
     }
 
 
@@ -129,15 +132,6 @@ public class SearchFragment extends Fragment implements View.OnClickListener, IS
 
         m_SearchButton.setOnClickListener(this);
         initListView();
-    }
-
-    /**
-     * 更新适配器连接数据
-     */
-    private void updateListAdapter() {
-        searchItemAdapter.setSearchItems(searchItems);
-        m_SearchRetList.setAdapter(searchItemAdapter);
-        searchItemAdapter.notifyDataSetChanged();
     }
 
     /**
@@ -219,6 +213,18 @@ public class SearchFragment extends Fragment implements View.OnClickListener, IS
         m_SearchRetList.setAdapter(searchItemAdapter);
     }
 
+    /**
+     * 显示提示对话框
+     * @param Content
+     */
+    private void ShowMessageBox(String Content) {
+        new AlertDialog.Builder(getContext())
+                .setTitle(R.string.SearchFrag_AlertDlg_NormalTitle)
+                .setMessage(Content)
+                .setPositiveButton(R.string.SearchFrag_AlertDlg_PosButton, null)
+                .create().show();
+    }
+
     @Override
     public void ShowLogE(String FunctionName, String Msg) {
         String ClassName = "SearchFragment";
@@ -226,17 +232,28 @@ public class SearchFragment extends Fragment implements View.OnClickListener, IS
                 ClassName + ": " + FunctionName + "###" + Msg);
     }
 
-    /**
-     * 显示提示对话框
-     * @param Content
-     */
-    private void ShowMessageBox(String Content) {
-        new AlertDialog.Builder(getContext())
-            .setTitle(R.string.SearchFrag_AlertDlg_NormalTitle)
-            .setMessage(Content)
-            .setPositiveButton(R.string.SearchFrag_AlertDlg_PosButton, null)
-            .create().show();
+    // endregion 初始化界面 ShowMessageBox
+
+    // region 数据变化 onResume updateListAdapter
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        searchItemAdapter.notifyDataSetChanged();
     }
+
+    /**
+     * 更新适配器连接数据
+     */
+    private void updateListAdapter() {
+        searchItemAdapter.setSearchItems(searchItems);
+        m_SearchRetList.setAdapter(searchItemAdapter);
+        searchItemAdapter.notifyDataSetChanged();
+    }
+
+    // endregion 数据变化
+
+    // region 菜单按钮 onClick ShowItemLongClickPopupMenu
 
     @Override
     public void onClick(View v) {
@@ -261,6 +278,69 @@ public class SearchFragment extends Fragment implements View.OnClickListener, IS
                 m_LongClickItemPopupMenu.dismiss();
             break;
         }
+    }
+
+    /**
+     * 显示长按菜单
+     * @param searchItem
+     */
+    private void ShowItemLongClickPopupMenu(SearchItem searchItem) {
+        m_LongClickItemPopupMenu = new Dialog(getActivity(), R.style.BottomDialog);
+        LinearLayout root = PopupMenuUtil.initPopupMenu(getActivity(), m_LongClickItemPopupMenu, R.layout.dialog_searchitem_bottompopupmenu);
+
+        SearchItemDao searchItemDao = new SearchItemDao(getContext());
+
+        if (searchItemDao.hasStaredSearchItem(searchItem)) // 已收藏
+            ((Button) root.findViewById(R.id.id_SearchFrag_PopupMenu_Star)).setText(R.string.SearchFrag_PopupMenu_CancelStar);
+        else // 未收藏
+            ((Button) root.findViewById(R.id.id_SearchFrag_PopupMenu_Star)).setText(R.string.SearchFrag_PopupMenu_Star);
+
+        root.findViewById(R.id.id_SearchFrag_PopupMenu_Star).setOnClickListener(this);
+        root.findViewById(R.id.id_SearchFrag_PopupMenu_Cancel).setOnClickListener(this);
+        root.findViewById(R.id.id_SearchFrag_PopupMenu_More).setOnClickListener(this);
+
+        TextView label = root.findViewById(R.id.id_SearchFrag_PopupMenu_Label);
+        label.setText(String.format(getString(R.string.SearchFrag_PopupMenu_Label), searchItem.getTitle()));
+
+        m_LongClickItemPopupMenu.show();
+    }
+
+    // endregion 菜单按钮
+
+    // region 列表和搜索点击更新处理 onHandleSearchedRet SearchButton_Click MoreSearchButton_Click SearchItem_Click SearchItem_LongClick
+
+    /**
+     * 收到更新 searchItems 列表 信号
+     * @param msg
+     */
+    private void onHandleSearchedRet(Message msg) {
+
+        if (isSearching && searchItems != null && searchItems.size() != 0) {
+
+            ShowLogE("onHandleSearchedRet", "isNewSearch" + isNewSearch);
+
+            if (isNewSearch) { // 新搜索
+
+                SearchPageCnt = 1;
+                Toast.makeText(getActivity(), String.format(Locale.CHINA,
+                        getString(R.string.SearchFrag_NewSearchToast), searchItems.size()), Toast.LENGTH_SHORT).show();
+            }
+            else { // 更多
+
+                Bundle bundle = msg.getData();
+                int newCnt = bundle.getInt(HandleWhat.BND_SearchMoreItemCnt, 0);
+
+                SearchPageCnt++;
+                Toast.makeText(getActivity(), String.format(Locale.CHINA,
+                        getString(R.string.SearchFrag_MoreSearchToast), newCnt), Toast.LENGTH_SHORT).show();
+            }
+
+            searchItems.remove(ITEM_MORE);
+            searchItems.add(ITEM_MORE);
+            updateListAdapter();
+
+        }
+        m_SearchingDialog.cancel();
     }
 
     /**
@@ -335,40 +415,6 @@ public class SearchFragment extends Fragment implements View.OnClickListener, IS
 
 
     /**
-     * 收到更新 searchItems 列表 信号
-     * @param msg
-     */
-    private void onHandleSearchedRet(Message msg) {
-
-        if (isSearching && searchItems != null && searchItems.size() != 0) {
-
-            ShowLogE("onHandleSearchedRet", "isNewSearch" + isNewSearch);
-
-            if (isNewSearch) { // 新搜索
-
-                SearchPageCnt = 1;
-                Toast.makeText(getActivity(), String.format(Locale.CHINA,
-                        getString(R.string.SearchFrag_NewSearchToast), searchItems.size()), Toast.LENGTH_SHORT).show();
-            }
-            else { // 更多
-
-                Bundle bundle = msg.getData();
-                int newCnt = bundle.getInt(HandleWhat.BND_SearchMoreItemCnt, 0);
-
-                SearchPageCnt++;
-                Toast.makeText(getActivity(), String.format(Locale.CHINA,
-                        getString(R.string.SearchFrag_MoreSearchToast), newCnt), Toast.LENGTH_SHORT).show();
-            }
-
-            searchItems.remove(ITEM_MORE);
-            searchItems.add(ITEM_MORE);
-            updateListAdapter();
-
-        }
-        m_SearchingDialog.cancel();
-    }
-
-    /**
      * 使用浏览器打开链接
      * TODO ********
      * @param searchItem
@@ -391,44 +437,12 @@ public class SearchFragment extends Fragment implements View.OnClickListener, IS
         ShowItemLongClickPopupMenu(searchItem);
     }
 
-    /**
-     * 显示长按菜单
-     */
-    private void ShowItemLongClickPopupMenu(SearchItem searchItem) {
-        m_LongClickItemPopupMenu = new Dialog(getActivity(), R.style.BottomDialog);
-        LinearLayout root = (LinearLayout) LayoutInflater.from(getActivity()).inflate(
-                R.layout.dialog_searchitem_bottompopupmenu, null);
+    // endregion 列表点击处理
 
-        SearchItemDao searchItemDao = new SearchItemDao(getContext());
-
-        //初始化视图
-        if (searchItemDao.hasStaredSearchItem(searchItem)) // 已收藏
-            ((Button) root.findViewById(R.id.id_SearchFrag_PopupMenu_Star)).setText(R.string.SearchFrag_PopupMenu_CancelStar);
-        else // 未收藏
-            ((Button) root.findViewById(R.id.id_SearchFrag_PopupMenu_Star)).setText(R.string.SearchFrag_PopupMenu_Star);
-
-        root.findViewById(R.id.id_SearchFrag_PopupMenu_Star).setOnClickListener(this);
-        root.findViewById(R.id.id_SearchFrag_PopupMenu_Cancel).setOnClickListener(this);
-        root.findViewById(R.id.id_SearchFrag_PopupMenu_More).setOnClickListener(this);
-
-        m_LongClickItemPopupMenu.setContentView(root);
-        Window dialogWindow = m_LongClickItemPopupMenu.getWindow();
-        dialogWindow.setGravity(Gravity.BOTTOM);
-        WindowManager.LayoutParams lp = dialogWindow.getAttributes(); // 获取对话框当前的参数值
-        lp.x = 0; // 新位置X坐标
-        lp.y = 0; // 新位置Y坐标
-        lp.width = (int) getResources().getDisplayMetrics().widthPixels; // 宽度
-        root.measure(0, 0);
-        lp.height = root.getMeasuredHeight();
-        lp.alpha = 9f; // 透明度
-
-        dialogWindow.setAttributes(lp);
-
-        m_LongClickItemPopupMenu.show();
-    }
+    // region 弹出菜单和顶部菜单点击事件处理 SearchItem_StarClick ActionBar_Star_Click
 
     /**
-     *
+     * 弹出菜单收藏点击
      */
     private void SearchItem_StarClick(SearchItem searchItem) {
         SearchItemDao searchItemDao = new SearchItemDao(getContext());
@@ -451,15 +465,20 @@ public class SearchFragment extends Fragment implements View.OnClickListener, IS
         searchItemAdapter.notifyDataSetChanged();
     }
 
+    /**
+     * Action 打开收藏活动
+     */
     private void ActionBar_Star_Click() {
         Intent intent = new Intent(getActivity(), StarSearchItemActivity.class);
         startActivity(intent);
     }
 
+    // endregion 弹出菜单和顶部菜单点击事件处理
 
     // ************************************************************************************************************** //
+    // ************************************************************************************************************** //
 
-    // 处理网络
+    // region 网络处理 HandleWhat handler
 
     /**
      * HandleWhat 和 HandleBundle 集成类
@@ -484,4 +503,6 @@ public class SearchFragment extends Fragment implements View.OnClickListener, IS
         }
         return false;
     });
+
+    // endregion 网络处理
 }

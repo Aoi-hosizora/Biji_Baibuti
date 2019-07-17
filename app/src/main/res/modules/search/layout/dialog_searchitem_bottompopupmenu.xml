@@ -8,14 +8,27 @@
     android:paddingRight="20dp"
     android:paddingTop="12dp">
 
+    <TextView
+        android:id="@+id/id_SearchFrag_PopupMenu_Label"
+        android:layout_width="match_parent"
+        android:layout_height="30dp"
+        android:background="@color/white"
+        android:text="@string/SearchFrag_PopupMenu_Label"
+        android:textColor="@color/grey_700"
+        android:maxLines="1"
+        android:ellipsize="end"
+        android:gravity="center"
+        android:textSize="@dimen/text_size_14" />
+
     <Button
         android:id="@+id/id_SearchFrag_PopupMenu_Star"
         android:layout_width="match_parent"
         android:layout_height="50dp"
+        android:layout_marginTop="4dp"
         android:gravity="center"
         android:text="@string/SearchFrag_PopupMenu_Star"
         android:textColor="@color/pink"
-        android:textSize="18sp"
+        android:textSize="@dimen/text_size_18"
         android:background="@color/white"
         />
 
@@ -27,7 +40,7 @@
         android:gravity="center"
         android:text="@string/SearchFrag_PopupMenu_More"
         android:textColor="@color/pink"
-        android:textSize="18sp"
+        android:textSize="@dimen/text_size_18"
         android:background="@color/white"/>
 
     <Button
@@ -38,6 +51,6 @@
         android:gravity="center"
         android:text="@string/SearchFrag_PopupMenu_Cancel"
         android:textColor="@color/pink"
-        android:textSize="18sp"
+        android:textSize="@dimen/text_size_18"
         android:background="@color/white"/>
 </LinearLayout>

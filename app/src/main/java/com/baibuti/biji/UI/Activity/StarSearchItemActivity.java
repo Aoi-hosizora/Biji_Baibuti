@@ -1,25 +1,23 @@
 package com.baibuti.biji.UI.Activity;
 
+import android.app.AlertDialog;
 import android.app.Dialog;
+import android.app.ProgressDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
-import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.StaggeredGridLayoutManager;
 import android.util.Log;
-import android.view.Gravity;
-import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.Window;
-import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.LinearLayout;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.baibuti.biji.Data.Adapters.SearchItemAdapter;
@@ -30,23 +28,52 @@ import com.baibuti.biji.R;
 import com.baibuti.biji.UI.View.SpacesItemDecoration;
 import com.baibuti.biji.UI.Widget.RecyclerViewEmptySupport;
 import com.baibuti.biji.Utils.CommonUtil;
+import com.baibuti.biji.Utils.PopupMenuUtil;
 
 import java.util.ArrayList;
 
 public class StarSearchItemActivity extends AppCompatActivity implements View.OnClickListener, IShowLog {
 
+    // region 定义界面元素 m_menu m_searchFragment m_StarListView m_LongClickItemPopupMenu m_SwipeRefresh
 
     private Menu m_menu;
-    private com.wyt.searchbox.SearchFragment searchFragment;
+    private com.wyt.searchbox.SearchFragment m_searchFragment;
 
     private RecyclerViewEmptySupport m_StarListView;
-    private SearchItem m_LongClickedSearchItem;
 
     private Dialog m_LongClickItemPopupMenu;
     private SwipeRefreshLayout m_SwipeRefresh;
 
+    private ProgressDialog m_LoadingProgress;
+
+    // endregion 定义界面元素
+
+    // region 定义临时搜索数据 m_LongClickedSearchItem searchItemList searchItemAdapter
+
+    private SearchItem m_LongClickedSearchItem;
     private ArrayList<SearchItem> searchItemList;
     private SearchItemAdapter searchItemAdapter;
+
+    /**
+     * 搜索记录
+     */
+    private ArrayList<SearchItem> FindSearchedItemList = null;
+    private String FindSearchedItemString = "";
+
+    // endregion 定义临时搜索数据
+
+    // region 定义零碎数据 TIME_SRL_MS
+
+    /**
+     * 下拉等待
+     */
+    private int TIME_SRL_MS = 500;
+
+    // endregion 定义零碎数据
+
+    ///
+
+    // region 初始化界面 onCreate initView initSearchFrag initSRL initListView ShowLogE
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -61,13 +88,65 @@ public class StarSearchItemActivity extends AppCompatActivity implements View.On
      * 初始化界面
      */
     private void initView() {
-        setTitle(R.string.StarSearchItemAct_Title);
-
         m_StarListView = findViewById(R.id.id_StarSearchItemActivity_StarListView);
 
-        initListView();
+        m_LoadingProgress = new ProgressDialog(this);
+        m_LoadingProgress.setCancelable(false);
+        m_LoadingProgress.setMessage(getString(R.string.StarSearchItemAct_BackSearchLoading));
+
         initSearchFrag();
         initSRL();
+        initListView();
+    }
+
+    /**
+     * 初始化搜索框
+     */
+    private void initSearchFrag() {
+        // 添加搜索框
+        m_searchFragment = com.wyt.searchbox.SearchFragment.newInstance();
+        m_searchFragment.setAllowReturnTransitionOverlap(true);
+        m_searchFragment.setOnSearchClickListener(new com.wyt.searchbox.custom.IOnSearchClickListener() {
+
+            @Override
+            public void OnSearchClick(String keyword) {
+                try {
+                    if (!keyword.trim().isEmpty()) {
+                        Find_SearchItem_Click(keyword.trim());
+                    }
+                }
+                catch (Exception ex) {
+                    ex.printStackTrace();
+                }
+            }
+        });
+    }
+
+    /**
+     * 初始化 下拉加载
+     */
+    private void initSRL() {
+        m_SwipeRefresh = findViewById(R.id.id_StarSearchItemActivity_Srl);
+        m_SwipeRefresh.setColorSchemeResources(R.color.colorPrimary);
+        // m_SwipeRefresh.setColorSchemeColors(Color.RED, Color.BLUE, Color.GREEN);
+        m_SwipeRefresh.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+            @Override
+            public void onRefresh() {
+
+                if (!m_LoadingProgress.isShowing())
+                    m_LoadingProgress.show();
+
+                new Handler().postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        refreshListData();
+                        refreshListView();
+                        m_SwipeRefresh.setRefreshing(false);
+                        m_LoadingProgress.cancel();
+                    }
+                }, TIME_SRL_MS);
+            }
+        });
     }
 
     /**
@@ -100,6 +179,7 @@ public class StarSearchItemActivity extends AppCompatActivity implements View.On
         searchItemAdapter.setOnItemLongClickListener(new SearchItemAdapter.OnRecyclerViewItemLongClickListener() {
             @Override
             public void onItemLongClick(View view, SearchItem searchItem) {
+                // 显示菜单
                 SearchItem_LongClick(searchItem);
             }
         });
@@ -108,25 +188,33 @@ public class StarSearchItemActivity extends AppCompatActivity implements View.On
         refreshListView();
     }
 
-    private void initSRL() {
-        m_SwipeRefresh = findViewById(R.id.id_StarSearchItemActivity_Srl);
-        m_SwipeRefresh.setColorSchemeResources(R.color.colorPrimary);
-        // m_SwipeRefresh.setColorSchemeColors(Color.RED, Color.BLUE, Color.GREEN);
-        m_SwipeRefresh.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
-            @Override
-            public void onRefresh() {
-                new Handler().postDelayed(new Runnable() {
-                    @Override
-                    public void run() {
-                        refreshListData();
-                        refreshListView();
-                        m_SwipeRefresh.setRefreshing(false);
-                    }
-                }, 500);
-            }
-        });
+    @Override
+    public void ShowLogE(String FunctionName, String Msg) {
+        String ClassName = "StarSearchItemActivity";
+        Log.e(getResources().getString(R.string.IShowLog_LogE),
+                ClassName + ": " + FunctionName + "###" + Msg);
     }
 
+    // endregion 初始化界面
+
+    // region 菜单点击绑定处理 onCreateOptionsMenu onClick onOptionsItemSelected ShowItemLongClickPopupMenu
+
+    /**
+     * 获取 Menu 实例
+     * @param menu
+     * @return
+     */
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.actionbar_ssiact, menu);
+        this.m_menu = menu;
+        return true;
+    }
+
+    /**
+     * 弹出下拉菜单 Click
+     * @param v
+     */
     @Override
     public void onClick(View v) {
         switch (v.getId()) {
@@ -135,18 +223,15 @@ public class StarSearchItemActivity extends AppCompatActivity implements View.On
                 if (m_LongClickedSearchItem != null)
                     SearchItem_CancelStarClick(m_LongClickedSearchItem);
                 m_LongClickItemPopupMenu.dismiss();
-                break;
+            break;
             case R.id.id_SSIActivity_PopupMenu_Cancel:
                 m_LongClickItemPopupMenu.dismiss();
-                break;
+            break;
+            case R.id.id_SSIActivity_PopupMenu_CancelAllStar:
+                SearchItem_CancelAllStarClick();
+                m_LongClickItemPopupMenu.dismiss();
+            break;
         }
-    }
-
-    @Override
-    public void ShowLogE(String FunctionName, String Msg) {
-        String ClassName = "StarSearchItemActivity";
-        Log.e(getResources().getString(R.string.IShowLog_LogE),
-                ClassName + ": " + FunctionName + "###" + Msg);
     }
 
     /**
@@ -164,45 +249,51 @@ public class StarSearchItemActivity extends AppCompatActivity implements View.On
                 backToLastCmd();
                 break;
             case R.id.action_FindSearchStar:
-                searchFragment.show(getSupportFragmentManager(), com.wyt.searchbox.SearchFragment.TAG);
+                m_searchFragment.show(getSupportFragmentManager(), com.wyt.searchbox.SearchFragment.TAG);
                 break;
         }
         return super.onOptionsItemSelected(item);
     }
 
     /**
-     * 获取 Menu 实例
-     * @param menu
-     * @return
+     * 显示长按菜单
      */
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.actionbar_ssiact, menu);
-        this.m_menu = menu;
-        return true;
+    private void ShowItemLongClickPopupMenu(SearchItem searchItem) {
+        m_LongClickItemPopupMenu = new Dialog(this, R.style.BottomDialog);
+        LinearLayout root = PopupMenuUtil.initPopupMenu(this, m_LongClickItemPopupMenu, R.layout.dialog_starsearchitem_bottompopupmenu);
+
+        root.findViewById(R.id.id_SSIActivity_PopupMenu_CancelStar).setOnClickListener(this);
+        root.findViewById(R.id.id_SSIActivity_PopupMenu_Cancel).setOnClickListener(this);
+
+        Button CancelAllStar = root.findViewById(R.id.id_SSIActivity_PopupMenu_CancelAllStar);
+        CancelAllStar.setOnClickListener(this);
+
+        TextView label = root.findViewById(R.id.id_SSIActivity_PopupMenu_Label);
+        label.setText(String.format(getString(R.string.StarSearchItemAct_PopupMenu_Label), searchItem.getTitle()));
+
+        if (FindSearchedItemList != null) {
+            CancelAllStar.setEnabled(false);
+            CancelAllStar.setTextColor(getResources().getColor(R.color.grey_400));
+        }
+        else {
+            CancelAllStar.setEnabled(true);
+            CancelAllStar.setTextColor(getResources().getColor(R.color.pink));
+        }
+
+        m_LongClickItemPopupMenu.show();
     }
 
-    /**
-     * 初始化搜索框
-     */
-    private void initSearchFrag() {
-        // 添加搜索框
-        searchFragment = com.wyt.searchbox.SearchFragment.newInstance();
-        searchFragment.setAllowReturnTransitionOverlap(true);
-        searchFragment.setOnSearchClickListener(new com.wyt.searchbox.custom.IOnSearchClickListener() {
+    // endregion 菜单点击绑定处理
 
-            @Override
-            public void OnSearchClick(String keyword) {
-                try {
-                    if (!keyword.isEmpty()) {
-                        Toast.makeText(StarSearchItemActivity.this, keyword, Toast.LENGTH_SHORT).show();
-                    }
-                }
-                catch (Exception ex) {
-                    ex.printStackTrace();
-                }
-            }
-        });
+    // region 数据更新处理 refreshListData refreshListView
+
+    /**
+     * 更新列表数据为所有新收藏
+     */
+    private void refreshListData() {
+        SearchItemDao searchItemDao = new SearchItemDao(this);
+        searchItemList = searchItemDao.queryAllStarSearchItem();
+        updateTitle();
     }
 
     /**
@@ -212,24 +303,67 @@ public class StarSearchItemActivity extends AppCompatActivity implements View.On
         searchItemAdapter.setSearchItems(searchItemList);
         m_StarListView.setAdapter(searchItemAdapter);
         searchItemAdapter.notifyDataSetChanged();
+        updateTitle();
     }
 
     /**
-     * 更新列表数据为所有新收藏
+     * 更新标题
      */
-    private void refreshListData() {
+    private void updateTitle() {
+        if (FindSearchedItemList != null)
+            setTitle(String.format(getString(R.string.StarSearchItemAct_TitleSearching), FindSearchedItemString, FindSearchedItemList.size()));
+        else
+            setTitle(String.format(getString(R.string.StarSearchItemAct_TitleNormal), searchItemList.size()));
+    }
+
+    // endregion 数据更新处理
+
+    // region 弹出菜单按钮点击事件 SearchItem_CancelStarClick SearchItem_CancelAllStarClick backToLastCmd onBackPressed
+
+    /**
+     * 取消收藏
+     * @param searchItem
+     */
+    private void SearchItem_CancelStarClick(SearchItem searchItem) {
         SearchItemDao searchItemDao = new SearchItemDao(this);
-        searchItemList = searchItemDao.queryAllStarSearchItem();
-        setTitle(String.format(getString(R.string.StarSearchItemAct_Title), searchItemList.size()));
+
+        if (searchItemDao.deleteStarSearchItem(searchItem) != -1)
+            Toast.makeText(this, String.format(getString(R.string.SearchFrag_CancelStarSuccess), searchItem.getTitle()), Toast.LENGTH_SHORT).show();
+        else
+            Toast.makeText(this, String.format(getString(R.string.SearchFrag_CancelStarFailed), searchItem.getTitle()), Toast.LENGTH_SHORT).show();
+
+        searchItemList.remove(searchItem);
+
+        if (FindSearchedItemList != null)
+            FindSearchedItemList.remove(searchItem);
+
+        // refreshListData();
+        refreshListView();
     }
 
     /**
-     * 获取当前所有收藏数
-     * @return
+     * 取消全部收藏
      */
-    private int getSearchItemsCnt() {
-        SearchItemDao searchItemDao = new SearchItemDao(this);
-        return searchItemDao.queryAllStarSearchItem().size();
+    private void SearchItem_CancelAllStarClick() {
+        new AlertDialog.Builder(this)
+            .setTitle(R.string.StarSearchItemAct_AlertDlg_NormalTitle)
+            .setMessage(R.string.StarSearchItemAct_AllCancelStarAlertDlg_Message)
+            .setPositiveButton(R.string.StarSearchItemAct_AlertDlg_PosButton, new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    SearchItemDao searchItemDao = new SearchItemDao(StarSearchItemActivity.this);
+                    if (searchItemDao.deleteStarSearchItems(searchItemDao.queryAllStarSearchItem()) != -1) {
+                        Toast.makeText(StarSearchItemActivity.this, getString(R.string.SearchFrag_CancelAllStarSuccess), Toast.LENGTH_SHORT).show();
+                        refreshListData();
+                        refreshListView();
+                    }
+                    else
+                        Toast.makeText(StarSearchItemActivity.this, getString(R.string.SearchFrag_CancelAllStarFailed), Toast.LENGTH_SHORT).show();
+                }
+            })
+            .setNegativeButton(R.string.StarSearchItemAct_AlertDlg_NegButton, null)
+            .create()
+            .show();
     }
 
     /**
@@ -237,13 +371,40 @@ public class StarSearchItemActivity extends AppCompatActivity implements View.On
      * 判断是返回上一活动还是取消搜索
      */
     private void backToLastCmd() {
-        if (getTitle().equals(String.format(getString(R.string.StarSearchItemAct_Title), getSearchItemsCnt())))
+        // 已收藏搜索结果 (共 %d 项)
+        if (FindSearchedItemList == null)
             finish();
         else {
-            refreshListData();
-            refreshListView();
+            // 返回搜索前
+
+            if (!m_LoadingProgress.isShowing())
+                m_LoadingProgress.show();
+
+            new Handler().postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    m_SwipeRefresh.setEnabled(true);
+                    FindSearchedItemList = null;
+                    refreshListData();
+                    refreshListView();
+                    m_LoadingProgress.dismiss();
+                }
+            }, TIME_SRL_MS);
         }
     }
+
+    /**
+     * 返回按键点击
+     */
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+        backToLastCmd();
+    }
+
+    // endregion 顶部菜单按钮点击事件处理
+
+    // region 列表点击事件处理 SearchItem_Click SearchItem_LongClick
 
     /**
      * 使用浏览器打开链接
@@ -268,47 +429,35 @@ public class StarSearchItemActivity extends AppCompatActivity implements View.On
         ShowItemLongClickPopupMenu(searchItem);
     }
 
-    /**
-     * 显示长按菜单
-     */
-    private void ShowItemLongClickPopupMenu(SearchItem searchItem) {
-        m_LongClickItemPopupMenu = new Dialog(this, R.style.BottomDialog);
-        LinearLayout root = (LinearLayout) LayoutInflater.from(this).inflate(
-                R.layout.dialog_starsearchitem_bottompopupmenu, null);
+    // endregion 列表点击事件处理
 
-        //初始化视图
-        root.findViewById(R.id.id_SSIActivity_PopupMenu_CancelStar).setOnClickListener(this);
-        root.findViewById(R.id.id_SSIActivity_PopupMenu_Cancel).setOnClickListener(this);
-
-        m_LongClickItemPopupMenu.setContentView(root);
-        Window dialogWindow = m_LongClickItemPopupMenu.getWindow();
-        dialogWindow.setGravity(Gravity.BOTTOM);
-        WindowManager.LayoutParams lp = dialogWindow.getAttributes(); // 获取对话框当前的参数值
-        lp.x = 0; // 新位置X坐标
-        lp.y = 0; // 新位置Y坐标
-        lp.width = (int) getResources().getDisplayMetrics().widthPixels; // 宽度
-        root.measure(0, 0);
-        lp.height = root.getMeasuredHeight();
-        lp.alpha = 9f; // 透明度
-
-        dialogWindow.setAttributes(lp);
-
-        m_LongClickItemPopupMenu.show();
-    }
+    // region 搜索处理 Find_SearchItem_Click
 
     /**
-     * 取消收藏
-     * @param searchItem
+     * 搜索处理
+     * @param searchStr
      */
-    private void SearchItem_CancelStarClick(SearchItem searchItem) {
+    private void Find_SearchItem_Click(String searchStr) {
+        FindSearchedItemString = searchStr;
+
         SearchItemDao searchItemDao = new SearchItemDao(this);
+        ArrayList<SearchItem> AllSearchItems = searchItemDao.queryAllStarSearchItem();
+        FindSearchedItemList = new ArrayList<>();
 
-        if (searchItemDao.deleteStarSearchItem(searchItem) != -1)
-            Toast.makeText(this, String.format(getString(R.string.SearchFrag_CancelStarSuccess), searchItem.getTitle()), Toast.LENGTH_SHORT).show();
-        else
-            Toast.makeText(this, String.format(getString(R.string.SearchFrag_CancelStarFailed), searchItem.getTitle()), Toast.LENGTH_SHORT).show();
+        for (SearchItem searchItem : AllSearchItems) {
+            if (
+                    searchItem.getTitle().toLowerCase().contains(searchStr.toLowerCase()) ||
+                    searchItem.getUrl().toLowerCase().contains(searchStr.toLowerCase()) ||
+                    searchItem.getContent().toLowerCase().contains(searchStr.toLowerCase())
+            ) {
+                FindSearchedItemList.add(searchItem);
+            }
+        }
 
-        refreshListData();
+        searchItemList = FindSearchedItemList;
         refreshListView();
+        m_SwipeRefresh.setEnabled(false);
     }
+
+    // endregion 搜索处理
 }

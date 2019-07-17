@@ -1,21 +1,46 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="220dp"
+    android:layout_height="300dp"
     android:orientation="vertical"
     android:paddingBottom="25dp"
     android:paddingLeft="20dp"
     android:paddingRight="20dp"
     android:paddingTop="12dp">
 
+    <TextView
+        android:id="@+id/id_SSIActivity_PopupMenu_Label"
+        android:layout_width="match_parent"
+        android:layout_height="30dp"
+        android:background="@color/white"
+        android:text="@string/StarSearchItemAct_PopupMenu_Label"
+        android:textColor="@color/grey_700"
+        android:maxLines="1"
+        android:ellipsize="end"
+        android:gravity="center"
+        android:textSize="@dimen/text_size_14" />
+
     <Button
         android:id="@+id/id_SSIActivity_PopupMenu_CancelStar"
         android:layout_width="match_parent"
         android:layout_height="50dp"
+        android:layout_marginTop="4dp"
         android:gravity="center"
         android:text="@string/StarSearchItemAct_PopupMenu_CancelStar"
         android:textColor="@color/pink"
-        android:textSize="18sp"
+        android:textSize="@dimen/text_size_18"
+        android:background="@color/white"
+        />
+
+    <Button
+        android:id="@+id/id_SSIActivity_PopupMenu_CancelAllStar"
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:layout_marginTop="4dp"
+        android:gravity="center"
+        android:text="@string/StarSearchItemAct_PopupMenu_CancelAllStar"
+        android:textColor="@color/pink"
+        android:textSize="@dimen/text_size_18"
         android:background="@color/white"
         />
 
@@ -27,6 +52,6 @@
         android:gravity="center"
         android:text="@string/StarSearchItemAct_PopupMenu_Cancel"
         android:textColor="@color/pink"
-        android:textSize="18sp"
+        android:textSize="@dimen/text_size_18"
         android:background="@color/white"/>
 </LinearLayout>

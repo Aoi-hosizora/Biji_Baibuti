@@ -201,4 +201,39 @@ public class SearchItemDao {
 
         return ret;
     }
+
+    /**
+     * 批量删除收藏项
+     * @param searchItems
+     */
+    public int deleteStarSearchItems(ArrayList<SearchItem> searchItems) {
+        SQLiteDatabase db = helper.getWritableDatabase();
+        int ret = 0;
+        try {
+            if (searchItems != null && searchItems.size() > 0) {
+                db.beginTransaction();
+                try {
+                    for (SearchItem searchItem : searchItems) {
+                        ret += db.delete(TBL_NAME, COL_URL + " = ?", new String[]{searchItem.getUrl()});
+                    }
+                    db.setTransactionSuccessful();
+                }
+                catch (Exception e) {
+                    e.printStackTrace();
+                }
+                finally {
+                    db.endTransaction();
+                }
+            }
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+        }
+        finally {
+            if (db != null) {
+                db.close();
+            }
+        }
+        return ret;
+    }
 }

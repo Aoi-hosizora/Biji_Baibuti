@@ -10,18 +10,21 @@
     <string name="SearchFrag_QuestionEditTextHint">关键词&#8230;</string>
     <string name="SearchFrag_SearchButtonText">搜索</string>
     <string name="SearchFrag_SearchNullMessage">未输入查找内容</string>
-    <string name="SearchFrag_SearchingProgressText">搜索 "%s" 中&#8230;</string>
+    <string name="SearchFrag_SearchingProgressText">搜索 \"%s\" 中&#8230;</string>
     <string name="SearchFrag_SearchingRetLoadingMore">加载更多&#8230;</string>
 
     <string name="SearchFrag_NewSearchToast">共获取了 %d 条新项目</string>
     <string name="SearchFrag_MoreSearchToast">共新增了 %d 条新项目</string>
 
-    <string name="SearchFrag_StarSuccess">收藏 %s 成功</string>
-    <string name="SearchFrag_CancelStarSuccess">取消收藏 %s 成功</string>
-    <string name="SearchFrag_StarFailed">收藏 %s 失败</string>
-    <string name="SearchFrag_CancelStarFailed">取消收藏 %s 失败</string>
+    <string name="SearchFrag_StarSuccess">收藏 \"%s\" 成功</string>
+    <string name="SearchFrag_CancelStarSuccess">取消收藏 \"%s\" 成功</string>
+    <string name="SearchFrag_StarFailed">收藏 \"%s\" 失败</string>
+    <string name="SearchFrag_CancelStarFailed">取消收藏 \"%s\" 失败</string>
+    <string name="SearchFrag_CancelAllStarSuccess">删除全部收藏成功</string>
+    <string name="SearchFrag_CancelAllStarFailed">删除全部收藏失败</string>
 
     <!-- PopupMenu -->
+    <string name="SearchFrag_PopupMenu_Label">当前选中项: %s</string>
     <string name="SearchFrag_PopupMenu_Star">收藏</string>
     <string name="SearchFrag_PopupMenu_CancelStar">取消收藏</string>
     <string name="SearchFrag_PopupMenu_More">加载更多&#8230;</string>
@@ -39,12 +42,23 @@
     <!-- //////////////////////////////////////////////////////// -->
     <!-- //////////////////  StarSearchItemAct  ///////////////// -->
 
-    <string name="StarSearchItemAct_Title">已收藏搜索结果 (共 %d 项)</string>
+    <string name="StarSearchItemAct_TitleNormal">已收藏搜索结果 (共 %d 项)</string>
+    <string name="StarSearchItemAct_TitleSearching">\"%s\" 的搜索结果 (共 %d 项)</string>
+    <string name="StarSearchItemAct_BackSearchLoading">加载中&#8230;</string>
 
     <!-- PopupMenu -->
 
+    <string name="StarSearchItemAct_PopupMenu_Label">当前选中项: %s</string>
     <string name="StarSearchItemAct_PopupMenu_CancelStar">取消收藏</string>
+    <string name="StarSearchItemAct_PopupMenu_CancelAllStar">取消全部收藏</string>
     <string name="StarSearchItemAct_PopupMenu_Cancel">取消</string>
+
+
+    <!-- Dlg -->
+    <string name="StarSearchItemAct_AlertDlg_NormalTitle">提示</string>
+    <string name="StarSearchItemAct_AlertDlg_PosButton">确定</string>
+    <string name="StarSearchItemAct_AlertDlg_NegButton">取消</string>
+    <string name="StarSearchItemAct_AllCancelStarAlertDlg_Message">确定要取消全部收藏吗？</string>
 
 
     <!-- ActionBar -->
