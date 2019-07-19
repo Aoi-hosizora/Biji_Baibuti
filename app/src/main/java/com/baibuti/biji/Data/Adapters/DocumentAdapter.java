@@ -65,10 +65,16 @@ public class DocumentAdapter extends RecyclerView.Adapter<DocumentAdapter.ViewHo
                     holder.imageView.setImageResource(R.drawable.doc);
                     break;
                 case "xls":
-                    holder.imageView.setImageResource(R.drawable.excel);
+                    holder.imageView.setImageResource(R.drawable.xls);
+                    break;
+                case "txt":
+                    holder.imageView.setImageResource(R.drawable.txt);
+                    break;
+                case "zip":
+                    holder.imageView.setImageResource(R.drawable.zip);
                     break;
                 default:
-                    holder.imageView.setImageResource(R.drawable.other);
+                    holder.imageView.setImageResource(R.drawable.unknown);
                     break;
             }
         }

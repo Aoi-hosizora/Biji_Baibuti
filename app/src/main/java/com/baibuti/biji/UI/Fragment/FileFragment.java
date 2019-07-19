@@ -11,16 +11,13 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
-import android.view.ContextMenu;
 import android.view.LayoutInflater;
-import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.widget.EditText;
-import android.widget.ImageButton;
 import android.widget.ListView;
 import android.widget.SearchView;
 import android.widget.TextView;
@@ -39,6 +36,8 @@ import java.io.File;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class FileFragment extends Fragment {
 
@@ -54,8 +53,8 @@ public class FileFragment extends Fragment {
     private SearchView documentSearchView;
 
     private TextView documentHeader;
-    private ImageButton documentImportBtn;
     private RecyclerView documentRecyclerView;
+    private TextView unSelectedText;
     private List<Document> documentListItems = new ArrayList<>();
     private DocumentAdapter documentAdapter;
 
@@ -91,6 +90,7 @@ public class FileFragment extends Fragment {
     private void initToolBar(View view){
         Toolbar mToolBar = view.findViewById(R.id.tab_file_toolbar);
         mToolBar.setTitle(R.string.FileFrag_Header);
+
         mToolBar.setNavigationIcon(R.drawable.tab_menu);
         mToolBar.setNavigationOnClickListener(new View.OnClickListener() {
             @Override
@@ -99,6 +99,70 @@ public class FileFragment extends Fragment {
                 //添加菜单逻辑
             }
         });
+
+        mToolBar.setPopupTheme(R.style.popup_theme);
+
+        mToolBar.inflateMenu(R.menu.filefragment_menu);
+        mToolBar.setOnMenuItemClickListener(new Toolbar.OnMenuItemClickListener() {
+            @Override
+            public boolean onMenuItemClick(MenuItem item) {
+
+                switch (item.getItemId()){
+                    case R.id.action_rename_fileclass:
+                        //重命名分组
+                        String currentFileClassName = documentHeader.getText().toString();
+                        final FileClass currentFileClass = fileClassDao.queryFileClassByName(currentFileClassName);
+
+                        final EditText edit = new EditText(getContext());
+                        AlertDialog.Builder editDialog = new AlertDialog.Builder(getContext());
+                        editDialog.setTitle(getString(R.string.FileclassDialog_Renameclass));
+                        editDialog.setIcon(R.drawable.ic_rename);
+                        edit.setHint("资料分类名...");
+                        //设置dialog布局
+                        editDialog.setView(edit);
+
+                        //设置按钮
+                        editDialog.setPositiveButton(getString(R.string.FileClassDialog_ConfirmBtn)
+                                , new DialogInterface.OnClickListener() {
+                                    @Override
+                                    public void onClick(DialogInterface dialog, int which) {
+
+                                        if(!isLegalName(edit.getText().toString().trim()))
+                                            HandleIllegalName();
+                                        else
+                                            updateFileClassList(edit.getText().toString().trim(), TAG_RENAME, currentFileClass, lastPositionClicked);
+
+                                        dialog.dismiss();
+                                    }
+                                });
+
+                        editDialog.create().show();
+                        break;
+                    case R.id.action_delete_fileclass:
+                        //删除分类
+                        try {
+                            fileClassDao.deleteFileClass(fileClassListItems.get(lastPositionClicked).getId());
+                            documentDao.deleteDocumentByClass(fileClassListItems.get(lastPositionClicked).getFileClassName());
+                            fileClassListItems.remove(lastPositionClicked);
+                            documentListsByClass.remove(lastPositionClicked);
+                            fileClassAdapter.notifyDataSetChanged();
+                            documentAdapter.notifyDataSetChanged();
+                            documentHeader.setText("");
+                            unSelectedText.setVisibility(View.VISIBLE);
+                        }catch (Exception e){
+                            e.printStackTrace();
+                            Toast.makeText(getContext(), "删除失败", Toast.LENGTH_LONG).show();
+                        }
+                        break;
+                    case R.id.action_import_documents:
+                        FileImportDialog cdd=new FileImportDialog(getActivity());
+                        cdd.show();
+                        break;
+                }
+                return true;
+            }
+        });
+
         documentSearchView = (SearchView) view.findViewById(R.id.filefragment_filesearch);
         //去除searchview下划线
         try{
@@ -113,48 +177,29 @@ public class FileFragment extends Fragment {
     }
 
     private void initFileClassList(View view){
-        //init fileclasslistitem
+        //初始化 fileclasslistitem
         initData();
         fileClassAdapter = new FileClassAdapter(getContext(), fileClassListItems);
         fileClassList = (ListView) view.findViewById(R.id.filefragment_fileclasses);
         fileClassList.setAdapter(fileClassAdapter);
         fileClassList.setVerticalScrollBarEnabled(false);
         fileClassList.setDivider(null);
+        Log.d("text_for_listview", "initFileClassList: "+fileClassList.toString());
         fileClassList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int position, long id) {
-
-                //点击更改item背景颜色
+                if(unSelectedText.getVisibility() == View.VISIBLE)
+                    unSelectedText.setVisibility(View.GONE);
                 if(position != fileClassList.getCount() - 1) {
-                    int firstVisiblePosition = fileClassList.getFirstVisiblePosition();
-                    if (null != fileClassList.getChildAt(lastPositionClicked - firstVisiblePosition))
-                        fileClassList.getChildAt(lastPositionClicked - firstVisiblePosition)
-                                .setBackgroundColor(getResources().getColor(R.color.grey_250));
-                    if (null != fileClassList.getChildAt(position - firstVisiblePosition)) {
-                        fileClassList.getChildAt(position - firstVisiblePosition)
-                                .setBackgroundColor(getResources().getColor(R.color.background));
-                        lastPositionClicked = position;
-                        FileClass currentFileClass = (FileClass) fileClassListItems.get(position);
-                        //更改文件列表标题
-                        documentHeader.setText(currentFileClass.getFileClassName());
-                        //获取分类下的文件
-                        updateDocumentRecyclerview(position);
-                    }
-                    documentImportBtn.setVisibility(View.VISIBLE);
+                    lastPositionClicked = position;
+                    FileClass currentFileClass = (FileClass) fileClassListItems.get(position);
+                    //更改文件列表标题
+                    documentHeader.setText(currentFileClass.getFileClassName());
+                    //获取分类下的文件
+                    updateDocumentRecyclerview(position);
                 }
-
-                //点击添加新类别
-                if(fileClassList.getCount() == position + 1){
-                    addNewFileClass();
-                }
-            }
-        });
-
-        fileClassList.setOnCreateContextMenuListener(new View.OnCreateContextMenuListener() {
-            @Override
-            public void onCreateContextMenu(ContextMenu contextMenu, View view, ContextMenu.ContextMenuInfo contextMenuInfo) {
-                contextMenu.add(Menu.NONE, 0, 0, "重命名");
-                contextMenu.add(Menu.NONE, 1, 0, "删除");
+                else
+                    addNewFileClass(position);//添加新类别
             }
         });
 
@@ -168,9 +213,9 @@ public class FileFragment extends Fragment {
     private void initDocumentLayout(View view){
         initDocuments();
         documentHeader = (TextView) view.findViewById(R.id.filefragment_document_list_header);
-        documentImportBtn = (ImageButton) view.findViewById(R.id.filefragment_document_importfile);
+        unSelectedText = (TextView) view.findViewById(R.id.filefragment_document_unselected);
         documentHeader.setText(R.string.app_name);
-        documentImportBtn.setImageResource(R.drawable.filefragment_document_import);
+        unSelectedText.setVisibility(View.GONE);
         documentRecyclerView = (RecyclerView) view.findViewById(R.id.filefragment_document_list);
         LinearLayoutManager layoutManager = new LinearLayoutManager(getContext());
         documentRecyclerView.setLayoutManager(layoutManager);
@@ -178,85 +223,6 @@ public class FileFragment extends Fragment {
         documentListItems.addAll(documentListsByClass.get(0));
         documentAdapter = new DocumentAdapter(documentListItems);
         documentRecyclerView.setAdapter(documentAdapter);
-        /*if(null != getContext())
-            documentRecyclerView.addItemDecoration(new DividerItemDecoration(getContext(), DividerItemDecoration.VERTICAL));*/
-        //updateDocumentRecyclerview(0);
-        documentImportBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                FileImportDialog cdd=new FileImportDialog(getActivity());
-                cdd.show();
-            }
-        });
-    }
-
-    //选中长按弹出的菜单项
-    public boolean onContextItemSelected(MenuItem item){
-
-        //关键代码在这里
-        final AdapterView.AdapterContextMenuInfo menuInfo;
-        menuInfo =(AdapterView.AdapterContextMenuInfo)item.getMenuInfo();
-
-        if(menuInfo.position == fileClassList.getCount()-1)
-            return false;
-
-        switch (item.getItemId()){
-            case 0:
-                //重命名分类
-                //Toast.makeText(getContext(), String.valueOf(menuInfo.position), Toast.LENGTH_LONG).show();
-
-                String currentFileClassName = fileClassListItems.get(menuInfo.position).getFileClassName();
-                final FileClass currentFileClass = fileClassDao.queryFileClassByName(currentFileClassName);
-                //Log.d("KKKKK", currentFileClass.getFileClassName());
-
-                final EditText edit = new EditText(getContext());
-                AlertDialog.Builder editDialog = new AlertDialog.Builder(getContext());
-                editDialog.setTitle(getString(R.string.FileclassDialog_Renameclass));
-                editDialog.setIcon(R.mipmap.ic_launcher_round);
-
-                //设置dialog布局
-                editDialog.setView(edit);
-
-                //设置按钮
-                editDialog.setPositiveButton(getString(R.string.FileClassDialog_ConfirmBtn)
-                        , new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int which) {
-                                Toast.makeText(getContext(),
-                                        edit.getText().toString().trim(),Toast.LENGTH_SHORT).show();
-
-                                updateFileClassList(edit.getText().toString().trim(), TAG_RENAME, currentFileClass, menuInfo.position);
-
-                                dialog.dismiss();
-                            }
-                        });
-
-                editDialog.create().show();
-                break;
-            case 1:
-                //删除分类
-                //Toast.makeText(getContext(), ""+fileClassListItems.get(menuInfo.position).getFileClassName(), Toast.LENGTH_LONG).show();
-                try {
-
-                    if(documentHeader.getText().toString().equals(fileClassListItems.get(menuInfo.position).getFileClassName())) {
-                        documentListItems.clear();
-                        documentHeader.setText("");
-                        documentImportBtn.setVisibility(View.GONE);
-                    }
-
-                    fileClassDao.deleteFileClass(fileClassListItems.get(menuInfo.position).getId());
-                    documentDao.deleteDocumentByClass(fileClassListItems.get(menuInfo.position).getFileClassName());
-                    fileClassListItems.remove(menuInfo.position);
-                    documentListsByClass.remove(menuInfo.position);
-                    fileClassAdapter.notifyDataSetChanged();
-
-                }catch (Exception e){
-                    e.printStackTrace();
-                    Toast.makeText(getContext(), "删除失败", Toast.LENGTH_LONG).show();
-                }
-                break;
-        }
-        return super.onContextItemSelected(item);
     }
 
     /**
@@ -283,13 +249,14 @@ public class FileFragment extends Fragment {
         }
     }
 
-    private void addNewFileClass(){
-        //Toast.makeText(getContext(),"Add new fileclass", Toast.LENGTH_SHORT).show();
+    private void addNewFileClass(final int position){
+
         final EditText edit = new EditText(getContext());
 
         AlertDialog.Builder editDialog = new AlertDialog.Builder(getContext());
         editDialog.setTitle(getString(R.string.FileClassDialog_AddNewClass));
-        editDialog.setIcon(R.mipmap.ic_launcher_round);
+        editDialog.setIcon(R.drawable.ic_rename);
+        edit.setHint("资料分类名...");
 
         //设置dialog布局
         editDialog.setView(edit);
@@ -302,7 +269,10 @@ public class FileFragment extends Fragment {
                         //Toast.makeText(getContext(),
                         //edit.getText().toString().trim(),Toast.LENGTH_SHORT).show();
 
-                        updateFileClassList(edit.getText().toString().trim(), TAG_NEW, null, 0);
+                        if(!isLegalName(edit.getText().toString().trim()))
+                            HandleIllegalName();
+                        else
+                            updateFileClassList(edit.getText().toString().trim(), TAG_NEW, null, position);
 
                         // Check if no view has focus:
                         View view = getView();
@@ -350,8 +320,9 @@ public class FileFragment extends Fragment {
                         fileClassDao.updateFileClass(currentFileClass);
                         fileClassListItems.remove(position);
                         fileClassListItems.add(position, currentFileClass);
+                        documentHeader.setText(newFileClassName);
                     }
-                    //Log.d("FILECLASSLIST", fileClassListItems.toString());
+
                     fileClassAdapter.notifyDataSetChanged();
 
                 }
@@ -370,6 +341,19 @@ public class FileFragment extends Fragment {
                 .Builder(getContext())
                 .setTitle(R.string.FileClassDialog_NullTitleAlertTitle)
                 .setMessage(R.string.FileClassDialog_NullTitleAlertMsg)
+                .setPositiveButton(R.string.FileClassDialog_NullTitleAlertPositiveButtonForOK, null)
+                .create();
+        emptyDialog.show();
+    }
+
+    /**
+     * 非法字符提醒对话框
+     */
+    private void HandleIllegalName(){
+        android.support.v7.app.AlertDialog emptyDialog = new android.support.v7.app.AlertDialog
+                .Builder(getContext())
+                .setTitle(R.string.FileClassDialog_NullTitleAlertTitle)
+                .setMessage(R.string.FileClassDialog_IllegalTitleAlertMsg)
                 .setPositiveButton(R.string.FileClassDialog_NullTitleAlertPositiveButtonForOK, null)
                 .create();
         emptyDialog.show();
@@ -416,8 +400,10 @@ public class FileFragment extends Fragment {
         documentAdapter.notifyDataSetChanged();
     }
 
-    private void importDocumentFromSD(){
-
+    private boolean isLegalName(String fileClassName){
+        Pattern p = Pattern.compile("[\\w]*");
+        Matcher m = p.matcher(fileClassName);
+        return m.matches();
     }
 
 }

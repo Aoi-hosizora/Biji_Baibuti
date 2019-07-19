@@ -45,7 +45,6 @@ public class FileAdapter extends RecyclerView.Adapter<FileAdapter.ViewHolder> {
             @Override
             public void onClick(View v) {
                 int position = holder.getAdapterPosition();
-                //file可以为目录，也可为文件
                 Toast.makeText(v.getContext(), "Click on file" + mFiles.get(position).getFileName(), Toast.LENGTH_LONG).show();
             }
         });
@@ -68,10 +67,16 @@ public class FileAdapter extends RecyclerView.Adapter<FileAdapter.ViewHolder> {
                     holder.imageView.setImageResource(R.drawable.doc);
                     break;
                 case "xls":
-                    holder.imageView.setImageResource(R.drawable.excel);
+                    holder.imageView.setImageResource(R.drawable.xls);
+                    break;
+                case "txt":
+                    holder.imageView.setImageResource(R.drawable.txt);
+                    break;
+                case "zip":
+                    holder.imageView.setImageResource(R.drawable.zip);
                     break;
                 default:
-                    holder.imageView.setImageResource(R.drawable.other);
+                    holder.imageView.setImageResource(R.drawable.unknown);
                     break;
             }
         }
@@ -81,5 +86,10 @@ public class FileAdapter extends RecyclerView.Adapter<FileAdapter.ViewHolder> {
     @Override
     public int getItemCount() {
         return mFiles.size();
+    }
+
+    public void addData(FileItem fileItem){
+        mFiles.add(fileItem);
+        notifyItemInserted(getItemCount());
     }
 }

@@ -13,5 +13,16 @@
     <string name="FileClassDialog_NullTitleAlertPositiveButtonForOK">确定</string>
     <string name="FileclassDialog_Renameclass">重命名</string>
 
+    <!-- Show Illegal Title File Class Dialog -->
+    <string name="FileClassDialog_IllegalTitleAlertMsg">请输入中文，字母，数字或下划线</string>
+
+    <!-- Filefragment Menu Item Title -->
+    <string name="Filefragment_Item_Rename_Title">重命名</string>
+    <string name="Filefragment_Item_Delete_Title">删除分组</string>
+    <string name="Filefragment_Item_Import_Title">导入资料</string>
+
+    <!-- Filefragment Fileclass not selected Hint -->
+    <string name="Filefragment_UnselectedText">未选择分组</string>
+
     <string name="todo">TODO</string>
 </resources>
