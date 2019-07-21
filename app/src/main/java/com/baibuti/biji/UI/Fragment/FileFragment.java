@@ -14,6 +14,7 @@ import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
@@ -286,6 +287,14 @@ public class FileFragment extends Fragment {
         searchResultList.setLayoutManager(new LinearLayoutManager(getContext()));
         searchResultAdapter = new DocumentAdapter(searchResults);
         searchResultList.setAdapter(searchResultAdapter);
+        documentSearchView.setOnCloseListener(new SearchView.OnCloseListener() {
+            @Override
+            public boolean onClose() {
+                searchResultLayout.setVisibility(View.GONE);
+                documentSearchView.clearFocus();
+                return false;
+            }
+        });
     }
 
     /**
