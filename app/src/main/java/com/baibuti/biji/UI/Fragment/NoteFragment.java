@@ -5,6 +5,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
@@ -92,14 +93,12 @@ public class NoteFragment extends Fragment implements View.OnClickListener, ISho
             ViewGroup parent = (ViewGroup) view.getParent();
             if (null != parent)
                 parent.removeView(view);
-        }
-        else {
+        } else {
             view = inflater.inflate(R.layout.fragment_notetab, container, false);
 
             ///
-
+            slidingMenu = ((MainActivity) getActivity()).getSlidingMenu();
             m_fabmenu = (FloatingActionsMenu) view.findViewById(R.id.note_fabmenu);
-            slidingMenu = ((MainActivity)getActivity()).getSlidingMenu();
 
             mNoteList = view.findViewById(R.id.note_list);
             View ListEmptyView = view.findViewById(R.id.note_emptylist);
@@ -120,6 +119,7 @@ public class NoteFragment extends Fragment implements View.OnClickListener, ISho
 
     /**
      * 初始化菜单栏以及标题
+     *
      * @param view
      */
     private void initToolbar(View view) {
@@ -131,7 +131,7 @@ public class NoteFragment extends Fragment implements View.OnClickListener, ISho
             public boolean onMenuItemClick(MenuItem item) {
                 switch (item.getItemId()) {
                     case R.id.action_search:
-                        searchFragment.show(getActivity().getSupportFragmentManager(),com.wyt.searchbox.SearchFragment.TAG);
+                        searchFragment.show(getActivity().getSupportFragmentManager(), com.wyt.searchbox.SearchFragment.TAG);
                         break;
                     case R.id.action_modifygroup:
                         ShowGroupDialog();
@@ -147,7 +147,7 @@ public class NoteFragment extends Fragment implements View.OnClickListener, ISho
         m_toolbar.setNavigationOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if(slidingMenu != null)
+                if (slidingMenu != null)
                     slidingMenu.showMenu();
             }
         });
@@ -156,6 +156,7 @@ public class NoteFragment extends Fragment implements View.OnClickListener, ISho
 
     /**
      * 初始化浮动按钮菜单
+     *
      * @param view
      */
     private void initFloatingActionBar(View view) {
@@ -166,7 +167,7 @@ public class NoteFragment extends Fragment implements View.OnClickListener, ISho
             @Override
             public void onClick(View view) {
                 m_fabmenu.collapse();
-                Toast.makeText(getContext(), "This is note_photo",Toast.LENGTH_LONG).show();
+                Toast.makeText(getContext(), "This is note_photo", Toast.LENGTH_LONG).show();
                 //添加逻辑处理
             }
         });
@@ -228,8 +229,7 @@ public class NoteFragment extends Fragment implements View.OnClickListener, ISho
                         m_fabmenu.setVisibility(View.GONE);
                         m_toolbar.setTitle(String.format(getContext().getString(R.string.NoteFrag_menu_search_content), keyword));
                     }
-                }
-                catch (Exception ex) {
+                } catch (Exception ex) {
                     ex.printStackTrace();
                 }
 
@@ -239,6 +239,7 @@ public class NoteFragment extends Fragment implements View.OnClickListener, ISho
 
     /**
      * IShowLog 接口，全局设置 Log 格式
+     *
      * @param FunctionName
      * @param Msg
      */
@@ -270,6 +271,7 @@ public class NoteFragment extends Fragment implements View.OnClickListener, ISho
 
     /**
      * 用于判断返回键时的事件
+     *
      * @return
      */
     public boolean getIsSearching() {
@@ -283,6 +285,7 @@ public class NoteFragment extends Fragment implements View.OnClickListener, ISho
 
     /**
      * 查找笔记功能
+     *
      * @param str
      * @return
      */
@@ -307,15 +310,13 @@ public class NoteFragment extends Fragment implements View.OnClickListener, ISho
      * 返回原界面，退出搜索
      */
     public void SearchFracBack() {
-
         loadingDialog.show();
         new Thread(new Runnable() {
             @Override
             public void run() {
                 try {
                     Thread.sleep(SearchReturnSecond); // 200
-                }
-                catch (InterruptedException ex) {
+                } catch (InterruptedException ex) {
                     ex.printStackTrace();
                 }
                 getActivity().runOnUiThread(new Runnable() {
@@ -402,6 +403,7 @@ public class NoteFragment extends Fragment implements View.OnClickListener, ISho
 
     /**
      * 刷新数据，用于 下拉 和 返回刷新
+     *
      * @param ms 毫秒
      */
     private void refreshdata(int ms) {
@@ -483,6 +485,7 @@ public class NoteFragment extends Fragment implements View.OnClickListener, ISho
 
     /**
      * 初始化 笔记列表 View，并处理点击笔记事件
+     *
      * @param nlist
      */
     private void initListView(final List<Note> nlist) {
@@ -525,6 +528,7 @@ public class NoteFragment extends Fragment implements View.OnClickListener, ISho
 
     /**
      * 删除笔记
+     *
      * @param view
      * @param note
      */
@@ -543,12 +547,13 @@ public class NoteFragment extends Fragment implements View.OnClickListener, ISho
                             NoteList.remove(note);
                             noteAdapter.notifyDataSetChanged();
 
-                            Snackbar.make(view , R.string.NoteFrag_DeleteAlertDeleteSuccess, Snackbar.LENGTH_LONG)
+                            Snackbar.make(view, R.string.NoteFrag_DeleteAlertDeleteSuccess, Snackbar.LENGTH_LONG)
                                     .setAction(R.string.NoteFrag_DeleteAlertUndo, new View.OnClickListener() {
                                         @Override
                                         public void onClick(View v) {
                                             try {
-                                                noteDao.insertNote(note);
+                                                long noteId = noteDao.insertNote(note);
+                                                note.setId((int) noteId);
                                                 NoteList.add(note);
                                                 Collections.sort(NoteList);
                                                 noteAdapter.notifyDataSetChanged();
@@ -557,7 +562,13 @@ public class NoteFragment extends Fragment implements View.OnClickListener, ISho
                                             }
                                             Snackbar.make(view, R.string.NoteFrag_DeleteAlertUndoSuccess, Snackbar.LENGTH_SHORT).show();
                                         }
-                                    }).show();
+                                    }).addCallback(new Snackbar.Callback() {
+                                @Override
+                                public void onDismissed(Snackbar transientBottomBar, int event) {
+                                    super.onDismissed(transientBottomBar, event);
+
+                                }
+                            }).show();
                         }
                     }
                 })
@@ -569,27 +580,27 @@ public class NoteFragment extends Fragment implements View.OnClickListener, ISho
 
     /**
      * 处理从 fab 新建或者从 list 修改，活动转换
+     *
      * @param isNew true 表示 新建
-     * @param note false 时有用，传入原先数据
+     * @param note  false 时有用，传入原先数据
      */
     private void HandleNewUpdateNote(boolean isNew, Note note, boolean noteisnew) {
         if (isNew) {
             hasNoteReturned = false;
-            Intent addNote_intent=new Intent(getActivity(), ModifyNoteActivity.class);
-            addNote_intent.putExtra("notedata",new Note("",""));
-            addNote_intent.putExtra("flag",NOTE_NEW); // NEW
-            startActivityForResult(addNote_intent,REQ_NOTE_NEW); // 2 from FloatingButton
-        }
-        else {
+            Intent addNote_intent = new Intent(getActivity(), ModifyNoteActivity.class);
+            addNote_intent.putExtra("notedata", new Note("", ""));
+            addNote_intent.putExtra("flag", NOTE_NEW); // NEW
+            startActivityForResult(addNote_intent, REQ_NOTE_NEW); // 2 from FloatingButton
+        } else {
 
             if (!noteisnew)
                 hasNoteReturned = false;
 
-            Intent modifyNote_intent=new Intent(getContext(), ViewModifyNoteActivity.class);
+            Intent modifyNote_intent = new Intent(getContext(), ViewModifyNoteActivity.class);
             modifyNote_intent.putExtra("notedata", note);
             modifyNote_intent.putExtra("isModify", noteisnew);
-            modifyNote_intent.putExtra("flag",NOTE_UPDATE); // UPDATE
-            startActivityForResult(modifyNote_intent,REQ_NOTE_UPDATE); // 1 from List
+            modifyNote_intent.putExtra("flag", NOTE_UPDATE); // UPDATE
+            startActivityForResult(modifyNote_intent, REQ_NOTE_UPDATE); // 1 from List
         }
 
     }
@@ -598,6 +609,7 @@ public class NoteFragment extends Fragment implements View.OnClickListener, ISho
 
     /**
      * 处理从 View Modify Note Activity 返回的数据
+     *
      * @param requestCode
      * @param resultCode
      * @param data
@@ -621,8 +633,7 @@ public class NoteFragment extends Fragment implements View.OnClickListener, ISho
                         NoteList.add(NoteList.size(), note);
                         SelectedNoteItem = NoteList.indexOf(note);
                         HandleNewUpdateNote(false, NoteList.get(SelectedNoteItem), true);
-                    }
-                    else {
+                    } else {
                         NoteList.set(SelectedNoteItem, note);
 
                         //////
