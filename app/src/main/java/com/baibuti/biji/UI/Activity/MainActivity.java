@@ -1,8 +1,12 @@
 package com.baibuti.biji.UI.Activity;
 
+import android.Manifest;
+import android.content.pm.PackageManager;
 import android.graphics.Point;
+import android.os.Build;
 import android.support.annotation.NonNull;
 import android.support.design.widget.BottomNavigationView;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentStatePagerAdapter;
@@ -50,16 +54,40 @@ public class MainActivity extends FragmentActivity implements SimplerSearcherVie
     private ClassFragment mClassFrag;
     private FileFragment mFileFrag;
 
+    //读写权限
+    private static String[] PERMISSIONS_STORAGE = {
+            Manifest.permission.READ_EXTERNAL_STORAGE,
+            Manifest.permission.WRITE_EXTERNAL_STORAGE};
+    //请求状态码
+    private static int REQUEST_PERMISSION_CODE = 1;
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        //对Android 6.0以上版本动态申请权限
+        if (Build.VERSION.SDK_INT > Build.VERSION_CODES.LOLLIPOP) {
+            if (ActivityCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+                ActivityCompat.requestPermissions(this, PERMISSIONS_STORAGE, REQUEST_PERMISSION_CODE);
+            };
+        }
 
         Stetho.initializeWithDefaults(this);
 
         initViews();
         initadpts();
         initsmenu();
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if (requestCode == REQUEST_PERMISSION_CODE) {
+            if (grantResults[0] != PackageManager.PERMISSION_GRANTED)
+                Toast.makeText(this, "授权失败", Toast.LENGTH_LONG).show();
+        }
     }
 
     @Override

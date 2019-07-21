@@ -7,6 +7,8 @@ import java.io.Serializable;
 */
 public class FileItem implements Serializable {
 
+    private int tag;
+
     private String filePath;
     private String fileName;
     private String fileType;
@@ -30,6 +32,7 @@ public class FileItem implements Serializable {
     }
 
     public FileItem(String fileName, String filePath, String fileType){
+        this.tag = 0;
         this.setFileName(fileName);
         this.setFilePath(filePath);
         this.setFileType(fileType);
@@ -57,5 +60,13 @@ public class FileItem implements Serializable {
 
     public String getFilePath(){
         return filePath;
+    }
+
+    public void setTag(int tag){
+        this.tag = tag;
+    }
+
+    public int getTag(){
+        return tag;
     }
 }

@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <item android:id="@+id/action_rename_fileclass"
+        android:title="@string/Filefragment_Item_Rename_Title"
+        app:showAsAction="never"/>
+
+    <item android:id="@+id/action_delete_fileclass"
+        android:title="@string/Filefragment_Item_Delete_Title"
+        app:showAsAction="never"/>
+
+    <item android:id="@+id/action_import_documents"
+        android:title="@string/Filefragment_Item_Import_Title"
+        app:showAsAction="never"/>
+
+</menu>
