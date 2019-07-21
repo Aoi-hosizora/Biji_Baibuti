@@ -25,6 +25,14 @@ public class Document implements Serializable {
         this.setDocumentPath(documentPath);
     }
 
+    public Document(String documentType, String documentName, String documentPath, String documentClassName){
+        this.id = 0;
+        this.documentType = documentType;
+        this.documentName = documentName;
+        this.documentPath = documentPath;
+        this.documentClassName = documentClassName;
+    }
+
     public Document(int id, String documentType, String documentName, String documentPath){
         this.id = id;
         this.documentType = documentType;

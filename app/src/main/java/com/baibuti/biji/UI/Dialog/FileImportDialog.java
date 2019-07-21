@@ -32,18 +32,23 @@ public class FileImportDialog extends Dialog implements android.view.View.OnClic
     public ImageButton close;
     public TextView title;
     public RecyclerView fileList;
-    public List<FileItem> fileListItems = new ArrayList<>();
+    public List<FileItem> fileListItems;
     public FileAdapter fileAdapter;
 
-    private Thread scanThread;
+    private MyThread scanThread;
     private Timer scanTimer;
     private TimerTask scanTask;
+
+    private OnFinishScanListener onFinishScanListener;
+
+    private boolean stopScan = false;
 
     final String[] fileFilter = {".doc", ".docx", ".ppt", ".pptx",
             ".xls", ".xlsx", ".pdf", ".txt", ".zip", ".rar"};
 
-    public FileImportDialog(Activity a) {
+    public FileImportDialog(Activity a, List<FileItem> l) {
         super(a, android.R.style.Widget_Material);
+        fileListItems = l;
         this.c = a;
     }
 
@@ -71,6 +76,10 @@ public class FileImportDialog extends Dialog implements android.view.View.OnClic
         switch (v.getId()) {
             case R.id.fileimportdialog_btnClose:
                 cancelTask();
+                stopScan = true;
+                if(null != onFinishScanListener){
+                    onFinishScanListener.OnFinish();
+                }
                 dismiss();
                 break;
             default:
@@ -80,15 +89,10 @@ public class FileImportDialog extends Dialog implements android.view.View.OnClic
     }
 
     private void startScan(){
-        final String rootPath = Environment.getExternalStorageDirectory().getAbsolutePath();
-        final File dir = new File(rootPath);
+        String rootPath = Environment.getExternalStorageDirectory().getAbsolutePath();
+        File dir = new File(rootPath);
 
-        scanThread = new Thread(new Runnable() {
-            @Override
-            public void run() {
-                scanFile(dir, fileFilter);
-            }
-        });
+        scanThread = new MyThread(dir);
 
         scanTimer = new Timer();
         scanTask = new TimerTask() {
@@ -112,6 +116,9 @@ public class FileImportDialog extends Dialog implements android.view.View.OnClic
     }
 
     private void scanFile(File dir, String[] fileFilter) {
+
+        if(stopScan)
+            return;
 
         File[] files = dir.listFiles();
 
@@ -167,52 +174,34 @@ public class FileImportDialog extends Dialog implements android.view.View.OnClic
             scanTimer.purge();
             scanTimer.cancel();
         }
+
     }
 
-    public void getFileList(){
-        String rootPath = PathUtils.getRootPath();
-        String externalStoragePath = PathUtils.getExternalStoragePath();
-        FileFilter fileFilter = new FileFilter() {
-            @Override
-            public boolean accept(File file) {
-                if(file.getName().endsWith(".doc")
-                        ||file.getName().endsWith(".docx")
-                        ||file.getName().endsWith(".ppt")
-                        ||file.getName().endsWith(".pptx")
-                        ||file.getName().endsWith(".xls")
-                        ||file.getName().endsWith(".xlsx")
-                        ||file.getName().endsWith(".pdf")
-                        ||file.getName().endsWith(".txt")
-                        ||file.getName().endsWith(".zip")
-                        ||file.getName().endsWith(".rar"))
-                    return true;
-                return false;
-            }
-        };
-        List<File> temp = FileUtils.listFilesInDirWithFilter(rootPath, fileFilter,true);
-        temp.addAll(FileUtils.listFilesInDirWithFilter(externalStoragePath, fileFilter, true));
-        for(File f: temp){
-            try {
-                String name = f.getName();
-                String path = f.getCanonicalPath();
-                if (f.getName().endsWith(".doc") || f.getName().endsWith(".docx")) {
-                    fileListItems.add(new FileItem(name, path, "doc"));
-                }else if(f.getName().endsWith(".ppt") || f.getName().endsWith(".pptx")){
-                    fileListItems.add(new FileItem(name, path, "ppt"));
-                }else if(f.getName().endsWith(".xls") || f.getName().endsWith(".xlsx")){
-                    fileListItems.add(new FileItem(name, path, "xls"));
-                }else if(f.getName().endsWith(".pdf")){
-                    fileListItems.add(new FileItem(name, path, "pdf"));
-                }else if(f.getName().endsWith(".txt")){
-                    fileListItems.add(new FileItem(name, path, "txt"));
-                }else if(f.getName().endsWith(".zip")){
-                    fileListItems.add(new FileItem(name, path, "zip"));
-                }else{
-                    fileListItems.add(new FileItem(name, path, "unknown"));
-                }
-            }catch(IOException e){
-                e.printStackTrace();
-            }
+    public void setOnFinishScanListener(OnFinishScanListener onFinishScanListener){
+        this.onFinishScanListener = onFinishScanListener;
+    }
+
+    public interface OnFinishScanListener{
+        public void OnFinish();
+    }
+
+    class MyThread extends Thread {
+
+        private File dir;
+
+        private volatile boolean flag = true;
+
+        public MyThread(File dir){
+            this.dir = dir;
+        }
+
+        public void stopRunning() {
+            flag = false;
+        }
+
+        @Override
+        public void run() {
+            scanFile(dir, fileFilter);
         }
     }
 

@@ -61,6 +61,7 @@ public class MainActivity extends FragmentActivity implements SimplerSearcherVie
     //请求状态码
     private static int REQUEST_PERMISSION_CODE = 1;
 
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);

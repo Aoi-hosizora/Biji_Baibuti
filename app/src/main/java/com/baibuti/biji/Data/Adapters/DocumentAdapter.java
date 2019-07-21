@@ -53,7 +53,6 @@ public class DocumentAdapter extends RecyclerView.Adapter<DocumentAdapter.ViewHo
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         Document document = mDocuments.get(position);
         if(document.getDocumentType() != null) {
-            Log.d("测试", "onBindViewHolder: 调用");
             switch (document.getDocumentType()) {
                 case "pdf":
                     holder.imageView.setImageResource(R.drawable.pdf);

@@ -9,7 +9,6 @@ import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.Button;
 import android.widget.ListView;
-import android.widget.Toast;
 
 import com.baibuti.biji.Data.Models.FileClass;
 import com.baibuti.biji.R;
@@ -24,6 +23,8 @@ public class FileClassAdapter extends BaseAdapter {
     private boolean firstStart = true;
     private Button lastButton;
     private int lastPosition;
+
+    public boolean isDeleting = false;
 
     public FileClassAdapter(Context context, List<FileClass> list) {
         this.list = list;
@@ -119,19 +120,19 @@ public class FileClassAdapter extends BaseAdapter {
         });
 
         if(lastButton == holder.fileClassListItemName && lastPosition == position){
-            if(!holder.fileClassListItemName.getText().toString().equals("+")) {
+            if(!holder.fileClassListItemName.getText().toString().equals("+") && !isDeleting) {
+                Log.i("test", "getView: "+position+", "+isDeleting);
                 TransitionDrawable transitionDrawable = (TransitionDrawable) holder.fileClassListItemName.getBackground();
                 transitionDrawable.startTransition(0);
             }
-
         }
 
         if(firstStart && position == 0) {
-            TransitionDrawable transition = (TransitionDrawable) holder.fileClassListItemName.getBackground();
-            transition.startTransition(0);
+            //TransitionDrawable transition = (TransitionDrawable) holder.fileClassListItemName.getBackground();
+            //transition.startTransition(0);
             firstStart = false;
-            lastButton = holder.fileClassListItemName;
-            lastPosition = 0;
+            lastButton = null;
+            lastPosition = -1;
         }
 
         return convertView;

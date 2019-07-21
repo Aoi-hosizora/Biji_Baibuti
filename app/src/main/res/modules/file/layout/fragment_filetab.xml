@@ -2,11 +2,12 @@
 <android.support.constraint.ConstraintLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:clipToPadding="true"
     android:fitsSystemWindows="true">
+
+
 
     <android.support.v7.widget.Toolbar
         android:id="@+id/tab_file_toolbar"
@@ -76,8 +77,7 @@
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/filefragment_document_list_header" >
-            </android.support.v7.widget.RecyclerView>
+                app:layout_constraintTop_toBottomOf="@+id/filefragment_document_list_header" />
 
             <TextView
                 android:id="@+id/filefragment_document_unselected"
@@ -93,6 +93,26 @@
                 app:layout_constraintTop_toTopOf="parent" />
 
         </android.support.constraint.ConstraintLayout>
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/filefragment_search_result"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginTop="6dp"
+        android:background="@android:drawable/screen_background_dark_transparent"
+        android:orientation="vertical"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/filefragment_filesearch">
+
+        <android.support.v7.widget.RecyclerView
+            android:id="@+id/filefragment_serachresultlist"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
 
     </LinearLayout>
 
