@@ -2,13 +2,23 @@
 <android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/id_adapter_documentlistitem_layout"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:background="@drawable/document_selector">
 
+    <CheckBox
+        android:id="@+id/id_adapter_fileitem_checkBox"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginBottom="8dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
     <ImageView
-        android:id="@+id/id_adapter_document_imageView"
+        android:id="@+id/id_adapter_fileitem_imageView"
         android:layout_width="36dp"
         android:layout_height="36dp"
         android:layout_marginStart="12dp"
@@ -16,12 +26,12 @@
         android:layout_marginBottom="12dp"
         android:contentDescription="@string/tudo"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintStart_toEndOf="@id/id_adapter_fileitem_checkBox"
         app:layout_constraintTop_toTopOf="parent"
         tools:srcCompat="@tools:sample/avatars" />
 
     <TextView
-        android:id="@+id/id_adapter_document_textView"
+        android:id="@+id/id_adapter_fileitem_textView"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="8dp"
@@ -29,7 +39,7 @@
         android:textSize="14sp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@+id/id_adapter_document_imageView"
+        app:layout_constraintStart_toEndOf="@+id/id_adapter_fileitem_imageView"
         app:layout_constraintTop_toTopOf="parent" />
 
 </android.support.constraint.ConstraintLayout>

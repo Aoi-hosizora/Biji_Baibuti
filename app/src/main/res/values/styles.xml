@@ -9,6 +9,10 @@
         <item name="android:colorBackground">@color/background</item>
     </style>
 
+    <!-- ToolBar菜单样式.-->
+    <style name="popup_theme" parent="@style/ThemeOverlay.AppCompat.Light">
+    </style>
+
     <style name="menu_labels_style">
         <item name="android:background">@color/transparent</item>
         <item name="android:textColor">@color/half_black</item>
