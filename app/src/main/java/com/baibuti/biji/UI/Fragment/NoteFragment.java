@@ -299,6 +299,7 @@ public class NoteFragment extends Fragment implements View.OnClickListener, ISho
         noteAdapter.notifyDataSetChanged();
 
         IsSearchingNull = notelist.isEmpty();
+
         if (IsSearchingNull) {
             Toast.makeText(getContext(), R.string.NoteFrag_SearchNullToast, Toast.LENGTH_SHORT).show();
         }
@@ -547,28 +548,38 @@ public class NoteFragment extends Fragment implements View.OnClickListener, ISho
                             NoteList.remove(note);
                             noteAdapter.notifyDataSetChanged();
 
+                            // TODO 一堆垃圾代码待改
+
+                            if (getIsSearching())
+                                noteAdapter.setmNotes(search(SearchingStr));
+                            else
+                                noteAdapter.setmNotes(NoteList);
+                            noteAdapter.notifyDataSetChanged();
+
                             Snackbar.make(view, R.string.NoteFrag_DeleteAlertDeleteSuccess, Snackbar.LENGTH_LONG)
                                     .setAction(R.string.NoteFrag_DeleteAlertUndo, new View.OnClickListener() {
                                         @Override
                                         public void onClick(View v) {
                                             try {
+
                                                 long noteId = noteDao.insertNote(note);
-                                                note.setId((int) noteId);
-                                                NoteList.add(note);
+                                                NoteList.add(noteDao.queryNoteById((int) noteId));
                                                 Collections.sort(NoteList);
+
+                                                if (getIsSearching())
+                                                    noteAdapter.setmNotes(search(SearchingStr));
+                                                else
+                                                    noteAdapter.setmNotes(NoteList);
                                                 noteAdapter.notifyDataSetChanged();
-                                            } catch (Exception ex) {
+                                            }
+                                            catch (Exception ex) {
                                                 ex.printStackTrace();
                                             }
-                                            Snackbar.make(view, R.string.NoteFrag_DeleteAlertUndoSuccess, Snackbar.LENGTH_SHORT).show();
-                                        }
-                                    }).addCallback(new Snackbar.Callback() {
-                                @Override
-                                public void onDismissed(Snackbar transientBottomBar, int event) {
-                                    super.onDismissed(transientBottomBar, event);
 
-                                }
-                            }).show();
+                                            Snackbar.make(v, R.string.NoteFrag_DeleteAlertUndoSuccess, Snackbar.LENGTH_SHORT).show();
+                                        }
+                                    }).show();
+
                         }
                     }
                 })
