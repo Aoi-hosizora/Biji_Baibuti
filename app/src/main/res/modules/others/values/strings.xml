@@ -21,4 +21,8 @@
 
     <!-- EmptyView -->
     <string name="EmptyView_NothingList">什么都没找到</string>
+
+    <!-- OCRAct -->
+    <string name="OCTActivity_Title">识别文字</string>
+    <string name="OCTActivity_Loading">正在识别文字&#8230;</string>
 </resources>

@@ -1,4 +1,4 @@
-package com.baibuti.biji.UI.View;
+package com.baibuti.biji.UI.Widget.ListView;
 
 import android.graphics.Rect;
 import android.support.v7.widget.RecyclerView;

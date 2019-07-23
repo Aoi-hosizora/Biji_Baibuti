@@ -1,4 +1,4 @@
-package com.baibuti.biji.UI.Widget;
+package com.baibuti.biji.UI.Widget.OtherView;
 
 import android.content.Context;
 import android.graphics.Canvas;

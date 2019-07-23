@@ -25,8 +25,8 @@ import com.baibuti.biji.Data.DB.SearchItemDao;
 import com.baibuti.biji.Data.Models.SearchItem;
 import com.baibuti.biji.Interface.IShowLog;
 import com.baibuti.biji.R;
-import com.baibuti.biji.UI.View.SpacesItemDecoration;
-import com.baibuti.biji.UI.Widget.RecyclerViewEmptySupport;
+import com.baibuti.biji.UI.Widget.ListView.SpacesItemDecoration;
+import com.baibuti.biji.UI.Widget.ListView.RecyclerViewEmptySupport;
 import com.baibuti.biji.Utils.CommonUtil;
 import com.baibuti.biji.Utils.PopupMenuUtil;
 

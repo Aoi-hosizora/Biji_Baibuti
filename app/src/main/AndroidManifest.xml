@@ -68,6 +68,16 @@
             </intent-filter>
         </activity>
 
+        <!-- StarSearchItemActivity Activity -->
+        <activity
+            android:name=".UI.Activity.OCRActivity"
+            android:screenOrientation="portrait">
+            <intent-filter>
+                <action android:name="activitytest.example.com.activitytest.OCRActivity" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </activity>
+
         <!-- PreLoaded Font -->
         <meta-data
             android:name="preloaded_fonts"

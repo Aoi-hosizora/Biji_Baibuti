@@ -53,7 +53,7 @@
                 android:textSize="@dimen/text_size_12"
                 android:layout_below="@id/id_adapter_SearchItem_Title"/>
 
-            <com.baibuti.biji.UI.Widget.EllipsizingTextView
+            <com.baibuti.biji.UI.Widget.OtherView.EllipsizingTextView
                 android:id="@+id/id_adapter_SearchItem_Content"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"

@@ -8,16 +8,14 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.baibuti.biji.Data.DB.SearchItemDao;
 import com.baibuti.biji.Data.Models.SearchItem;
 import com.baibuti.biji.R;
-import com.baibuti.biji.UI.Widget.EllipsizingTextView;
-import com.baibuti.biji.UI.Widget.RecyclerViewEmptySupport;
+import com.baibuti.biji.UI.Widget.OtherView.EllipsizingTextView;
+import com.baibuti.biji.UI.Widget.ListView.RecyclerViewEmptySupport;
 
 import java.util.ArrayList;
 import java.util.List;

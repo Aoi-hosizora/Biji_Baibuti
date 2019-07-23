@@ -13,7 +13,7 @@ import android.view.View.OnClickListener;
 import com.baibuti.biji.Data.Models.Group;
 import com.baibuti.biji.Interface.IShowLog;
 import com.baibuti.biji.R;
-import com.baibuti.biji.UI.Widget.RainbowPalette;
+import com.baibuti.biji.UI.Widget.OtherView.RainbowPalette;
 import com.baibuti.biji.Data.DB.GroupDao;
 import com.baibuti.biji.Data.DB.NoteDao;
 import com.baibuti.biji.Utils.CommonUtil;

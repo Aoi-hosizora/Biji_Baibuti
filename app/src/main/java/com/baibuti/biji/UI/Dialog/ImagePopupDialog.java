@@ -28,6 +28,16 @@ public class ImagePopupDialog extends Dialog implements IShowLog {
     private Bitmap[] imgs;
     private int index;
 
+    private onLongClickImageListener m_onLongClickImageListener;
+
+    public interface onLongClickImageListener {
+        void onLongClick(View v, int index);
+    }
+
+    public void setOnLongClickImageListener(onLongClickImageListener m_onLongClickImageListener) {
+        this.m_onLongClickImageListener = m_onLongClickImageListener;
+    }
+
     /**
      * IShowLog 接口，全局设置 Log 格式
      * @param FunctionName
@@ -123,7 +133,8 @@ public class ImagePopupDialog extends Dialog implements IShowLog {
                 view.setOnLongClickListener(new View.OnLongClickListener() {
                     @Override
                     public boolean onLongClick(View v) {
-                        Toast.makeText(getContext(), "LongClick " + index, Toast.LENGTH_SHORT).show();
+                        if (m_onLongClickImageListener != null)
+                            m_onLongClickImageListener.onLongClick(v, index);
                         return true;
                     }
                 });

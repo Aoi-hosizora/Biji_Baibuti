@@ -28,7 +28,7 @@ import com.baibuti.biji.UI.Fragment.SearchFragment;
 import com.baibuti.biji.UI.Fragment.FileFragment;
 import com.baibuti.biji.Interface.IShowLog;
 import com.baibuti.biji.R;
-import com.baibuti.biji.UI.Widget.SimplerSearcherView;
+import com.baibuti.biji.UI.Widget.OtherView.SimplerSearcherView;
 import com.facebook.stetho.Stetho;
 import com.jeremyfeinstein.slidingmenu.lib.SlidingMenu;
 import  com.baibuti.biji.Utils.BottomNavigationHelper;

@@ -1,5 +1,6 @@
 package com.baibuti.biji.UI.Activity;
 
+import android.app.Dialog;
 import android.app.ProgressDialog;
 import android.content.ClipData;
 import android.content.ClipboardManager;
@@ -13,6 +14,7 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -21,6 +23,7 @@ import com.baibuti.biji.UI.Dialog.ImagePopupDialog;
 import com.baibuti.biji.Interface.IShowLog;
 import com.baibuti.biji.R;
 import com.baibuti.biji.Utils.CommonUtil;
+import com.baibuti.biji.Utils.PopupMenuUtil;
 import com.baibuti.biji.Utils.StringUtils;
 import com.baibuti.biji.Utils.ToDocUtil;
 import com.sendtion.xrichtext.RichTextView;
@@ -40,7 +43,7 @@ import io.reactivex.schedulers.Schedulers;
 
 public class ViewModifyNoteActivity extends AppCompatActivity implements View.OnClickListener, IShowLog {
 
-    // region 声明: UI ProgressDialog
+    // region 声明: UI ProgressDialog m_LongClickImgPopupMenu
 
     private TextView TitleEditText_View;
     private TextView UpdateTimeTextView_View;
@@ -50,6 +53,7 @@ public class ViewModifyNoteActivity extends AppCompatActivity implements View.On
     private ProgressDialog loadingDialog;
     private ProgressDialog savingDialog;
     private Disposable mDisposable;
+    private Dialog m_LongClickImgPopupMenu;
 
     // endregion 声明: UI ProgressDialog
 
@@ -70,7 +74,7 @@ public class ViewModifyNoteActivity extends AppCompatActivity implements View.On
 
     // endregion 声明: flag REQ
 
-    // region 菜单创建 活动返回 onCreate onCreateOptionsMenu onBackPressed onActivityResult ShowLogE
+    // region 菜单创建 活动返回 onCreate initPopupMenu onCreateOptionsMenu onBackPressed onActivityResult ShowLogE
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -88,6 +92,7 @@ public class ViewModifyNoteActivity extends AppCompatActivity implements View.On
         loadingDialog.setCanceledOnTouchOutside(false);
         loadingDialog.show();
 
+        initPopupMenu();
 
         note = (Note) getIntent().getSerializableExtra("notedata");
         flag = getIntent().getIntExtra("flag", NOTE_NEW);
@@ -127,6 +132,25 @@ public class ViewModifyNoteActivity extends AppCompatActivity implements View.On
 //            }
 //        });
 
+    }
+
+    /**
+     * 初始化弹出菜单
+     */
+    private void initPopupMenu() {
+        m_LongClickImgPopupMenu = new Dialog(this, R.style.BottomDialog);
+        LinearLayout root = PopupMenuUtil.initPopupMenu(this, m_LongClickImgPopupMenu, R.layout.dialog_vmnote_longclickimgpopupmenu);
+
+        root.findViewById(R.id.id_VMNoteAct_PopupMenu_OCR).setOnClickListener(this);
+        root.findViewById(R.id.id_VMNoteAct_PopupMenu_Cancel).setOnClickListener(this);
+
+        m_LongClickImgPopupMenu.setOnCancelListener(new DialogInterface.OnCancelListener() {
+
+            @Override
+            public void onCancel(DialogInterface dialog) {
+                LongClickImgPath = "";
+            }
+        });
     }
 
     @Override
@@ -209,7 +233,13 @@ public class ViewModifyNoteActivity extends AppCompatActivity implements View.On
     @Override
     public void onClick(View v) {
         switch (v.getId()) {
-
+            case R.id.id_VMNoteAct_PopupMenu_OCR:
+                openOCRAct(LongClickImgPath);
+                m_LongClickImgPopupMenu.cancel();
+            break;
+            case R.id.id_VMNoteAct_PopupMenu_Cancel:
+                m_LongClickImgPopupMenu.cancel();
+            break;
         }
     }
 
@@ -468,7 +498,7 @@ public class ViewModifyNoteActivity extends AppCompatActivity implements View.On
 
     // endregion 其他功能
 
-    // region 其他功能 showDetailInfo ShowClickImg ShareNoteContent
+    // region 其他功能 showDetailInfo ShowClickImg ShareNoteContent LongClickImgPath openOCRAct
 
     /**
      * 显示笔记详细信息
@@ -503,6 +533,13 @@ public class ViewModifyNoteActivity extends AppCompatActivity implements View.On
     }
 
     /**
+     * 记录长按图片序号
+     *
+     * -1: 没有长按
+     */
+    private String LongClickImgPath = "";
+
+    /**
      * 点击图片后弹出预览窗口，待改
      * @param imageList
      * @param currentPosition
@@ -511,13 +548,33 @@ public class ViewModifyNoteActivity extends AppCompatActivity implements View.On
         try {
             String[] imgs = imageList.toArray(new String[imageList.size()]);
             ImagePopupDialog dialog = new ImagePopupDialog(this, imgs, currentPosition);
+            dialog.setOnLongClickImageListener(new ImagePopupDialog.onLongClickImageListener() {
+
+                @Override
+                public void onLongClick(View v, int index) {
+                    LongClickImgPath = imgs[index];
+                    m_LongClickImgPopupMenu.show();
+                }
+            });
             dialog.show();
         }
         catch (Exception ex) {
             ex.printStackTrace();
         }
+    }
 
+    /**
+     * 对图片 打开OCR活动
+     * @param imgPath
+     */
+    private void openOCRAct(String imgPath) {
+        Intent intent = new Intent(ViewModifyNoteActivity.this, OCRActivity.class);
 
+        Bundle bundle = new Bundle();
+        bundle.putString(OCRActivity.INT_IMGPATH, imgPath);
+
+        intent.putExtra(OCRActivity.INT_BUNDLE, bundle);
+        startActivity(intent);
     }
 
     /**
@@ -552,8 +609,6 @@ public class ViewModifyNoteActivity extends AppCompatActivity implements View.On
                 ShowLogE("dealWithContent", "点击图片："+currentPosition+"："+imagePath);
 
                 ShowClickImg(imageList, currentPosition);
-
-
             }
         });
     }

@@ -68,6 +68,10 @@
     <string name="VMNoteActivity_SavingFileAsNoteNegativeForCancel">取消保存</string>
     <string name="VMNoteActivity_SavingDataMessage">%s 文件正在保存中&#8230;\n\n%s\n</string>
 
+    <!-- Bottom Menu -->
+    <string name="VMNoteActivity_BottomMenuOCR">识别图片中的文字&#8230;</string>
+    <string name="VMNoteActivity_BottomMenuCancel">取消</string>
+
     <!-- /////////////////////// VMNoteAct UI End ////////////////////////// -->
     <!-- /////////////////////////////////////////////////////////////////// -->
     <!-- ///////////////////////// MNoteAct UI ///////////////////////////// -->

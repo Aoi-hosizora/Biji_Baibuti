@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="250dp"
+    android:orientation="vertical"
+    android:paddingBottom="25dp"
+    android:paddingLeft="20dp"
+    android:paddingRight="20dp"
+    android:paddingTop="12dp">
+    <Button
+        android:id="@+id/id_VMNoteAct_PopupMenu_OCR"
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:layout_marginTop="2dp"
+        android:gravity="center"
+        android:text="@string/VMNoteActivity_BottomMenuOCR"
+        android:textColor="@color/pink"
+        android:textSize="18sp"
+        android:background="@color/white"/>
+
+    <Button
+        android:id="@+id/id_VMNoteAct_PopupMenu_Cancel"
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:layout_marginTop="20dp"
+        android:gravity="center"
+        android:text="@string/VMNoteActivity_BottomMenuCancel"
+        android:textColor="@color/pink"
+        android:textSize="18sp"
+        android:background="@color/white"/>
+</LinearLayout>
