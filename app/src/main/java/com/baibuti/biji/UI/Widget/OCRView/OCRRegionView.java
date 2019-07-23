@@ -17,8 +17,8 @@ public class OCRRegionView extends View implements IShowLog {
 
     private boolean isChecked = false;
 
-    public static final int OPACITY_CHECKED = 100;
-    public static final int OPACITY_UNCHECKED = 20;
+    public static final int OPACITY_CHECKED = 120;
+    public static final int OPACITY_UNCHECKED = 50;
 
     public static final int DEF_WIDTH = 200;
     public static final int DEF_HEIGHT = 100;
@@ -96,6 +96,7 @@ public class OCRRegionView extends View implements IShowLog {
 
     public void setChecked(boolean checked) {
         isChecked = checked;
+        refreshLayoutBG(checked);
     }
 
     /**

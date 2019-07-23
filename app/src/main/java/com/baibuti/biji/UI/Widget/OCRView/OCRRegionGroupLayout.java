@@ -2,8 +2,10 @@ package com.baibuti.biji.UI.Widget.OCRView;
 
 import android.content.Context;
 import android.content.res.TypedArray;
+import android.graphics.Bitmap;
 import android.util.AttributeSet;
 import android.util.Log;
+import android.util.Size;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
@@ -13,12 +15,21 @@ import com.baibuti.biji.Interface.IShowLog;
 import com.baibuti.biji.Net.Models.Region;
 import com.baibuti.biji.R;
 import com.baibuti.biji.Utils.BitmapUtils;
+import com.baibuti.biji.Utils.OCRRegionUtil;
+
+import java.util.ArrayList;
+import java.util.List;
 
 
 public class OCRRegionGroupLayout extends ViewGroup implements IShowLog {
 
     private Region region;
-    private String imgUrl;
+    private Bitmap imgBG;
+    private onClickFramesListener m_onClickFramesListener;
+
+    public interface onClickFramesListener {
+        void onClickFrames(Region.Frame[] frames);
+    }
 
     public OCRRegionGroupLayout(Context context) {
         this(context, null);
@@ -36,10 +47,6 @@ public class OCRRegionGroupLayout extends ViewGroup implements IShowLog {
      */
     public OCRRegionGroupLayout(Context context, AttributeSet attributeSet, int defStyle) {
         super(context, attributeSet, defStyle);
-        // TypedArray a = context.obtainStyledAttributes(attributeSet, R.styleable.CascadeLayout);
-        // horizontalSpacing = a.getDimensionPixelSize(R.styleable.CascadeLayout_horizontal_spacing, (int) getResources().getDimension(R.dimen.Card_Horizontal_Spacing));
-        // verticalSpacing = a.getDimensionPixelSize(R.styleable.CascadeLayout_vertical_spacing, R.dimen.Card_Vertical_Spacing);
-        // a.recycle();
     }
 
     /**
@@ -103,11 +110,17 @@ public class OCRRegionGroupLayout extends ViewGroup implements IShowLog {
 
                 // TODO 非正四边形
 
-                int pnt1X = regionView.getFrame().getPoints()[0].getX();
-                int pnt1Y = regionView.getFrame().getPoints()[0].getY();
+                Region.Point[] point4 = OCRRegionUtil.parsePnts(
+                    regionView.getFrame().getPoints(),
+                    getWidth(), getHeight(),
+                    imgBG.getWidth(), imgBG.getHeight()
+                );
 
-                int pnt3X = regionView.getFrame().getPoints()[2].getX();
-                int pnt3Y = regionView.getFrame().getPoints()[2].getY();
+                int pnt1X = point4[0].getX();
+                int pnt1Y = point4[0].getY();
+
+                int pnt3X = point4[2].getX();
+                int pnt3Y = point4[2].getY();
 
                 child.layout(pnt1X, pnt1Y, pnt3X, pnt3Y);
             }
@@ -164,11 +177,13 @@ public class OCRRegionGroupLayout extends ViewGroup implements IShowLog {
                 @Override
                 public void onClickAfterUp(Region.Frame frame) {
                     ShowLogE("onClickAfterDown", "Up: " + frame.getOcr());
+                    onChangeChecked();
                 }
 
                 @Override
                 public void onClickAfterDown(Region.Frame frame) {
                     ShowLogE("onClickAfterDown", "Down: " + frame.getOcr());
+                    onChangeChecked();
                 }
             });
 
@@ -176,16 +191,38 @@ public class OCRRegionGroupLayout extends ViewGroup implements IShowLog {
         }
     }
 
-    public String getImgUrl() {
-        return imgUrl;
+    public void setOnClickRegionsListener(onClickFramesListener m_onClickFramesListener) {
+        this.m_onClickFramesListener = m_onClickFramesListener;
+    }
+
+    /**
+     * 当选择修改时，通知订阅
+     * @return
+     */
+    private void onChangeChecked() {
+        if (m_onClickFramesListener != null) {
+            List<Region.Frame> frames = new ArrayList<>();
+            for (int i = 0; i < getChildCount(); i++) {
+                View child = getChildAt(i);
+                if (child instanceof OCRRegionView) { // Region
+                    if (((OCRRegionView) child).isChecked())
+                        frames.add(((OCRRegionView) child).getFrame());
+                }
+            }
+            m_onClickFramesListener.onClickFrames(frames.toArray(new Region.Frame[0]));
+        }
+    }
+
+    public Bitmap getImgBG() {
+        return imgBG;
     }
 
     /**
      * 设置背景
-     * @param imgUrl
+     * @param imgBG
      */
-    public void setImgUrl(String imgUrl) {
-        this.imgUrl = imgUrl;
+    public void setImgBG(Bitmap imgBG) {
+        this.imgBG = imgBG;
         setupBG();
     }
 
@@ -194,8 +231,21 @@ public class OCRRegionGroupLayout extends ViewGroup implements IShowLog {
      */
     private void setupBG() {
         ImageView imageView = new ImageView(getContext());
-        imageView.setImageBitmap(BitmapUtils.getBitmapFromFile(imgUrl));
+        imageView.setImageBitmap(imgBG);
 
         addView(imageView);
+    }
+
+    /**
+     * 选择全部区域或者取消选择全部区域
+     * @param isSelect
+     */
+    public void setAllFramesChecked(boolean isSelect) {
+        for (int i = 0; i < getChildCount(); i++) {
+            View child = getChildAt(i);
+            if (child instanceof OCRRegionView) // Region
+                ((OCRRegionView) child).setChecked(isSelect);
+        }
+        onChangeChecked();
     }
 }

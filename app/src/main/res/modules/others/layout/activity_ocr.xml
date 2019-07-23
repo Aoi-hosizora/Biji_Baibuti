@@ -5,7 +5,8 @@
     android:orientation="vertical"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".UI.Activity.OCRActivity">
+    tools:context=".UI.Activity.OCRActivity"
+    android:background="@color/black">
 
     <com.baibuti.biji.UI.Widget.OCRView.OCRRegionGroupLayout
         android:id="@+id/id_OCRActivity_OCRRegionGroupLayout"
@@ -13,17 +14,60 @@
         android:layout_height="0dp"
         android:layout_weight="1">
 
-        <com.baibuti.biji.UI.Widget.OCRView.OCRRegionView
-            android:background="@color/image_color_red"
-            android:layout_width="120dp"
-            android:layout_height="30dp" />
-
     </com.baibuti.biji.UI.Widget.OCRView.OCRRegionGroupLayout>
 
     <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="50dp"
-        android:text="123123123"
+        android:id="@+id/id_OCRActivity_OCRResultLabelTextView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/grey_900"
+        android:paddingTop="10dp"
+        android:paddingBottom="8dp"
+        android:paddingStart="12dp"
+        android:paddingEnd="2dp"
+        android:text="@string/OCRActivity_RetLabel"
+        android:textColor="@color/white"
         android:textSize="20sp"/>
+
+    <TextView
+        android:id="@+id/id_OCRActivity_OCRResultTextView"
+        android:layout_width="match_parent"
+        android:layout_height="100dp"
+        android:background="@color/grey_900"
+        android:paddingTop="8dp"
+        android:paddingStart="20dp"
+        android:paddingEnd="20dp"
+        android:text="xxxxx"
+        android:textColor="@color/white"
+        android:textSize="15sp"/>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:background="@color/grey_900">
+
+        <Button
+            android:id="@+id/id_OCRActivity_SelectAllButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@color/grey_900"
+            android:textColor="@color/light_pink"
+            android:text="@string/OCRActivity_SelectAllButton"/>
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"/>
+
+        <Button
+            android:id="@+id/id_OCRActivity_CopyButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@color/grey_900"
+            android:textColor="@color/light_pink"
+            android:text="@string/OCRActivity_CopyButton"/>
+
+    </LinearLayout>
 
 </LinearLayout>

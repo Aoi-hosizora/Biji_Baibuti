@@ -23,6 +23,13 @@
     <string name="EmptyView_NothingList">什么都没找到</string>
 
     <!-- OCRAct -->
-    <string name="OCTActivity_Title">识别文字</string>
-    <string name="OCTActivity_Loading">正在识别文字&#8230;</string>
+    <string name="OCRActivity_Title">识别文字</string>
+    <string name="OCRActivity_Loading">正在识别文字&#8230;</string>
+    <string name="OCRActivity_RetLabel">识别结果: (共 %d / %d 处)</string>
+    <string name="OCRActivity_CancelSelectAllButton">取消全选</string>
+    <string name="OCRActivity_SelectAllButton">全选</string>
+    <string name="OCRActivity_CopyButton">复制</string>
+    <string name="OCRActivity_CopySuccess">识图结果已复制</string>
+    <string name="OCRActivity_PleaseSelectHint">(请选择识别出的文字区域&#8230;)</string>
+
 </resources>
