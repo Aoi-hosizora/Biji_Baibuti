@@ -3,18 +3,16 @@ package com.baibuti.biji.UI.Widget.OCRView;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.Bitmap;
+import android.graphics.Color;
 import android.util.AttributeSet;
 import android.util.Log;
-import android.util.Size;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
-import android.widget.Toast;
 
 import com.baibuti.biji.Interface.IShowLog;
 import com.baibuti.biji.Net.Models.Region;
 import com.baibuti.biji.R;
-import com.baibuti.biji.Utils.BitmapUtils;
 import com.baibuti.biji.Utils.OCRRegionUtil;
 
 import java.util.ArrayList;
@@ -27,6 +25,19 @@ public class OCRRegionGroupLayout extends ViewGroup implements IShowLog {
     private Bitmap imgBG;
     private onClickFramesListener m_onClickFramesListener;
 
+    // attr
+    private int checkedOpacity;
+    private int uncheckedOpacity;
+    private int mainColor;
+    private int borderColor;
+    private float borderWidth;
+
+    // ocrlayout:mainColor="@color/image_color_blue"
+    // ocrlayout:borderColor="@color/image_color_yellow"
+    // ocrlayout:borderWidth="5dp"
+    // ocrlayout:uncheckedOpacity="75"
+    // ocrlayout:checkedOpacity="150"
+
     public interface onClickFramesListener {
         void onClickFrames(Region.Frame[] frames);
     }
@@ -37,6 +48,15 @@ public class OCRRegionGroupLayout extends ViewGroup implements IShowLog {
 
     public OCRRegionGroupLayout(Context context, AttributeSet attributeSet) {
         this(context, attributeSet, 0);
+
+        TypedArray typedArray = context.obtainStyledAttributes(attributeSet, R.styleable.OCRRegionGroupLayout);
+        checkedOpacity = typedArray.getInt(R.styleable.OCRRegionGroupLayout_checkedOpacity, OCRRegionView.DEF_OPACITY_CHECKED);
+        uncheckedOpacity = typedArray.getInt(R.styleable.OCRRegionGroupLayout_uncheckedOpacity, OCRRegionView.DEF_OPACITY_UNCHECKED);
+        mainColor = typedArray.getColor(R.styleable.OCRRegionGroupLayout_mainColor, OCRRegionView.DEF_MAINCOLOR);
+        borderColor = typedArray.getColor(R.styleable.OCRRegionGroupLayout_borderColor, OCRRegionView.DEF_BORDERCOLOR);
+        borderWidth = typedArray.getDimension(R.styleable.OCRRegionGroupLayout_borderWidth, OCRRegionView.DEF_BORDERWIDTH);
+
+        typedArray.recycle();
     }
 
     /**
@@ -108,30 +128,62 @@ public class OCRRegionGroupLayout extends ViewGroup implements IShowLog {
                 if (regionView.getFrame() == null)
                     continue;
 
-                // TODO 非正四边形
-
                 Region.Point[] point4 = OCRRegionUtil.parsePnts(
                     regionView.getFrame().getPoints(),
                     getWidth(), getHeight(),
                     imgBG.getWidth(), imgBG.getHeight()
                 );
 
-                int pnt1X = point4[0].getX();
-                int pnt1Y = point4[0].getY();
+                setRotationAndLayoutOfOCRRegion(regionView, point4);
 
-                int pnt3X = point4[2].getX();
-                int pnt3Y = point4[2].getY();
-
-                child.layout(pnt1X, pnt1Y, pnt3X, pnt3Y);
             }
             else if (child instanceof ImageView) { // BG
-                ImageView imageView = (ImageView) child;
-
-                // TODO 图片位置
-
                 child.layout(l, t, r, b);
             }
         }
+    }
+
+    /**
+     * 设置布局和旋转 推导重要!!
+     * @param child
+     * @param point4
+     */
+    private void setRotationAndLayoutOfOCRRegion(OCRRegionView child, Region.Point[] point4) {
+
+        // 获得三点
+        int pnt1X = point4[0].getX();
+        int pnt1Y = point4[0].getY();
+
+        int pnt2X = point4[1].getX();
+        int pnt2Y = point4[1].getY();
+
+        int pnt3X = point4[2].getX();
+        int pnt3Y = point4[2].getY();
+
+        // 旋转角
+        float rad = (float) Math.atan2(pnt2Y - pnt1Y, pnt2X - pnt1X);
+        float deg = (float) Math.toDegrees(rad);
+
+        double cos = Math.cos(-rad);
+        double sin = Math.sin(-rad);
+
+        // 俩向量旋转
+        double vec1X = pnt3X - pnt1X;
+        double vec1Y = pnt3Y - pnt1Y;
+
+        double vec2X = vec1X * cos - vec1Y * sin;
+        double vec2Y = vec1X * sin + vec1Y * cos;
+
+        int new3X = (int) (pnt1X + vec2X);
+        int new3Y = (int) (pnt1Y + vec2Y);
+
+        // 新布局
+        child.layout(pnt1X, pnt1Y, new3X, new3Y);
+
+        // 角度
+        child.setPivotX(0);
+        child.setPivotY(0);
+        child.setRotation(deg);
     }
 
     @Override
@@ -169,7 +221,14 @@ public class OCRRegionGroupLayout extends ViewGroup implements IShowLog {
         for (Region.Frame frame : frames) {
             OCRRegionView regionView = new OCRRegionView(getContext());
 
-            regionView.setBackgroundColor(OCRRegionView.DEF_BGCOLOR);
+            // attr
+            regionView.setMainColor(mainColor);
+            regionView.setOpacity_Checked(checkedOpacity);
+            regionView.setOpacity_UnChecked(uncheckedOpacity);
+            regionView.setBorderColor(borderColor);
+            regionView.setBorderWidth(borderWidth);
+
+            // data
             regionView.setFrame(frame);
 
             regionView.setOnClickRegionListener(new OCRRegionView.onClickRegionListener() {

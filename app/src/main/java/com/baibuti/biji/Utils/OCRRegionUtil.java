@@ -1,7 +1,5 @@
 package com.baibuti.biji.Utils;
 
-import android.util.Size;
-
 import com.baibuti.biji.Net.Models.Region;
 
 import java.util.ArrayList;

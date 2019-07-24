@@ -1,15 +1,17 @@
 package com.baibuti.biji.UI.Activity;
 
+import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
-import android.view.KeyEvent;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
@@ -40,6 +42,18 @@ public class OCRActivity extends AppCompatActivity implements IShowLog, View.OnC
     private TextView m_ocrResultLabelTextView;
     private Button m_CopyButton;
     private Button m_SelectAllButton;
+
+    /**
+     * 获取数据延迟
+     */
+    private int MS_GETDATA = 1000;
+
+    /**
+     * 是否已经取消识别
+     */
+    private boolean isCanceled = false;
+
+    private Region m_region;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -72,7 +86,33 @@ public class OCRActivity extends AppCompatActivity implements IShowLog, View.OnC
 
         m_ocringProgressDlg = new ProgressDialog(this);
         m_ocringProgressDlg.setMessage(getString(R.string.OCRActivity_Loading));
-        // m_ocringProgressDlg.show();
+        m_ocringProgressDlg.setOnCancelListener(new DialogInterface.OnCancelListener() {
+
+            @Override
+            public void onCancel(DialogInterface dialog) {
+                new AlertDialog.Builder(OCRActivity.this)
+                    .setTitle(R.string.OCRActivity_CancelCheckTitle)
+                    .setMessage(R.string.OCRActivity_CancelCheckMsg)
+                    .setPositiveButton(R.string.OCRActivity_CancelCheckOK, new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            isCanceled = true;
+                            dialog.dismiss();
+                            finish();
+                            Toast.makeText(OCRActivity.this, R.string.OCRActivity_Canceled, Toast.LENGTH_SHORT).show();
+                        }
+                    })
+                    .setNegativeButton(R.string.OCRActivity_CancelCheckNo, new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            isCanceled = false;
+                            dialog.dismiss();
+                        }
+                    })
+                    .create().show();
+            }
+        });
+        m_ocringProgressDlg.show();
 
         m_ocrResultTextView = findViewById(R.id.id_OCRActivity_OCRResultTextView);
         m_ocrResultLabelTextView = findViewById(R.id.id_OCRActivity_OCRResultLabelTextView);
@@ -85,10 +125,32 @@ public class OCRActivity extends AppCompatActivity implements IShowLog, View.OnC
         m_ocrResultTextView.setText(R.string.OCRActivity_PleaseSelectHint);
         setEnabled(m_CopyButton, false);
 
-        Region region = getRetTmp();
-
+        // 1.BG
         m_ocrRegionGroupLayout.setImgBG(BitmapUtils.getBitmapFromFile(ImgPath));
-        m_ocrRegionGroupLayout.setRegion(region);
+
+
+        // TODO
+
+        new Handler().postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                m_region = getRetTmp();
+
+                if (!isCanceled)
+                    setupOCRLayout();
+            }
+        }, MS_GETDATA); // 1000
+    }
+
+    /**
+     * 获得数据后更新界面
+     */
+    private void setupOCRLayout() {
+
+        // 2.Region
+        m_ocrRegionGroupLayout.setRegion(m_region);
+
+        // 3.Click
         m_ocrRegionGroupLayout.setOnClickRegionsListener(new OCRRegionGroupLayout.onClickFramesListener() {
 
             @Override
@@ -101,7 +163,7 @@ public class OCRActivity extends AppCompatActivity implements IShowLog, View.OnC
                 setRetLabelText(cnt, m_ocrRegionGroupLayout.getRegion().getFrames().length);
 
                 // 全选
-                if (cnt == region.getFrames().length)
+                if (cnt == m_region.getFrames().length)
                     m_SelectAllButton.setText(getString(R.string.OCRActivity_CancelSelectAllButton));
                 else
                     m_SelectAllButton.setText(getString(R.string.OCRActivity_SelectAllButton));
@@ -172,39 +234,18 @@ public class OCRActivity extends AppCompatActivity implements IShowLog, View.OnC
             new Region.Point(600, 400),
             3,
             new Region.Frame[] {
-                new Region.Frame(
-                    new Region.Point[] {
-                        new Region.Point(342, 150),
-                        new Region.Point(664, 115),
-                        new Region.Point(679, 270),
-                        new Region.Point(358, 305)
-                    },
-                    0.9,
-                    "Half"
-                ),
-                new Region.Frame(
-                    new Region.Point[] {
-                        new Region.Point(878, 653),
-                        new Region.Point(1021, 653),
-                        new Region.Point(1021, 672),
-                        new Region.Point(878, 672)
-                    },
-                    0.9,
-                    "pm0336-1683hy"
-                ),
-                new Region.Frame(
-                    new Region.Point[] {
-                        new Region.Point(0, 651),
-                        new Region.Point(251, 652),
-                        new Region.Point(251, 682),
-                        new Region.Point(0, 671)
-                    },
-                    0.9,
-                    "全景网www.quanjing.com"
-                )
+                new Region.Frame(342, 150, 664, 115, 679, 270, 358, 305, 0.9, "Half"),
+                new Region.Frame(878, 653, 1021, 653, 1021, 672, 879, 673,0.9, "pm0336-1683hy"),
+                new Region.Frame(0, 651, 251, 652, 251, 682, 0, 671,0.9,"全景网www.quanjing.com"),
+                new Region.Frame(167, 430, 843, 366, 854, 496, 179, 560, 0.9, "Weschubiahnten"),
+                new Region.Frame(426, 308, 556, 303, 559, 381, 430, 388, 0.9, "执待")
             }
         );
         setRetLabelText(0, ret.getFrames().length);
+
+        if (m_ocringProgressDlg.isShowing())
+            m_ocringProgressDlg.dismiss();
+
         return ret;
     }
 }

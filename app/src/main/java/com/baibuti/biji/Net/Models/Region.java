@@ -69,6 +69,8 @@ public class Region implements Serializable {
         public void setY(int y) {
             this.y = y;
         }
+
+        public static Point zeroPoint = new Point(0, 0);
     }
 
     public static class Frame implements Serializable {
@@ -78,9 +80,23 @@ public class Region implements Serializable {
         private String ocr;
 
         public Frame(Point[] points, double scores, String ocr) {
-            this.points = points;
+            if (points.length > 4)
+                this.points = new Point[] {points[0], points[1], points[2], points[3]};
+            else if (points.length < 4)
+                this.points = new Point[] {Point.zeroPoint, Point.zeroPoint, Point.zeroPoint, Point.zeroPoint};
+            else
+                this.points = points;
             this.scores = scores;
             this.ocr = ocr;
+        }
+
+        public Frame(int X1, int Y1, int X2, int Y2, int X3, int Y3, int X4, int Y4, double scores, String ocr) {
+            this(
+                new Point[] {
+                    new Point(X1, Y1), new Point(X2, Y2), new Point(X3, Y3), new Point(X4, Y4)
+                },
+                scores, ocr
+            );
         }
 
         public Frame(String ocr, double scores, Point[] points) {

@@ -30,6 +30,13 @@
     <string name="OCRActivity_SelectAllButton">全选</string>
     <string name="OCRActivity_CopyButton">复制</string>
     <string name="OCRActivity_CopySuccess">识图结果已复制</string>
+    <string name="OCRActivity_Canceled">操作已取消</string>
+
+    <string name="OCRActivity_CancelCheckMsg">是否取消操作？</string>
+    <string name="OCRActivity_CancelCheckTitle">提醒</string>
+    <string name="OCRActivity_CancelCheckOK">取消</string>
+    <string name="OCRActivity_CancelCheckNo">保留</string>
+
     <string name="OCRActivity_PleaseSelectHint">(请选择识别出的文字区域&#8230;)</string>
 
 </resources>
