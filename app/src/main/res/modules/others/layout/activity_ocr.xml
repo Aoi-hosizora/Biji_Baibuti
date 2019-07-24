@@ -17,7 +17,7 @@
         ocrlayout:mainColor="@color/image_color_blue"
         ocrlayout:borderColor="@color/image_color_yellow"
         ocrlayout:borderWidth="1dp"
-        ocrlayout:uncheckedOpacity="75"
+        ocrlayout:uncheckedOpacity="45"
         ocrlayout:checkedOpacity="150">
 
     </com.baibuti.biji.UI.Widget.OCRView.OCRRegionGroupLayout>

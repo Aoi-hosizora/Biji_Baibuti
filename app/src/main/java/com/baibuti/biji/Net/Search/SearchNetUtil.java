@@ -1,10 +1,9 @@
-package com.baibuti.biji.Utils;
+package com.baibuti.biji.Net.Search;
 
 import android.util.Log;
 
 import com.baibuti.biji.Data.Models.SearchItem;
-
-import android.support.annotation.NonNull;
+import com.baibuti.biji.Net.NetUtil;
 
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -29,20 +28,13 @@ public class SearchNetUtil {
     private static String BaiduUrl = "https://www.baidu.com/s?wd=%s&pn=%s1";
 
     /**
-     * UA 头
-     */
-    private static String UserAgent = "Mozilla/5.0 (Windows NT 10.0; WOW64) " +
-            "AppleWebKit/537.36 (KHTML, like Gecko) " +
-            "Chrome/75.0.3770.100 Safari/537.36";
-
-    /**
      * 连接超时时间
      */
-    private static int TIME_CONN_SEC = 1;
+    private static int TIME_CONN_1SEC = 1;
     /**
      * 读取超时时间
      */
-    private static int TIME_READ_SEC = 1;
+    private static int TIME_READ_1SEC = 1;
 
 
     /**
@@ -53,44 +45,9 @@ public class SearchNetUtil {
      */
     public static ArrayList<SearchItem> getSearchBaiduRet(String KeyWord, int page) {
         String url = String.format(Locale.CHINA, BaiduUrl, KeyWord, page - 1);
-        return getParseBaiduRet(getResponse(url));
+        return getParseBaiduRet(NetUtil.httpGet(url, NetUtil.DEF_UserAgent, TIME_CONN_1SEC, TIME_READ_1SEC));
     }
 
-    /**
-     * 获得 url 的响应 html
-     * @param url
-     * @return
-     */
-    private static String getResponse(String url) {
-        OkHttpClient okHttpClient = new OkHttpClient.Builder()
-                .connectTimeout(TIME_CONN_SEC, TimeUnit.SECONDS)
-                .readTimeout(TIME_READ_SEC, TimeUnit.SECONDS)
-                .build();
-
-        String Ret = "";
-
-        // Reader htmlData = null;
-        try {
-            Request request = new Request.Builder()
-                .url(url)
-                .addHeader("User-Agent", UserAgent)
-                .build();
-
-            Response response = okHttpClient.newCall(request).execute();
-            Ret = response.body().string();
-            response.close();
-        }
-        catch (IOException ex) {
-            ex.printStackTrace();
-        }
-        catch (NullPointerException ex) {
-            ex.printStackTrace();
-        }
-        catch (Exception ex) {
-            ex.printStackTrace();
-        }
-        return Ret;
-    }
     /**
      * 解析百度响应
      * @param Resp
@@ -166,15 +123,15 @@ public class SearchNetUtil {
      */
     private static String getShinUrlFromBaiduUrl(String baiduUrl) {
         OkHttpClient okHttpClient = new OkHttpClient.Builder()
-                .connectTimeout(TIME_CONN_SEC, TimeUnit.SECONDS)
-                .readTimeout(TIME_READ_SEC, TimeUnit.SECONDS)
+                .connectTimeout(TIME_CONN_1SEC, TimeUnit.SECONDS)
+                .readTimeout(TIME_READ_1SEC, TimeUnit.SECONDS)
                 .build();
 
         baiduUrl = baiduUrl.replace("http://", "https://");
         try {
             Request request = new Request.Builder()
                     .url(baiduUrl)
-                    .addHeader("User-Agent", UserAgent)
+                    .addHeader("User-Agent", NetUtil.DEF_UserAgent)
                     .build()
                     ;
 

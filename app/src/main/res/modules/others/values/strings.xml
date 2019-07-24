@@ -37,6 +37,10 @@
     <string name="OCRActivity_CancelCheckOK">取消</string>
     <string name="OCRActivity_CancelCheckNo">保留</string>
 
+    <string name="OCRActivity_ErrorMessage">识别失败，请重试</string>
+    <string name="OCRActivity_ErrorTitle">提醒</string>
+    <string name="OCRActivity_ErrorReturnButton">返回</string>
+
     <string name="OCRActivity_PleaseSelectHint">(请选择识别出的文字区域&#8230;)</string>
 
 </resources>

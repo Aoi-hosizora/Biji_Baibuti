@@ -1,24 +1,42 @@
 # Biji_Baibuti
-+ SCUT 百步梯项目
 
-### 开发环境
-+ AS: 3.4.1
-+ gradle: 3.3.2
++ SCUT Baibuti Project
 
-+ buildToolsVersion: 28.0.3
+### Environment
 
-### 参考库
+#### Tools
++ `AS` 3.4.1
++ `gradle` 3.3.2
++ `buildToolsVersion` 28.0.3
 
-#### 外部库修改
-+ [xrichtext](https://github.com/sendtion/XRichText) (RichTextView.java - addImageViewAtIndex())
-+ [SearchDialog](https://github.com/wenwenwen888/SearchDialog) (SearchFragment.java - search()...)
-+ [image_lib](https://github.com/zhangphil/WeiXinPictureTool) (IMGEditActivity.java - onDoneClick())
+#### Application
++ `compileSdkVersion` 27
++ `targetSdkVersion` 27
++ `minSdkVersion` 21
 
+### BackEnd
 
-#### 未修改
+#### OCR(CTPN + CRNN)
+
++ See [CTPN_CRNN_BackEnd](https://github.com/Aoi-hosizora/CTPN_CRNN_BackEnd)
+
+#### Others
+
++ Continue...
+
+---
+
+### Ref Lib
+
+#### Has modified
+
++ [xrichtext](https://github.com/sendtion/XRichText) (RichTextView.java - `addImageViewAtIndex()`)
++ [SearchDialog](https://github.com/wenwenwen888/SearchDialog) (SearchFragment.java - `search()`...)
++ [image_lib](https://github.com/zhangphil/WeiXinPictureTool) (IMGEditActivity.java - `onDoneClick()`)
+
+#### Others
+
 + [SlidingMenu](https://github.com/jfeinstein10/SlidingMenu)
 + [photoview](https://github.com/bm-x/PhotoView)
-+ [tess-two](https://github.com/rmtheis/tess-two)
 + ...
-
-+ 其他参考：[build.gradle](https://github.com/Aoi-hosizora/Biji_Baibuti/blob/master/app/build.gradle)
++ Others see [build.gradle](https://github.com/Aoi-hosizora/Biji_Baibuti/blob/master/app/build.gradle)

@@ -81,6 +81,9 @@
     <string name="MNoteActivity_BottomMenuGallery">从相册中选取</string>
     <string name="MNoteActivity_BottomMenuCancel">取消</string>
 
+    <string name="MNoteActivity_BottomMenuOCR">识别图片中的文字&#8230;</string>
+    <string name="MNoteActivity_BottomMenuOCRCancel">取消</string>
+
     <!-- OnCreate -->
     <string name="MNoteActivity_LoadingData">数据加载中&#8230;</string>
     <string name="MNoteActivity_LoadingImg">图片加载中&#8230;</string>

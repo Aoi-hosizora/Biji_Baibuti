@@ -39,9 +39,11 @@ import com.baibuti.biji.Interface.IShowLog;
 import com.baibuti.biji.R;
 import com.baibuti.biji.Data.DB.GroupDao;
 import com.baibuti.biji.Data.DB.NoteDao;
+import com.baibuti.biji.UI.Dialog.ImagePopupDialog;
 import com.baibuti.biji.Utils.CommonUtil;
 import com.baibuti.biji.Utils.FilePathUtil;
 import com.baibuti.biji.Utils.ImageUtils;
+import com.baibuti.biji.Utils.PopupMenuUtil;
 import com.baibuti.biji.Utils.SDCardUtil;
 import com.baibuti.biji.Utils.StringUtils;
 import com.baibuti.biji.Utils.ExtractUtil;
@@ -51,6 +53,7 @@ import com.sendtion.xrichtext.RichTextEditor;
 
 import java.io.File;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
@@ -89,6 +92,7 @@ public class ModifyNoteActivity extends AppCompatActivity implements View.OnClic
     
     private Menu menu;
     private Dialog mInsertImgPopupMenu;
+    private Dialog mLongClickImgPopupMenu;
     
     // endregion 声明: UI ProgressDialog Menu
     
@@ -139,7 +143,7 @@ public class ModifyNoteActivity extends AppCompatActivity implements View.OnClic
 
     // endregion 声明: region REQ img PERMISSION
 
-    // region 菜单创建 活动返回 onCreate onCreateOptionsMenu onBackPressed ShowPopMenu onActivityResult ShowLogE
+    // region 菜单创建 活动返回 onCreate initPopupMenu onCreateOptionsMenu onBackPressed ShowPopMenu onActivityResult ShowLogE
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -187,6 +191,8 @@ public class ModifyNoteActivity extends AppCompatActivity implements View.OnClic
         GroupNameTextView.setTextColor(note.getGroupLabel().getIntColor());
         selectedGropId = note.getGroupLabel().getId();
 
+        initPopupMenu();
+
         //////////////////////////////////////////////////
         // ContentEditText
 
@@ -194,6 +200,25 @@ public class ModifyNoteActivity extends AppCompatActivity implements View.OnClic
             @Override
             public void run() {
                 dealWithContent();
+            }
+        });
+    }
+
+    /**
+     * 初始化弹出菜单
+     */
+    private void initPopupMenu() {
+        mLongClickImgPopupMenu = new Dialog(this, R.style.BottomDialog);
+        LinearLayout root = PopupMenuUtil.initPopupMenu(this, mLongClickImgPopupMenu, R.layout.dialog_mnote_longclickimgpopupmenu);
+
+        root.findViewById(R.id.id_MNoteAct_PopupMenu_OCR).setOnClickListener(this);
+        root.findViewById(R.id.id_MNoteAct_PopupMenu_OCRCancel).setOnClickListener(this);
+
+        mLongClickImgPopupMenu.setOnCancelListener(new DialogInterface.OnCancelListener() {
+
+            @Override
+            public void onCancel(DialogInterface dialog) {
+                LongClickImgPath = "";
             }
         });
     }
@@ -350,6 +375,14 @@ public class ModifyNoteActivity extends AppCompatActivity implements View.OnClic
             // 取消
             case R.id.id_popmenu_cancel:
                 mInsertImgPopupMenu.dismiss();
+                break;
+
+            case R.id.id_MNoteAct_PopupMenu_OCR:
+                openOCRAct(LongClickImgPath);
+                mLongClickImgPopupMenu.cancel();
+                break;
+            case R.id.id_MNoteAct_PopupMenu_OCRCancel:
+                mLongClickImgPopupMenu.cancel();
                 break;
         }
     }
@@ -680,137 +713,152 @@ public class ModifyNoteActivity extends AppCompatActivity implements View.OnClic
 
     // endregion 其他功能
     
-    // region 文字识别 ShowdealWithContentForOCR idenWordsSync idenWordsNextReturn
-    
-    /**
-     * 处理文字识别
-     * 在 dealWithContent 处理图片点击事件
-     * @param imagePath
-     */
-    private void ShowdealWithContentForOCR(final String imagePath) {
-
-        AlertDialog.Builder idenDialog = new AlertDialog
-                .Builder(ModifyNoteActivity.this)
-                .setTitle(R.string.MNoteActivity_OCRCheckAlertTitle)
-                .setMessage(getResources().getString(R.string.MNoteActivity_OCRCheckAlertMsg) + imagePath)
-                .setCancelable(true)
-                .setPositiveButton(R.string.MNoteActivity_OCRCheckAlertPositiveButtonForOK, new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-
-                        Bitmap bitmap = BitmapUtils.getBitmapFromFile(imagePath);
-                        // 异步识别文字
-                        idenWordsSync(bitmap);
-                        dialog.dismiss();
-                    }
-                })
-                .setNegativeButton(R.string.MNoteActivity_OCRCheckAlertNegativeButtonForCancel, null);
-        idenDialog.show();
-    }
+    // region 文字识别 openOCRAct
 
     /**
-     * 异步识别文字
-     * @param bitmap 图片路径
+     * 对图片 打开OCR活动
+     * @param imgPath
      */
-    private void idenWordsSync(final Bitmap bitmap) {
-        idenLoadingDialog = new ProgressDialog(ModifyNoteActivity.this);
-        idenLoadingDialog.setTitle(R.string.MNoteActivity_OCRSyncAlertTitle);
-        idenLoadingDialog.setMessage(getResources().getString(R.string.MNoteActivity_OCRSyncAlertMsg));
+    private void openOCRAct(String imgPath) {
+        Intent intent = new Intent(ModifyNoteActivity.this, OCRActivity.class);
 
-        class HasDismiss {
-            private boolean dismiss = false;
-            HasDismiss() {}
-            void setDismiss() { this.dismiss = true; }
-            boolean getDismiss() { return this.dismiss; }
-        }
-        final HasDismiss isHasDismiss = new HasDismiss();
+        Bundle bundle = new Bundle();
+        bundle.putString(OCRActivity.INT_IMGPATH, imgPath);
 
-        final Observable<String> mObservable = Observable.create(new ObservableOnSubscribe<String>() {
-            @Override
-            public void subscribe(ObservableEmitter<String> emitter) throws Exception {
-
-                // 识别 ExtractUtil.recognition <<< 异步
-                final String extaText = ExtractUtil.recognition(bitmap, ModifyNoteActivity.this);
-
-                emitter.onNext(extaText); // 处理识别后响应
-                emitter.onComplete(); // 完成
-            }
-        })
-                .subscribeOn(Schedulers.io()) //生产事件在io
-                .observeOn(AndroidSchedulers.mainThread()); //消费事件在UI线程
-
-        idenLoadingDialog.setOnCancelListener(new DialogInterface.OnCancelListener() {
-            @Override
-            public void onCancel(DialogInterface dialog) { ////////// 待改
-                // Toast.makeText(ModifyNoteActivity.this, "d", Toast.LENGTH_SHORT).show();
-                // ExtractUtil.tessBaseAPI.clear();
-                // mObservable.onTerminateDetach();
-                isHasDismiss.setDismiss();
-            }
-        });
-        idenLoadingDialog.show();
-
-        mObservable.subscribe(new Observer<String>() {
-            @Override
-            public void onComplete() {
-
-            }
-
-            @Override
-            public void onError(Throwable e) {
-                if (idenLoadingDialog != null && idenLoadingDialog.isShowing()) {
-                    idenLoadingDialog.dismiss();
-                }
-                Toast.makeText(ModifyNoteActivity.this, R.string.MNoteActivity_OCRSyncAlertError, Toast.LENGTH_SHORT).show();
-            }
-
-            @Override
-            public void onSubscribe(Disposable d) {
-                subsInsert = d;
-            }
-
-            // 识别后的处理
-            @Override
-            public void onNext(final String extaText) {
-                // 关闭进度条
-                if (idenLoadingDialog != null && idenLoadingDialog.isShowing()) {
-                    idenLoadingDialog.dismiss();
-                }
-                // 处理回显
-                ShowLogE("idenWordsSync.onNext()", isHasDismiss.getDismiss() + "");
-                if (!isHasDismiss.getDismiss()) // GOMI Code
-                    idenWordsNextReturn(extaText);
-            }
-        });
+        intent.putExtra(OCRActivity.INT_BUNDLE, bundle);
+        startActivity(intent);
     }
 
-    /**
-     * 异步识别出图片后的回显
-     * @param extaText 识别出的文字
-     */
-    private void idenWordsNextReturn(final String extaText) {
-        final EditText et = new EditText(ModifyNoteActivity.this);
-        et.setText(extaText);
-
-        AlertDialog.Builder resultDialog = new AlertDialog
-                .Builder(ModifyNoteActivity.this)
-                .setTitle(R.string.MNoteActivity_OCRSyncResultAlertTitle)
-                .setView(et)
-                .setCancelable(true)
-                .setPositiveButton(R.string.MNoteActivity_OCRSyncResultAlertPositiveButtonForCopy, new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        ClipboardManager clipboardManager = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
-                        ClipData clip = ClipData.newPlainText(getResources().getString(R.string.MNoteActivity_OCRSyncResultAlertCopyClipLabel), extaText);
-                        clipboardManager.setPrimaryClip(clip);
-                        Toast.makeText(ModifyNoteActivity.this, R.string.MNoteActivity_OCRSyncAlertCopy, Toast.LENGTH_SHORT).show();
-                    }
-                })
-                .setNegativeButton(R.string.MNoteActivity_OCRSyncResultAlertNegativeButtonForCancel, null);
-
-        resultDialog.show();
-    }
-
+    //
+    // /**
+    //  * 处理文字识别
+    //  * 在 dealWithContent 处理图片点击事件
+    //  * @param imagePath
+    //  */
+    // private void ShowdealWithContentForOCR(final String imagePath) {
+    //
+    //     AlertDialog.Builder idenDialog = new AlertDialog
+    //             .Builder(ModifyNoteActivity.this)
+    //             .setTitle(R.string.MNoteActivity_OCRCheckAlertTitle)
+    //             .setMessage(getResources().getString(R.string.MNoteActivity_OCRCheckAlertMsg) + imagePath)
+    //             .setCancelable(true)
+    //             .setPositiveButton(R.string.MNoteActivity_OCRCheckAlertPositiveButtonForOK, new DialogInterface.OnClickListener() {
+    //                 @Override
+    //                 public void onClick(DialogInterface dialog, int which) {
+    //
+    //                     Bitmap bitmap = BitmapUtils.getBitmapFromFile(imagePath);
+    //                     // 异步识别文字
+    //                     idenWordsSync(bitmap);
+    //                     dialog.dismiss();
+    //                 }
+    //             })
+    //             .setNegativeButton(R.string.MNoteActivity_OCRCheckAlertNegativeButtonForCancel, null);
+    //     idenDialog.show();
+    // }
+    //
+    // /**
+    //  * 异步识别文字
+    //  * @param bitmap 图片路径
+    //  */
+    // private void idenWordsSync(final Bitmap bitmap) {
+    //     idenLoadingDialog = new ProgressDialog(ModifyNoteActivity.this);
+    //     idenLoadingDialog.setTitle(R.string.MNoteActivity_OCRSyncAlertTitle);
+    //     idenLoadingDialog.setMessage(getResources().getString(R.string.MNoteActivity_OCRSyncAlertMsg));
+    //
+    //     class HasDismiss {
+    //         private boolean dismiss = false;
+    //         HasDismiss() {}
+    //         void setDismiss() { this.dismiss = true; }
+    //         boolean getDismiss() { return this.dismiss; }
+    //     }
+    //     final HasDismiss isHasDismiss = new HasDismiss();
+    //
+    //     final Observable<String> mObservable = Observable.create(new ObservableOnSubscribe<String>() {
+    //         @Override
+    //         public void subscribe(ObservableEmitter<String> emitter) throws Exception {
+    //
+    //             // 识别 ExtractUtil.recognition <<< 异步
+    //             final String extaText = ExtractUtil.recognition(bitmap, ModifyNoteActivity.this);
+    //
+    //             emitter.onNext(extaText); // 处理识别后响应
+    //             emitter.onComplete(); // 完成
+    //         }
+    //     })
+    //             .subscribeOn(Schedulers.io()) //生产事件在io
+    //             .observeOn(AndroidSchedulers.mainThread()); //消费事件在UI线程
+    //
+    //     idenLoadingDialog.setOnCancelListener(new DialogInterface.OnCancelListener() {
+    //         @Override
+    //         public void onCancel(DialogInterface dialog) { ////////// 待改
+    //             // Toast.makeText(ModifyNoteActivity.this, "d", Toast.LENGTH_SHORT).show();
+    //             // ExtractUtil.tessBaseAPI.clear();
+    //             // mObservable.onTerminateDetach();
+    //             isHasDismiss.setDismiss();
+    //         }
+    //     });
+    //     idenLoadingDialog.show();
+    //
+    //     mObservable.subscribe(new Observer<String>() {
+    //         @Override
+    //         public void onComplete() {
+    //
+    //         }
+    //
+    //         @Override
+    //         public void onError(Throwable e) {
+    //             if (idenLoadingDialog != null && idenLoadingDialog.isShowing()) {
+    //                 idenLoadingDialog.dismiss();
+    //             }
+    //             Toast.makeText(ModifyNoteActivity.this, R.string.MNoteActivity_OCRSyncAlertError, Toast.LENGTH_SHORT).show();
+    //         }
+    //
+    //         @Override
+    //         public void onSubscribe(Disposable d) {
+    //             subsInsert = d;
+    //         }
+    //
+    //         // 识别后的处理
+    //         @Override
+    //         public void onNext(final String extaText) {
+    //             // 关闭进度条
+    //             if (idenLoadingDialog != null && idenLoadingDialog.isShowing()) {
+    //                 idenLoadingDialog.dismiss();
+    //             }
+    //             // 处理回显
+    //             ShowLogE("idenWordsSync.onNext()", isHasDismiss.getDismiss() + "");
+    //             if (!isHasDismiss.getDismiss()) // GOMI Code
+    //                 idenWordsNextReturn(extaText);
+    //         }
+    //     });
+    // }
+    //
+    // /**
+    //  * 异步识别出图片后的回显
+    //  * @param extaText 识别出的文字
+    //  */
+    // private void idenWordsNextReturn(final String extaText) {
+    //     final EditText et = new EditText(ModifyNoteActivity.this);
+    //     et.setText(extaText);
+    //
+    //     AlertDialog.Builder resultDialog = new AlertDialog
+    //             .Builder(ModifyNoteActivity.this)
+    //             .setTitle(R.string.MNoteActivity_OCRSyncResultAlertTitle)
+    //             .setView(et)
+    //             .setCancelable(true)
+    //             .setPositiveButton(R.string.MNoteActivity_OCRSyncResultAlertPositiveButtonForCopy, new DialogInterface.OnClickListener() {
+    //                 @Override
+    //                 public void onClick(DialogInterface dialog, int which) {
+    //                     ClipboardManager clipboardManager = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
+    //                     ClipData clip = ClipData.newPlainText(getResources().getString(R.string.MNoteActivity_OCRSyncResultAlertCopyClipLabel), extaText);
+    //                     clipboardManager.setPrimaryClip(clip);
+    //                     Toast.makeText(ModifyNoteActivity.this, R.string.MNoteActivity_OCRSyncAlertCopy, Toast.LENGTH_SHORT).show();
+    //                 }
+    //             })
+    //             .setNegativeButton(R.string.MNoteActivity_OCRSyncResultAlertNegativeButtonForCancel, null);
+    //
+    //     resultDialog.show();
+    // }
+    //
     // endregion  OCR部分
     
     // region 权限 软键盘 checkPermissions onRequestPermissionsResult closeSoftKeyInput
@@ -901,14 +949,54 @@ public class ModifyNoteActivity extends AppCompatActivity implements View.OnClic
             @Override
             public void onRtImageClick(final String imagePath) {
                 if (!TextUtils.isEmpty(getEditData())) {
-                    List<String> imageList = StringUtils.getTextFromHtml(getEditData(), true);
-                    if (!TextUtils.isEmpty(imagePath)) {
-                        // int currentPosition = imageList.indexOf(imagePath);
-                        ShowdealWithContentForOCR(imagePath);
-                    }
+
+                    ArrayList<String> imageList = StringUtils.getTextFromHtml(note.getContent(), true);
+                    int currentPosition = imageList.indexOf(imagePath);
+
+                    ShowLogE("dealWithContent", "点击图片："+currentPosition+"："+imagePath);
+
+                    ShowClickImg(imageList, currentPosition);
+
+//                    List<String> imageList = StringUtils.getTextFromHtml(getEditData(), true);
+//                    if (!TextUtils.isEmpty(imagePath)) {
+//                        // int currentPosition = imageList.indexOf(imagePath);
+//                        // ShowdealWithContentForOCR(imagePath);
+//
+//                    }
                 }
             }
         });
+    }
+
+    /**
+     * 记录长按图片序号
+     *
+     * -1: 没有长按
+     */
+    private String LongClickImgPath = "";
+
+    /**
+     * 点击图片后弹出预览窗口，待改
+     * @param imageList
+     * @param currentPosition
+     */
+    private void ShowClickImg(ArrayList<String> imageList, int currentPosition) {
+        try {
+            String[] imgs = imageList.toArray(new String[imageList.size()]);
+            ImagePopupDialog dialog = new ImagePopupDialog(this, imgs, currentPosition);
+            dialog.setOnLongClickImageListener(new ImagePopupDialog.onLongClickImageListener() {
+
+                @Override
+                public void onLongClick(View v, int index) {
+                    LongClickImgPath = imgs[index];
+                    mLongClickImgPopupMenu.show();
+                }
+            });
+            dialog.show();
+        }
+        catch (Exception ex) {
+            ex.printStackTrace();
+        }
     }
 
     /**

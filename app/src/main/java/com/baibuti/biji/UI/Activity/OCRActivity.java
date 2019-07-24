@@ -9,6 +9,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.Message;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
@@ -19,7 +20,9 @@ import android.widget.Toast;
 
 import com.baibuti.biji.Interface.IShowLog;
 import com.baibuti.biji.Net.Models.Region;
+import com.baibuti.biji.Net.OCR.OCRRetUtil;
 import com.baibuti.biji.R;
+import com.baibuti.biji.UI.Fragment.SearchFragment;
 import com.baibuti.biji.UI.Widget.OCRView.OCRRegionGroupLayout;
 import com.baibuti.biji.Utils.BitmapUtils;
 import com.baibuti.biji.Utils.OCRRegionUtil;
@@ -124,20 +127,17 @@ public class OCRActivity extends AppCompatActivity implements IShowLog, View.OnC
         m_SelectAllButton.setOnClickListener(this);
         m_ocrResultTextView.setText(R.string.OCRActivity_PleaseSelectHint);
         setEnabled(m_CopyButton, false);
+        setRetLabelText(0, 0);
 
-        // 1.BG
         m_ocrRegionGroupLayout.setImgBG(BitmapUtils.getBitmapFromFile(ImgPath));
 
-
-        // TODO
-
+        // 延迟
         new Handler().postDelayed(new Runnable() {
             @Override
             public void run() {
-                m_region = getRetTmp();
-
-                if (!isCanceled)
-                    setupOCRLayout();
+                getRetTmp(ImgPath);
+                // TODO !!!!!
+//                getRet(ImgPath);
             }
         }, MS_GETDATA); // 1000
     }
@@ -146,6 +146,9 @@ public class OCRActivity extends AppCompatActivity implements IShowLog, View.OnC
      * 获得数据后更新界面
      */
     private void setupOCRLayout() {
+
+        // 1.Label Cnt
+        setRetLabelText(0, m_region.getFrames().length);
 
         // 2.Region
         m_ocrRegionGroupLayout.setRegion(m_region);
@@ -229,7 +232,11 @@ public class OCRActivity extends AppCompatActivity implements IShowLog, View.OnC
         m_ocrResultLabelTextView.setText(String.format(getString(R.string.OCRActivity_RetLabel), selectCnt, allCnt));
     }
 
-    private Region getRetTmp() {
+    /**
+     * 获得 结果，并调用设置布局 (dev env)
+     * @param url
+     */
+    private void getRetTmp(String url) {
         Region ret = new Region(
             new Region.Point(600, 400),
             3,
@@ -241,11 +248,87 @@ public class OCRActivity extends AppCompatActivity implements IShowLog, View.OnC
                 new Region.Frame(426, 308, 556, 303, 559, 381, 430, 388, 0.9, "执待")
             }
         );
-        setRetLabelText(0, ret.getFrames().length);
+
+        m_region = ret;
 
         if (m_ocringProgressDlg.isShowing())
             m_ocringProgressDlg.dismiss();
 
-        return ret;
+        if (!isCanceled)
+            setupOCRLayout();
     }
+
+    /**
+     * 访问网络获得获得结果，等待信号
+     * @param url
+     */
+    private void getRet(String url) {
+
+        // TODO
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                Region ret = OCRRetUtil.getOCRRet(url);
+
+                Message message = new Message();
+                message.what = HandleWhat.HND_OCRRet;
+
+                Bundle bundle = new Bundle();
+                bundle.putSerializable(HandleWhat.BND_Region, ret);
+                message.setData(bundle);
+
+                handler.sendMessage(message);
+            }
+        }).start();
+    }
+
+    /**
+     * 返回 OCR 结果，并调用设置布局
+     * @param msg
+     */
+    private void onHandleRetOCR(Message msg) {
+        Bundle bundle = msg.getData();
+        m_region = (Region) bundle.getSerializable(HandleWhat.BND_Region);
+
+        if (m_ocringProgressDlg.isShowing())
+            m_ocringProgressDlg.dismiss();
+
+        if (m_region == null)
+            new AlertDialog.Builder(this)
+                .setTitle(R.string.OCRActivity_ErrorTitle)
+                .setMessage(R.string.OCRActivity_ErrorMessage)
+                .setPositiveButton(R.string.OCRActivity_ErrorReturnButton, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+
+                        finish();
+                    }
+                })
+                .create().show();
+        else
+            if (!isCanceled)
+                setupOCRLayout();
+    }
+
+    class HandleWhat {
+        /**
+         * 处理搜索响应
+         */
+        static final int HND_OCRRet = 1;
+
+        static final String BND_Region = "BND_Region";
+    }
+
+
+    /**
+     * 网络信号处理
+     */
+    private final Handler handler = new Handler((Message msg) -> {
+        switch (msg.what) {
+            case HandleWhat.HND_OCRRet:
+                onHandleRetOCR(msg);
+                break;
+        }
+        return false;
+    });
 }

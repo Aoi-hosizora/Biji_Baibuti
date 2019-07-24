@@ -35,7 +35,7 @@ import com.baibuti.biji.UI.Widget.ListView.SpacesItemDecoration;
 import com.baibuti.biji.UI.Widget.ListView.RecyclerViewEmptySupport;
 import com.baibuti.biji.Utils.CommonUtil;
 import com.baibuti.biji.Utils.PopupMenuUtil;
-import com.baibuti.biji.Utils.SearchNetUtil;
+import com.baibuti.biji.Net.Search.SearchNetUtil;
 
 import java.util.ArrayList;
 import java.util.Locale;
