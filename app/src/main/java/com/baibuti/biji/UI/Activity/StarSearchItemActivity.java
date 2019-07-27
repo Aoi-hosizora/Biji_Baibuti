@@ -29,6 +29,7 @@ import com.baibuti.biji.UI.Widget.ListView.SpacesItemDecoration;
 import com.baibuti.biji.UI.Widget.ListView.RecyclerViewEmptySupport;
 import com.baibuti.biji.Utils.CommonUtil;
 import com.baibuti.biji.Utils.PopupMenuUtil;
+import com.baibuti.biji.Utils.SearchUtil;
 
 import java.util.ArrayList;
 
@@ -442,17 +443,19 @@ public class StarSearchItemActivity extends AppCompatActivity implements View.On
 
         SearchItemDao searchItemDao = new SearchItemDao(this);
         ArrayList<SearchItem> AllSearchItems = searchItemDao.queryAllStarSearchItem();
-        FindSearchedItemList = new ArrayList<>();
+//        FindSearchedItemList = new ArrayList<>();
+//
+//        for (SearchItem searchItem : AllSearchItems) {
+//            if (
+//                    searchItem.getTitle().toLowerCase().contains(searchStr.toLowerCase()) ||
+//                    searchItem.getUrl().toLowerCase().contains(searchStr.toLowerCase()) ||
+//                    searchItem.getContent().toLowerCase().contains(searchStr.toLowerCase())
+//            ) {
+//                FindSearchedItemList.add(searchItem);
+//            }
+//        }
 
-        for (SearchItem searchItem : AllSearchItems) {
-            if (
-                    searchItem.getTitle().toLowerCase().contains(searchStr.toLowerCase()) ||
-                    searchItem.getUrl().toLowerCase().contains(searchStr.toLowerCase()) ||
-                    searchItem.getContent().toLowerCase().contains(searchStr.toLowerCase())
-            ) {
-                FindSearchedItemList.add(searchItem);
-            }
-        }
+        FindSearchedItemList = SearchUtil.getSearchItems(AllSearchItems.toArray(new SearchItem[0]), FindSearchedItemString);
 
         searchItemList = FindSearchedItemList;
         refreshListView();

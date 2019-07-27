@@ -37,6 +37,7 @@ import com.getbase.floatingactionbutton.FloatingActionButton;
 import com.getbase.floatingactionbutton.FloatingActionsMenu;
 import com.jeremyfeinstein.slidingmenu.lib.SlidingMenu;
 import com.wyt.searchbox.SearchFragment;
+import com.baibuti.biji.Utils.SearchUtil;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -291,10 +292,13 @@ public class NoteFragment extends Fragment implements View.OnClickListener, ISho
     private List<Note> search(String str) {
         List<Note> notelist = new ArrayList<>();
 
-        for (Note note : NoteList) {
-            if (note.getTitle().contains(str) || note.getContent().contains(str))
-                notelist.add(note);
-        }
+//        for (Note note : NoteList) {
+//            if (note.getTitle().contains(str) || note.getContent().contains(str))
+//                notelist.add(note);
+//        }
+//        noteAdapter.notifyDataSetChanged();
+
+        notelist = SearchUtil.getSearchItems(NoteList.toArray(new Note[0]), str);
         noteAdapter.notifyDataSetChanged();
 
         IsSearchingNull = notelist.isEmpty();

@@ -15,3 +15,11 @@
 #-keepclassmembers class fqcn.of.javascript.interface.for.webview {
 #   public *;
 #}
+
+-keep class jackmego.com.jieba_android.RequestCallback { *; }
+-keep class jackmego.com.jieba_android.JiebaSegmenter { *; }
+-keep class jackmego.com.jieba_android.JiebaSegmenter$** {   # keep enum
+    **[] $VALUES;
+    public *;
+}
+-keep class jackmego.com.jieba_android.SegToken { *; }

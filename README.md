@@ -38,5 +38,6 @@
 
 + [SlidingMenu](https://github.com/jfeinstein10/SlidingMenu)
 + [photoview](https://github.com/bm-x/PhotoView)
++ [jieba-android](https://github.com/452896915/jieba-android)
 + ...
 + Others see [build.gradle](https://github.com/Aoi-hosizora/Biji_Baibuti/blob/master/app/build.gradle)

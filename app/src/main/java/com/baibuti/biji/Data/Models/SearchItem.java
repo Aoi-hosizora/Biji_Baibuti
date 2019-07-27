@@ -1,11 +1,10 @@
 package com.baibuti.biji.Data.Models;
 
-import com.baibuti.biji.Data.Adapters.SearchItemAdapter;
-import com.baibuti.biji.R;
+import com.baibuti.biji.Interface.ISearchEntity;
 
 import java.io.Serializable;
 
-public class SearchItem implements Serializable {
+public class SearchItem implements Serializable, ISearchEntity {
 
     private String title;
     private String url;
@@ -44,5 +43,10 @@ public class SearchItem implements Serializable {
     @Override
     public String toString() {
         return "title: " + title + ", url: " + url + ", content: " + content;
+    }
+
+    @Override
+    public String getSearchContent() {
+        return this.title + this.content + this.url;
     }
 }

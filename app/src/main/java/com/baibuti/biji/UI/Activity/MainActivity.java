@@ -29,6 +29,7 @@ import com.baibuti.biji.UI.Fragment.FileFragment;
 import com.baibuti.biji.Interface.IShowLog;
 import com.baibuti.biji.R;
 import com.baibuti.biji.UI.Widget.OtherView.SimplerSearcherView;
+import com.baibuti.biji.Utils.SearchUtil;
 import com.facebook.stetho.Stetho;
 import com.jeremyfeinstein.slidingmenu.lib.SlidingMenu;
 import  com.baibuti.biji.Utils.BottomNavigationHelper;
@@ -71,10 +72,14 @@ public class MainActivity extends FragmentActivity implements SimplerSearcherVie
         if (Build.VERSION.SDK_INT > Build.VERSION_CODES.LOLLIPOP) {
             if (ActivityCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
                 ActivityCompat.requestPermissions(this, PERMISSIONS_STORAGE, REQUEST_PERMISSION_CODE);
-            };
+            }
         }
 
+        // FB 数据库查看
         Stetho.initializeWithDefaults(this);
+
+        // 初始化结巴分词
+        SearchUtil.initJieba(getApplicationContext());
 
         initViews();
         initadpts();
