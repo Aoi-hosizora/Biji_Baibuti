@@ -13,6 +13,7 @@ import android.os.Message;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
@@ -66,7 +67,7 @@ public class OCRActivity extends AppCompatActivity implements IShowLog, View.OnC
         Intent lastIntent = getIntent();
         Bundle bundle = lastIntent.getBundleExtra(INT_BUNDLE);
         String ImgPath = bundle.getString(INT_IMGPATH, "");
-
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
         initView(ImgPath);
     }
@@ -140,6 +141,16 @@ public class OCRActivity extends AppCompatActivity implements IShowLog, View.OnC
 //                getRet(ImgPath);
             }
         }, MS_GETDATA); // 1000
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case android.R.id.home:
+                finish();
+                break;
+        }
+        return super.onOptionsItemSelected(item);
     }
 
     /**

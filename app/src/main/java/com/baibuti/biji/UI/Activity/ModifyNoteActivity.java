@@ -540,7 +540,19 @@ public class ModifyNoteActivity extends AppCompatActivity implements View.OnClic
         intent.addFlags(Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION);
         // 传入新图片名
         intent.putExtra(MediaStore.EXTRA_OUTPUT, imgUri);
-        startActivityForResult(intent, REQUEST_TAKE_PHOTO);
+        try {
+            startActivityForResult(intent, REQUEST_TAKE_PHOTO);
+        }
+        catch (Exception ex) {
+            ex.printStackTrace();
+            new AlertDialog.Builder(this)
+                    .setTitle(R.string.MNoteActivity_CameraNoFoundAlertTitle)
+                    .setMessage(R.string.MNoteActivity_CameraNoFoundAlertMsg)
+                    .setPositiveButton(R.string.MNoteActivity_CameraNoFoundAlertPosButton, null)
+                    .create().show();
+        }
+
+        // TODO nox 模拟器没有相机可以测试
     }
 
     /**

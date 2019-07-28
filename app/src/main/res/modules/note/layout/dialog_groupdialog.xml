@@ -8,10 +8,10 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="18dp"
-        android:layout_marginLeft="24dp"
+        android:layout_marginStart="24dp"
         android:layout_marginBottom="10dp"
         android:text="@string/GroupDialog_Title"
-        android:textSize="20dp"
+        android:textSize="20sp"
         android:textColor="#000000"/>
 
     <ListView
@@ -23,30 +23,30 @@
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="35dp"
+        android:layout_height="@dimen/groupDlgButtonHeight"
         android:orientation="horizontal"
-        android:layout_marginTop="15dp"
-        android:layout_marginBottom="12dp">
+        android:layout_marginTop="@dimen/groupDlgActionLayoutTopMargin"
+        android:layout_marginBottom="@dimen/groupDlgActionLayoutBottomMargin">
 
         <Button
             android:id="@+id/id_GroupDialog_ButtonUE"
-            android:layout_width="35dp"
-            android:layout_height="wrap_content"
-            android:layout_marginLeft="20dp"
+            android:layout_width="@dimen/groupDlgButtonSmallWidth"
+            android:layout_height="match_parent"
+            android:layout_marginStart="@dimen/groupDlgStartEndMargin"
 
             android:text="@string/GroupDialog_UE"
-            android:background="@color/transparent"
-            android:textColor="@color/pink"/>
+            android:theme="@style/DlgFlatButton"
+            />
 
         <Button
             android:id="@+id/id_GroupDialog_ButtonSHITA"
-            android:layout_width="35dp"
-            android:layout_height="wrap_content"
-            android:layout_marginLeft="8dp"
+            android:layout_width="@dimen/groupDlgButtonSmallWidth"
+            android:layout_height="match_parent"
+            android:layout_marginStart="@dimen/groupDlgButtonMargin"
 
             android:text="@string/GroupDialog_SHITA"
-            android:background="@color/transparent"
-            android:textColor="@color/pink"/>
+            android:theme="@style/DlgFlatButton"
+            />
 
         <TextView
             android:layout_width="0dp"
@@ -55,43 +55,43 @@
 
         <Button
             android:id="@+id/id_GroupDialog_ButtonDelete"
-            android:layout_width="50dp"
-            android:layout_height="wrap_content"
-            android:layout_marginRight="8dp"
+            android:layout_width="@dimen/groupDlgButtonLargeWidth"
+            android:layout_height="match_parent"
+            android:layout_marginEnd="@dimen/groupDlgButtonMargin"
 
             android:text="@string/GroupDialog_Delete"
-            android:background="@color/transparent"
-            android:textColor="@color/pink"/>
+            android:theme="@style/DlgFlatButton"
+            />
 
         <Button
             android:id="@+id/id_GroupDialog_ButtonAdd"
-            android:layout_width="50dp"
-            android:layout_height="wrap_content"
-            android:layout_marginRight="8dp"
+            android:layout_width="@dimen/groupDlgButtonLargeWidth"
+            android:layout_height="match_parent"
+            android:layout_marginEnd="@dimen/groupDlgButtonMargin"
 
             android:text="@string/GroupDialog_Add"
-            android:background="@color/transparent"
-            android:textColor="@color/pink"/>
+            android:theme="@style/DlgFlatButton"
+            />
 
         <Button
             android:id="@+id/id_GroupDialog_ButtonEdit"
-            android:layout_width="50dp"
-            android:layout_height="wrap_content"
-            android:layout_marginRight="8dp"
+            android:layout_width="@dimen/groupDlgButtonLargeWidth"
+            android:layout_height="match_parent"
+            android:layout_marginEnd="@dimen/groupDlgButtonMargin"
 
             android:text="@string/GroupDialog_Edit"
-            android:background="@color/transparent"
-            android:textColor="@color/pink"/>
+            android:theme="@style/DlgFlatButton"
+            />
 
         <Button
             android:id="@+id/id_GroupDialog_ButtonCancel"
-            android:layout_width="50dp"
-            android:layout_height="wrap_content"
-            android:layout_marginRight="20dp"
+            android:layout_width="@dimen/groupDlgButtonLargeWidth"
+            android:layout_height="match_parent"
+            android:layout_marginEnd="@dimen/groupDlgStartEndMargin"
 
             android:text="@string/GroupDialog_Return"
-            android:background="@color/transparent"
-            android:textColor="@color/pink"/>
+            android:theme="@style/DlgFlatButton"
+            />
 
     </LinearLayout>
 

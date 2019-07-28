@@ -4,9 +4,12 @@
     <color name="colorPrimaryLight">#00BFFF</color>
     <color name="colorPrimaryLighter">#00CFFF</color>
     <color name="colorPrimaryDark">#0090FF</color>
+
     <color name="colorAccent">#009B95</color>
+    <color name="colorHighLightAccent">@color/grey_250</color>
+
     <color name="color_shadow">#417F7F81</color>
-    <color name="color_searchview">#F2E6E6E6</color>
+    <color name="color_searchview">#E0E0E0</color>
 
     <color name="background">#F8F8F8</color>
     <color name="half_black">#808080</color>
@@ -27,9 +30,10 @@
     <color name="grey_700">#616161</color>
     <color name="grey_900">#212121</color>
 
-    <color name="popUpMenu_btn_textColor">#EC407A</color> <!-- pink -->
-    <color name="popUpMenu_txt_textColor">#616161</color> <!-- grey_700 -->
+    <!-- PopupMenu -->
+    <color name="popUpMenu_btn_textColor">@color/colorAccent</color>
+    <color name="popUpMenu_btn_HighLightColor">@color/grey_500</color>
+    <color name="popUpMenu_txt_textColor">@color/grey_700</color>
     <color name="popUpMenu_bgColor">#FFFFFF</color>
-
 
 </resources>

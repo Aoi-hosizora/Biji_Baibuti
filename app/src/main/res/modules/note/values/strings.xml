@@ -33,6 +33,11 @@
     <string name="NoteFrag_ActivityReturnNewNote">笔记 %s 创建成功</string>
     <string name="NoteFrag_ActivityReturnUpdateNote">笔记 %s 更新成功</string>
 
+    <!-- OCR Kamera -->
+    <string name="NoteFrag_CameraNoFoundAlertTitle">错误</string>
+    <string name="NoteFrag_CameraNoFoundAlertMsg">相机打开失败，可能该设备没有相机或者设备出错，拍照文字识别功能暂时不可用。</string>
+    <string name="NoteFrag_CameraNoFoundAlertPosButton">确定</string>
+
     <!-- /////////////////////// NoteFrag UI End ////////////////////////// -->
     <!-- ////////////////////////////////////////////////////////////////// -->
     <!-- /////////////////////// VMNoteAct UI ///////////////////////////// -->
@@ -145,6 +150,11 @@
     <string name="ContentNew_NoteTitleHint">请输入标题</string>
     <string name="ContentNew_GroupTitleHint">默认笔记</string>
     <string name="ContentNew_NoteContentHint">在这里输入内容</string>
+
+    <!-- OCR Kamera -->
+    <string name="MNoteActivity_CameraNoFoundAlertTitle">错误</string>
+    <string name="MNoteActivity_CameraNoFoundAlertMsg">相机打开失败，可能该设备没有相机或者设备出错，拍照插入图片功能暂时不可用。</string>
+    <string name="MNoteActivity_CameraNoFoundAlertPosButton">确定</string>
 
     <!-- /////////////////////// MNoteAct UI End /////////////////////////// -->
     <!-- /////////////////////////////////////////////////////////////////// -->

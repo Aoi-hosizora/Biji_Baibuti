@@ -16,8 +16,9 @@
         android:layout_height="@dimen/popUpMenu_cnt_btn_layout_height"
         android:layout_marginTop="@dimen/popUpMenu_cnt_layout_marginTop"
         android:textSize="@dimen/popUpMenu_cnt_btn_textSize"
+
         android:textColor="@color/popUpMenu_btn_textColor"
-        android:background="@color/popUpMenu_bgColor"
+        android:background="@drawable/button_popup_ripple_bg"
         />
 
     <Button
@@ -28,7 +29,8 @@
         android:layout_height="@dimen/popUpMenu_cnt_btn_layout_height"
         android:layout_marginTop="@dimen/popUpMenu_cnt_layout_bottomMarginTop"
         android:textSize="@dimen/popUpMenu_cnt_btn_textSize"
+
         android:textColor="@color/popUpMenu_btn_textColor"
-        android:background="@color/popUpMenu_bgColor"
+        android:background="@drawable/button_popup_ripple_bg"
         />
 </LinearLayout>

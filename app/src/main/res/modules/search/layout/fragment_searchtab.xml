@@ -41,13 +41,13 @@
             android:singleLine="true"
             android:hint="@string/SearchFrag_QuestionEditTextHint"/>
 
-        <Button
+        <ImageButton
             android:id="@+id/id_SearchFrag_SearchButton"
-            android:layout_marginStart="5dp"
-            android:layout_marginEnd="5dp"
-            android:layout_width="wrap_content"
+            android:layout_width="45dp"
             android:layout_height="wrap_content"
-            android:text="@string/SearchFrag_SearchButtonText"/>
+            android:src="@drawable/ic_search_grey_24dp"
+            android:contentDescription="@string/SearchFrag_SearchButtonText"
+            style="@style/Widget.AppCompat.Button.Borderless.Colored"/>
 
     </LinearLayout>
 

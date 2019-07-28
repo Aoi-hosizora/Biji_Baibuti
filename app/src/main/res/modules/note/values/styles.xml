@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <!-- Dlg Flat Button -->
+    <style name="DlgFlatButton" parent="Theme.AppCompat.Light">
+        <item name="android:buttonStyle">@style/Widget.AppCompat.Button.Borderless.Colored</item>
+        <item name="colorControlHighlight">@color/groupDlg_btn_HighLightColor</item>
+        <item name="colorAccent">@color/groupDlg_btn_textColor</item>
+    </style>
+
+</resources>

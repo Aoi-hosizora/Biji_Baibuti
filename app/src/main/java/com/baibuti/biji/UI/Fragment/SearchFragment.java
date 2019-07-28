@@ -20,6 +20,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -47,7 +48,7 @@ public class SearchFragment extends Fragment implements View.OnClickListener, IS
     private View view;
     private Toolbar m_toolbar;
 
-    private Button m_SearchButton;
+    private ImageButton m_SearchButton;
     private EditText m_QuestionEditText;
     private RecyclerViewEmptySupport m_SearchRetList;
     private ProgressDialog m_SearchingDialog;

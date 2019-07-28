@@ -223,6 +223,9 @@ public class NoteFragment extends Fragment implements View.OnClickListener, ISho
             @Override
             public void OnSearchClick(String keyword) {
 
+                if (m_fabmenu.isExpanded())
+                    m_fabmenu.collapse();
+
                 try {
                     if (!keyword.isEmpty()) {
 
@@ -452,6 +455,9 @@ public class NoteFragment extends Fragment implements View.OnClickListener, ISho
      */
     public void ShowGroupDialog() {
 
+        if (m_fabmenu.isExpanded())
+            m_fabmenu.collapse();
+
         loadingGroupDialog.show();
         new Handler().postDelayed(new Runnable() {
             @Override
@@ -521,15 +527,21 @@ public class NoteFragment extends Fragment implements View.OnClickListener, ISho
         noteAdapter.setOnItemClickListener(new NoteAdapter.OnItemClickListener() {
             @Override
             public void onItemClick(View view, int position) {
-
-                SelectedNoteItem = position;
-                HandleNewUpdateNote(false, nlist.get(position), false);
+                if (m_fabmenu.isExpanded()) // 先关闭弹出菜单
+                    m_fabmenu.collapse();
+                else {
+                    SelectedNoteItem = position;
+                    HandleNewUpdateNote(false, nlist.get(position), false);
+                }
             }
         });
 
         noteAdapter.setOnItemLongClickListener(new NoteAdapter.OnRecyclerViewItemLongClickListener() {
             @Override
             public void onItemLongClick(final View view, final Note note) {
+                if (m_fabmenu.isExpanded())
+                    m_fabmenu.collapse();
+
                 DeleteNote(view, note);
             }
         });
@@ -565,7 +577,18 @@ public class NoteFragment extends Fragment implements View.OnClickListener, ISho
         intent.addFlags(Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION);
         // 传入新图片名
         intent.putExtra(MediaStore.EXTRA_OUTPUT, imgUri);
-        startActivityForResult(intent, REQUEST_TAKE_PHOTO);
+
+        try {
+            startActivityForResult(intent, REQUEST_TAKE_PHOTO);
+        }
+        catch (Exception ex) {
+            ex.printStackTrace();
+            new AlertDialog.Builder(getContext())
+                    .setTitle(R.string.NoteFrag_CameraNoFoundAlertTitle)
+                    .setMessage(R.string.NoteFrag_CameraNoFoundAlertMsg)
+                    .setPositiveButton(R.string.NoteFrag_CameraNoFoundAlertPosButton, null)
+                    .create().show();
+        }
 
         // TODO nox 模拟器没有相机可以测试
     }
@@ -726,7 +749,9 @@ public class NoteFragment extends Fragment implements View.OnClickListener, ISho
 
             // 拍照获得图片，编辑
             case REQUEST_TAKE_PHOTO:
-                OpenOCRAct(imgUri);
+                if (resultCode == RESULT_OK) {
+                    OpenOCRAct(imgUri);
+                }
                 break;
         }
     }

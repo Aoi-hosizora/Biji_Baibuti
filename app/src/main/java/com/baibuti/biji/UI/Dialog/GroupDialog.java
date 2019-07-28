@@ -122,7 +122,7 @@ public class GroupDialog extends AlertDialog implements OnClickListener, IShowLo
     private void setEnabled(Button button, boolean en) {
         button.setEnabled(en);
         if (en)
-            button.setTextColor(getContext().getResources().getColor(R.color.pink));
+            button.setTextColor(getContext().getResources().getColor(R.color.colorAccent));
         else
             button.setTextColor(getContext().getResources().getColor(R.color.disable));
     }

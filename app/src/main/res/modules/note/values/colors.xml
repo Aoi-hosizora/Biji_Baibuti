@@ -1,3 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+
+    <color name="groupDlg_btn_textColor">@color/colorAccent</color>
+    <color name="groupDlg_btn_HighLightColor">@color/colorHighLightAccent</color>
+
 </resources>

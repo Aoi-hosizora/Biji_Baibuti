@@ -274,11 +274,11 @@ public class StarSearchItemActivity extends AppCompatActivity implements View.On
 
         if (FindSearchedItemList != null) {
             CancelAllStar.setEnabled(false);
-            CancelAllStar.setTextColor(getResources().getColor(R.color.grey_400));
+            CancelAllStar.setTextColor(getResources().getColor(R.color.disable));
         }
         else {
             CancelAllStar.setEnabled(true);
-            CancelAllStar.setTextColor(getResources().getColor(R.color.pink));
+            CancelAllStar.setTextColor(getResources().getColor(R.color.popUpMenu_btn_textColor));
         }
 
         m_LongClickItemPopupMenu.show();

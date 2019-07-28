@@ -2,15 +2,13 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/Biji.iml" filepath="$PROJECT_DIR$/Biji.iml" />
+      <module fileurl="file://$PROJECT_DIR$/../Biji.iml" filepath="$PROJECT_DIR$/../Biji.iml" />
       <module fileurl="file://$PROJECT_DIR$/Biji_Baibuti.iml" filepath="$PROJECT_DIR$/Biji_Baibuti.iml" />
-      <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
-      <module fileurl="file://$PROJECT_DIR$/libs/image_lib/image_lib.iml" filepath="$PROJECT_DIR$/libs/image_lib/image_lib.iml" />
+      <module fileurl="file://$PROJECT_DIR$/../app/app.iml" filepath="$PROJECT_DIR$/../app/app.iml" />
       <module fileurl="file://$PROJECT_DIR$/../libs/image_lib/image_lib.iml" filepath="$PROJECT_DIR$/../libs/image_lib/image_lib.iml" />
-      <module fileurl="file://$PROJECT_DIR$/libs/searchbox/searchbox.iml" filepath="$PROJECT_DIR$/libs/searchbox/searchbox.iml" />
       <module fileurl="file://$PROJECT_DIR$/../libs/searchbox/searchbox.iml" filepath="$PROJECT_DIR$/../libs/searchbox/searchbox.iml" />
-      <module fileurl="file://$PROJECT_DIR$/libs/slidingMenu/slidingMenu.iml" filepath="$PROJECT_DIR$/libs/slidingMenu/slidingMenu.iml" />
-      <module fileurl="file://$PROJECT_DIR$/libs/xrichtext/xrichtext.iml" filepath="$PROJECT_DIR$/libs/xrichtext/xrichtext.iml" />
+      <module fileurl="file://$PROJECT_DIR$/../libs/slidingMenu/slidingMenu.iml" filepath="$PROJECT_DIR$/../libs/slidingMenu/slidingMenu.iml" />
+      <module fileurl="file://$PROJECT_DIR$/../libs/xrichtext/xrichtext.iml" filepath="$PROJECT_DIR$/../libs/xrichtext/xrichtext.iml" />
     </modules>
   </component>
 </project>

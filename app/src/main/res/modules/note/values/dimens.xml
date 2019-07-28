@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <!-- Group Dlg FlatButtons Left Right Margin -->
+    <dimen name="groupDlgStartEndMargin">15dp</dimen>
+
+    <!-- Group Dlg Action Buttons Margin -->
+    <dimen name="groupDlgActionLayoutBottomMargin">5dp</dimen>
+    <dimen name="groupDlgActionLayoutTopMargin">15dp</dimen>
+
+
+    <!-- Group Dlg Buttons Inner Margin -->
+    <dimen name="groupDlgButtonMargin">3dp</dimen>
+
+    <!-- Group Dlg Buttons Height -->
+    <dimen name="groupDlgButtonHeight">50dp</dimen>
+
+    <!-- Group Dlg Buttons Width(1) -->
+    <dimen name="groupDlgButtonSmallWidth">45dp</dimen>
+    <!-- Group Dlg Buttons Width(2) -->
+    <dimen name="groupDlgButtonLargeWidth">55dp</dimen>
+
+</resources>
