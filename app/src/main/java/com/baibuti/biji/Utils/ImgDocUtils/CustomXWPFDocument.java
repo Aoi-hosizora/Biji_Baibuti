@@ -1,4 +1,4 @@
-package com.baibuti.biji.Utils;
+package com.baibuti.biji.Utils.ImgDocUtils;
 
 import org.apache.poi.openxml4j.opc.OPCPackage;
 import org.apache.poi.xwpf.usermodel.XWPFDocument;

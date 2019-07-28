@@ -23,10 +23,9 @@ import com.baibuti.biji.Interface.IShowLog;
 import com.baibuti.biji.Net.Models.Region;
 import com.baibuti.biji.Net.OCR.OCRRetUtil;
 import com.baibuti.biji.R;
-import com.baibuti.biji.UI.Fragment.SearchFragment;
 import com.baibuti.biji.UI.Widget.OCRView.OCRRegionGroupLayout;
-import com.baibuti.biji.Utils.BitmapUtils;
-import com.baibuti.biji.Utils.OCRRegionUtil;
+import com.baibuti.biji.Utils.ImgDocUtils.BitmapUtils;
+import com.baibuti.biji.Utils.LayoutUtils.OCRRegionUtil;
 
 /**
  * OCR 用

@@ -34,8 +34,8 @@ import com.baibuti.biji.R;
 import com.baibuti.biji.UI.Activity.StarSearchItemActivity;
 import com.baibuti.biji.UI.Widget.ListView.SpacesItemDecoration;
 import com.baibuti.biji.UI.Widget.ListView.RecyclerViewEmptySupport;
-import com.baibuti.biji.Utils.CommonUtil;
-import com.baibuti.biji.Utils.PopupMenuUtil;
+import com.baibuti.biji.Utils.OtherUtils.CommonUtil;
+import com.baibuti.biji.Utils.LayoutUtils.PopupMenuUtil;
 import com.baibuti.biji.Net.Search.SearchNetUtil;
 
 import java.util.ArrayList;

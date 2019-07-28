@@ -10,7 +10,7 @@ import android.util.Log;
 
 import com.baibuti.biji.Data.Models.Group;
 import com.baibuti.biji.Data.Models.Note;
-import com.baibuti.biji.Utils.CommonUtil;
+import com.baibuti.biji.Utils.OtherUtils.CommonUtil;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;

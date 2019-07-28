@@ -1,4 +1,4 @@
-package com.baibuti.biji.Utils;
+package com.baibuti.biji.Utils.LayoutUtils;
 
 import android.app.Dialog;
 import android.content.Context;

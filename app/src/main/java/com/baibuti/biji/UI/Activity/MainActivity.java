@@ -29,10 +29,10 @@ import com.baibuti.biji.UI.Fragment.FileFragment;
 import com.baibuti.biji.Interface.IShowLog;
 import com.baibuti.biji.R;
 import com.baibuti.biji.UI.Widget.OtherView.SimplerSearcherView;
-import com.baibuti.biji.Utils.SearchUtil;
+import com.baibuti.biji.Utils.StrSrchUtils.SearchUtil;
 import com.facebook.stetho.Stetho;
 import com.jeremyfeinstein.slidingmenu.lib.SlidingMenu;
-import  com.baibuti.biji.Utils.BottomNavigationHelper;
+import com.baibuti.biji.Utils.LayoutUtils.BottomNavigationHelper;
 
 import java.util.ArrayList;
 import java.util.List;

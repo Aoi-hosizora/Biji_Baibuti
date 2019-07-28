@@ -10,7 +10,7 @@ import android.widget.TextView;
 import com.baibuti.biji.Data.Models.Note;
 import com.baibuti.biji.R;
 import com.baibuti.biji.UI.Widget.ListView.RecyclerViewEmptySupport;
-import com.baibuti.biji.Utils.CommonUtil;
+import com.baibuti.biji.Utils.OtherUtils.CommonUtil;
 
 import java.util.ArrayList;
 import java.util.List;

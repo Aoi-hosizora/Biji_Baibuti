@@ -11,12 +11,11 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.baibuti.biji.Interface.IShowLog;
 import com.baibuti.biji.R;
 import com.baibuti.biji.UI.Widget.PhotoView.PhotoView;
-import com.baibuti.biji.Utils.BitmapUtils;
+import com.baibuti.biji.Utils.ImgDocUtils.BitmapUtils;
 
 import java.util.ArrayList;
 

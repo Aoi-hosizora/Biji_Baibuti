@@ -16,7 +16,7 @@ import com.baibuti.biji.R;
 import com.baibuti.biji.UI.Widget.OtherView.RainbowPalette;
 import com.baibuti.biji.Data.DB.GroupDao;
 import com.baibuti.biji.Data.DB.NoteDao;
-import com.baibuti.biji.Utils.CommonUtil;
+import com.baibuti.biji.Utils.OtherUtils.CommonUtil;
 
 public class GroupAddDialog extends AlertDialog implements OnClickListener, IShowLog {
     private OnUpdateGroupListener mListener; //接口

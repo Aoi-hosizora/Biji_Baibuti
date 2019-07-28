@@ -1,4 +1,4 @@
-package com.baibuti.biji.Utils;
+package com.baibuti.biji.Utils.OtherUtils;
 
 import android.app.Activity;
 import android.app.ActivityManager;
@@ -21,9 +21,6 @@ import java.util.List;
 
 import static android.content.Context.INPUT_METHOD_SERVICE;
 
-/**
- * Created by sendtion on 2016/3/30.
- */
 public class CommonUtil {
 
     /**

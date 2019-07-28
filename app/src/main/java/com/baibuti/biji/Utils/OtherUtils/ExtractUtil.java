@@ -1,4 +1,4 @@
-package com.baibuti.biji.Utils;
+package com.baibuti.biji.Utils.OtherUtils;
 
 import android.content.Context;
 import android.graphics.Bitmap;

@@ -3,7 +3,6 @@ package com.baibuti.biji.UI.Widget.OCRView;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.Bitmap;
-import android.graphics.Color;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.View;
@@ -13,7 +12,7 @@ import android.widget.ImageView;
 import com.baibuti.biji.Interface.IShowLog;
 import com.baibuti.biji.Net.Models.Region;
 import com.baibuti.biji.R;
-import com.baibuti.biji.Utils.OCRRegionUtil;
+import com.baibuti.biji.Utils.LayoutUtils.OCRRegionUtil;
 
 import java.util.ArrayList;
 import java.util.List;

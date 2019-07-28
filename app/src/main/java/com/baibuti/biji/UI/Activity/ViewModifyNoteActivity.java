@@ -22,10 +22,10 @@ import com.baibuti.biji.Data.Models.Note;
 import com.baibuti.biji.UI.Dialog.ImagePopupDialog;
 import com.baibuti.biji.Interface.IShowLog;
 import com.baibuti.biji.R;
-import com.baibuti.biji.Utils.CommonUtil;
-import com.baibuti.biji.Utils.PopupMenuUtil;
-import com.baibuti.biji.Utils.StringUtils;
-import com.baibuti.biji.Utils.ToDocUtil;
+import com.baibuti.biji.Utils.OtherUtils.CommonUtil;
+import com.baibuti.biji.Utils.LayoutUtils.PopupMenuUtil;
+import com.baibuti.biji.Utils.StrSrchUtils.StringUtils;
+import com.baibuti.biji.Utils.ImgDocUtils.ToDocUtil;
 import com.sendtion.xrichtext.RichTextView;
 
 import java.io.File;

@@ -1,9 +1,11 @@
-package com.baibuti.biji.Utils;
+package com.baibuti.biji.Utils.ImgDocUtils;
 
 
 import android.graphics.BitmapFactory;
 import android.os.Environment;
 import android.util.Log;
+
+import com.baibuti.biji.Utils.StrSrchUtils.StringUtils;
 
 import org.apache.poi.xslf.usermodel.TextAlign;
 import org.apache.poi.xwpf.usermodel.UnderlinePatterns;
@@ -17,7 +19,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.List;
-
 
 /**
  * Using POI & IText By AoiHosizora

@@ -36,14 +36,13 @@ import com.baibuti.biji.UI.Widget.ListView.SpacesItemDecoration;
 import com.baibuti.biji.UI.Widget.ListView.RecyclerViewEmptySupport;
 import com.baibuti.biji.Data.DB.GroupDao;
 import com.baibuti.biji.Data.DB.NoteDao;
-import com.baibuti.biji.Utils.FilePathUtil;
-import com.baibuti.biji.Utils.SDCardUtil;
-import com.blankj.utilcode.util.UriUtils;
+import com.baibuti.biji.Utils.FileDirUtils.FilePathUtil;
+import com.baibuti.biji.Utils.FileDirUtils.SDCardUtil;
 import com.getbase.floatingactionbutton.FloatingActionButton;
 import com.getbase.floatingactionbutton.FloatingActionsMenu;
 import com.jeremyfeinstein.slidingmenu.lib.SlidingMenu;
 import com.wyt.searchbox.SearchFragment;
-import com.baibuti.biji.Utils.SearchUtil;
+import com.baibuti.biji.Utils.StrSrchUtils.SearchUtil;
 
 import java.io.File;
 import java.text.SimpleDateFormat;

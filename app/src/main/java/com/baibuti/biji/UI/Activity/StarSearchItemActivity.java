@@ -27,9 +27,9 @@ import com.baibuti.biji.Interface.IShowLog;
 import com.baibuti.biji.R;
 import com.baibuti.biji.UI.Widget.ListView.SpacesItemDecoration;
 import com.baibuti.biji.UI.Widget.ListView.RecyclerViewEmptySupport;
-import com.baibuti.biji.Utils.CommonUtil;
-import com.baibuti.biji.Utils.PopupMenuUtil;
-import com.baibuti.biji.Utils.SearchUtil;
+import com.baibuti.biji.Utils.OtherUtils.CommonUtil;
+import com.baibuti.biji.Utils.LayoutUtils.PopupMenuUtil;
+import com.baibuti.biji.Utils.StrSrchUtils.SearchUtil;
 
 import java.util.ArrayList;
 

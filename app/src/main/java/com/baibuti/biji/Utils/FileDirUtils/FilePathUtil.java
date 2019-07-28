@@ -1,4 +1,4 @@
-package com.baibuti.biji.Utils;
+package com.baibuti.biji.Utils.FileDirUtils;
 
 import android.content.ContentResolver;
 import android.content.ContentUris;

@@ -1,4 +1,4 @@
-package com.baibuti.biji.Utils;
+package com.baibuti.biji.Utils.StrSrchUtils;
 
 import android.content.Context;
 import android.util.Log;

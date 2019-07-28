@@ -26,7 +26,6 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
-import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -40,14 +39,13 @@ import com.baibuti.biji.R;
 import com.baibuti.biji.Data.DB.GroupDao;
 import com.baibuti.biji.Data.DB.NoteDao;
 import com.baibuti.biji.UI.Dialog.ImagePopupDialog;
-import com.baibuti.biji.Utils.CommonUtil;
-import com.baibuti.biji.Utils.FilePathUtil;
-import com.baibuti.biji.Utils.ImageUtils;
-import com.baibuti.biji.Utils.PopupMenuUtil;
-import com.baibuti.biji.Utils.SDCardUtil;
-import com.baibuti.biji.Utils.StringUtils;
-import com.baibuti.biji.Utils.ExtractUtil;
-import com.baibuti.biji.Utils.BitmapUtils;
+import com.baibuti.biji.Utils.OtherUtils.CommonUtil;
+import com.baibuti.biji.Utils.FileDirUtils.FilePathUtil;
+import com.baibuti.biji.Utils.ImgDocUtils.ImageUtils;
+import com.baibuti.biji.Utils.LayoutUtils.PopupMenuUtil;
+import com.baibuti.biji.Utils.FileDirUtils.SDCardUtil;
+import com.baibuti.biji.Utils.StrSrchUtils.StringUtils;
+import com.baibuti.biji.Utils.OtherUtils.ExtractUtil;
 import com.sendtion.xrichtext.RichTextEditor;
 
 
@@ -68,7 +66,7 @@ import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
 import me.kareluo.imaging.IMGEditActivity;
 
-import static com.baibuti.biji.Utils.ExtractUtil.assets2SD;
+import static com.baibuti.biji.Utils.OtherUtils.ExtractUtil.assets2SD;
 
 
 /**
