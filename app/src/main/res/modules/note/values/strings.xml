@@ -1,7 +1,7 @@
 <resources>
 
     <!-- Title -->
-    <string name="NoteFrag_Header">笔记</string>
+    <string name="NoteFrag_Header">所有笔记</string>
 
     <!-- Frag Menu -->
     <string name="NoteFrag_menu_search">搜索</string>
@@ -37,6 +37,12 @@
     <string name="NoteFrag_CameraNoFoundAlertTitle">错误</string>
     <string name="NoteFrag_CameraNoFoundAlertMsg">相机打开失败，可能该设备没有相机或者设备出错，拍照文字识别功能暂时不可用。</string>
     <string name="NoteFrag_CameraNoFoundAlertPosButton">确定</string>
+
+    <!-- Grouping -->
+    <string name="NoteFrag_GroupNullToast">查找列表结果为空</string>
+    <string name="NoteFrag_GroupingTitle">属于分组 \"%s\" 的笔记</string>
+    <string name="NoteFrag_GroupingRightTextView">笔记分类</string>
+    <string name="NoteFrag_GroupingMgrRightTextView">分组管理</string>
 
     <!-- /////////////////////// NoteFrag UI End ////////////////////////// -->
     <!-- ////////////////////////////////////////////////////////////////// -->

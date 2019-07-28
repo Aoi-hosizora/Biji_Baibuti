@@ -7,20 +7,28 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.provider.MediaStore;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.design.widget.NavigationView;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
+import android.support.v4.widget.DrawerLayout;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.Toolbar;
+import android.util.DisplayMetrics;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
+import android.widget.ListView;
 import android.widget.Toast;
 
+import com.baibuti.biji.Data.Adapters.GroupRadioAdapter;
 import com.baibuti.biji.UI.Activity.MainActivity;
 import com.baibuti.biji.UI.Activity.ModifyNoteActivity;
 import com.baibuti.biji.UI.Activity.OCRActivity;
@@ -53,9 +61,12 @@ import java.util.Locale;
 
 import static android.app.Activity.RESULT_OK;
 
+/**
+ * 待整理 !!!!!!
+ */
 public class NoteFragment extends Fragment implements View.OnClickListener, IShowLog {
 
-    // region 声明: View UI ProgressDialog Toolbar
+    // region 声明: View UI ProgressDialog Toolbar DrawerLayout
 
     private View view;
 
@@ -70,6 +81,10 @@ public class NoteFragment extends Fragment implements View.OnClickListener, ISho
     private ProgressDialog loadingGroupDialog;
 
     private Toolbar m_toolbar;
+
+    private DrawerLayout m_drawerLayout;
+    private NavigationView m_navigationView;
+    private ListView m_nav_groupList;
 
     // endregion 声明: View UI ProgressDialog Toolbar
 
@@ -92,7 +107,7 @@ public class NoteFragment extends Fragment implements View.OnClickListener, ISho
 
     // endregion 声明: 一些等待的秒数
 
-    // region 创建界面 菜单栏 浮动菜单 等待框 搜索框 onCreateView initToolbar initFloatingActionBar setupProgressAndSR initSearchFrag ShowLogE onClick
+    // region 创建界面 菜单栏 浮动菜单 等待框 搜索框 右划菜单 onCreateView initToolbar initFloatingActionBar setupProgressAndSR initSearchFrag ShowLogE onClick initRightMenu closeDrawer
 
     @Nullable
     @Override
@@ -120,6 +135,7 @@ public class NoteFragment extends Fragment implements View.OnClickListener, ISho
             initAdapter();
             initListView(NoteList);
             initSearchFrag();
+            initRightMenu();
         }
 
         return view;
@@ -144,10 +160,10 @@ public class NoteFragment extends Fragment implements View.OnClickListener, ISho
                         searchFragment.show(getActivity().getSupportFragmentManager(), com.wyt.searchbox.SearchFragment.TAG);
                         break;
                     case R.id.action_modifygroup:
-                        ShowGroupDialog();
+                        ModifyGroupMenuClick();
                         break;
                     case R.id.action_search_back:
-                        SearchFracBack();
+                        SearchGroupBack();
                         break;
                 }
                 return true;
@@ -250,6 +266,54 @@ public class NoteFragment extends Fragment implements View.OnClickListener, ISho
     }
 
     /**
+     * 初始化右划菜单
+     */
+    private void initRightMenu() {
+
+        // 布局
+        m_drawerLayout = view.findViewById(R.id.id_noteFrag_drawer_layout);
+        m_navigationView = view.findViewById(R.id.id_noteFrag_Right_nav);
+
+        m_drawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED);
+        m_navigationView.setNavigationItemSelectedListener(new NavigationView.OnNavigationItemSelectedListener() {
+            @Override
+            public boolean onNavigationItemSelected(@NonNull MenuItem item) {
+                return false;
+            }
+        });
+
+        DisplayMetrics metrics = new DisplayMetrics();
+        getActivity().getWindowManager().getDefaultDisplay().getMetrics(metrics);
+
+        // 宽度
+        ViewGroup.LayoutParams params = m_navigationView.getLayoutParams();
+        params.width = metrics.widthPixels / 3 * 2;
+        m_navigationView.setLayoutParams(params);
+
+        // 列表
+        m_nav_groupList = view.findViewById(R.id.id_NoteFrag_nav_GroupList);
+
+
+        // 按钮
+        Button m_groupMgrButton = view.findViewById(R.id.id_NoteFrag_nav_GroupMgrButton);
+        m_groupMgrButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                ShowGroupDialog();
+            }
+        });
+
+    }
+
+
+    /**
+     * 关闭侧边栏
+     */
+    private void closeDrawer() {
+        m_drawerLayout.closeDrawer(Gravity.END);
+    }
+
+    /**
      * IShowLog 接口，全局设置 Log 格式
      *
      * @param FunctionName
@@ -270,30 +334,31 @@ public class NoteFragment extends Fragment implements View.OnClickListener, ISho
         }
     }
 
-    // endregion 创建界面 菜单栏 浮动菜单 等待框 搜索框
+    // endregion 创建界面 菜单栏 浮动菜单 等待框 搜索框 右划菜单
 
-    // region 搜索处理 IsSearching IsSearchingNull getIsSearching SearchingStr search SearchFracBack
+    // region 搜索处理 IsSearching IsSearchingNull getIsSearching SearchingStr search SearchGroupBack
 
     /**
      * 用于返回数据时判断当前是否处在搜索页面
      * 而进行下一步处理刷新 ListView
      */
     private boolean IsSearching = false;
+
     private boolean IsSearchingNull = false;
 
     /**
-     * 用于判断返回键时的事件
-     *
+     * MainAct用
      * @return
      */
     public boolean getIsSearching() {
-        return this.IsSearching;
+        // TODO ???
+        return !SearchingStr.equals("");
     }
 
     /**
      * 当 IsSearching 时表示当前所有页面的 keyWord
      */
-    private String SearchingStr;
+    private String SearchingStr = "";
 
     /**
      * 查找笔记功能
@@ -323,9 +388,9 @@ public class NoteFragment extends Fragment implements View.OnClickListener, ISho
     }
 
     /**
-     * 返回原界面，退出搜索
+     * 返回原界面，退出搜索或分类
      */
-    public void SearchFracBack() {
+    public void SearchGroupBack() {
         loadingDialog.show();
         new Thread(new Runnable() {
             @Override
@@ -345,11 +410,18 @@ public class NoteFragment extends Fragment implements View.OnClickListener, ISho
                         m_fabmenu.setVisibility(View.VISIBLE);
 
                         m_toolbar.getMenu().findItem(R.id.action_search_back).setVisible(false);
+                        m_toolbar.getMenu().findItem(R.id.action_search).setVisible(true);
                         m_toolbar.setTitle(R.string.NoteFrag_Header);
 
                         IsSearching = false;
                         SearchingStr = "";
                         IsSearchingNull = false;
+
+                        IsGrouping = false;
+                        currGroup = null;
+                        currGroupIdx = -1;
+                        IsGroupingNull = false;
+
                         loadingDialog.dismiss();
 
                     }
@@ -448,16 +520,13 @@ public class NoteFragment extends Fragment implements View.OnClickListener, ISho
 
     // endregion 初始化各种数据和适配器 下拉刷新
 
-    // region 显示分组 ShowGroupDialog
+    // region 显示分组 分组显示 ShowGroupDialog ModifyGroupMenuClick currGroup showAsGroup getGroupOfNote showAsDefault
 
     /**
      * 显示 分类 对话框
      */
     public void ShowGroupDialog() {
-
-        if (m_fabmenu.isExpanded())
-            m_fabmenu.collapse();
-
+        m_drawerLayout.closeDrawer(Gravity.END);
         loadingGroupDialog.show();
         new Handler().postDelayed(new Runnable() {
             @Override
@@ -486,6 +555,10 @@ public class NoteFragment extends Fragment implements View.OnClickListener, ISho
                                 initListView(search(SearchingStr));
                             else
                                 initListView(NoteList);
+                        else
+                            // 防止冲突，直接回复
+                            if (IsGrouping)
+                                SearchGroupBack();
                     }
                 });
                 dialog.show();
@@ -493,7 +566,113 @@ public class NoteFragment extends Fragment implements View.OnClickListener, ISho
         }, ShowGroupDlgSecond); // 10
     }
 
-    // endregion 显示分组
+    /**
+     * 菜单点击，显示左滑菜单
+     */
+    public void ModifyGroupMenuClick() {
+
+        if (m_fabmenu.isExpanded())
+            m_fabmenu.collapse();
+
+        // 列表
+
+        List<Group> groups = groupDao.queryGroupAll();
+        Collections.sort(groups);
+
+        groups.add(0, Group.AllGroups);
+
+        GroupRadioAdapter groupRadioAdapter = new GroupRadioAdapter(getContext(), groups, new GroupRadioAdapter.OnRadioButtonSelect() {
+
+            @Override
+            public void onSelect(int position) {
+                Group curr = groups.get(position);
+                if (curr == Group.AllGroups)
+                    showAsDefault();
+                else 
+                    showAsGroup(curr, position);
+            }
+        });
+
+        m_nav_groupList.setAdapter(groupRadioAdapter);
+
+        if (currGroup != null)
+            groupRadioAdapter.setChecked(currGroupIdx);
+        else
+            groupRadioAdapter.setChecked(Group.AllGroups);
+
+        groupAdapter.notifyDataSetChanged();
+
+        m_drawerLayout.openDrawer(Gravity.END);
+    }
+
+    private Group currGroup = null;
+    private int currGroupIdx = -1;
+
+    /**
+     * MainAct用
+     * @return
+     */
+    public boolean getIsGrouping() {
+        // TODO ???
+        return currGroup != null;
+    }
+
+    private boolean IsGrouping = false;
+    private boolean IsGroupingNull = false;
+
+    /**
+     * 按分组显示
+     * @param group
+     */
+    private void showAsGroup(Group group, int idx) {
+        currGroup = group;
+        currGroupIdx = idx;
+        List<Note> groupNotes = getGroupOfNote(group);
+
+        IsGrouping = true;
+        IsGroupingNull = groupNotes.isEmpty();
+
+        if (IsGroupingNull) {
+            Toast.makeText(getContext(), R.string.NoteFrag_GroupNullToast, Toast.LENGTH_SHORT).show();
+        }
+
+        m_toolbar.getMenu().findItem(R.id.action_search_back).setVisible(true);
+        m_toolbar.getMenu().findItem(R.id.action_search).setVisible(false);
+        mSwipeRefresh.setEnabled(false);
+
+        initListView(groupNotes);
+        closeDrawer();
+
+        m_toolbar.setTitle(String.format(Locale.CHINA, getString(R.string.NoteFrag_GroupingTitle), group.getName()));
+    }
+
+    /**
+     * 显示全部分组
+     */
+    private void showAsDefault() {
+        currGroup = null;
+        currGroupIdx = -1;
+        IsGrouping = false;
+
+        SearchGroupBack();
+        closeDrawer();
+    }
+    
+    /**
+     * 获取分组笔记
+     * @param group
+     * @return
+     */
+    private List<Note> getGroupOfNote(Group group) {
+        List<Note> ret = new ArrayList<>();
+        List<Note> allNotes = noteDao.queryNotesAll();
+        for (Note note : allNotes)
+            if (note.getGroupLabel().getName().equals(group.getName()))
+                ret.add(note);
+        return ret;
+    }
+
+    // endregion 显示分组 分组显示
 
     // region 初始化笔记列表 进入笔记 SelectedNoteItem initListView
 
@@ -629,8 +808,10 @@ public class NoteFragment extends Fragment implements View.OnClickListener, ISho
 
                             // TODO 一堆垃圾代码待改
 
-                            if (getIsSearching())
+                            if (IsSearching)
                                 noteAdapter.setmNotes(search(SearchingStr));
+                            else if (IsGrouping)
+                                noteAdapter.setmNotes(getGroupOfNote(currGroup));
                             else
                                 noteAdapter.setmNotes(NoteList);
                             noteAdapter.notifyDataSetChanged();
@@ -645,8 +826,10 @@ public class NoteFragment extends Fragment implements View.OnClickListener, ISho
                                                 NoteList.add(noteDao.queryNoteById((int) noteId));
                                                 Collections.sort(NoteList);
 
-                                                if (getIsSearching())
+                                                if (IsSearching)
                                                     noteAdapter.setmNotes(search(SearchingStr));
+                                                else if (IsGrouping)
+                                                    noteAdapter.setmNotes(getGroupOfNote(currGroup));
                                                 else
                                                     noteAdapter.setmNotes(NoteList);
                                                 noteAdapter.notifyDataSetChanged();
@@ -723,16 +906,18 @@ public class NoteFragment extends Fragment implements View.OnClickListener, ISho
                         NoteList.add(NoteList.size(), note);
                         SelectedNoteItem = NoteList.indexOf(note);
                         HandleNewUpdateNote(false, NoteList.get(SelectedNoteItem), true);
-                    } else {
+                    }
+                    else {
                         NoteList.set(SelectedNoteItem, note);
 
                         //////
                         Collections.sort(NoteList);
                         noteAdapter.notifyDataSetChanged();
 
-
                         if (IsSearching)
                             initListView(search(SearchingStr));
+                        else if (IsGrouping)
+                            initListView(getGroupOfNote(currGroup));
                         else
                             initListView(NoteList);
 
@@ -740,10 +925,7 @@ public class NoteFragment extends Fragment implements View.OnClickListener, ISho
                             Toast.makeText(getContext(), String.format(getResources().getString(R.string.NoteFrag_ActivityReturnNewNote), note.getTitle()), Toast.LENGTH_SHORT).show();
                         else
                             Toast.makeText(getContext(), String.format(getResources().getString(R.string.NoteFrag_ActivityReturnUpdateNote), note.getTitle()), Toast.LENGTH_SHORT).show();
-
                     }
-
-
                 }
                 break;
 

@@ -99,7 +99,7 @@ public class GroupRadioAdapter extends BaseAdapter implements IShowLog {
             }
         });
 
-        boolean res=false;
+        boolean res = false;
         if (states.get(list.get(position)) == null || !states.get(list.get(position))) {
             res = false;
             states.put(list.get(position), false);
@@ -111,8 +111,20 @@ public class GroupRadioAdapter extends BaseAdapter implements IShowLog {
         return convertView;
     }
 
-    public void setValue(int position) {
+    /**
+     * 选择项
+     * @param position
+     */
+    public void setChecked(int position) {
         states.put(list.get(position), true);
+    }
+
+    /**
+     * 选择项
+     * @param group
+     */
+    public void setChecked(Group group) {
+        states.put(group, true);
     }
 
     public static class ViewHolder {

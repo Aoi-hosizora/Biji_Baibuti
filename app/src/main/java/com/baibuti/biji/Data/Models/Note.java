@@ -54,7 +54,10 @@ public class Note implements Serializable, Comparable<Note>, ISearchEntity {
 
     @Override
     public int compareTo(@NonNull Note o) {
-        return o.getUpdateTime().compareTo(this.getUpdateTime());
+        int ret = o.getUpdateTime().compareTo(this.getUpdateTime());
+        if (ret == 0)
+            return o.getTitle().compareTo(this.getTitle());
+        return ret;
     }
     //////////////////////////////////////////////////
 

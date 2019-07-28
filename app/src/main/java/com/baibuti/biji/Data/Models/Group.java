@@ -15,6 +15,7 @@ public class Group implements Serializable, Comparable<Group> {
     private String color;//分类颜色，存储颜色代码
 
     public static String GetDefaultGroupName = "默认分组";
+    public static final Group AllGroups = new Group("所有分组", -1, "#00000000");
 
     @Override
     public boolean equals(Object obj) {

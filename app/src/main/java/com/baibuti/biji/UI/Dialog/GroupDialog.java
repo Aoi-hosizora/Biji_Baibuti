@@ -75,7 +75,7 @@ public class GroupDialog extends AlertDialog implements OnClickListener, IShowLo
         setEnabled(mButtonUE, false);
         setEnabled(mButtonSHITA, false);
 
-        groupAdapter.setValue(GroupListViewClickId);
+        groupAdapter.setChecked(GroupListViewClickId);
 
         GroupListView = (ListView) findViewById(R.id.id_GroupDialog_GroupListView);
         GroupListView.setAdapter(groupAdapter);
@@ -185,7 +185,7 @@ public class GroupDialog extends AlertDialog implements OnClickListener, IShowLo
                 if (inputGroup == null)  // 新分组
                     GroupListViewClickId = GroupList.size() - 1; // 选择最后一项
 
-                groupAdapter.setValue(GroupListViewClickId);
+                groupAdapter.setChecked(GroupListViewClickId);
                 GroupListView.setAdapter(groupAdapter); // 必要
 
                 DismissAndReturn(false);
@@ -202,7 +202,7 @@ public class GroupDialog extends AlertDialog implements OnClickListener, IShowLo
             public void DeleteGroupFinished() {
                 refreshGroupList();
                 GroupListViewClickId--;
-                groupAdapter.setValue(GroupListViewClickId);
+                groupAdapter.setChecked(GroupListViewClickId);
                 GroupListView.setAdapter(groupAdapter); // 必要
 
                 DismissAndReturn(false);
@@ -267,7 +267,7 @@ public class GroupDialog extends AlertDialog implements OnClickListener, IShowLo
         // 更新显示
         refreshGroupList();
         GroupListView.setAdapter(groupAdapter); // 必要
-        groupAdapter.setValue(currentpos);
+        groupAdapter.setChecked(currentpos);
         GroupListViewClickId = currentpos;
         refreshUeShitaEnabled(GroupListViewClickId);
         DismissAndReturn(false);

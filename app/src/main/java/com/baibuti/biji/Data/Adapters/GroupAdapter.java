@@ -2,19 +2,21 @@ package com.baibuti.biji.Data.Adapters;
 
 import android.content.Context;
 import android.graphics.Color;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.baibuti.biji.Data.Models.Group;
 import com.baibuti.biji.R;
 
 import java.util.List;
 
-public class GroupAdapter extends BaseAdapter {
+public class GroupAdapter extends BaseAdapter  {
 
     public List<Group> list;
     LayoutInflater inflater;
@@ -42,11 +44,6 @@ public class GroupAdapter extends BaseAdapter {
         return i;
     }
 
-
-    // 选中当前选项时，让其他选项不被选中
-    public void select(int position) {
-
-    }
     @Override
     public View getView(int position, View convertView, ViewGroup viewGroup) {
         ViewHolder holder;
@@ -58,11 +55,10 @@ public class GroupAdapter extends BaseAdapter {
             holder.GroupColor = (ImageView) convertView.findViewById(R.id.id_adapter_group_color);
 
             convertView.setTag(holder);
-        } else {
+        }
+        else {
             holder = (ViewHolder) convertView.getTag();
         }
-
-
 
         holder.GroupName.setText(getItem(position).getName());
         holder.GroupColor.setBackgroundColor(Color.parseColor(getItem(position).getColor()));

@@ -1,7 +1,10 @@
 package com.baibuti.biji.UI.Activity;
 
 import android.Manifest;
+import android.app.AlertDialog;
+import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.net.Uri;
 import android.os.Build;
 import android.support.annotation.NonNull;
 import android.support.design.widget.BottomNavigationView;
@@ -230,11 +233,13 @@ public class MainActivity extends FragmentActivity implements IShowLog, Navigati
     public boolean onKeyDown(int keyCode, KeyEvent event) {
         if (keyCode == KeyEvent.KEYCODE_BACK && event.getAction() == KeyEvent.ACTION_DOWN) {
 
-            // 判断是否处于笔记搜索页面
-            if (mNoteFrag.getIsSearching()) {
-                mNoteFrag.SearchFracBack();
+            // 判断是否处于笔记搜索页面或分类界面
+            if (mViewPager.getCurrentItem() == 0 &&
+                    (mNoteFrag.getIsSearching() || mNoteFrag.getIsGrouping())) {
+                mNoteFrag.SearchGroupBack();
                 return true;
             }
+
             // 不在笔记搜索页面，退出程序
             if ((System.currentTimeMillis() - exitTime) > 2000) {
                 Toast.makeText(getApplicationContext(), R.string.onKeyDownExit, Toast.LENGTH_SHORT).show();
@@ -258,9 +263,9 @@ public class MainActivity extends FragmentActivity implements IShowLog, Navigati
      * 初始化侧边栏
      */
     private void initNav() {
-        m_drawerLayout = findViewById(R.id.id_drawer_layout);
+        m_drawerLayout = findViewById(R.id.id_mainAct_drawer_layout);
 
-        m_navigationView = findViewById(R.id.id_nav_view);
+        m_navigationView = findViewById(R.id.id_mainAct_left_nav);
         m_navigationView.setNavigationItemSelectedListener(this);
 
         // 默认选中
@@ -299,13 +304,26 @@ public class MainActivity extends FragmentActivity implements IShowLog, Navigati
 
     @Override
     public boolean onNavigationItemSelected(@NonNull MenuItem item) {
-        Toast.makeText(this, item.getTitle(), Toast.LENGTH_SHORT).show();
         switch(item.getItemId()) {
             case R.id.id_nav_login:
-            break;
+                Toast.makeText(this, "待改", Toast.LENGTH_SHORT).show();
+                closeNavMenu();
+            return false;
             case R.id.id_nav_about:
+                String msg = "SCUT 百步梯项目 - 笔迹\n\n" +
+                        "开发网站：https://github.com/Aoi-hosizora/Biji_Baibuti\n\n" +
+                        "作者：17级软件学院xxxxx\n\n" +
+                        "更多信息详看开发网站。";
+                new AlertDialog.Builder(this)
+                        .setTitle("关于")
+                        .setMessage(msg)
+                        .setPositiveButton("确定", null)
+                        .create().show();
             break;
             case R.id.id_nav_feedback:
+                Intent intent = new Intent(Intent.ACTION_VIEW);
+                intent.setData(Uri.parse("https://github.com/Aoi-hosizora/Biji_Baibuti/issues"));
+                startActivity(intent);
             break;
         }
         closeNavMenu();
