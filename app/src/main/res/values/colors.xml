@@ -27,5 +27,9 @@
     <color name="grey_700">#616161</color>
     <color name="grey_900">#212121</color>
 
+    <color name="popUpMenu_btn_textColor">#EC407A</color> <!-- pink -->
+    <color name="popUpMenu_txt_textColor">#616161</color> <!-- grey_700 -->
+    <color name="popUpMenu_bgColor">#FFFFFF</color>
+
 
 </resources>

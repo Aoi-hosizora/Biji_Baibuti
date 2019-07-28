@@ -1,57 +1,60 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="300dp"
+    android:layout_height="match_parent"
     android:orientation="vertical"
-    android:paddingBottom="25dp"
-    android:paddingLeft="20dp"
-    android:paddingRight="20dp"
-    android:paddingTop="12dp">
+    android:paddingBottom="@dimen/popUpMenu_paddingBottom"
+    android:paddingStart="@dimen/popUpMenu_paddingStart"
+    android:paddingEnd="@dimen/popUpMenu_paddingEnd"
+    android:paddingTop="@dimen/popUpMenu_paddingTop">
 
     <TextView
         android:id="@+id/id_SSIActivity_PopupMenu_Label"
         android:layout_width="match_parent"
-        android:layout_height="30dp"
-        android:background="@color/white"
-        android:text="@string/StarSearchItemAct_PopupMenu_Label"
-        android:textColor="@color/grey_700"
         android:maxLines="1"
         android:ellipsize="end"
         android:gravity="center"
-        android:textSize="@dimen/text_size_14" />
+        android:text="@string/SearchFrag_PopupMenu_Label"
+        android:layout_height="@dimen/popUpMenu_cnt_txt_layout_height"
+        android:layout_marginTop="@dimen/popUpMenu_cnt_layout_marginTop"
+        android:textSize="@dimen/popUpMenu_cnt_txt_textSize"
+        android:textColor="@color/popUpMenu_txt_textColor"
+        android:background="@color/popUpMenu_bgColor"
+        />
 
     <Button
         android:id="@+id/id_SSIActivity_PopupMenu_CancelStar"
         android:layout_width="match_parent"
-        android:layout_height="50dp"
-        android:layout_marginTop="4dp"
+        android:layout_height="@dimen/popUpMenu_cnt_btn_layout_height"
+        android:layout_marginTop="@dimen/popUpMenu_cnt_layout_marginTop"
         android:gravity="center"
         android:text="@string/StarSearchItemAct_PopupMenu_CancelStar"
-        android:textColor="@color/pink"
-        android:textSize="@dimen/text_size_18"
-        android:background="@color/white"
+        android:textColor="@color/popUpMenu_btn_textColor"
+        android:textSize="@dimen/popUpMenu_cnt_btn_textSize"
+        android:background="@color/popUpMenu_bgColor"
         />
 
     <Button
         android:id="@+id/id_SSIActivity_PopupMenu_CancelAllStar"
         android:layout_width="match_parent"
-        android:layout_height="50dp"
-        android:layout_marginTop="4dp"
         android:gravity="center"
         android:text="@string/StarSearchItemAct_PopupMenu_CancelAllStar"
-        android:textColor="@color/pink"
-        android:textSize="@dimen/text_size_18"
-        android:background="@color/white"
+        android:layout_height="@dimen/popUpMenu_cnt_btn_layout_height"
+        android:layout_marginTop="@dimen/popUpMenu_cnt_layout_marginTop"
+        android:textSize="@dimen/popUpMenu_cnt_btn_textSize"
+        android:textColor="@color/popUpMenu_btn_textColor"
+        android:background="@color/popUpMenu_bgColor"
         />
 
     <Button
         android:id="@+id/id_SSIActivity_PopupMenu_Cancel"
         android:layout_width="match_parent"
-        android:layout_height="50dp"
-        android:layout_marginTop="20dp"
         android:gravity="center"
         android:text="@string/StarSearchItemAct_PopupMenu_Cancel"
-        android:textColor="@color/pink"
-        android:textSize="@dimen/text_size_18"
-        android:background="@color/white"/>
+        android:layout_height="@dimen/popUpMenu_cnt_btn_layout_height"
+        android:layout_marginTop="@dimen/popUpMenu_cnt_layout_bottomMarginTop"
+        android:textSize="@dimen/popUpMenu_cnt_btn_textSize"
+        android:textColor="@color/popUpMenu_btn_textColor"
+        android:background="@color/popUpMenu_bgColor"
+        />
 </LinearLayout>

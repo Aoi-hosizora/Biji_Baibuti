@@ -3,8 +3,10 @@ package com.baibuti.biji.UI.Fragment;
 import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
+import android.provider.MediaStore;
 import android.support.annotation.Nullable;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
@@ -21,6 +23,7 @@ import android.widget.Toast;
 
 import com.baibuti.biji.UI.Activity.MainActivity;
 import com.baibuti.biji.UI.Activity.ModifyNoteActivity;
+import com.baibuti.biji.UI.Activity.OCRActivity;
 import com.baibuti.biji.UI.Activity.ViewModifyNoteActivity;
 import com.baibuti.biji.Data.Models.Group;
 import com.baibuti.biji.Data.Adapters.GroupAdapter;
@@ -33,15 +36,22 @@ import com.baibuti.biji.UI.Widget.ListView.SpacesItemDecoration;
 import com.baibuti.biji.UI.Widget.ListView.RecyclerViewEmptySupport;
 import com.baibuti.biji.Data.DB.GroupDao;
 import com.baibuti.biji.Data.DB.NoteDao;
+import com.baibuti.biji.Utils.FilePathUtil;
+import com.baibuti.biji.Utils.SDCardUtil;
+import com.blankj.utilcode.util.UriUtils;
 import com.getbase.floatingactionbutton.FloatingActionButton;
 import com.getbase.floatingactionbutton.FloatingActionsMenu;
 import com.jeremyfeinstein.slidingmenu.lib.SlidingMenu;
 import com.wyt.searchbox.SearchFragment;
 import com.baibuti.biji.Utils.SearchUtil;
 
+import java.io.File;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 
 import static android.app.Activity.RESULT_OK;
 
@@ -167,8 +177,7 @@ public class NoteFragment extends Fragment implements View.OnClickListener, ISho
             @Override
             public void onClick(View view) {
                 m_fabmenu.collapse();
-                Toast.makeText(getContext(), "This is note_photo", Toast.LENGTH_LONG).show();
-                //添加逻辑处理
+                NotePhoto_Click();
             }
         });
         mNoteEdit.setOnClickListener(new View.OnClickListener() {
@@ -528,7 +537,51 @@ public class NoteFragment extends Fragment implements View.OnClickListener, ISho
 
     // endregion 进入笔记
 
-    // region 笔记增删改 活动返回 DeleteNote HandleNewUpdateNote onActivityResult
+    // region 笔记增删改 文字识别 活动返回 NotePhoto_Click OpenOCRAct DeleteNote HandleNewUpdateNote onActivityResult
+
+    private Uri imgUri; // 拍照时返回的uri
+    private static final int REQUEST_TAKE_PHOTO = 0;// 拍照
+
+    /**
+     * 浮动菜单 OCR
+     */
+    private void NotePhoto_Click() {
+        // Photo 类型
+        String time = new SimpleDateFormat("yyyyMMddHHmmssSSS", Locale.CHINA).format(new Date());
+        String fileName = time + "_Photo";
+
+        // /Biji/NoteImage/
+        String path = SDCardUtil.getPictureDir(); // 保存路径
+        File file = new File(path);
+
+        // 要保存的图片文件
+        File imgFile = new File(file + File.separator + fileName + ".jpg");
+
+        // 将file转换成uri，返回 provider 路径
+        imgUri = FilePathUtil.getUriForFile(getContext(), imgFile);
+
+        Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+        // 权限
+        intent.addFlags(Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION);
+        // 传入新图片名
+        intent.putExtra(MediaStore.EXTRA_OUTPUT, imgUri);
+        startActivityForResult(intent, REQUEST_TAKE_PHOTO);
+
+        // TODO nox 模拟器没有相机可以测试
+    }
+
+    /**
+     * 拍完照后文字识别
+     */
+    private void OpenOCRAct(Uri imgPath) {
+        Intent intent = new Intent(getContext(), OCRActivity.class);
+
+        Bundle bundle = new Bundle();
+        bundle.putString(OCRActivity.INT_IMGPATH, imgPath.getPath());
+
+        intent.putExtra(OCRActivity.INT_BUNDLE, bundle);
+        startActivity(intent);
+    }
 
     /**
      * 删除笔记
@@ -669,6 +722,11 @@ public class NoteFragment extends Fragment implements View.OnClickListener, ISho
 
 
                 }
+                break;
+
+            // 拍照获得图片，编辑
+            case REQUEST_TAKE_PHOTO:
+                OpenOCRAct(imgUri);
                 break;
         }
     }

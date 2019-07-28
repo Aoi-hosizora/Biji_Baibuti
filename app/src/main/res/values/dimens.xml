@@ -11,6 +11,30 @@
     <dimen name="text_size_20">20sp</dimen>
     <dimen name="text_size_24">24sp</dimen>
 
+    <!-- Toolbar Icon Margin Left -->
     <dimen name="toolbar_title_margin_left">18dp</dimen>
+
+
+    <!-- Button Layout Height -->
+    <dimen name="popUpMenu_cnt_btn_layout_height">50dp</dimen>
+    <!-- Label Layout Height -->
+    <dimen name="popUpMenu_cnt_txt_layout_height">30dp</dimen>
+    <!-- Content Margin Top -->
+    <dimen name="popUpMenu_cnt_layout_marginTop">2dp</dimen>
+    <!-- Content Bottom Margin Top -->
+    <dimen name="popUpMenu_cnt_layout_bottomMarginTop">15dp</dimen>
+    <!-- Button Text Size -->
+    <dimen name="popUpMenu_cnt_btn_textSize">18sp</dimen>
+    <!-- Label Text Size -->
+    <dimen name="popUpMenu_cnt_txt_textSize">13sp</dimen>
+
+    <!-- Layout Padding Top -->
+    <dimen name="popUpMenu_paddingTop">12dp</dimen>
+    <!-- Layout Padding Bottom -->
+    <dimen name="popUpMenu_paddingBottom">25dp</dimen>
+    <!-- Layout Padding Start -->
+    <dimen name="popUpMenu_paddingStart">20dp</dimen>
+    <!-- Layout Padding End -->
+    <dimen name="popUpMenu_paddingEnd">20dp</dimen>
 
 </resources>
