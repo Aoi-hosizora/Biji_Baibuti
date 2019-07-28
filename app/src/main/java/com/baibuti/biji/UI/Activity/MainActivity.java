@@ -2,10 +2,10 @@ package com.baibuti.biji.UI.Activity;
 
 import android.Manifest;
 import android.content.pm.PackageManager;
-import android.graphics.Point;
 import android.os.Build;
 import android.support.annotation.NonNull;
 import android.support.design.widget.BottomNavigationView;
+import android.support.design.widget.NavigationView;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
@@ -14,8 +14,10 @@ import android.support.v4.view.ViewPager;
 import android.support.v4.view.ViewPager.OnPageChangeListener;
 import android.os.Bundle;
 
+import android.support.v4.widget.DrawerLayout;
+import android.util.DisplayMetrics;
 import android.util.Log;
-import android.view.Display;
+import android.view.Gravity;
 import android.view.KeyEvent;
 
 import android.view.ViewGroup;
@@ -28,32 +30,36 @@ import com.baibuti.biji.UI.Fragment.SearchFragment;
 import com.baibuti.biji.UI.Fragment.FileFragment;
 import com.baibuti.biji.Interface.IShowLog;
 import com.baibuti.biji.R;
-import com.baibuti.biji.UI.Widget.OtherView.SimplerSearcherView;
 import com.baibuti.biji.Utils.StrSrchUtils.SearchUtil;
 import com.facebook.stetho.Stetho;
-import com.jeremyfeinstein.slidingmenu.lib.SlidingMenu;
 import com.baibuti.biji.Utils.LayoutUtils.BottomNavigationHelper;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class MainActivity extends FragmentActivity implements SimplerSearcherView.OnSearcherClickListener, IShowLog {
-    //声明ViewPager
-    private ViewPager mViewPager;
-    //适配器
-    private FragmentStatePagerAdapter mAdapter;
-    //装载Fragment的集合
-    private List<Fragment> mFragments;
+public class MainActivity extends FragmentActivity implements IShowLog, NavigationView.OnNavigationItemSelectedListener {
 
-    //侧拉菜单
-    private SlidingMenu slidingMenu;
-    //底部导航栏
-    private BottomNavigationView  bottomNavigationView;
+    // region 声明显示元素 mViewPager bottomNavigationView m_drawerLayout m_navigationView
+
+    private ViewPager mViewPager;
+    private BottomNavigationView bottomNavigationView;
+    private DrawerLayout m_drawerLayout;
+    private NavigationView m_navigationView;
+
+    // endregion 声明显示元素
+
+    // region 声明列表信息 mFragments mxxFrags
+
+    private List<Fragment> mFragments;
 
     private NoteFragment mNoteFrag;
     private SearchFragment mSearchFrag;
     private ClassFragment mClassFrag;
     private FileFragment mFileFrag;
+
+    // endregion 声明列表信息
+
+    // region 声明权限和状态码 PERMISSIONS_STORAGE REQUEST_PERMISSION_CODE
 
     //读写权限
     private static String[] PERMISSIONS_STORAGE = {
@@ -62,6 +68,9 @@ public class MainActivity extends FragmentActivity implements SimplerSearcherVie
     //请求状态码
     private static int REQUEST_PERMISSION_CODE = 1;
 
+    // endregion 声明权限和状态码
+
+    // region 显示 适配器 onCreate initViews initAdpts ShowLogE
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -82,32 +91,13 @@ public class MainActivity extends FragmentActivity implements SimplerSearcherVie
         SearchUtil.initJieba(getApplicationContext());
 
         initViews();
-        initadpts();
-        initsmenu();
+        initAdpts();
+        initNav();
     }
 
-    @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        if (requestCode == REQUEST_PERMISSION_CODE) {
-            if (grantResults[0] != PackageManager.PERMISSION_GRANTED)
-                Toast.makeText(this, "授权失败", Toast.LENGTH_LONG).show();
-        }
-    }
-
-    @Override
-    public void ShowLogE(String FunctionName, String Msg) {
-        String ClassName = "MainActivity";
-        Log.e(getResources().getString(R.string.IShowLog_LogE),
-                ClassName + ": " + FunctionName + "###" + Msg); // MainActivity: initDatas###data=xxx
-    }
-
-    @Override
-    public void onSearcherClick(String content) {
-        // Toast.makeText(this, "This is searcher", Toast.LENGTH_LONG).show();
-    }
-
-
+    /**
+     * 初始化布局
+     */
     private void initViews() {
 
         mNoteFrag = new NoteFragment();
@@ -166,13 +156,13 @@ public class MainActivity extends FragmentActivity implements SimplerSearcherVie
 
             @Override
             public void onPageScrollStateChanged(int state) { }
-
-
         });
     }
 
-
-    private void initadpts() {
+    /**
+     * 初始化页面适配器
+     */
+    private void initAdpts() {
 
         mFragments = new ArrayList<Fragment>();
         mFragments.add(mNoteFrag);
@@ -182,7 +172,7 @@ public class MainActivity extends FragmentActivity implements SimplerSearcherVie
 
         ShowLogE("initadpts", "mFragments: " + mFragments.size());
 
-        mAdapter = new FragmentStatePagerAdapter(getSupportFragmentManager()) {
+        FragmentStatePagerAdapter mAdapter = new FragmentStatePagerAdapter(getSupportFragmentManager()) {
             @Override
             public Fragment getItem(int position) {
                 return mFragments.get(position);
@@ -204,35 +194,35 @@ public class MainActivity extends FragmentActivity implements SimplerSearcherVie
         mViewPager.setCurrentItem(0);
     }
 
-    private void initsmenu() {
-
-        //获取屏幕宽度
-        Display display = getWindowManager().getDefaultDisplay();
-        Point size = new Point();
-        display.getSize(size);
-        int width = size.x;
-        //添加侧拉菜单
-        slidingMenu =new SlidingMenu(this);
-        slidingMenu.setMode(SlidingMenu.LEFT);
-        //设置预留屏幕宽度
-        slidingMenu.setBehindOffset(width/5);
-        //全屏都可以拖拽触摸
-        slidingMenu.setTouchModeAbove(SlidingMenu.TOUCHMODE_NONE);
-        //附加到当前的Activity上去
-        slidingMenu.attachToActivity(this,SlidingMenu.SLIDING_CONTENT);
-        //设置阴影
-        slidingMenu.setOffsetFadeDegree(0.4f);
-        //设置渐入渐出效果的值
-        slidingMenu.setFadeDegree(0.35f);
-        //为侧滑菜单设置布局
-        slidingMenu.setMenu(R.layout.modulelayout_leftmenu);
-
+    @Override
+    protected void onResume() {
+        super.onResume();
+        NavMenuDefSelect();
     }
 
-    public SlidingMenu getSlidingMenu() {
-        return slidingMenu;
+    @Override
+    public void ShowLogE(String FunctionName, String Msg) {
+        String ClassName = "MainActivity";
+        Log.e(getResources().getString(R.string.IShowLog_LogE),
+                ClassName + ": " + FunctionName + "###" + Msg); // MainActivity: initDatas###data=xxx
     }
 
+    // endregion 显示和适配器
+
+    // region 权限返回 onRequestPermissionsResult
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if (requestCode == REQUEST_PERMISSION_CODE) {
+            if (grantResults[0] != PackageManager.PERMISSION_GRANTED)
+                Toast.makeText(this, "授权失败", Toast.LENGTH_LONG).show();
+        }
+    }
+
+    // endregion 权限返回
+
+    // region 退出记录 exitTime onKeyDown
 
     private long exitTime = 0;
 
@@ -257,4 +247,70 @@ public class MainActivity extends FragmentActivity implements SimplerSearcherVie
         }
         return super.onKeyDown(keyCode, event);
     }
+
+    // endregion 退出记录
+
+    ////////////////////////////////////////////////
+
+    // region 侧边栏 initNav openNavMenu closeNavMenu onNavigationItemSelected
+
+    /**
+     * 初始化侧边栏
+     */
+    private void initNav() {
+        m_drawerLayout = findViewById(R.id.id_drawer_layout);
+
+        m_navigationView = findViewById(R.id.id_nav_view);
+        m_navigationView.setNavigationItemSelectedListener(this);
+
+        // 默认选中
+        NavMenuDefSelect();
+
+        DisplayMetrics metrics = new DisplayMetrics();
+        getWindowManager().getDefaultDisplay().getMetrics(metrics);
+
+        // 宽度
+        ViewGroup.LayoutParams params = m_navigationView.getLayoutParams();
+        params.width = metrics.widthPixels / 3 * 2;
+
+        m_navigationView.setLayoutParams(params);
+    }
+
+    /**
+     * 打开侧边栏
+     */
+    public void openNavMenu() {
+        m_drawerLayout.openDrawer(Gravity.START);
+    }
+
+    /**
+     * 打开侧边栏
+     */
+    public void closeNavMenu() {
+        m_drawerLayout.closeDrawer(Gravity.START);
+    }
+
+    /**
+     * 侧边栏默认选中
+     */
+    private void NavMenuDefSelect() {
+        m_navigationView.setCheckedItem(R.id.id_nav_main);
+    }
+
+    @Override
+    public boolean onNavigationItemSelected(@NonNull MenuItem item) {
+        Toast.makeText(this, item.getTitle(), Toast.LENGTH_SHORT).show();
+        switch(item.getItemId()) {
+            case R.id.id_nav_login:
+            break;
+            case R.id.id_nav_about:
+            break;
+            case R.id.id_nav_feedback:
+            break;
+        }
+        closeNavMenu();
+        return true;
+    }
+
+    // endregion 侧边栏 openNavMenu closeNavMenu
 }

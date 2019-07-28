@@ -2,21 +2,27 @@ package com.baibuti.biji.UI.Dialog;
 
 import android.app.AlertDialog;
 import android.content.Context;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.view.View.OnClickListener;
 
 import com.baibuti.biji.Data.Models.Group;
 import com.baibuti.biji.Interface.IShowLog;
 import com.baibuti.biji.R;
-import com.baibuti.biji.UI.Widget.OtherView.RainbowPalette;
 import com.baibuti.biji.Data.DB.GroupDao;
 import com.baibuti.biji.Data.DB.NoteDao;
 import com.baibuti.biji.Utils.OtherUtils.CommonUtil;
+import com.larswerkman.holocolorpicker.ColorPicker;
+
+import java.util.Locale;
 
 public class GroupAddDialog extends AlertDialog implements OnClickListener, IShowLog {
     private OnUpdateGroupListener mListener; //接口
@@ -24,7 +30,9 @@ public class GroupAddDialog extends AlertDialog implements OnClickListener, ISho
     private EditText editText;
     private TextView colorText;
     private TextView titleText;
-    private RainbowPalette colorPalette;
+
+    private ColorPicker colorPalette;
+    private LinearLayout colorBlocks;
 
     private GroupDao groupDao;
     private NoteDao noteDao;
@@ -41,7 +49,6 @@ public class GroupAddDialog extends AlertDialog implements OnClickListener, ISho
     private int GROUPFLAG = 0;
     private static final int NEW_GROUP = 0; // 新建分组
     private static final int UPDATE_GROUP = 1; // 更改分组
-
 
     public interface OnUpdateGroupListener{
         void UpdateGroupFinished(); // 修改引发的事件
@@ -61,13 +68,19 @@ public class GroupAddDialog extends AlertDialog implements OnClickListener, ISho
         editText = (EditText) findViewById(R.id.id_addgroup_name);
         colorText = (TextView) findViewById(R.id.id_addgroup_colortext);
         titleText = (TextView) findViewById(R.id.id_addgroup_title);
-        colorPalette = (RainbowPalette) findViewById(R.id.id_addgroup_colorpalettle);
-        colorPalette.setOnChangeListen(new RainbowPalette.OnColorChangedListen() {
+
+        colorPalette = findViewById(R.id.id_ColorPicker_Picker);
+        colorPalette.addSaturationBar(findViewById(R.id.id_ColorPicker_SaturationBar));
+        colorPalette.addSVBar(findViewById(R.id.id_ColorPicker_SVBar));
+
+        colorPalette.setOnColorChangedListener(new ColorPicker.OnColorChangedListener() {
             @Override
-            public void onColorChange(int color) {
-                colorText.setText(getContext().getString(R.string.GroupDialog_AddAlertColorText)+ CommonUtil.ColorInt_HexEncoding(color));
+            public void onColorChanged(int color) {
+                colorText.setText(String.format(Locale.CHINA, "%s%s",
+                        getContext().getString(R.string.GroupDialog_AddAlertColorText), CommonUtil.ColorInt_HexEncoding(color)));
             }
         });
+
 
         mButtonDelete = (Button) findViewById(R.id.id_AddGroupDialog_ButtonDelete);
         mButtonUpdate = (Button) findViewById(R.id.id_AddGroupDialog_ButtonUpdate);
@@ -91,10 +104,11 @@ public class GroupAddDialog extends AlertDialog implements OnClickListener, ISho
         if (dis == null) {
             dis = new Group();
             dis.setName("");
-            dis.setColor("#FFFFFF");
         }
         editText.setText(dis.getName());
         colorText.setText(getContext().getString(R.string.GroupDialog_AddAlertColorText) + dis.getStringColor());
+
+        colorPalette.setOldCenterColor(dis.getIntColor());
         colorPalette.setColor(dis.getIntColor());
 
         if (inputGroup == null) {
@@ -162,6 +176,7 @@ public class GroupAddDialog extends AlertDialog implements OnClickListener, ISho
         else
             newGroupOrder = 0;
 
+        // TODO
         String newGroupColor = CommonUtil.ColorInt_HexEncoding(colorPalette.getColor());
         ShowLogE("UpdateGroup", "COLOR: " + newGroupColor);
 

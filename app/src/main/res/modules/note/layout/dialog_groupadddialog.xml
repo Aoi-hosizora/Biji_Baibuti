@@ -40,13 +40,21 @@
             android:layout_marginTop="5dp"
             android:text="@string/GroupAdapter_GroupColor" />
 
-        <com.baibuti.biji.UI.Widget.OtherView.RainbowPalette
-            android:id="@+id/id_addgroup_colorpalettle"
+        <!--<com.baibuti.biji.UI.Widget.OtherView.RainbowPalette-->
+            <!--android:id="@+id/id_addgroup_colorpalettle"-->
+            <!--android:layout_width="wrap_content"-->
+            <!--android:layout_height="wrap_content"-->
+            <!--android:layout_gravity="center"-->
+            <!--app:center_circle_defcolor="#0511FB"/>-->
+
+        <include layout="@layout/modulelayout_colorpicker"
+            android:layout_marginTop="10dp"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_gravity="center|center_vertical"
+            />
 
-            android:layout_gravity="center"
-            app:center_circle_defcolor="#0511FB"/>
+
 
     </LinearLayout>
 

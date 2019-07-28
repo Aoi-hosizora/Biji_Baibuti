@@ -14,7 +14,7 @@ import android.widget.TextView;
 import com.baibuti.biji.Data.DB.SearchItemDao;
 import com.baibuti.biji.Data.Models.SearchItem;
 import com.baibuti.biji.R;
-import com.baibuti.biji.UI.Widget.OtherView.EllipsizingTextView;
+import com.baibuti.biji.UI.Widget.OtherView.EllipsizeTextView;
 import com.baibuti.biji.UI.Widget.ListView.RecyclerViewEmptySupport;
 
 import java.util.ArrayList;
@@ -156,7 +156,7 @@ public class SearchItemAdapter extends RecyclerView.Adapter<SearchItemAdapter.Vi
         private View m_view;
 
         private TextView m_title;
-        private EllipsizingTextView m_content;
+        private EllipsizeTextView m_content;
         private TextView m_url;
         private ImageView m_stared;
 

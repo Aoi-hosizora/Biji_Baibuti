@@ -14,7 +14,7 @@ import java.util.List;
 /**
  * https://stackoverflow.com/questions/2160619/android-ellipsize-multiline-textview
  */
-public class EllipsizingTextView extends android.support.v7.widget.AppCompatTextView {
+public class EllipsizeTextView extends android.support.v7.widget.AppCompatTextView {
     private static final String ELLIPSIS = "...";
 
     public interface EllipsizeListener {
@@ -30,15 +30,15 @@ public class EllipsizingTextView extends android.support.v7.widget.AppCompatText
     private float lineSpacingMultiplier = 1.0f;
     private float lineAdditionalVerticalPadding = 0.0f;
 
-    public EllipsizingTextView(Context context) {
+    public EllipsizeTextView(Context context) {
         super(context);
     }
 
-    public EllipsizingTextView(Context context, AttributeSet attrs) {
+    public EllipsizeTextView(Context context, AttributeSet attrs) {
         super(context, attrs);
     }
 
-    public EllipsizingTextView(Context context, AttributeSet attrs, int defStyle) {
+    public EllipsizeTextView(Context context, AttributeSet attrs, int defStyle) {
         super(context, attrs, defStyle);
     }
 

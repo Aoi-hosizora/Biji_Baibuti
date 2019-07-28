@@ -31,6 +31,7 @@ import com.baibuti.biji.Data.DB.SearchItemDao;
 import com.baibuti.biji.Data.Models.SearchItem;
 import com.baibuti.biji.Interface.IShowLog;
 import com.baibuti.biji.R;
+import com.baibuti.biji.UI.Activity.MainActivity;
 import com.baibuti.biji.UI.Activity.StarSearchItemActivity;
 import com.baibuti.biji.UI.Widget.ListView.SpacesItemDecoration;
 import com.baibuti.biji.UI.Widget.ListView.RecyclerViewEmptySupport;
@@ -156,14 +157,15 @@ public class SearchFragment extends Fragment implements View.OnClickListener, IS
                 return true;
              }
          });
-//        m_toolbar.setNavigationIcon(R.drawable.tab_menu);
-//        m_toolbar.setNavigationOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View view) {
-//                Toast.makeText(getContext(), "ddd", Toast.LENGTH_SHORT).show();
-//            }
-//        });
-        m_toolbar.setTitleMarginStart(getResources().getDimensionPixelSize(R.dimen.toolbar_title_margin_left));
+        m_toolbar.setNavigationIcon(R.drawable.tab_menu);
+        m_toolbar.setNavigationOnClickListener(new View.OnClickListener() {
+
+            @Override
+            public void onClick(View view) {
+                ((MainActivity) getActivity()).openNavMenu();
+            }
+        });
+       //  m_toolbar.setTitleMarginStart(getResources().getDimensionPixelSize(R.dimen.toolbar_title_margin_left));
         m_toolbar.setTitle(R.string.SearchFrag_Header);
     }
 

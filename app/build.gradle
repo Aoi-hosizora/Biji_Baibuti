@@ -79,8 +79,6 @@ dependencies {
 
     ////////////////////////////////////////////////////////////
 
-    // 右滑菜单
-    implementation project(':slidingMenu')
     // 富文本框
     implementation project(':xrichtext')
     // 图片编辑
@@ -118,4 +116,7 @@ dependencies {
     implementation ('jackmego.com.jieba_android:jieba_android-release:0.1.0') {
         exclude group: 'com.android.support' // 版本冲突 27.1.1
     }
+
+    // 图片选择
+    implementation 'com.larswerkman:HoloColorPicker:1.5'
 }

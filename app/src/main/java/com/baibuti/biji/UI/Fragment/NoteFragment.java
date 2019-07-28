@@ -40,7 +40,6 @@ import com.baibuti.biji.Utils.FileDirUtils.FilePathUtil;
 import com.baibuti.biji.Utils.FileDirUtils.SDCardUtil;
 import com.getbase.floatingactionbutton.FloatingActionButton;
 import com.getbase.floatingactionbutton.FloatingActionsMenu;
-import com.jeremyfeinstein.slidingmenu.lib.SlidingMenu;
 import com.wyt.searchbox.SearchFragment;
 import com.baibuti.biji.Utils.StrSrchUtils.SearchUtil;
 
@@ -65,7 +64,7 @@ public class NoteFragment extends Fragment implements View.OnClickListener, ISho
     private FloatingActionsMenu m_fabmenu;
     private SearchFragment searchFragment;
     private SwipeRefreshLayout mSwipeRefresh;
-    private SlidingMenu slidingMenu;
+    // private SlidingMenu slidingMenu;
 
     private ProgressDialog loadingDialog;
     private ProgressDialog loadingGroupDialog;
@@ -106,7 +105,7 @@ public class NoteFragment extends Fragment implements View.OnClickListener, ISho
             view = inflater.inflate(R.layout.fragment_notetab, container, false);
 
             ///
-            slidingMenu = ((MainActivity) getActivity()).getSlidingMenu();
+           // slidingMenu = ((MainActivity) getActivity()).getSlidingMenu();
             m_fabmenu = (FloatingActionsMenu) view.findViewById(R.id.note_fabmenu);
 
             mNoteList = view.findViewById(R.id.note_list);
@@ -140,6 +139,8 @@ public class NoteFragment extends Fragment implements View.OnClickListener, ISho
             public boolean onMenuItemClick(MenuItem item) {
                 switch (item.getItemId()) {
                     case R.id.action_search:
+                        if (m_fabmenu.isExpanded())
+                            m_fabmenu.collapse();
                         searchFragment.show(getActivity().getSupportFragmentManager(), com.wyt.searchbox.SearchFragment.TAG);
                         break;
                     case R.id.action_modifygroup:
@@ -154,10 +155,10 @@ public class NoteFragment extends Fragment implements View.OnClickListener, ISho
         });
         m_toolbar.setNavigationIcon(R.drawable.tab_menu);
         m_toolbar.setNavigationOnClickListener(new View.OnClickListener() {
+
             @Override
             public void onClick(View view) {
-                if (slidingMenu != null)
-                    slidingMenu.showMenu();
+                ((MainActivity) getActivity()).openNavMenu();
             }
         });
         m_toolbar.setTitle(R.string.NoteFrag_Header);
