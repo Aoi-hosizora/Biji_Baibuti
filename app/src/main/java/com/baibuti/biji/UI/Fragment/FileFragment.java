@@ -4,23 +4,25 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.graphics.Color;
+import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.support.v4.content.FileProvider;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.widget.EditText;
-import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.SearchView;
@@ -36,6 +38,7 @@ import com.baibuti.biji.Data.Models.FileClass;
 import com.baibuti.biji.Data.Models.FileItem;
 import com.baibuti.biji.R;
 import com.baibuti.biji.UI.Dialog.FileImportDialog;
+import com.baibuti.biji.Utils.Define;
 
 import java.io.File;
 import java.lang.reflect.Field;
@@ -286,6 +289,12 @@ public class FileFragment extends Fragment {
         searchResultList = (RecyclerView) view.findViewById(R.id.filefragment_serachresultlist);
         searchResultList.setLayoutManager(new LinearLayoutManager(getContext()));
         searchResultAdapter = new DocumentAdapter(searchResults);
+        searchResultAdapter.setOnDocumentClickListener(new DocumentAdapter.OnDocumentClickListener() {
+            @Override
+            public void OnDocumentClick(String path) {
+                openDocument(path);
+            }
+        });
         searchResultList.setAdapter(searchResultAdapter);
         documentSearchView.setOnCloseListener(new SearchView.OnCloseListener() {
             @Override
@@ -350,6 +359,18 @@ public class FileFragment extends Fragment {
         documentRecyclerView.setLayoutManager(layoutManager);
         documentListItems.clear();
         documentAdapter = new DocumentAdapter(documentListItems);
+        documentAdapter.setOnDocumentClickListener(new DocumentAdapter.OnDocumentClickListener() {
+            @Override
+            public void OnDocumentClick(String path) {
+                openDocument(path);
+            }
+        });
+        documentAdapter.setOnDocumentLongClickListener(new DocumentAdapter.OnDocumentLongClickListener() {
+            @Override
+            public void OnDocumentLongClick(int position) {
+                showConfirmDialog(position);
+            }
+        });
         documentRecyclerView.setAdapter(documentAdapter);
     }
 
@@ -488,6 +509,35 @@ public class FileFragment extends Fragment {
     }
 
     /**
+     * 确认对话框
+     * @param position
+     */
+    private void showConfirmDialog(final int position){
+
+        final AlertDialog.Builder normalDialog =
+                new AlertDialog.Builder(getContext());
+        normalDialog.setIcon(R.drawable.ic_error_black_24dp);
+        normalDialog.setTitle("删除资料");
+        normalDialog.setMessage("确认删除?");
+        normalDialog.setPositiveButton("确定",
+                new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        deleteDocumentFromList(position);
+                    }
+                });
+        normalDialog.setNegativeButton("取消",
+                new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.dismiss();
+                    }
+                });
+        // 显示
+        normalDialog.show();
+    }
+
+    /**
      * 重复分组标题对话框
      * @param newFileClass 添加的分组
      */
@@ -553,6 +603,64 @@ public class FileFragment extends Fragment {
         Pattern p = Pattern.compile("[\\w]+");
         Matcher m = p.matcher(fileClassName);
         return m.matches();
+    }
+
+    /**
+     * 调用wps打开文档
+     * @param path
+     */
+    private void openDocument(String path){
+
+            File file = new File(path);
+            Log.e("test", "openDocument: 打开文件");
+            Intent intent = activity.getPackageManager().getLaunchIntentForPackage("cn.wps.moffice_eng");
+            Log.e("test", "openDocument: 获得Intent");
+            Bundle bundle = new Bundle();
+            //打开模式
+            bundle.putString(Define.OPEN_MODE, Define.NORMAL);
+            bundle.putBoolean(Define.ENTER_REVISE_MODE, true);//以修订模式打开
+            //bundle.putString(Define.OPEN_MODE, Define.READ_ONLY);
+            bundle.putBoolean(Define.SEND_SAVE_BROAD, true);
+            bundle.putBoolean(Define.SEND_CLOSE_BROAD, true);
+            bundle.putBoolean(Define.HOME_KEY_DOWN, true);
+            bundle.putBoolean(Define.BACK_KEY_DOWN, true);
+            bundle.putBoolean(Define.ENTER_REVISE_MODE, true);
+            bundle.putBoolean(Define.IS_SHOW_VIEW, false);
+            bundle.putBoolean(Define.AUTO_JUMP, true);
+            //设置广播
+            bundle.putString(Define.THIRD_PACKAGE, activity.getPackageName());
+            intent.setAction(Intent.ACTION_VIEW);
+            Log.e("test", "openDocument: 设置action");
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                Uri contentUri = FileProvider.getUriForFile(activity,
+                        "com.baibuti.biji.FileProvider", file);
+                intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+                intent.addFlags(Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
+                intent.setDataAndType(contentUri, "*/*");
+            } else {
+                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                intent.setDataAndType(Uri.fromFile(file), "*/*");
+            }
+            Log.e("test", "openDocument: 即将发送");
+            intent.putExtras(bundle);
+            activity.startActivity(intent);
+
+    }
+
+    /**
+     * 从右侧列表中删除资料
+     * @param position
+     */
+    private void deleteDocumentFromList(int position){
+        try {
+            String path = documentListItems.get(position).getDocumentPath();
+            documentDao.deleteDocumentByPath(path);
+            documentListItems.remove(position);
+            documentListsByClass.get(lastPositionClicked).remove(position);
+            documentAdapter.notifyDataSetChanged();
+        }catch (Exception e){
+            e.printStackTrace();
+        }
     }
 
 }

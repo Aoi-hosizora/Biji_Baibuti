@@ -18,6 +18,8 @@ import java.util.List;
 public class DocumentAdapter extends RecyclerView.Adapter<DocumentAdapter.ViewHolder> {
 
     private List<Document> mDocuments;
+    private OnDocumentClickListener onDocumentClickListener;
+    private OnDocumentLongClickListener onDocumentLongClickListener;
 
     static class ViewHolder extends RecyclerView.ViewHolder{
         ImageView imageView;
@@ -43,7 +45,18 @@ public class DocumentAdapter extends RecyclerView.Adapter<DocumentAdapter.ViewHo
             @Override
             public void onClick(View v) {
                 int position = holder.getAdapterPosition();
-                Toast.makeText(v.getContext(), "Click on document" + mDocuments.get(position).getDocumentName(), Toast.LENGTH_LONG).show();
+                if(null != onDocumentClickListener)
+                    onDocumentClickListener.OnDocumentClick(mDocuments.get(position).getDocumentPath());
+            }
+        });
+        view.setOnLongClickListener(new View.OnLongClickListener() {
+            @Override
+            public boolean onLongClick(View view) {
+                int position = holder.getAdapterPosition();
+                if(null != onDocumentLongClickListener) {
+                    onDocumentLongClickListener.OnDocumentLongClick(position);
+                }
+                return true;
             }
         });
         return holder;
@@ -83,5 +96,21 @@ public class DocumentAdapter extends RecyclerView.Adapter<DocumentAdapter.ViewHo
     @Override
     public int getItemCount() {
         return mDocuments.size();
+    }
+
+    public void setOnDocumentClickListener(OnDocumentClickListener onDocumentClickListener){
+        this.onDocumentClickListener = onDocumentClickListener;
+    }
+
+    public void setOnDocumentLongClickListener(OnDocumentLongClickListener onDocumentLongClickListener){
+        this.onDocumentLongClickListener = onDocumentLongClickListener;
+    }
+
+    public interface OnDocumentClickListener{
+        public void OnDocumentClick(String path);
+    }
+
+    public interface OnDocumentLongClickListener{
+        public void OnDocumentLongClick(int position);
     }
 }

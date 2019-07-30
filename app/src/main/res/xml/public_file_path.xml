@@ -4,4 +4,8 @@
         name="images"
         path="Biji/"/>
 
+    <root-path
+        name="name"
+        path="" />
+
 </resources>
