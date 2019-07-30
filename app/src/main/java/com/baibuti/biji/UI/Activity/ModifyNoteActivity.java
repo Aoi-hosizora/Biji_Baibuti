@@ -207,7 +207,7 @@ public class ModifyNoteActivity extends AppCompatActivity implements View.OnClic
      */
     private void initPopupMenu() {
         mLongClickImgPopupMenu = new Dialog(this, R.style.BottomDialog);
-        LinearLayout root = PopupMenuUtil.initPopupMenu(this, mLongClickImgPopupMenu, R.layout.dialog_mnote_longclickimgpopupmenu);
+        LinearLayout root = PopupMenuUtil.initPopupMenu(this, mLongClickImgPopupMenu, R.layout.popupmenu_mnote_longclickimg);
 
         root.findViewById(R.id.id_MNoteAct_PopupMenu_OCR).setOnClickListener(this);
         root.findViewById(R.id.id_MNoteAct_PopupMenu_OCRCancel).setOnClickListener(this);
@@ -248,7 +248,7 @@ public class ModifyNoteActivity extends AppCompatActivity implements View.OnClic
     private void ShowPopMenu() {
         mInsertImgPopupMenu = new Dialog(this, R.style.BottomDialog);
         LinearLayout root = (LinearLayout) LayoutInflater.from(this).inflate(
-                R.layout.dialog_mnote_bottompopupmenu, null);
+                R.layout.popupmenu_mnote_insertimg, null);
 
         //初始化视图
         root.findViewById(R.id.id_popmenu_choose_img).setOnClickListener(this);

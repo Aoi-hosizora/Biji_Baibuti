@@ -139,7 +139,7 @@ public class ViewModifyNoteActivity extends AppCompatActivity implements View.On
      */
     private void initPopupMenu() {
         m_LongClickImgPopupMenu = new Dialog(this, R.style.BottomDialog);
-        LinearLayout root = PopupMenuUtil.initPopupMenu(this, m_LongClickImgPopupMenu, R.layout.dialog_vmnote_longclickimgpopupmenu);
+        LinearLayout root = PopupMenuUtil.initPopupMenu(this, m_LongClickImgPopupMenu, R.layout.popupmenu_vmnote_longclickimg);
 
         root.findViewById(R.id.id_VMNoteAct_PopupMenu_OCR).setOnClickListener(this);
         root.findViewById(R.id.id_VMNoteAct_PopupMenu_Cancel).setOnClickListener(this);

@@ -8,11 +8,26 @@
     android:paddingEnd="@dimen/popUpMenu_paddingEnd"
     android:paddingTop="@dimen/popUpMenu_paddingTop">
 
+    <TextView
+        android:id="@+id/id_NoteFrag_PopupMenu_Label"
+        android:layout_width="match_parent"
+        android:maxLines="1"
+        android:ellipsize="end"
+        android:gravity="center"
+        android:text="@string/NoteFrag_PopupMenuLabel"
+        android:layout_height="@dimen/popUpMenu_cnt_txt_layout_height"
+        android:layout_marginTop="@dimen/popUpMenu_cnt_layout_marginTop"
+        android:textSize="@dimen/popUpMenu_cnt_txt_textSize"
+
+        android:textColor="@color/popUpMenu_txt_textColor"
+        android:background="@drawable/button_popup_ripple_bg"
+        />
+
     <Button
-        android:id="@+id/id_NoteFrag_PopupMenu_EditNote"
+        android:id="@+id/id_NoteFrag_PopupMenu_ViewNote"
         android:layout_width="match_parent"
         android:gravity="center"
-        android:text="@string/NoteFrag_PopupMenuEditNote"
+        android:text="@string/NoteFrag_PopupMenuViewNote"
         android:layout_height="@dimen/popUpMenu_cnt_btn_layout_height"
         android:layout_marginTop="@dimen/popUpMenu_cnt_layout_marginTop"
         android:textSize="@dimen/popUpMenu_cnt_btn_textSize"

@@ -241,6 +241,13 @@ public class MainActivity extends FragmentActivity implements IShowLog, Navigati
     public boolean onKeyDown(int keyCode, KeyEvent event) {
         if (keyCode == KeyEvent.KEYCODE_BACK && event.getAction() == KeyEvent.ACTION_DOWN) {
 
+            // 是否打开着Drawer
+            if (mViewPager.getCurrentItem() == 0 &&
+                mNoteFrag.getDrawerIsOpen()) {
+                mNoteFrag.closeDrawer();
+                return true;
+            }
+
             // 判断是否处于笔记搜索页面或分类界面
             if (mViewPager.getCurrentItem() == 0 &&
                     (mNoteFrag.getIsSearching() || mNoteFrag.getIsGrouping())) {

@@ -50,10 +50,12 @@
     <string name="NoteFrag_GroupingMgrAlertNegBackButton">取消</string>
 
     <!-- Popup Menu -->
-    <string name="NoteFrag_PopupMenuEditNote">修改内容</string>
+    <string name="NoteFrag_PopupMenuLabel">当前选中：%s</string>
+    <string name="NoteFrag_PopupMenuViewNote">查看笔记</string>
     <string name="NoteFrag_PopupMenuChangeGroup">更改分组</string>
     <string name="NoteFrag_PopupMenuDeleteNote">删除笔记</string>
     <string name="NoteFrag_PopupMenuCancel">取消</string>
+    <string name="NoteFrag_ModifyGroupToast">笔记 %s 修改为 %s 成功</string>
 
     <!-- /////////////////////// NoteFrag UI End ////////////////////////// -->
     <!-- ////////////////////////////////////////////////////////////////// -->

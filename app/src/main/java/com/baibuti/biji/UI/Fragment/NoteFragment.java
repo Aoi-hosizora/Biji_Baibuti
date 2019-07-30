@@ -4,7 +4,6 @@ import android.app.Dialog;
 import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
@@ -30,6 +29,7 @@ import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.ListView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.baibuti.biji.Data.Adapters.GroupRadioAdapter;
@@ -144,7 +144,6 @@ public class NoteFragment extends Fragment implements View.OnClickListener, ISho
             initListView(NoteList);
             initSearchFrag();
             initRightMenu();
-            initPopupMenu();
         }
 
         return view;
@@ -331,30 +330,17 @@ public class NoteFragment extends Fragment implements View.OnClickListener, ISho
     }
 
     /**
-     * 初始化长按笔记弹出菜单
+     * 判断是否开着,MainAct用
+     * @return
      */
-    private void initPopupMenu() {
-        m_LongClickNotePopupMenu = new Dialog(getContext(), R.style.BottomDialog);
-        LinearLayout root = PopupMenuUtil.initPopupMenu(getContext(), m_LongClickNotePopupMenu, R.layout.dialog_note_longclicknotepopupmenu);
-
-        root.findViewById(R.id.id_NoteFrag_PopupMenu_EditNote).setOnClickListener(this);
-        root.findViewById(R.id.id_NoteFrag_PopupMenu_ChangeGroup).setOnClickListener(this);
-        root.findViewById(R.id.id_NoteFrag_PopupMenu_DeleteNote).setOnClickListener(this);
-        root.findViewById(R.id.id_NoteFrag_PopupMenu_Cancel).setOnClickListener(this);
-
-        m_LongClickNotePopupMenu.setOnCancelListener(new DialogInterface.OnCancelListener() {
-
-            @Override
-            public void onCancel(DialogInterface dialog) {
-                LongClickNoteItem = null;
-            }
-        });
+    public boolean getDrawerIsOpen() {
+        return m_drawerLayout.isDrawerOpen(Gravity.END);
     }
 
     /**
      * 关闭侧边栏
      */
-    private void closeDrawer() {
+    public void closeDrawer() {
         m_drawerLayout.closeDrawer(Gravity.END);
     }
 
@@ -378,10 +364,8 @@ public class NoteFragment extends Fragment implements View.OnClickListener, ISho
     @Override
     public void onClick(View v) {
         switch (v.getId()) {
-            case R.id.id_NoteFrag_PopupMenu_EditNote:
-//                SelectedNoteItem = position;
-//                HandleNewUpdateNote(false, nlist.get(position), false);
-                HandleNewUpdateNote(false, LongClickNoteItem, true);
+            case R.id.id_NoteFrag_PopupMenu_ViewNote:
+                HandleNewUpdateNote(false, LongClickNoteItem, false);
                 LongClickNoteItem = null;
                 m_LongClickNotePopupMenu.cancel();
             break;
@@ -761,9 +745,13 @@ public class NoteFragment extends Fragment implements View.OnClickListener, ISho
                 .setSingleChoiceItems(groupAdapter, 0, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        note.setGroupLabel(GroupList.get(which), true);
+
+                        // 修改保存数据库
+                        Group group = GroupList.get(which);
+                        note.setGroupLabel(group, true);
                         noteDao.updateNote(note);
 
+                        // 更新数据
                         if (IsSearching)
                             if (!IsSearchingNull)
                                 initListView(search(SearchingStr));
@@ -775,8 +763,14 @@ public class NoteFragment extends Fragment implements View.OnClickListener, ISho
                                     initListView(getGroupOfNote(currGroup));
                                 else
                                     initListView(NoteList);
+
+                        // 排序显示
                         Collections.sort(NoteList);
                         noteAdapter.notifyDataSetChanged();
+
+                        // 提示
+                        Toast.makeText(getActivity(), String.format(Locale.CHINA,
+                                getString(R.string.NoteFrag_ModifyGroupToast), note.getTitle(), group.getName()), Toast.LENGTH_SHORT).show();
 
                         dialog.cancel();
                     }
@@ -833,13 +827,38 @@ public class NoteFragment extends Fragment implements View.OnClickListener, ISho
             public void onItemLongClick(final View view, final Note note) {
                 if (m_fabmenu.isExpanded())
                     m_fabmenu.collapse();
-
-                // 记录长按项
-                LongClickNoteItem = note;
-                m_LongClickNotePopupMenu.show();
-                // DeleteNote(view, note);
+                showPopupMenuOfNote(note);
             }
         });
+    }
+
+    /**
+     * 长按笔记显示弹出菜单
+     * @param note
+     */
+    private void showPopupMenuOfNote(Note note) {
+        // 记录长按项
+        LongClickNoteItem = note;
+
+        m_LongClickNotePopupMenu = new Dialog(getContext(), R.style.BottomDialog);
+        LinearLayout root = PopupMenuUtil.initPopupMenu(getContext(), m_LongClickNotePopupMenu, R.layout.popupmenu_note_longclicknote);
+
+        root.findViewById(R.id.id_NoteFrag_PopupMenu_ViewNote).setOnClickListener(NoteFragment.this);
+        root.findViewById(R.id.id_NoteFrag_PopupMenu_ChangeGroup).setOnClickListener(NoteFragment.this);
+        root.findViewById(R.id.id_NoteFrag_PopupMenu_DeleteNote).setOnClickListener(NoteFragment.this);
+        root.findViewById(R.id.id_NoteFrag_PopupMenu_Cancel).setOnClickListener(NoteFragment.this);
+
+        m_LongClickNotePopupMenu.setOnCancelListener(new DialogInterface.OnCancelListener() {
+            @Override
+            public void onCancel(DialogInterface dialog) {
+                LongClickNoteItem = null;
+            }
+        });
+
+        TextView label = root.findViewById(R.id.id_NoteFrag_PopupMenu_Label);
+        label.setText(String.format(Locale.CHINA, getString(R.string.NoteFrag_PopupMenuLabel), LongClickNoteItem.getTitle()));
+
+        m_LongClickNotePopupMenu.show();
     }
 
     // endregion 进入笔记

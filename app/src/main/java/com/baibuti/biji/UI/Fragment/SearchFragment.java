@@ -289,7 +289,7 @@ public class SearchFragment extends Fragment implements View.OnClickListener, IS
      */
     private void ShowItemLongClickPopupMenu(SearchItem searchItem) {
         m_LongClickItemPopupMenu = new Dialog(getActivity(), R.style.BottomDialog);
-        LinearLayout root = PopupMenuUtil.initPopupMenu(getActivity(), m_LongClickItemPopupMenu, R.layout.dialog_searchitem_bottompopupmenu);
+        LinearLayout root = PopupMenuUtil.initPopupMenu(getActivity(), m_LongClickItemPopupMenu, R.layout.popupmenu_searchitem_longclickitem);
 
         SearchItemDao searchItemDao = new SearchItemDao(getContext());
 
