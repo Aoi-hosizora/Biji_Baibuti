@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:paddingBottom="@dimen/popUpMenu_paddingBottom"
+    android:paddingStart="@dimen/popUpMenu_paddingStart"
+    android:paddingEnd="@dimen/popUpMenu_paddingEnd"
+    android:paddingTop="@dimen/popUpMenu_paddingTop">
+
+    <Button
+        android:id="@+id/id_NoteFrag_PopupMenu_EditNote"
+        android:layout_width="match_parent"
+        android:gravity="center"
+        android:text="@string/NoteFrag_PopupMenuEditNote"
+        android:layout_height="@dimen/popUpMenu_cnt_btn_layout_height"
+        android:layout_marginTop="@dimen/popUpMenu_cnt_layout_marginTop"
+        android:textSize="@dimen/popUpMenu_cnt_btn_textSize"
+
+        android:textColor="@color/popUpMenu_btn_textColor"
+        android:background="@drawable/button_popup_ripple_bg"
+        />
+
+    <Button
+        android:id="@+id/id_NoteFrag_PopupMenu_ChangeGroup"
+        android:layout_width="match_parent"
+        android:gravity="center"
+        android:text="@string/NoteFrag_PopupMenuChangeGroup"
+        android:layout_height="@dimen/popUpMenu_cnt_btn_layout_height"
+        android:layout_marginTop="@dimen/popUpMenu_cnt_layout_marginTop"
+        android:textSize="@dimen/popUpMenu_cnt_btn_textSize"
+
+        android:textColor="@color/popUpMenu_btn_textColor"
+        android:background="@drawable/button_popup_ripple_bg"
+        />
+
+    <Button
+        android:id="@+id/id_NoteFrag_PopupMenu_DeleteNote"
+        android:layout_width="match_parent"
+        android:gravity="center"
+        android:text="@string/NoteFrag_PopupMenuDeleteNote"
+        android:layout_height="@dimen/popUpMenu_cnt_btn_layout_height"
+        android:layout_marginTop="@dimen/popUpMenu_cnt_layout_marginTop"
+        android:textSize="@dimen/popUpMenu_cnt_btn_textSize"
+
+        android:textColor="@color/popUpMenu_btn_textColor"
+        android:background="@drawable/button_popup_ripple_bg"
+        />
+
+    <Button
+        android:id="@+id/id_NoteFrag_PopupMenu_Cancel"
+        android:layout_width="match_parent"
+        android:gravity="center"
+        android:text="@string/NoteFrag_PopupMenuCancel"
+        android:layout_height="@dimen/popUpMenu_cnt_btn_layout_height"
+        android:layout_marginTop="@dimen/popUpMenu_cnt_layout_bottomMarginTop"
+        android:textSize="@dimen/popUpMenu_cnt_btn_textSize"
+
+        android:textColor="@color/popUpMenu_btn_textColor"
+        android:background="@drawable/button_popup_ripple_bg"
+        />
+</LinearLayout>

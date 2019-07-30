@@ -43,6 +43,17 @@
     <string name="NoteFrag_GroupingTitle">属于分组 \"%s\" 的笔记</string>
     <string name="NoteFrag_GroupingRightTextView">笔记分类</string>
     <string name="NoteFrag_GroupingMgrRightTextView">分组管理</string>
+    <string name="NoteFrag_GroupingMgrRightBackButton">返回</string>
+    <string name="NoteFrag_GroupingMgrAlertTitle">提醒</string>
+    <string name="NoteFrag_GroupingMgrAlertMsg">分组管理可能会修改到分组信息，需要将分组显示关闭，是否继续？</string>
+    <string name="NoteFrag_GroupingMgrAlertPosDoButton">继续</string>
+    <string name="NoteFrag_GroupingMgrAlertNegBackButton">取消</string>
+
+    <!-- Popup Menu -->
+    <string name="NoteFrag_PopupMenuEditNote">修改内容</string>
+    <string name="NoteFrag_PopupMenuChangeGroup">更改分组</string>
+    <string name="NoteFrag_PopupMenuDeleteNote">删除笔记</string>
+    <string name="NoteFrag_PopupMenuCancel">取消</string>
 
     <!-- /////////////////////// NoteFrag UI End ////////////////////////// -->
     <!-- ////////////////////////////////////////////////////////////////// -->

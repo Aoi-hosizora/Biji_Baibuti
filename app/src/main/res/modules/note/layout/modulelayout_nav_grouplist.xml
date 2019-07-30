@@ -4,14 +4,35 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content">
 
-    <TextView
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="@string/NoteFrag_GroupingRightTextView"
-        android:textSize="20sp"
-        android:layout_marginTop="12dp"
-        android:layout_marginBottom="12dp"
-        android:gravity="center"/>
+        android:layout_height="57dp"
+        android:orientation="horizontal"
+        android:background="@color/colorPrimary"
+        android:layout_marginBottom="5dp">
+
+        <ImageButton
+            android:id="@+id/id_NoteFrag_nav_BackButton"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:layout_marginStart="5dp"
+            android:layout_marginEnd="5dp"
+            android:layout_gravity="center_vertical"
+            android:src="@drawable/ic_back_white_24dp"
+            android:contentDescription="@string/NoteFrag_GroupingMgrRightBackButton"
+            style="@style/Widget.AppCompat.Button.Borderless.Colored"/>
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/NoteFrag_GroupingRightTextView"
+            android:textSize="20sp"
+            android:textColor="@color/white"
+            android:layout_marginStart="5dp"
+            android:layout_gravity="center_vertical"/>
+
+    </LinearLayout>
+
 
     <ListView
         android:id="@+id/id_NoteFrag_nav_GroupList"

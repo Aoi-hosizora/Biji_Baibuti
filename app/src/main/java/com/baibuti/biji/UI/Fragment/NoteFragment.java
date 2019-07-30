@@ -1,8 +1,10 @@
 package com.baibuti.biji.UI.Fragment;
 
+import android.app.Dialog;
 import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
@@ -25,6 +27,8 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.ImageButton;
+import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.Toast;
 
@@ -46,7 +50,7 @@ import com.baibuti.biji.Data.DB.GroupDao;
 import com.baibuti.biji.Data.DB.NoteDao;
 import com.baibuti.biji.Utils.FileDirUtils.FilePathUtil;
 import com.baibuti.biji.Utils.FileDirUtils.SDCardUtil;
-import com.blankj.utilcode.util.PathUtils;
+import com.baibuti.biji.Utils.LayoutUtils.PopupMenuUtil;
 import com.getbase.floatingactionbutton.FloatingActionButton;
 import com.getbase.floatingactionbutton.FloatingActionsMenu;
 import com.wyt.searchbox.SearchFragment;
@@ -86,6 +90,9 @@ public class NoteFragment extends Fragment implements View.OnClickListener, ISho
     private DrawerLayout m_drawerLayout;
     private NavigationView m_navigationView;
     private ListView m_nav_groupList;
+
+    private Dialog m_LongClickNotePopupMenu;
+    private Note LongClickNoteItem;
 
     // endregion 声明: View UI ProgressDialog Toolbar
 
@@ -137,6 +144,7 @@ public class NoteFragment extends Fragment implements View.OnClickListener, ISho
             initListView(NoteList);
             initSearchFrag();
             initRightMenu();
+            initPopupMenu();
         }
 
         return view;
@@ -294,18 +302,54 @@ public class NoteFragment extends Fragment implements View.OnClickListener, ISho
         // 列表
         m_nav_groupList = view.findViewById(R.id.id_NoteFrag_nav_GroupList);
 
-
         // 按钮
         Button m_groupMgrButton = view.findViewById(R.id.id_NoteFrag_nav_GroupMgrButton);
         m_groupMgrButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                ShowGroupDialog();
+                new AlertDialog.Builder(getContext())
+                        .setTitle(R.string.NoteFrag_GroupingMgrAlertTitle)
+                        .setMessage(R.string.NoteFrag_GroupingMgrAlertMsg)
+                        .setPositiveButton(R.string.NoteFrag_GroupingMgrAlertPosDoButton, new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                ShowGroupDialog();
+                            }
+                        })
+                        .setNegativeButton(R.string.NoteFrag_GroupingMgrAlertNegBackButton, null)
+                        .create().show();
             }
         });
 
+        ImageButton m_groupMgrBackButton = view.findViewById(R.id.id_NoteFrag_nav_BackButton);
+        m_groupMgrBackButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                m_drawerLayout.closeDrawer(Gravity.END);
+            }
+        });
     }
 
+    /**
+     * 初始化长按笔记弹出菜单
+     */
+    private void initPopupMenu() {
+        m_LongClickNotePopupMenu = new Dialog(getContext(), R.style.BottomDialog);
+        LinearLayout root = PopupMenuUtil.initPopupMenu(getContext(), m_LongClickNotePopupMenu, R.layout.dialog_note_longclicknotepopupmenu);
+
+        root.findViewById(R.id.id_NoteFrag_PopupMenu_EditNote).setOnClickListener(this);
+        root.findViewById(R.id.id_NoteFrag_PopupMenu_ChangeGroup).setOnClickListener(this);
+        root.findViewById(R.id.id_NoteFrag_PopupMenu_DeleteNote).setOnClickListener(this);
+        root.findViewById(R.id.id_NoteFrag_PopupMenu_Cancel).setOnClickListener(this);
+
+        m_LongClickNotePopupMenu.setOnCancelListener(new DialogInterface.OnCancelListener() {
+
+            @Override
+            public void onCancel(DialogInterface dialog) {
+                LongClickNoteItem = null;
+            }
+        });
+    }
 
     /**
      * 关闭侧边栏
@@ -327,11 +371,34 @@ public class NoteFragment extends Fragment implements View.OnClickListener, ISho
                 ClassName + ": " + FunctionName + "###" + Msg); // MainActivity: initDatas###data=xxx
     }
 
-
+    /**
+     * 弹出菜单点击
+     * @param v
+     */
     @Override
     public void onClick(View v) {
         switch (v.getId()) {
-
+            case R.id.id_NoteFrag_PopupMenu_EditNote:
+//                SelectedNoteItem = position;
+//                HandleNewUpdateNote(false, nlist.get(position), false);
+                HandleNewUpdateNote(false, LongClickNoteItem, true);
+                LongClickNoteItem = null;
+                m_LongClickNotePopupMenu.cancel();
+            break;
+            case R.id.id_NoteFrag_PopupMenu_ChangeGroup:
+                modifyNoteGroup(LongClickNoteItem);
+                LongClickNoteItem = null;
+                m_LongClickNotePopupMenu.cancel();
+            break;
+            case R.id.id_NoteFrag_PopupMenu_DeleteNote:
+                DeleteNote(getView(), LongClickNoteItem);
+                LongClickNoteItem = null;
+                m_LongClickNotePopupMenu.cancel();
+            break;
+            case R.id.id_NoteFrag_PopupMenu_Cancel:
+                LongClickNoteItem = null;
+                m_LongClickNotePopupMenu.cancel();
+            break;
         }
     }
 
@@ -411,7 +478,8 @@ public class NoteFragment extends Fragment implements View.OnClickListener, ISho
                         m_fabmenu.setVisibility(View.VISIBLE);
 
                         m_toolbar.getMenu().findItem(R.id.action_search_back).setVisible(false);
-                        m_toolbar.getMenu().findItem(R.id.action_search).setVisible(true);
+                        m_toolbar.getMenu().findItem(R.id.action_search).setEnabled(true);
+                        m_toolbar.getMenu().findItem(R.id.action_search).setIcon(R.drawable.search);
                         m_toolbar.setTitle(R.string.NoteFrag_Header);
 
                         IsSearching = false;
@@ -638,7 +706,8 @@ public class NoteFragment extends Fragment implements View.OnClickListener, ISho
         }
 
         m_toolbar.getMenu().findItem(R.id.action_search_back).setVisible(true);
-        m_toolbar.getMenu().findItem(R.id.action_search).setVisible(false);
+        m_toolbar.getMenu().findItem(R.id.action_search).setEnabled(false);
+        m_toolbar.getMenu().findItem(R.id.action_search).setIcon(R.drawable.ic_search_grey_24dp);
         mSwipeRefresh.setEnabled(false);
 
         initListView(groupNotes);
@@ -672,6 +741,48 @@ public class NoteFragment extends Fragment implements View.OnClickListener, ISho
             if (note.getGroupLabel().getName().equals(group.getName()))
                 ret.add(note);
         return ret;
+    }
+
+    /**
+     * 修改分组
+     */
+    private void modifyNoteGroup(Note note) {
+        refreshGroupList();
+
+        AlertDialog GroupSettingDialog = new AlertDialog
+                .Builder(getContext())
+                .setTitle(R.string.MNoteActivity_GroupSetAlertTitle)
+                .setNegativeButton(R.string.MNoteActivity_GroupSetAlertNegativeButtonForCancel, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.cancel();
+                    }
+                })
+                .setSingleChoiceItems(groupAdapter, 0, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        note.setGroupLabel(GroupList.get(which), true);
+                        noteDao.updateNote(note);
+
+                        if (IsSearching)
+                            if (!IsSearchingNull)
+                                initListView(search(SearchingStr));
+                            else
+                                initListView(NoteList);
+                        else
+                            if (IsGrouping)
+                                if (!IsGroupingNull)
+                                    initListView(getGroupOfNote(currGroup));
+                                else
+                                    initListView(NoteList);
+                        Collections.sort(NoteList);
+                        noteAdapter.notifyDataSetChanged();
+
+                        dialog.cancel();
+                    }
+                }).create();
+
+        GroupSettingDialog.show();
     }
 
     // endregion 显示分组 分组显示
@@ -723,7 +834,10 @@ public class NoteFragment extends Fragment implements View.OnClickListener, ISho
                 if (m_fabmenu.isExpanded())
                     m_fabmenu.collapse();
 
-                DeleteNote(view, note);
+                // 记录长按项
+                LongClickNoteItem = note;
+                m_LongClickNotePopupMenu.show();
+                // DeleteNote(view, note);
             }
         });
     }

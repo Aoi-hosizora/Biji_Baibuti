@@ -81,6 +81,14 @@ public class GroupAddDialog extends AlertDialog implements OnClickListener, ISho
             }
         });
 
+        colorPalette.setOnColorSelectedListener(new ColorPicker.OnColorSelectedListener() {
+            @Override
+            public void onColorSelected(int color) {
+                colorText.setText(String.format(Locale.CHINA, "%s%s",
+                        getContext().getString(R.string.GroupDialog_AddAlertColorText), CommonUtil.ColorInt_HexEncoding(color)));
+            }
+        });
+
 
         mButtonDelete = (Button) findViewById(R.id.id_AddGroupDialog_ButtonDelete);
         mButtonUpdate = (Button) findViewById(R.id.id_AddGroupDialog_ButtonUpdate);
