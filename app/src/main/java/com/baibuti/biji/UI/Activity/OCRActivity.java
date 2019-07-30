@@ -68,6 +68,7 @@ public class OCRActivity extends AppCompatActivity implements IShowLog, View.OnC
         String ImgPath = bundle.getString(INT_IMGPATH, "");
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
+        ShowLogE("onCreate", "ImgPath" + ImgPath);
         initView(ImgPath);
     }
 

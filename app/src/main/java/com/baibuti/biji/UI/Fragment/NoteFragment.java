@@ -46,6 +46,7 @@ import com.baibuti.biji.Data.DB.GroupDao;
 import com.baibuti.biji.Data.DB.NoteDao;
 import com.baibuti.biji.Utils.FileDirUtils.FilePathUtil;
 import com.baibuti.biji.Utils.FileDirUtils.SDCardUtil;
+import com.blankj.utilcode.util.PathUtils;
 import com.getbase.floatingactionbutton.FloatingActionButton;
 import com.getbase.floatingactionbutton.FloatingActionsMenu;
 import com.wyt.searchbox.SearchFragment;
@@ -776,11 +777,11 @@ public class NoteFragment extends Fragment implements View.OnClickListener, ISho
     /**
      * 拍完照后文字识别
      */
-    private void OpenOCRAct(Uri imgPath) {
+    private void OpenOCRAct(Uri imgUri) {
         Intent intent = new Intent(getContext(), OCRActivity.class);
 
         Bundle bundle = new Bundle();
-        bundle.putString(OCRActivity.INT_IMGPATH, imgPath.getPath());
+        bundle.putString(OCRActivity.INT_IMGPATH, FilePathUtil.getFilePathByUri(getContext(), imgUri));
 
         intent.putExtra(OCRActivity.INT_BUNDLE, bundle);
         startActivity(intent);

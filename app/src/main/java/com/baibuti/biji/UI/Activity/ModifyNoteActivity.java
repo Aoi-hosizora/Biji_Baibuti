@@ -946,26 +946,24 @@ public class ModifyNoteActivity extends AppCompatActivity implements View.OnClic
 
             @Override
             public void onRtImageDelete(String imagePath) {
-                if (!TextUtils.isEmpty(imagePath)) {
-                    boolean isOK = SDCardUtil.deleteFile(imagePath);
-                    if (isOK) {
-                        Toast.makeText(ModifyNoteActivity.this, R.string.MNoteActivity_DWCRtImageDelete + imagePath, Toast.LENGTH_SHORT).show();
-                    }
-                }
+                if (!TextUtils.isEmpty(imagePath))
+                    if (SDCardUtil.deleteFile(imagePath))
+                        Toast.makeText(ModifyNoteActivity.this, R.string.MNoteActivity_DWCRtImageDelete, Toast.LENGTH_SHORT).show();
             }
         });
+
         // 图片点击事件
         ContentEditText.setOnRtImageClickListener(new RichTextEditor.OnRtImageClickListener() {
             @Override
             public void onRtImageClick(final String imagePath) {
                 if (!TextUtils.isEmpty(getEditData())) {
 
-                    ArrayList<String> imageList = StringUtils.getTextFromHtml(note.getContent(), true);
-                    int currentPosition = imageList.indexOf(imagePath);
-
-                    ShowLogE("dealWithContent", "点击图片："+currentPosition+"："+imagePath);
-
-                    ShowClickImg(imageList, currentPosition);
+                    ArrayList<String> imageList = StringUtils.getTextFromHtml(getEditData(), true);
+                    if (!TextUtils.isEmpty(imagePath)) {
+                        int currentPosition = imageList.indexOf(imagePath);
+                        ShowLogE("dealWithContent", "点击图片："+currentPosition+"："+imagePath);
+                        ShowClickImg(imageList, currentPosition);
+                    }
 
 //                    List<String> imageList = StringUtils.getTextFromHtml(getEditData(), true);
 //                    if (!TextUtils.isEmpty(imagePath)) {
