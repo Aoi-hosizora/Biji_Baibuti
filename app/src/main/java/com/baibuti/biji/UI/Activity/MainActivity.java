@@ -70,6 +70,7 @@ public class MainActivity extends FragmentActivity implements IShowLog, Navigati
             Manifest.permission.WRITE_EXTERNAL_STORAGE};
     //请求状态码
     private static int REQUEST_PERMISSION_CODE = 1;
+    private static int REQUEST_PERMISSION_CODE_CAMERA = 2;
 
     // endregion 声明权限和状态码
 
@@ -84,6 +85,9 @@ public class MainActivity extends FragmentActivity implements IShowLog, Navigati
         if (Build.VERSION.SDK_INT > Build.VERSION_CODES.LOLLIPOP) {
             if (ActivityCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
                 ActivityCompat.requestPermissions(this, PERMISSIONS_STORAGE, REQUEST_PERMISSION_CODE);
+            }
+            if(ActivityCompat.checkSelfPermission(this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED){
+                ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.CAMERA}, REQUEST_PERMISSION_CODE_CAMERA);
             }
         }
 
@@ -218,6 +222,10 @@ public class MainActivity extends FragmentActivity implements IShowLog, Navigati
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         if (requestCode == REQUEST_PERMISSION_CODE) {
+            if (grantResults[0] != PackageManager.PERMISSION_GRANTED)
+                Toast.makeText(this, "授权失败", Toast.LENGTH_LONG).show();
+        }
+        if (requestCode == REQUEST_PERMISSION_CODE_CAMERA) {
             if (grantResults[0] != PackageManager.PERMISSION_GRANTED)
                 Toast.makeText(this, "授权失败", Toast.LENGTH_LONG).show();
         }

@@ -611,6 +611,7 @@ public class FileFragment extends Fragment {
      */
     private void openDocument(String path){
 
+        try {
             File file = new File(path);
             Log.e("test", "openDocument: 打开文件");
             Intent intent = activity.getPackageManager().getLaunchIntentForPackage("cn.wps.moffice_eng");
@@ -644,6 +645,9 @@ public class FileFragment extends Fragment {
             Log.e("test", "openDocument: 即将发送");
             intent.putExtras(bundle);
             activity.startActivity(intent);
+        }catch(Exception e){
+            e.printStackTrace();
+        }
 
     }
 
