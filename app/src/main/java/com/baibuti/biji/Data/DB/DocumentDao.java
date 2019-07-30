@@ -155,7 +155,7 @@ public class DocumentDao {
     }
 
     /**
-     * 删除一个分类
+     * 删除资料
      */
     public int deleteDocument(int documentId) {
 
@@ -177,6 +177,34 @@ public class DocumentDao {
         return ret;
     }
 
+    /**
+     * 删除资料
+     */
+    public int deleteDocumentByPath(String documentPath) {
+
+        SQLiteDatabase db = helper.getWritableDatabase();
+
+        int ret = 0;
+        try {
+            ret = db.delete("db_document", "doc_path=?", new String[]{documentPath});
+        }
+
+        catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            if (db != null) {
+                db.close();
+            }
+        }
+
+        return ret;
+    }
+
+    /**
+     * 删除整个分类
+     * @param documentClassName
+     * @return
+     */
     public int deleteDocumentByClass(String documentClassName){
 
         SQLiteDatabase db = helper.getWritableDatabase();
