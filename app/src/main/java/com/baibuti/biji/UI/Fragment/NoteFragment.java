@@ -643,7 +643,8 @@ public class NoteFragment extends Fragment implements View.OnClickListener, ISho
         initListView(groupNotes);
         closeDrawer();
 
-        m_toolbar.setTitle(String.format(Locale.CHINA, getString(R.string.NoteFrag_GroupingTitle), group.getName()));
+        m_toolbar.setTitle(String.format(Locale.CHINA,
+            getString(R.string.NoteFrag_GroupingTitle), group.getName()));
     }
 
     /**
