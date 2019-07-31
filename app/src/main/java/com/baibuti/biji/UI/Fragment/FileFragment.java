@@ -38,7 +38,7 @@ import com.baibuti.biji.Data.Models.FileClass;
 import com.baibuti.biji.Data.Models.FileItem;
 import com.baibuti.biji.R;
 import com.baibuti.biji.UI.Dialog.FileImportDialog;
-import com.baibuti.biji.Utils.Define;
+import com.baibuti.biji.Utils.StringUtils.Define;
 
 import java.io.File;
 import java.lang.reflect.Field;
@@ -82,23 +82,29 @@ public class FileFragment extends Fragment {
     private List<Document> searchResults = new ArrayList<>();
     private DocumentAdapter searchResultAdapter;
 
+    private boolean closeDSL = false;
+
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         if (null != view) {
+            Log.e("test_filefragment", "有缓存: 执行");
             ViewGroup parent = (ViewGroup) view.getParent();
             if (null != parent)
                 parent.removeView(view);
         }
         else {
+            Log.e("test_filefragment", "没有缓存: 执行");
             view = inflater.inflate(R.layout.fragment_filetab, container, false);
 
             initToolBar(view);
             initSearchResultLayout(view);
             initFileClassList(view);
             initDocumentLayout(view);
-        }
 
+            closeDSL = true;
+        }
+        Log.e("test_filefragment", "onCreateView: 执行");
         return view;
     }
 
@@ -106,6 +112,7 @@ public class FileFragment extends Fragment {
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         activity = getActivity();
+        Log.e("test_filefragment", "onCreate: 执行");
     }
 
     /**
@@ -250,6 +257,11 @@ public class FileFragment extends Fragment {
                     }
                 });
 
+                if(closeDSL) {
+                    searchResultLayout.setVisibility(View.GONE);
+                    closeDSL = false;
+                }
+
                 return true;
             }
         });
@@ -267,6 +279,10 @@ public class FileFragment extends Fragment {
 
     }
 
+    /**
+     * 搜索结果页
+     * @param s
+     */
     private void searchDocuments(String s){
         if(!s.equals("")) {
             for (List<Document> l : documentListsByClass) {
