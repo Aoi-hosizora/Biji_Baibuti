@@ -4,7 +4,7 @@
  * 	创建时间:2013.7.18
  * 	作用：保存一些基本的常用字符串
  */
-package com.baibuti.biji.Utils;
+package com.baibuti.biji.Utils.StringUtils;
 
 public class Define {
 	public static final String PREFS_NAME = "MyPrefsFile";			//用于存取参数的文件名

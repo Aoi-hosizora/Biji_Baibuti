@@ -119,4 +119,10 @@ dependencies {
 
     // 图片选择
     implementation 'com.larswerkman:HoloColorPicker:1.5'
+
+    //html解析器
+    implementation 'org.jsoup:jsoup:1.11.3'
+
+    //课表控件
+    implementation "com.github.zfman:TimetableView:2.0.7"
 }

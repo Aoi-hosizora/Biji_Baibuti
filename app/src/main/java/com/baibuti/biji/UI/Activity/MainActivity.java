@@ -27,7 +27,7 @@ import android.view.ViewGroup;
 import android.widget.Toast;
 import android.view.MenuItem;
 
-import com.baibuti.biji.UI.Fragment.ClassFragment;
+import com.baibuti.biji.UI.Fragment.ScheduleFragment;
 import com.baibuti.biji.UI.Fragment.NoteFragment;
 import com.baibuti.biji.UI.Fragment.SearchFragment;
 import com.baibuti.biji.UI.Fragment.FileFragment;
@@ -57,7 +57,7 @@ public class MainActivity extends FragmentActivity implements IShowLog, Navigati
 
     private NoteFragment mNoteFrag;
     private SearchFragment mSearchFrag;
-    private ClassFragment mClassFrag;
+    private ScheduleFragment mClassFrag;
     private FileFragment mFileFrag;
 
     // endregion 声明列表信息
@@ -109,7 +109,7 @@ public class MainActivity extends FragmentActivity implements IShowLog, Navigati
 
         mNoteFrag = new NoteFragment();
         mSearchFrag = new SearchFragment();
-        mClassFrag = new ClassFragment();
+        mClassFrag = new ScheduleFragment();
         mFileFrag = new FileFragment();
 
         bottomNavigationView = (BottomNavigationView) findViewById(R.id.id_bottomnavigation);
