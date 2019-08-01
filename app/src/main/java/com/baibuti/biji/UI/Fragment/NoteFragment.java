@@ -306,17 +306,20 @@ public class NoteFragment extends Fragment implements View.OnClickListener, ISho
         m_groupMgrButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                new AlertDialog.Builder(getContext())
-                        .setTitle(R.string.NoteFrag_GroupingMgrAlertTitle)
-                        .setMessage(R.string.NoteFrag_GroupingMgrAlertMsg)
-                        .setPositiveButton(R.string.NoteFrag_GroupingMgrAlertPosDoButton, new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int which) {
-                                ShowGroupDialog();
-                            }
-                        })
-                        .setNegativeButton(R.string.NoteFrag_GroupingMgrAlertNegBackButton, null)
-                        .create().show();
+                if (IsGrouping)
+                    new AlertDialog.Builder(getContext())
+                            .setTitle(R.string.NoteFrag_GroupingMgrAlertTitle)
+                            .setMessage(R.string.NoteFrag_GroupingMgrAlertMsg)
+                            .setPositiveButton(R.string.NoteFrag_GroupingMgrAlertPosDoButton, new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialog, int which) {
+                                    ShowGroupDialog();
+                                }
+                            })
+                            .setNegativeButton(R.string.NoteFrag_GroupingMgrAlertNegBackButton, null)
+                            .create().show();
+                else
+                    ShowGroupDialog();
             }
         });
 
