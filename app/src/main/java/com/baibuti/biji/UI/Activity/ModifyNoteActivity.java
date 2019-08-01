@@ -615,10 +615,9 @@ public class ModifyNoteActivity extends AppCompatActivity implements View.OnClic
         ShowLogE("onActivityResult", "Result:"+ mCutUri);
 
         // 判断是否需要删除原图片
-        if (isTakePhoto_Delete) {
-            if (SDCardUtil.deleteFile(FilePathUtil.getFilePathByUri(this, imgUri)))
-                ShowLogE("onActivityResult", "Delete finish: "+ FilePathUtil.getFilePathByUri(this, imgUri));
-        }
+        if (isTakePhoto_Delete)
+            SDCardUtil.deleteFile(FilePathUtil.getFilePathByUri(this, imgUri));
+
         insertImagesSync(mCutUri); // URI
     }
 
@@ -1089,6 +1088,7 @@ public class ModifyNoteActivity extends AppCompatActivity implements View.OnClic
     private void insertImagesSync(final Uri data) {
         insertDialog.show();
 
+        // TODO 整理
 
         Observable.create(new ObservableOnSubscribe<String>() {
             @Override
@@ -1096,19 +1096,19 @@ public class ModifyNoteActivity extends AppCompatActivity implements View.OnClic
                 try {
                     ContentEditText.measure(0, 0);
 
-                    ShowLogE("insertImagesSync", "data: " + data);
-                    String imagePath = SDCardUtil.getFilePathFromUri(getApplicationContext(), data);
+                    ShowLogE("insertImagesSync", "data: " + data); // _Edited
 
-                    ShowLogE("insertImagesSync", "path: " + imagePath);
-                    Bitmap bitmap = ImageUtils.getSmallBitmap(data + "", screenWidth, screenHeight);//压缩图片
+                    Bitmap bitmap = ImageUtils.getSmallBitmap(data + "", screenWidth, screenHeight); // 压缩图片
+                    String smallImagePath = SDCardUtil.saveSmallImgToSdCard(bitmap);
 
-                    //bitmap = BitmapFactory.decodeFile(imagePath);
-                    imagePath = SDCardUtil.saveToSdCard(bitmap);
-                    ShowLogE("insertImagesSync", "imagePath: " + imagePath);
+                    ShowLogE("insertImagesSync", "imagePath: " + smallImagePath); // _Small
 
-                    emitter.onNext(imagePath);
+                    // 删除 Edited
+                    SDCardUtil.deleteFile("" + data);
 
+                    emitter.onNext(smallImagePath);
 
+                    // TODO 网络图片插入
                     // 测试插入网络图片 http://p695w3yko.bkt.clouddn.com/18-5-5/44849367.jpg
                     //subscriber.onNext("http://p695w3yko.bkt.clouddn.com/18-5-5/30271511.jpg");
 

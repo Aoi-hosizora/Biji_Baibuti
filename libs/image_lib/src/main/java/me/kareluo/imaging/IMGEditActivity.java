@@ -26,7 +26,7 @@ import java.util.Locale;
  * Created by felix on 2017/11/14 下午2:26.
  *
  * onDoneClick(): Modified By Aoihosizora
- * saveToSdCard(): Add By AoiHosizora
+ * saveEditedImgToSdCard(): Add By AoiHosizora
  */
 
 public class IMGEditActivity extends IMGEditBaseActivity {
@@ -141,7 +141,7 @@ public class IMGEditActivity extends IMGEditBaseActivity {
      * @param bitmap
      * @return
      */
-    public String saveToSdCard(Bitmap bitmap) {
+    public String saveEditedImgToSdCard(Bitmap bitmap) {
 
         Intent intent = getIntent();
         String Edited_Image_Save_Path = intent.getStringExtra(EXTRA_IMAGE_SAVE_PATH);
@@ -171,7 +171,7 @@ public class IMGEditActivity extends IMGEditBaseActivity {
             Bitmap bitmap = mImgView.saveBitmap();
             if (bitmap != null) {
 
-                String str = saveToSdCard(bitmap);
+                String str = saveEditedImgToSdCard(bitmap);
 
                 Intent intent = new Intent();
                 intent.setData(Uri.parse(str));

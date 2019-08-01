@@ -4,6 +4,7 @@ import android.app.Dialog;
 import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
@@ -50,7 +51,9 @@ import com.baibuti.biji.Data.DB.GroupDao;
 import com.baibuti.biji.Data.DB.NoteDao;
 import com.baibuti.biji.Utils.FileDirUtils.FilePathUtil;
 import com.baibuti.biji.Utils.FileDirUtils.SDCardUtil;
+import com.baibuti.biji.Utils.ImgDocUtils.ImageUtils;
 import com.baibuti.biji.Utils.LayoutUtils.PopupMenuUtil;
+import com.baibuti.biji.Utils.OtherUtils.CommonUtil;
 import com.getbase.floatingactionbutton.FloatingActionButton;
 import com.getbase.floatingactionbutton.FloatingActionsMenu;
 import com.wyt.searchbox.SearchFragment;
@@ -63,6 +66,8 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
+
+import me.kareluo.imaging.IMGEditActivity;
 
 import static android.app.Activity.RESULT_OK;
 
@@ -257,8 +262,6 @@ public class NoteFragment extends Fragment implements View.OnClickListener, ISho
                         SearchingStr = keyword;
 
                         initListView(search(keyword));
-
-//                    ShowLogE("initSearchFrag", search(keyword).isEmpty()+"");
 
                         m_toolbar.getMenu().findItem(R.id.action_search_back).setVisible(true);
                         mSwipeRefresh.setEnabled(false);
@@ -870,6 +873,7 @@ public class NoteFragment extends Fragment implements View.OnClickListener, ISho
 
     private Uri imgUri; // 拍照时返回的uri
     private static final int REQUEST_TAKE_PHOTO = 0;// 拍照
+    private static final int REQUEST_CROP = 3;// 剪辑
 
     /**
      * 浮动菜单 OCR
@@ -914,13 +918,58 @@ public class NoteFragment extends Fragment implements View.OnClickListener, ISho
      * 拍完照后文字识别
      */
     private void OpenOCRAct(Uri imgUri) {
+
+        // imgUri _Edited
+        // smallImagePath _Small
+
+        int screenWidth = CommonUtil.getScreenWidth(getContext());
+        int screenHeight = CommonUtil.getScreenHeight(getContext());
+
+        Bitmap bitmap = ImageUtils.getSmallBitmap(imgUri + "", screenWidth, screenHeight); // 压缩图片
+        String smallImagePath = SDCardUtil.saveSmallImgToSdCard(bitmap);
+        SDCardUtil.deleteFile("" + imgUri);
+
+
         Intent intent = new Intent(getContext(), OCRActivity.class);
 
         Bundle bundle = new Bundle();
-        bundle.putString(OCRActivity.INT_IMGPATH, FilePathUtil.getFilePathByUri(getContext(), imgUri));
+        bundle.putString(OCRActivity.INT_IMGPATH, smallImagePath);
 
         intent.putExtra(OCRActivity.INT_BUNDLE, bundle);
         startActivity(intent);
+    }
+
+    /**
+     * 微信弹出图片涂鸦裁剪
+     * @param uridata
+     */
+    private void StartEditImg(Uri uridata) {
+
+        try {
+            // 获得源路径
+            String uri_path = FilePathUtil.getFilePathByUri(getContext(), uridata);
+
+            if (uri_path.isEmpty()) {
+                new AlertDialog.Builder(getContext())
+                        .setTitle("插入图片")
+                        .setMessage("从相册获取的图片或拍照得到的图片不存在，请重试。")
+                        .setNegativeButton("确定", null)
+                        .create()
+                        .show();
+                return;
+            }
+
+            Uri uri = Uri.fromFile(new File(uri_path));
+
+            Intent intent = new Intent(getActivity(), IMGEditActivity.class);
+
+            intent.putExtra("IMAGE_URI", uri);
+            intent.putExtra("IMAGE_SAVE_PATH", SDCardUtil.getPictureDir());
+
+            startActivityForResult(intent, REQUEST_CROP);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     /**
@@ -1070,7 +1119,16 @@ public class NoteFragment extends Fragment implements View.OnClickListener, ISho
             // 拍照获得图片，编辑
             case REQUEST_TAKE_PHOTO:
                 if (resultCode == RESULT_OK) {
-                    OpenOCRAct(imgUri);
+                    StartEditImg(imgUri);
+                }
+                break;
+
+            // 裁剪后文字识别
+            case REQUEST_CROP: // 裁剪
+                if (resultCode == RESULT_OK) {
+                    // _PHOTO
+                    SDCardUtil.deleteFile(FilePathUtil.getFilePathByUri(getContext(), imgUri));
+                    OpenOCRAct(data.getData()); // _small uri
                 }
                 break;
         }
