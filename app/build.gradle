@@ -35,6 +35,7 @@ android {
     sourceSets {
         main {
             res.srcDirs = [
+                'src/main/res/modules/auth',
                 'src/main/res/modules/note',
                 'src/main/res/modules/search',
                 'src/main/res/modules/schedule',

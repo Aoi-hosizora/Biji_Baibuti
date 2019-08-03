@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
+import okhttp3.Headers;
 import okhttp3.MediaType;
 import okhttp3.MultipartBody;
 import okhttp3.OkHttpClient;
@@ -32,44 +33,44 @@ public class NetUtil {
     public static String NO_UA = "";
 
     /**
-     * HTTP GET url (UA)
+     * HTTP sync GET url (UA)
      * @param url
      * @param UA
      * @return
      */
-    public static String httpGet(String url, String UA) {
-        return httpGet(url, UA, NO_TIME, NO_TIME);
+    public static String httpGetSync(String url, String UA) {
+        return httpGetSync(url, UA, NO_TIME, NO_TIME);
     }
 
     /**
-     * HTTP GET url (not UA)
+     * HTTP sync GET url (not UA)
      * @param url
      * @return
      */
-    public static String httpGet(String url) {
-        return httpGet(url, NO_UA, NO_TIME, NO_TIME);
+    public static String httpGetSync(String url) {
+        return httpGetSync(url, NO_UA, NO_TIME, NO_TIME);
     }
 
     /**
-     * HTTP GET url (not UA)
+     * HTTP sync GET url (not UA)
      * @param url
      * @param TIME_CONN_SEC
      * @param TIME_READ_SEC
      * @return
      */
-    public static String httpGet(String url, int TIME_CONN_SEC, int TIME_READ_SEC) {
-        return httpGet(url, NO_UA, TIME_CONN_SEC, TIME_READ_SEC);
+    public static String httpGetSync(String url, int TIME_CONN_SEC, int TIME_READ_SEC) {
+        return httpGetSync(url, NO_UA, TIME_CONN_SEC, TIME_READ_SEC);
     }
 
     /**
-     * HTTP GET url (UA)
+     * HTTP sync GET url (UA)
      * @param url
      * @param UA
      * @param TIME_CONN_SEC
      * @param TIME_READ_SEC
      * @return
      */
-    public static String httpGet(String url, String UA, int TIME_CONN_SEC, int TIME_READ_SEC) {
+    public static String httpGetSync(String url, String UA, int TIME_CONN_SEC, int TIME_READ_SEC) {
 
         OkHttpClient.Builder okHttpClientBuilder = new OkHttpClient.Builder();
 
@@ -108,76 +109,57 @@ public class NetUtil {
     }
 
     /**
-     * HTTP Post File (no UA)
+     * HTTP sync Post (no file, has json)
      * @param url
-     * @param key
-     * @param img
+     * @param json
      * @return
      */
-    public static String httpPostImg(String url, String key, File img) {
-        return httpPostImg(url, key, img, NO_UA, NO_TIME, NO_TIME);
+    public static String httpPostSync(String url, Map<String, String> json) {
+        return httpPostSync(url, json, null, null);
     }
 
     /**
-     * HTTP Post File (UA)
+     * HTTP sync Post (no json, has file)
      * @param url
      * @param key
-     * @param img
-     * @param UA
+     * @param file
      * @return
      */
-    public static String httpPostImg(String url, String key, File img, String UA) {
-        return httpPostImg(url, key, img, UA, NO_TIME, NO_TIME);
+    public static String httpPostSync(String url, String key, File file) {
+        return httpPostSync(url, null, key, file);
     }
 
     /**
-     * HTTP Post File (no UA)
+     * HTTP sync Post (has file, has file)
      * @param url
+     * @param json
      * @param key
-     * @param img
-     * @param TIME_CONN_SEC
-     * @param TIME_READ_SEC
+     * @param file
      * @return
      */
-    public static String httpPostImg(String url, String key, File img, int TIME_CONN_SEC, int TIME_READ_SEC) {
-        return httpPostImg(url, key, img, NO_UA, TIME_CONN_SEC, TIME_READ_SEC);
-    }
+    public static String httpPostSync(String url, Map<String, String> json, String key, File file) {
 
-    /**
-     * HTTP Post File (UA)
-     * @param url
-     * @param key String
-     * @param img File
-     * @param TIME_CONN_SEC
-     * @param TIME_READ_SEC
-     * @return
-     */
-    public static String httpPostImg(String url, String key, File img, String UA, int TIME_CONN_SEC, int TIME_READ_SEC) {
-        if (img == null)
-            return "";
-
-        OkHttpClient.Builder okHttpClientBuilder = new OkHttpClient.Builder();
-
-        if (TIME_CONN_SEC != NO_TIME)
-            okHttpClientBuilder.connectTimeout(TIME_CONN_SEC, TimeUnit.SECONDS);
-        if (TIME_READ_SEC != NO_TIME)
-            okHttpClientBuilder.readTimeout(TIME_READ_SEC, TimeUnit.SECONDS);
-
-        OkHttpClient okHttpClient = okHttpClientBuilder.build();
-
+        OkHttpClient okHttpClient = new OkHttpClient();
         String Ret = "";
 
         try {
             // File
             MultipartBody.Builder requestBody = new MultipartBody.Builder().setType(MultipartBody.FORM);
-            RequestBody body = RequestBody.create(MediaType.parse("image/*"), img);
-            requestBody.addFormDataPart(key, img.getName(), body);
+
+            if (key != null && !key.isEmpty() && file != null) {
+                RequestBody body = RequestBody.create(MediaType.parse("image/*"), file);
+                requestBody.addFormDataPart(key, file.getName(), body);
+            }
+
+            if (json != null && !json.isEmpty()) {
+                for (Map.Entry<String, String> item : json.entrySet()) {
+                    RequestBody body = RequestBody.create(null, "none");
+                    requestBody.addPart(Headers.of(item.getKey(), item.getValue()), body);
+                }
+            }
 
             // Req Builder
             Request.Builder requestBuilder = new Request.Builder().url(url);
-
-            if (!UA.isEmpty())
-                requestBuilder.addHeader("User-Agent", UA);
 
             requestBuilder.post(requestBody.build());
 

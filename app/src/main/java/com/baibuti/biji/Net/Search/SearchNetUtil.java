@@ -10,7 +10,6 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
-import java.io.IOException;
 import java.net.SocketTimeoutException;
 import java.util.ArrayList;
 import java.util.Locale;
@@ -45,7 +44,7 @@ public class SearchNetUtil {
      */
     public static ArrayList<SearchItem> getSearchBaiduRet(String KeyWord, int page) {
         String url = String.format(Locale.CHINA, BaiduUrl, KeyWord, page - 1);
-        return getParseBaiduRet(NetUtil.httpGet(url, NetUtil.DEF_UserAgent, TIME_CONN_1SEC, TIME_READ_1SEC));
+        return getParseBaiduRet(NetUtil.httpGetSync(url, NetUtil.DEF_UserAgent, TIME_CONN_1SEC, TIME_READ_1SEC));
     }
 
     /**

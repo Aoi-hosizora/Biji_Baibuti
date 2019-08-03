@@ -16,17 +16,18 @@
 
 ### BackEnd
 
-#### OCR(CTPN + CRNN)
+#### OCR (CTPN + CRNN + Flask)
 
 + See [CTPN_CRNN_BackEnd](https://github.com/Aoi-hosizora/CTPN_CRNN_BackEnd)
 
-#### Others
+#### Auth Note Star Schedule File (Flask)
 
 + Continue...
++ See [Biji_BackEnd](https://github.com/Aoi-hosizora/Biji_BackEnd)
 
 ---
 
-### Ref Lib
+### Ref Libs
 
 #### Has modified
 

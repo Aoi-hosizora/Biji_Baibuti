@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <ImageView
+        android:layout_marginTop="@dimen/RegLogLogoMarginTop"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:src="@mipmap/icons8_copybook_96"/>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:layout_marginTop="@dimen/RegLogEditTextMarginTop"
+        android:layout_marginStart="@dimen/RegLogEditTextMarginLeftRight"
+        android:layout_marginEnd="@dimen/RegLogEditTextMarginLeftRight"
+        android:layout_marginBottom="@dimen/RegLogEditTextMarginBottom">
+
+        <android.support.design.widget.TextInputLayout
+            android:id="@+id/id_LoginFrag_LoginLayout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="@string/RegLogAct_UsrHint">
+
+            <android.support.design.widget.TextInputEditText
+                android:id="@+id/id_LoginFrag_LoginText"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="textPersonName"
+                android:maxLines="1"
+                android:imeOptions="actionNext"/>
+        </android.support.design.widget.TextInputLayout>
+
+        <android.support.design.widget.TextInputLayout
+            android:id="@+id/id_LoginFrag_PasswordLayout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="@string/RegLogAct_PsdHint"
+            app:passwordToggleEnabled="true"
+            app:passwordToggleTint="?colorAccent">
+
+            <android.support.design.widget.TextInputEditText
+                android:id="@+id/id_LoginFrag_PasswordText"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="textPassword"
+                android:maxLines="1"
+                android:imeOptions="actionSend"/>
+        </android.support.design.widget.TextInputLayout>
+
+    </LinearLayout>
+
+    <Button
+        android:id="@+id/id_LoginFrag_LoginButton"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/RegLogAct_Login"
+
+        android:textSize="@dimen/RegLogButtonTextSize"
+        android:textColor="@color/white"
+        android:background="@drawable/button_reglog_ripple_bg"
+        android:layout_marginTop="@dimen/RegLogButtonMarginTop"
+        android:layout_marginStart="@dimen/RegLogButtonMarginLeftRight"
+        android:layout_marginEnd="@dimen/RegLogButtonMarginLeftRight"/>
+
+    <Button
+        android:id="@+id/id_LoginFrag_ClearButton"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/RegLogAct_Clear"
+
+        android:textSize="@dimen/RegLogButtonTextSize"
+        android:textColor="@color/white"
+        android:background="@drawable/button_reglog_ripple_bg"
+        android:layout_marginTop="@dimen/RegLogButtonMarginTop"
+        android:layout_marginStart="@dimen/RegLogButtonMarginLeftRight"
+        android:layout_marginEnd="@dimen/RegLogButtonMarginLeftRight"/>
+
+    <Button
+        android:id="@+id/id_LoginFrag_ToRegisterButton"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/RegLogAct_ToRegister"
+
+        android:textSize="@dimen/RegLogButtonTextSize"
+        android:textColor="@color/white"
+        android:background="@drawable/button_reglog_ripple_bg"
+        android:layout_marginTop="@dimen/RegLogButtonMarginTop"
+        android:layout_marginStart="@dimen/RegLogButtonMarginLeftRight"
+        android:layout_marginEnd="@dimen/RegLogButtonMarginLeftRight"/>
+
+</LinearLayout>

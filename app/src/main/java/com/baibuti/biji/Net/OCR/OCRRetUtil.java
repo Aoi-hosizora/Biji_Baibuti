@@ -21,7 +21,7 @@ public class OCRRetUtil {
      */
     public static Region getOCRRet(String imgPath) {
         File img = new File(imgPath);
-        String resp = NetUtil.httpPostImg(Urls.OCRServerUrl, "img", img);
+        String resp = NetUtil.httpPostSync(Urls.OCRServerUrl, "img", img);
         Log.e("OCRRetUtil", "getOCRRet: " + resp.length());
 
         JSONObject jsonObject = null;

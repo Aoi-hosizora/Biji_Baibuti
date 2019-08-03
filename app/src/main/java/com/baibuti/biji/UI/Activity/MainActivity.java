@@ -321,7 +321,8 @@ public class MainActivity extends FragmentActivity implements IShowLog, Navigati
     public boolean onNavigationItemSelected(@NonNull MenuItem item) {
         switch(item.getItemId()) {
             case R.id.id_nav_login:
-                Toast.makeText(this, "待改", Toast.LENGTH_SHORT).show();
+                Intent reglogIntent = new Intent(MainActivity.this, RegLogActivity.class);
+                startActivity(reglogIntent);
                 closeNavMenu();
             return false;
             case R.id.id_nav_about:
@@ -336,9 +337,9 @@ public class MainActivity extends FragmentActivity implements IShowLog, Navigati
                         .create().show();
             break;
             case R.id.id_nav_feedback:
-                Intent intent = new Intent(Intent.ACTION_VIEW);
-                intent.setData(Uri.parse("https://github.com/Aoi-hosizora/Biji_Baibuti/issues"));
-                startActivity(intent);
+                Intent browserIntent = new Intent(Intent.ACTION_VIEW);
+                browserIntent.setData(Uri.parse("https://github.com/Aoi-hosizora/Biji_Baibuti/issues"));
+                startActivity(browserIntent);
             break;
         }
         closeNavMenu();

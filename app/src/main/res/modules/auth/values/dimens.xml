@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <dimen name="appbar_padding">16dp</dimen>
+    <dimen name="appbar_padding_top">8dp</dimen>
+
+    <dimen name="Fragment_MarginLeftRight">10dp</dimen>
+    <dimen name="Fragment_MarginTop">6dp</dimen>
+
+    <dimen name="tabIndicatorHeight">2dp</dimen>
+
+    <dimen name="RegLogEditTextMarginTop">15dp</dimen>
+    <dimen name="RegLogEditTextMarginLeftRight">20dp</dimen>
+    <dimen name="RegLogEditTextMarginBottom">12dp</dimen>
+
+    <dimen name="RegLogLogoMarginTop">20dp</dimen>
+
+    <dimen name="RegLogButtonTextSize">16sp</dimen>
+    <dimen name="RegLogButtonMarginTop">12dp</dimen>
+    <dimen name="RegLogButtonMarginLeftRight">30dp</dimen>
+
+    <dimen name="RegLogTextSize">18sp</dimen>
+</resources>
