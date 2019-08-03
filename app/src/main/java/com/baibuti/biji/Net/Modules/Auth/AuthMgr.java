@@ -1,4 +1,4 @@
-package com.baibuti.biji.Net.Auth;
+package com.baibuti.biji.Net.Modules.Auth;
 
 public class AuthMgr {
 

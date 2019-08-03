@@ -1,4 +1,4 @@
-package com.baibuti.biji.Net.OCR;
+package com.baibuti.biji.Net.Modules.OCR;
 
 import android.util.Log;
 

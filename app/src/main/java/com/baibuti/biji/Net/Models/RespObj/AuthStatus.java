@@ -1,6 +1,6 @@
 package com.baibuti.biji.Net.Models.RespObj;
 
-public class LoginStatus {
+public class AuthStatus {
 
     private String token;
     private String username;
@@ -8,19 +8,38 @@ public class LoginStatus {
     private String errorMsg;
     private int errorCode;
 
-    private LoginStatus(boolean isSuccess, String token, String username, int errorCode, String errorMsg) {
+    private AuthStatus(boolean isSuccess, String token, String username, int errorCode, String errorMsg) {
         this.token = token;
+        this.username = username;
         this.isSuccess = isSuccess;
         this.errorMsg = errorMsg;
         this.errorCode = errorCode;
     }
 
-    public LoginStatus(String token, String username) {
+    /**
+     * 登陆成功
+     * @param token
+     * @param username
+     */
+    public AuthStatus(String token, String username) {
         this(true, token, username, 200, "");
     }
 
-    public LoginStatus(int errorCode, String errorMsg) {
+    /**
+     * 登陆失败 / 注册失败
+     * @param errorCode
+     * @param errorMsg
+     */
+    public AuthStatus(int errorCode, String errorMsg) {
         this(false, "", "", errorCode, errorMsg);
+    }
+
+    /**
+     * 注册成功
+     * @param username
+     */
+    public AuthStatus(String username) {
+        this(true, "", username, 200, "");
     }
 
     public String getToken() {

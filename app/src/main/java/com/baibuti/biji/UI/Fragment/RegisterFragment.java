@@ -1,5 +1,7 @@
 package com.baibuti.biji.UI.Fragment;
 
+import android.app.AlertDialog;
+import android.app.ProgressDialog;
 import android.support.annotation.NonNull;
 import android.support.design.widget.TextInputEditText;
 import android.support.design.widget.TextInputLayout;
@@ -11,8 +13,12 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 
+import com.baibuti.biji.Net.Modules.Auth.AuthUtil;
+import com.baibuti.biji.Net.Models.RespObj.AuthStatus;
 import com.baibuti.biji.R;
 import com.baibuti.biji.UI.Activity.RegLogActivity;
+
+import java.util.Locale;
 
 public class RegisterFragment extends Fragment implements View.OnClickListener {
 
@@ -24,6 +30,8 @@ public class RegisterFragment extends Fragment implements View.OnClickListener {
     private TextInputEditText m_LoginEditText;
     private TextInputLayout m_PasswordLayout;
     private TextInputEditText m_PasswordEditText;
+
+    private ProgressDialog m_reging;
 
     @Nullable
     @Override
@@ -55,6 +63,9 @@ public class RegisterFragment extends Fragment implements View.OnClickListener {
         m_RegisterButton.setOnClickListener(this);
         m_ToLoginButton.setOnClickListener(this);
         m_ClearButton.setOnClickListener(this);
+
+        m_reging = new ProgressDialog(getContext());
+        m_reging.setCancelable(false);
     }
 
     @Override
@@ -74,10 +85,42 @@ public class RegisterFragment extends Fragment implements View.OnClickListener {
 
     private void RegisterButton_Click() {
 
+        String username = m_LoginEditText.getText().toString();
+        String password = m_PasswordEditText.getText().toString();
+
+        m_reging.setMessage(String.format(Locale.CHINA, "用户 \"%s\" 注册中，请稍后...", username));
+        m_reging.show();
+
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                AuthStatus status = AuthUtil.register(username, password);
+
+                getActivity().runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        m_reging.cancel();
+                        if (status.isSuccess())
+                            showAlert("注册成功", String.format(Locale.CHINA, "用户 \"%s\" 注册成功，请登录。", status.getUsername()));
+                        else
+                            showAlert("注册失败", status.getErrorMsg());
+                    }
+                });
+
+            }
+        }).start();
     }
 
     private void ClearButton_Click() {
         m_LoginEditText.setText("");
         m_PasswordEditText.setText("");
+    }
+
+    private void showAlert(String title, String message) {
+        new AlertDialog.Builder(getContext())
+                .setTitle(title)
+                .setMessage(message)
+                .setPositiveButton("确定", null)
+                .create().show();
     }
 }

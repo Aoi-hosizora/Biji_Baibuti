@@ -5,17 +5,17 @@ import org.json.JSONObject;
 
 import java.io.Serializable;
 
-public class Message implements Serializable {
+public class MessageResp implements Serializable {
 
     private String message;
     private String detail;
 
-    public Message(String message, String detail) {
+    public MessageResp(String message, String detail) {
         this.message = message;
         this.detail = detail;
     }
 
-    public Message(String message) {
+    public MessageResp(String message) {
         this(message, "");
     }
 
@@ -35,10 +35,10 @@ public class Message implements Serializable {
         this.detail = detail;
     }
 
-    public static Message getMessageFromJson(String json) {
+    public static MessageResp getMsgRespFromJson(String json) {
         try {
             JSONObject obj = new JSONObject(json);
-            return getMessageFromJson(obj);
+            return getMsgRespFromJson(obj);
         }
         catch (JSONException ex) {
             ex.printStackTrace();
@@ -46,9 +46,9 @@ public class Message implements Serializable {
         }
     }
 
-    public static Message getMessageFromJson(JSONObject obj) {
+    public static MessageResp getMsgRespFromJson(JSONObject obj) {
         try {
-            return new Message(
+            return new MessageResp(
                 obj.getString("message"),
                 obj.getString("detail")
             );

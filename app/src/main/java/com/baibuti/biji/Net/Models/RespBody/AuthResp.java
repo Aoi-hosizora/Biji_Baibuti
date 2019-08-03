@@ -3,12 +3,12 @@ package com.baibuti.biji.Net.Models.RespBody;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-public class RegLogResp {
+public class AuthResp {
 
     private String username;
     private String status;
 
-    public RegLogResp(String username, String status) {
+    public AuthResp(String username, String status) {
         this.username = username;
         this.status = status;
     }
@@ -29,10 +29,10 @@ public class RegLogResp {
         this.status = status;
     }
 
-    public static RegLogResp getRegLogRespFromJson(String json) {
+    public static AuthResp getAuthRespFromJson(String json) {
         try {
             JSONObject obj = new JSONObject(json);
-            return getRegLogRespFromJson(obj);
+            return getAuthRespFromJson(obj);
         }
         catch (JSONException ex) {
             ex.printStackTrace();
@@ -40,9 +40,9 @@ public class RegLogResp {
         }
     }
 
-    public static RegLogResp getRegLogRespFromJson(JSONObject obj) {
+    public static AuthResp getAuthRespFromJson(JSONObject obj) {
         try {
-            return new RegLogResp(
+            return new AuthResp(
                 obj.getString("username"),
                 obj.getString("status")
             );

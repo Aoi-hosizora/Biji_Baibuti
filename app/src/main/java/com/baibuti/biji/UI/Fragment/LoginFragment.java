@@ -15,9 +15,9 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.Toast;
 
-import com.baibuti.biji.Net.Auth.AuthMgr;
-import com.baibuti.biji.Net.Auth.AuthUtil;
-import com.baibuti.biji.Net.Models.RespObj.LoginStatus;
+import com.baibuti.biji.Net.Modules.Auth.AuthMgr;
+import com.baibuti.biji.Net.Modules.Auth.AuthUtil;
+import com.baibuti.biji.Net.Models.RespObj.AuthStatus;
 import com.baibuti.biji.R;
 import com.baibuti.biji.UI.Activity.RegLogActivity;
 
@@ -97,7 +97,7 @@ public class LoginFragment extends Fragment implements View.OnClickListener {
         new Thread(new Runnable() {
             @Override
             public void run() {
-                LoginStatus status = AuthUtil.login(username, password);
+                AuthStatus status = AuthUtil.login(username, password);
 
                 getActivity().runOnUiThread(new Runnable() {
                     @Override
@@ -107,7 +107,10 @@ public class LoginFragment extends Fragment implements View.OnClickListener {
                             Toast.makeText(getActivity(),
                                 String.format(Locale.CHINA, "用户 \"%s\" 登录成功", status.getUsername()), Toast.LENGTH_SHORT).show();
                             AuthMgr.getInstance().setToken(status.getToken());
+                            AuthMgr.getInstance().setUserName(status.getUsername());
+
                             Log.e("", "usr: " + AuthMgr.getInstance().getUserName() + ", token: " + AuthMgr.getInstance().getToken() );
+                            // TODO finish
                         }
                         else
                             showErrorAlert(status.getErrorMsg());

@@ -1,20 +1,18 @@
-package com.baibuti.biji.Net.Models.ReqHeader;
+package com.baibuti.biji.Net.Models.ReqBody;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.Serializable;
 
-public class LoginHeader implements Serializable {
+public class RegisterReqBody implements Serializable {
 
     private String username;
     private String password;
-    private int expiration;
 
-    public LoginHeader(String username, String password, int expiration) {
+    public RegisterReqBody(String username, String password) {
         this.username = username;
         this.password = password;
-        this.expiration = expiration;
     }
 
     public String getUsername() {
@@ -33,21 +31,11 @@ public class LoginHeader implements Serializable {
         this.password = password;
     }
 
-    public int getExpiration() {
-        return expiration;
-    }
-
-    public void setExpiration(int expiration) {
-        this.expiration = expiration;
-    }
-
     public String toJson() {
         JSONObject obj = new JSONObject();
         try {
             obj.put("username", username);
             obj.put("password", password);
-            if (expiration != 0)
-                obj.put("expiration", expiration);
         }
         catch (JSONException ex) {
             ex.printStackTrace();

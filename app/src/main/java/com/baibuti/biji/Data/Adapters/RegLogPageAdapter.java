@@ -14,7 +14,7 @@ import com.baibuti.biji.UI.Fragment.RegisterFragment;
 public class RegLogPageAdapter extends FragmentPagerAdapter {
 
     @StringRes
-    private static final int[] TAB_TITLES = new int[] {
+    public static final int[] TAB_TITLES = new int[] {
             R.string.RegLogAct_Login,
             R.string.RegLogAct_Register
     };
