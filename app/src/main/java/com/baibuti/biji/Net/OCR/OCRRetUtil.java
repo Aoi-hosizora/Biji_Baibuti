@@ -2,7 +2,7 @@ package com.baibuti.biji.Net.OCR;
 
 import android.util.Log;
 
-import com.baibuti.biji.Net.Models.Region;
+import com.baibuti.biji.Net.Models.RespObj.Region;
 import com.baibuti.biji.Net.NetUtil;
 import com.baibuti.biji.Net.Urls;
 
@@ -21,7 +21,14 @@ public class OCRRetUtil {
      */
     public static Region getOCRRet(String imgPath) {
         File img = new File(imgPath);
-        String resp = NetUtil.httpPostSync(Urls.OCRServerUrl, "img", img);
+        String resp;
+        try {
+            resp = NetUtil.httpPostSync(Urls.OCRServerUrl, "img", img).getBody();
+        }
+        catch (Exception ex) {
+            ex.printStackTrace();
+            return null;
+        }
         Log.e("OCRRetUtil", "getOCRRet: " + resp.length());
 
         JSONObject jsonObject = null;

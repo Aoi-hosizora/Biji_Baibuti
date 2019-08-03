@@ -20,7 +20,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.baibuti.biji.Interface.IShowLog;
-import com.baibuti.biji.Net.Models.Region;
+import com.baibuti.biji.Net.Models.RespObj.Region;
 import com.baibuti.biji.Net.OCR.OCRRetUtil;
 import com.baibuti.biji.R;
 import com.baibuti.biji.UI.Widget.OCRView.OCRRegionGroupLayout;

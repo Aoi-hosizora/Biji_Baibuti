@@ -10,7 +10,7 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 
 import com.baibuti.biji.Interface.IShowLog;
-import com.baibuti.biji.Net.Models.Region;
+import com.baibuti.biji.Net.Models.RespObj.Region;
 import com.baibuti.biji.R;
 import com.baibuti.biji.Utils.LayoutUtils.OCRRegionUtil;
 

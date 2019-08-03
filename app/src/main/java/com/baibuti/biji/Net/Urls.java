@@ -18,10 +18,28 @@ public class Urls {
     /**
      * 临时设置的本地局域网 (调试记得设置)
      */
-    public static final String tmpLAN = "http://192.168.1.117";
+    public static final String tmpLAN = "http://192.168.1.122";
+
+    public static final String ServerIP = tmpLAN;
+
+    /**
+     * 百度搜索页
+     */
+    public static String BaiduUrl = "https://www.baidu.com/s?wd=%s&pn=%s1";
 
     /**
      * OCR 服务器的 POST ocr/upload/
      */
-    public static final String OCRServerUrl = tmpLAN + ":1627/ocr/upload/";
+    public static final String OCRServerUrl = ServerIP + ":1627/ocr/upload/";
+
+    /**
+     * 后端登录注册 URL
+     */
+    public static final String AuthUrl = ServerIP + ":8001/auth";
+
+    /**
+     * 后端笔记 URL
+     */
+    public static final String NoteUrl = ServerIP + ":8001/note";
+
 }

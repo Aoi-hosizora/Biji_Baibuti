@@ -54,6 +54,7 @@ public class RegisterFragment extends Fragment implements View.OnClickListener {
 
         m_RegisterButton.setOnClickListener(this);
         m_ToLoginButton.setOnClickListener(this);
+        m_ClearButton.setOnClickListener(this);
     }
 
     @Override

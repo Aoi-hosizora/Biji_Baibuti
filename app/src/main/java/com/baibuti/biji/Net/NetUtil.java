@@ -1,11 +1,12 @@
 package com.baibuti.biji.Net;
 
+import com.baibuti.biji.Net.Models.RespType;
+
 import java.io.File;
 import java.io.IOException;
-import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
-import okhttp3.Headers;
+import okhttp3.FormBody;
 import okhttp3.MediaType;
 import okhttp3.MultipartBody;
 import okhttp3.OkHttpClient;
@@ -38,7 +39,7 @@ public class NetUtil {
      * @param UA
      * @return
      */
-    public static String httpGetSync(String url, String UA) {
+    public static RespType httpGetSync(String url, String UA) {
         return httpGetSync(url, UA, NO_TIME, NO_TIME);
     }
 
@@ -47,7 +48,7 @@ public class NetUtil {
      * @param url
      * @return
      */
-    public static String httpGetSync(String url) {
+    public static RespType httpGetSync(String url) {
         return httpGetSync(url, NO_UA, NO_TIME, NO_TIME);
     }
 
@@ -58,7 +59,7 @@ public class NetUtil {
      * @param TIME_READ_SEC
      * @return
      */
-    public static String httpGetSync(String url, int TIME_CONN_SEC, int TIME_READ_SEC) {
+    public static RespType httpGetSync(String url, int TIME_CONN_SEC, int TIME_READ_SEC) {
         return httpGetSync(url, NO_UA, TIME_CONN_SEC, TIME_READ_SEC);
     }
 
@@ -70,7 +71,7 @@ public class NetUtil {
      * @param TIME_READ_SEC
      * @return
      */
-    public static String httpGetSync(String url, String UA, int TIME_CONN_SEC, int TIME_READ_SEC) {
+    public static RespType httpGetSync(String url, String UA, int TIME_CONN_SEC, int TIME_READ_SEC) {
 
         OkHttpClient.Builder okHttpClientBuilder = new OkHttpClient.Builder();
 
@@ -81,7 +82,7 @@ public class NetUtil {
 
         OkHttpClient okHttpClient = okHttpClientBuilder.build();
 
-        String Ret = "";
+        RespType Ret = null;
 
         try {
             // Req Builder
@@ -93,7 +94,7 @@ public class NetUtil {
             // Req Resp
             Request request = requestBuilder.build();
             Response response = okHttpClient.newCall(request).execute();
-            Ret = response.body().string();
+            Ret = new RespType(response.code(), response.headers(), response.body().string());
             response.close();
         }
         catch (IOException ex) {
@@ -109,64 +110,74 @@ public class NetUtil {
     }
 
     /**
-     * HTTP sync Post (no file, has json)
+     * HTTP sync Post (json)
      * @param url
      * @param json
      * @return
      */
-    public static String httpPostSync(String url, Map<String, String> json) {
-        return httpPostSync(url, json, null, null);
-    }
-
-    /**
-     * HTTP sync Post (no json, has file)
-     * @param url
-     * @param key
-     * @param file
-     * @return
-     */
-    public static String httpPostSync(String url, String key, File file) {
-        return httpPostSync(url, null, key, file);
-    }
-
-    /**
-     * HTTP sync Post (has file, has file)
-     * @param url
-     * @param json
-     * @param key
-     * @param file
-     * @return
-     */
-    public static String httpPostSync(String url, Map<String, String> json, String key, File file) {
-
+    public static RespType httpPostSync(String url, String json) {
         OkHttpClient okHttpClient = new OkHttpClient();
-        String Ret = "";
+        RespType Ret = null;
+
+        try {
+            RequestBody body;
+            if (json != null && !(json.isEmpty()))
+                body = FormBody.create(MediaType.parse("application/json; charset=utf-8"), json);
+            else
+                return null;
+
+            // Req Resp
+            Request request = new Request.Builder()
+                    .url(url)
+                    .post(body)
+                    .build();
+
+            Response response = okHttpClient.newCall(request).execute();
+            Ret = new RespType(response.code(), response.headers(), response.body().string());
+            response.close();
+        }
+        catch (IOException ex) {
+            ex.printStackTrace();
+        }
+        catch (NullPointerException ex) {
+            ex.printStackTrace();
+        }
+        catch (Exception ex) {
+            ex.printStackTrace();
+        }
+        return Ret;
+    }
+
+    /**
+     * HTTP sync Post (file)
+     * @param url
+     * @param key
+     * @param file
+     * @return
+     */
+    public static RespType httpPostSync(String url, String key, File file) {
+        OkHttpClient okHttpClient = new OkHttpClient();
+        RespType Ret = null;
 
         try {
             // File
             MultipartBody.Builder requestBody = new MultipartBody.Builder().setType(MultipartBody.FORM);
 
-            if (key != null && !key.isEmpty() && file != null) {
+            if (key != null && !(key.isEmpty()) && file != null) {
                 RequestBody body = RequestBody.create(MediaType.parse("image/*"), file);
                 requestBody.addFormDataPart(key, file.getName(), body);
             }
-
-            if (json != null && !json.isEmpty()) {
-                for (Map.Entry<String, String> item : json.entrySet()) {
-                    RequestBody body = RequestBody.create(null, "none");
-                    requestBody.addPart(Headers.of(item.getKey(), item.getValue()), body);
-                }
-            }
-
-            // Req Builder
-            Request.Builder requestBuilder = new Request.Builder().url(url);
-
-            requestBuilder.post(requestBody.build());
+            else
+                return null;
 
             // Req Resp
-            Request request = requestBuilder.build();
+            Request request = new Request.Builder()
+                    .url(url)
+                    .post(requestBody.build())
+                    .build();
+
             Response response = okHttpClient.newCall(request).execute();
-            Ret = response.body().string();
+            Ret = new RespType(response.code(), response.headers(), response.body().string());
             response.close();
         }
         catch (IOException ex) {

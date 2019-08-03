@@ -4,6 +4,7 @@ import android.util.Log;
 
 import com.baibuti.biji.Data.Models.SearchItem;
 import com.baibuti.biji.Net.NetUtil;
+import com.baibuti.biji.Net.Urls;
 
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -22,11 +23,6 @@ import okhttp3.Response;
 public class SearchNetUtil {
 
     /**
-     * 百度搜索页
-     */
-    private static String BaiduUrl = "https://www.baidu.com/s?wd=%s&pn=%s1";
-
-    /**
      * 连接超时时间
      */
     private static int TIME_CONN_1SEC = 1;
@@ -43,8 +39,8 @@ public class SearchNetUtil {
      * @return
      */
     public static ArrayList<SearchItem> getSearchBaiduRet(String KeyWord, int page) {
-        String url = String.format(Locale.CHINA, BaiduUrl, KeyWord, page - 1);
-        return getParseBaiduRet(NetUtil.httpGetSync(url, NetUtil.DEF_UserAgent, TIME_CONN_1SEC, TIME_READ_1SEC));
+        String url = String.format(Locale.CHINA, Urls.BaiduUrl, KeyWord, page - 1);
+        return getParseBaiduRet(NetUtil.httpGetSync(url, NetUtil.DEF_UserAgent, TIME_CONN_1SEC, TIME_READ_1SEC).getBody());
     }
 
     /**
