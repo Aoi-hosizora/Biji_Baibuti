@@ -8,6 +8,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
+import okhttp3.Call;
+import okhttp3.Callback;
 import okhttp3.FormBody;
 import okhttp3.MediaType;
 import okhttp3.MultipartBody;
@@ -91,6 +93,52 @@ public class NetUtil {
         return Ret;
     }
 
+    ////////////////////////////////////////
+
+    public static void httpGetAsync(String url, Callback responseCallback) {
+        httpGetAsync(url, null, NO_TIME, NO_TIME, responseCallback);
+    }
+
+    public static void httpGetAsync(String url, Map<String, String> headers, Callback responseCallback) {
+        httpGetAsync(url, headers, NO_TIME, NO_TIME, responseCallback);
+    }
+
+    public static void httpGetAsync(String url, int TIME_CONN_SEC, int TIME_READ_SEC, Callback responseCallback) {
+        httpGetAsync(url, null, TIME_CONN_SEC, TIME_READ_SEC, responseCallback);
+    }
+
+    public static void httpGetAsync(String url, Map<String, String> headers, int TIME_CONN_SEC, int TIME_READ_SEC, Callback responseCallback) {
+
+        OkHttpClient.Builder okHttpClientBuilder = new OkHttpClient.Builder();
+
+        if (TIME_CONN_SEC != NO_TIME)
+            okHttpClientBuilder.connectTimeout(TIME_CONN_SEC, TimeUnit.SECONDS);
+        if (TIME_READ_SEC != NO_TIME)
+            okHttpClientBuilder.readTimeout(TIME_READ_SEC, TimeUnit.SECONDS);
+
+        OkHttpClient okHttpClient = okHttpClientBuilder.build();
+
+        try {
+            // Req Builder
+            Request.Builder requestBuilder = new Request.Builder().url(url);
+
+            if (headers != null && !(headers.isEmpty()))
+                for (Map.Entry<String, String> header : headers.entrySet())
+                    requestBuilder.addHeader(header.getKey(), header.getValue());
+
+            // Req Resp
+            Request request = requestBuilder.build();
+
+
+            okHttpClient.newCall(request).enqueue(responseCallback);
+        }
+        catch (NullPointerException ex) {
+            ex.printStackTrace();
+        }
+        catch (Exception ex) {
+            ex.printStackTrace();
+        }
+    }
 
     ////////////////////////////////////////
 

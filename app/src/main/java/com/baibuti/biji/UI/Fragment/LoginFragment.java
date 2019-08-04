@@ -136,30 +136,6 @@ public class LoginFragment extends Fragment implements View.OnClickListener {
     private void ClearButton_Click() {
         m_LoginEditText.setText("");
         m_PasswordEditText.setText("");
-
-        // TODO
-
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    GroupUtil.deleteGroup(Group.getTmpGroup(3));
-                }
-                catch (ServerErrorException ex) {
-                    ex.printStackTrace();
-                    getActivity().runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            new AlertDialog.Builder(getActivity())
-                                    .setTitle("错误")
-                                    .setMessage(ex.getMessage())
-                                    .setPositiveButton("确定", null)
-                                    .create().show();
-                        }
-                    });
-                }
-            }
-        }).start();
     }
 
     private void showErrorAlert(String message) {

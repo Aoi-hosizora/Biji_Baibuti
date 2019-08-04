@@ -60,7 +60,7 @@ public class AuthUtil {
         }
         catch (NullPointerException ex) {
             ex.printStackTrace();
-            return null;
+            return new AuthStatus(false);
         }
     }
 

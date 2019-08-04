@@ -8,8 +8,14 @@ import android.database.sqlite.SQLiteStatement;
 import android.util.Log;
 
 import com.baibuti.biji.Data.Models.SearchItem;
+import com.baibuti.biji.Net.Models.RespObj.ServerErrorException;
+import com.baibuti.biji.Net.Modules.Star.StarUtil;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 
 public class SearchItemDao {
@@ -32,7 +38,7 @@ public class SearchItemDao {
      *
      * @return ArrayList<SearchItem>
      */
-    public ArrayList<SearchItem> queryAllStarSearchItem() {
+    public ArrayList<SearchItem> queryAllStarSearchItems() {
         SQLiteDatabase db = helper.getWritableDatabase();
 
         ArrayList<SearchItem> searchItems = new ArrayList<>();

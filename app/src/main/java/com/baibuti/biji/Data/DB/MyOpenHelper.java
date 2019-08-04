@@ -9,7 +9,8 @@ import android.database.sqlite.SQLiteOpenHelper;
 
 public class MyOpenHelper extends SQLiteOpenHelper {
 
-    private final static String DB_NAME = "note.db";// 数据库文件名
+    private final static String DB_NAME = "note.db";
+//     private final static String DB_NAME = "biji.db";
 
     /**
      * 数据库版本号更新记录：
@@ -26,6 +27,9 @@ public class MyOpenHelper extends SQLiteOpenHelper {
      *
      * 4:
      * create table db_search_item_star
+     *
+     * 5:
+     * create table db_log
      */
 
     private final static int DB_VERSION = 4;// 数据库版本
@@ -121,12 +125,13 @@ public class MyOpenHelper extends SQLiteOpenHelper {
             version = 4;
         }
     }
+
     /**
      * 判断表格是否存在
      * @param table 表名
      * @return
      */
-    public boolean getTblExists (String table){
+    public boolean getTblExists(String table) {
         SQLiteDatabase db = getWritableDatabase();
         String sql = "SELECT COUNT(*) FROM sqlite_master where type='table' and name='" + table + "'";
         Cursor cursor = db.rawQuery(sql, null);

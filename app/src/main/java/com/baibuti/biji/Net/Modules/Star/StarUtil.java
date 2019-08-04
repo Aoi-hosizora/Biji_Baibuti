@@ -1,8 +1,6 @@
 package com.baibuti.biji.Net.Modules.Star;
 
-import com.baibuti.biji.Data.Models.Note;
 import com.baibuti.biji.Data.Models.SearchItem;
-import com.baibuti.biji.Net.Models.ReqBody.NoteReqBody;
 import com.baibuti.biji.Net.Models.ReqBody.StarReqBody;
 import com.baibuti.biji.Net.Models.RespBody.MessageResp;
 import com.baibuti.biji.Net.Models.RespObj.ServerErrorException;
@@ -36,10 +34,10 @@ public class StarUtil {
         }
     }
 
-    public static SearchItem insertStar(Note Note) throws ServerErrorException {
+    public static SearchItem insertStar(SearchItem searchItem) throws ServerErrorException {
         RespType resp = NetUtil.httpPostPutDeleteSync(
                 InsertStarUrl, NetUtil.PUT,
-                NoteReqBody.toNoteReqBody(Note).toJson(),
+                StarReqBody.toStarReqBody(searchItem).toJson(),
                 NetUtil.getOneHeader("Authorization", AuthMgr.getInstance().getToken())
         );
 
@@ -60,10 +58,10 @@ public class StarUtil {
         }
     }
 
-    public static SearchItem deleteStar(Note Note) throws ServerErrorException {
+    public static SearchItem deleteStar(SearchItem searchItem) throws ServerErrorException {
         RespType resp = NetUtil.httpPostPutDeleteSync(
                 DeleteStarUrl, NetUtil.DELETE,
-                NoteReqBody.toNoteReqBody(Note).toJson(),
+                StarReqBody.toStarReqBody(searchItem).toJson(),
                 NetUtil.getOneHeader("Authorization", AuthMgr.getInstance().getToken())
         );
 

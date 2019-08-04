@@ -35,6 +35,15 @@ public class AuthStatus {
     }
 
     /**
+     * 其他失败
+     * 其他失败
+     * @param isSuccess
+     */
+    public AuthStatus(boolean isSuccess) {
+        this(false, "", "", 500, "");
+    }
+
+    /**
      * 注册成功
      * @param username
      */

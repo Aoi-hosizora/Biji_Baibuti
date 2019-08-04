@@ -34,6 +34,9 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.baibuti.biji.Data.Adapters.GroupRadioAdapter;
+import com.baibuti.biji.Net.Models.RespObj.ServerErrorException;
+import com.baibuti.biji.Net.Modules.Note.GroupUtil;
+import com.baibuti.biji.Net.Modules.Note.NoteUtil;
 import com.baibuti.biji.UI.Activity.MainActivity;
 import com.baibuti.biji.UI.Activity.ModifyNoteActivity;
 import com.baibuti.biji.UI.Activity.OCRActivity;
@@ -177,6 +180,10 @@ public class NoteFragment extends Fragment implements View.OnClickListener, ISho
                         break;
                     case R.id.action_search_back:
                         SearchGroupBack();
+                        break;
+                    case R.id.action_noteUpdate:
+                        // TODO
+                        UpdateData();
                         break;
                 }
                 return true;
@@ -1076,13 +1083,14 @@ public class NoteFragment extends Fragment implements View.OnClickListener, ISho
      */
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
+
         super.onActivityResult(requestCode, resultCode, data);
+        ShowLogE("onActivityResult", "HasReturn");
 
         switch (requestCode) {
             case REQ_NOTE_NEW:
             case REQ_NOTE_UPDATE:
 
-                ShowLogE("onActivityResult", "HasReturn");
                 if (resultCode == RESULT_OK) {
 
                     int flag = data.getIntExtra("flag", NOTE_NEW);
@@ -1136,6 +1144,44 @@ public class NoteFragment extends Fragment implements View.OnClickListener, ISho
 
     // endregion 笔记增删改
 
+    // region DEBUG
+
+    private void UpdateData() {
+
+        // TODO
+
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+
+                    List<Note> notes = noteDao.queryNotesAll();
+                    for (Note note : notes)
+                        NoteUtil.insertNote(note);
+
+                    List<Group> groups = groupDao.queryGroupAll();
+                    for (Group group : groups)
+                        GroupUtil.insertGroup(group);
+
+                }
+                catch (ServerErrorException ex) {
+                    ex.printStackTrace();
+                    getActivity().runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            new android.app.AlertDialog.Builder(getActivity())
+                                    .setTitle("错误")
+                                    .setMessage(ex.getMessage())
+                                    .setPositiveButton("确定", null)
+                                    .create().show();
+                        }
+                    });
+                }
+            }
+        }).start();
+    }
+
+    // endregion DEBUG
 }
 
 

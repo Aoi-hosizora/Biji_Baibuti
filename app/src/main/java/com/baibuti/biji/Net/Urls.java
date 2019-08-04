@@ -18,7 +18,7 @@ public class Urls {
     /**
      * 临时设置的本地局域网 (调试记得设置)
      */
-    public static final String tmpLAN = "http://192.168.43.23";
+    public static final String tmpLAN = "http://192.168.1.122";
 
     public static final String ServerIP = tmpLAN;
 

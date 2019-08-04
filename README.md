@@ -16,11 +16,13 @@
 
 ### BackEnd
 
-#### OCR (CTPN + CRNN + Flask)
++ Use `uwsgi` + `nginx` + `Flask` + `Blueprint`
+
+#### OCR (CTPN + CRNN)
 
 + See [CTPN_CRNN_BackEnd](https://github.com/Aoi-hosizora/CTPN_CRNN_BackEnd)
 
-#### Auth Note Star Schedule File (Flask)
+#### Auth & Note & Star & Schedule & File
 
 + Continue...
 + See [Biji_BackEnd](https://github.com/Aoi-hosizora/Biji_BackEnd)
@@ -31,8 +33,9 @@
 
 #### Has modified
 
++ See [libs/](https://github.com/Aoi-hosizora/Biji_Baibuti/tree/Module-Search/libs)
 + [xrichtext](https://github.com/sendtion/XRichText) (RichTextView.java - `addImageViewAtIndex()`)
-+ [SearchDialog](https://github.com/wenwenwen888/SearchDialog) (SearchFragment.java - `search()`...)
++ [SearchDialog](https://github.com/wenwenwen888/SearchDialog) (SearchFragment.java - `search()`)
 + [image_lib](https://github.com/zhangphil/WeiXinPictureTool) (IMGEditActivity.java - `onDoneClick()`)
 
 #### Others
@@ -41,4 +44,4 @@
 + [jieba-android](https://github.com/452896915/jieba-android)
 + [HoloColorPicker](https://github.com/LarsWerkman/HoloColorPicker)
 + ...
-+ Others see [build.gradle](https://github.com/Aoi-hosizora/Biji_Baibuti/blob/master/app/build.gradle)
++ See [build.gradle](https://github.com/Aoi-hosizora/Biji_Baibuti/blob/master/app/build.gradle)
