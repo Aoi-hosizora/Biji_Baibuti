@@ -52,4 +52,9 @@ public class Urls {
      */
     public static final String StarUrl = ServerIP + ":8001/star";
 
+    /**
+     * 后端日志 URL
+     */
+    public static final String LogUrl = ServerIP + ":8001/log";
+
 }

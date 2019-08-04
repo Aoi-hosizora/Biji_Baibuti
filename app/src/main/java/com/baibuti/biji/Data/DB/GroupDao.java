@@ -10,6 +10,7 @@ import android.util.Log;
 import android.widget.Toast;
 
 import com.baibuti.biji.Data.Models.Group;
+import com.baibuti.biji.Net.Modules.Auth.AuthMgr;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -22,7 +23,11 @@ public class GroupDao {
     private Context context;
 
     public GroupDao(Context context) {
-        helper = new MyOpenHelper(context);
+        this(context, (!(AuthMgr.getInstance().getUserName().isEmpty())) ? AuthMgr.getInstance().getUserName() : "");
+    }
+
+    public GroupDao(Context context, String username) {
+        helper = new MyOpenHelper(context, username);
         this.context = context;
     }
 

@@ -116,8 +116,7 @@ public class LoginFragment extends Fragment implements View.OnClickListener {
                         if (status.isSuccess()) {
                             Toast.makeText(getActivity(),
                                 String.format(Locale.CHINA, "用户 \"%s\" 登录成功", status.getUsername()), Toast.LENGTH_SHORT).show();
-                            AuthMgr.getInstance().setToken(status.getToken());
-                            AuthMgr.getInstance().setUserName(status.getUsername());
+                            AuthMgr.getInstance().login(status.getUsername(), status.getToken());
 
                             Log.e("", "usr: " + AuthMgr.getInstance().getUserName() + ", token: " + AuthMgr.getInstance().getToken() );
                             getActivity().setResult(Activity.RESULT_OK, new Intent());

@@ -10,6 +10,7 @@ import android.util.Log;
 
 import com.baibuti.biji.Data.Models.Group;
 import com.baibuti.biji.Data.Models.Note;
+import com.baibuti.biji.Net.Modules.Auth.AuthMgr;
 import com.baibuti.biji.Utils.OtherUtils.CommonUtil;
 
 import java.text.SimpleDateFormat;
@@ -26,8 +27,12 @@ public class NoteDao {
     private GroupDao groupDao;
 
     public NoteDao(Context context) {
-        helper = new MyOpenHelper(context);
-        groupDao = new GroupDao(context);
+        this(context, (!(AuthMgr.getInstance().getUserName().isEmpty())) ? AuthMgr.getInstance().getUserName() : "");
+    }
+
+    public NoteDao(Context context, String username) {
+        helper = new MyOpenHelper(context, username);
+        groupDao = new GroupDao(context, username);
     }
 
     /**

@@ -9,6 +9,7 @@ import android.util.Log;
 
 import com.baibuti.biji.Data.Models.SearchItem;
 import com.baibuti.biji.Net.Models.RespObj.ServerErrorException;
+import com.baibuti.biji.Net.Modules.Auth.AuthMgr;
 import com.baibuti.biji.Net.Modules.Star.StarUtil;
 
 import java.util.ArrayList;
@@ -28,9 +29,12 @@ public class SearchItemDao {
     private final static String COL_TTL = "sis_title";
     private final static String COL_CNT = "sis_content";
 
-
     public SearchItemDao(Context context) {
-        helper = new MyOpenHelper(context);
+        this(context, (!(AuthMgr.getInstance().getUserName().isEmpty())) ? AuthMgr.getInstance().getUserName() : "");
+    }
+
+    public SearchItemDao(Context context, String username) {
+        helper = new MyOpenHelper(context, username);
     }
 
     /**

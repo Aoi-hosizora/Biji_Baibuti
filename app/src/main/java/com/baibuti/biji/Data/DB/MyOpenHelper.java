@@ -6,11 +6,13 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 
+import java.util.Locale;
+
 
 public class MyOpenHelper extends SQLiteOpenHelper {
 
-    private final static String DB_NAME = "note.db";
-//     private final static String DB_NAME = "biji.db";
+    private final static String DEF_DB_NAME = "note.db";
+    private final static String DB_USR_NAME = "biji_%s.db";
 
     /**
      * 数据库版本号更新记录：
@@ -28,14 +30,15 @@ public class MyOpenHelper extends SQLiteOpenHelper {
      * 4:
      * create table db_search_item_star
      *
-     * 5:
-     * create table db_log
      */
 
     private final static int DB_VERSION = 4;// 数据库版本
 
-    public MyOpenHelper(Context context) {
-        super(context, DB_NAME, null, DB_VERSION);
+    public MyOpenHelper(Context context, String UsrName) {
+        super(context, (UsrName == null || UsrName.isEmpty()) ?
+            DEF_DB_NAME : (String.format(Locale.CHINA, DB_USR_NAME, UsrName)),
+            null, DB_VERSION
+        );
     }
 
     private void Create_Db_group(SQLiteDatabase db) {

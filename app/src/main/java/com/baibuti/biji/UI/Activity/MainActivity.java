@@ -324,11 +324,14 @@ public class MainActivity extends FragmentActivity implements IShowLog, Navigati
 
     @Override
     public boolean onNavigationItemSelected(@NonNull MenuItem item) {
-        switch(item.getItemId()) {
+        switch (item.getItemId()) {
             case R.id.id_nav_login:
-                Intent reglogIntent = new Intent(MainActivity.this, RegLogActivity.class);
-                startActivityForResult(reglogIntent, REQ_LOGIN);
-            return false;
+                closeNavMenu();
+                if (m_navigationView.getMenu().findItem(R.id.id_nav_login).getTitle().equals(getString(R.string.nav_login)))
+                    toLogin();
+                else
+                    toLogout();
+                return false;
             case R.id.id_nav_about:
                 about();
             break;
@@ -363,9 +366,58 @@ public class MainActivity extends FragmentActivity implements IShowLog, Navigati
         usrlabel.setText(username);
     }
 
+    /**
+     * 导航栏 登录
+     */
+    private void toLogin() {
+        Intent reglogIntent = new Intent(MainActivity.this, RegLogActivity.class);
+        startActivityForResult(reglogIntent, REQ_LOGIN);
+    }
+
+    /**
+     * 活动返回 登陆成功
+     */
+    private void login() {
+        m_navigationView.getMenu().findItem(R.id.id_nav_login).setTitle(R.string.nav_logout);
+        refreshUserInfo(AuthMgr.getInstance().getUserName());
+
+        // TODO 更新界面
+        checkLoginStatus();
+    }
+
+    /**
+     * 导航栏 注销
+     */
+    private void toLogout() {
+        AuthMgr.getInstance().logout();
+        m_navigationView.getMenu().findItem(R.id.id_nav_login).setTitle(R.string.nav_login);
+
+        // TODO 更新界面
+
+        // AuthMgr.getInstance().addLoginChangeListener(new AuthMgr.OnLoginChangeListener() {
+        //
+        //     @Override
+        //     public void onLogin(String UserName) {
+        //
+        //     }
+        //
+        //     @Override
+        //     public void onLogout() {
+        //
+        //     }
+        // });
+
+        Toast.makeText(this, "注销成功，请重新登录。", Toast.LENGTH_SHORT).show();
+        checkLoginStatus();
+    }
+
     private void checkLoginStatus() {
         // TODO
-        refreshUserInfo("未登录用户");
+        if (AuthMgr.getInstance().getToken().isEmpty())
+            refreshUserInfo("未登录用户");
+        else
+            refreshUserInfo(AuthMgr.getInstance().getUserName());
+
     }
 
     private final int REQ_LOGIN = 1;
@@ -375,9 +427,8 @@ public class MainActivity extends FragmentActivity implements IShowLog, Navigati
         super.onActivityResult(requestCode, resultCode, data);
         switch (requestCode) {
             case REQ_LOGIN:
-                if (resultCode == RESULT_OK) {
-                    refreshUserInfo(AuthMgr.getInstance().getUserName());
-                }
+                if (resultCode == RESULT_OK)
+                    login();
             break;
         }
     }
