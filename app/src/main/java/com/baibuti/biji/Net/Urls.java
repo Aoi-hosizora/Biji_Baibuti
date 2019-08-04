@@ -18,7 +18,7 @@ public class Urls {
     /**
      * 临时设置的本地局域网 (调试记得设置)
      */
-    public static final String tmpLAN = "http://192.168.1.122";
+    public static final String tmpLAN = "http://192.168.43.23";
 
     public static final String ServerIP = tmpLAN;
 
@@ -46,5 +46,10 @@ public class Urls {
      * 后端分组 URL
      */
     public static final String GroupUrl = ServerIP + ":8001/group";
+
+    /**
+     * 后端收藏 URL
+     */
+    public static final String StarUrl = ServerIP + ":8001/star";
 
 }

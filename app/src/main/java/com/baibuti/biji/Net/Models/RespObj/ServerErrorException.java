@@ -10,6 +10,9 @@ public class ServerErrorException extends Exception {
 
     public ServerErrorException(String errorTitle, String errorDetail, int errorCode) {
         super(String.format(Locale.CHINA, "%d: %s, %s", errorCode, errorTitle, errorDetail));
+        this.errorTitle = errorTitle;
+        this.errorDetail = errorDetail;
+        this.errorCode = errorCode;
     }
 
     public String getErrorTitle() {

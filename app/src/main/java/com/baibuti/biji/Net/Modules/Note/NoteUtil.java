@@ -1,8 +1,6 @@
 package com.baibuti.biji.Net.Modules.Note;
 
 import com.baibuti.biji.Data.Models.Note;
-import com.baibuti.biji.Data.Models.Note;
-import com.baibuti.biji.Net.Models.ReqBody.NoteReqBody;
 import com.baibuti.biji.Net.Models.ReqBody.NoteReqBody;
 import com.baibuti.biji.Net.Models.RespBody.MessageResp;
 import com.baibuti.biji.Net.Models.RespObj.ServerErrorException;

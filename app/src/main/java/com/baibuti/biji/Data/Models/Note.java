@@ -52,6 +52,12 @@ public class Note implements Serializable, Comparable<Note>, ISearchEntity {
         this.setUpdateTime(updateTime);
     }
 
+    public Note(int id, String title, String content, Group groupLabel) {
+        this(title, content);
+        this.setId(id);
+        this.setGroupLabel(groupLabel, true);
+    }
+
     @Override
     public int compareTo(@NonNull Note o) {
         int ret = o.getUpdateTime().compareTo(this.getUpdateTime());

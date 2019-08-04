@@ -122,14 +122,15 @@ public class NoteReqBody implements Serializable {
      * @return
      */
     public String toJson() {
+        SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.CHINA);
         JSONObject obj = new JSONObject();
         try {
             obj.put("id", id);
             obj.put("title", title);
             obj.put("content", content);
             obj.put("group_id", group_id);
-            obj.put("create_time", create_time);
-            obj.put("update_time", update_time);
+            obj.put("create_time", formatter.format(create_time));
+            obj.put("update_time", formatter.format(update_time));
         }
         catch (JSONException ex) {
             ex.printStackTrace();
@@ -160,11 +161,10 @@ public class NoteReqBody implements Serializable {
      * @return
      */
     public static NoteReqBody getNoteRespFromJson(JSONObject obj) {
+        SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.CHINA);
         try {
-            Date ct = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.CHINA).parse(
-                obj.getString("create_time"));
-            Date ut = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.CHINA).parse(
-                obj.getString("update_time"));
+            Date ct = formatter.parse(obj.getString("create_time"));
+            Date ut = formatter.parse(obj.getString("update_time"));
             return new NoteReqBody(
                 obj.getInt("id"),
                 obj.getString("title"),
