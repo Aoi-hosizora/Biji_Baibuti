@@ -10,7 +10,7 @@
         android:layout_width="70dp"
         android:layout_height="70dp"
         android:layout_centerHorizontal="true"
-        android:layout_marginTop="25dp"
+        android:layout_marginTop="32dp"
         android:src="@mipmap/ic_launcher"/>
 
     <TextView
@@ -21,14 +21,5 @@
         android:text="Tony Green"
         android:textColor="#FFF"
         android:textSize="18sp" />
-
-    <TextView
-        android:id="@+id/id_nav_mail"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_above="@id/id_nav_username"
-        android:text="tonygreendev@gmail.com"
-        android:textColor="#FFF"
-        android:textSize="14sp" />
 
 </RelativeLayout>

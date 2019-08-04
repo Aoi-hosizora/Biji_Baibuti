@@ -1,7 +1,9 @@
 package com.baibuti.biji.UI.Fragment;
 
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
+import android.content.Intent;
 import android.support.annotation.NonNull;
 import android.support.design.widget.TextInputEditText;
 import android.support.design.widget.TextInputLayout;
@@ -69,6 +71,9 @@ public class LoginFragment extends Fragment implements View.OnClickListener {
 
         m_logining = new ProgressDialog(getContext());
         m_logining.setCancelable(false);
+
+        if (AuthMgr.getInstance().getToken() != null && !(AuthMgr.getInstance().getToken().isEmpty()))
+            m_LoginEditText.setText(AuthMgr.getInstance().getUserName());
     }
 
     @Override
@@ -110,7 +115,8 @@ public class LoginFragment extends Fragment implements View.OnClickListener {
                             AuthMgr.getInstance().setUserName(status.getUsername());
 
                             Log.e("", "usr: " + AuthMgr.getInstance().getUserName() + ", token: " + AuthMgr.getInstance().getToken() );
-                            // TODO finish
+                            getActivity().setResult(Activity.RESULT_OK, new Intent());
+                            getActivity().finish();
                         }
                         else
                             showErrorAlert(status.getErrorMsg());

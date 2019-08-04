@@ -42,4 +42,9 @@ public class Urls {
      */
     public static final String NoteUrl = ServerIP + ":8001/note";
 
+    /**
+     * 后端分组 URL
+     */
+    public static final String GroupUrl = ServerIP + ":8001/group";
+
 }

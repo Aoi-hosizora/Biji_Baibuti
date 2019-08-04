@@ -23,7 +23,7 @@ public class OCRRetUtil {
         File img = new File(imgPath);
         String resp;
         try {
-            resp = NetUtil.httpPostSync(Urls.OCRServerUrl, "img", img).getBody();
+            resp = NetUtil.httpPostFileSync(Urls.OCRServerUrl, "img", img).getBody();
         }
         catch (Exception ex) {
             ex.printStackTrace();

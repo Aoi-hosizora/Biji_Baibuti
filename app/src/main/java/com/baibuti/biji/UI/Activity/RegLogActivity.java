@@ -1,5 +1,6 @@
 package com.baibuti.biji.UI.Activity;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.design.widget.TabLayout;
@@ -58,6 +59,7 @@ public class RegLogActivity extends AppCompatActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case android.R.id.home:
+                setResult(RESULT_CANCELED, new Intent());
                 finish();
             break;
         }

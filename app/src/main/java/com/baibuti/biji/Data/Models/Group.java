@@ -99,4 +99,10 @@ public class Group implements Serializable, Comparable<Group> {
     public int getIntColor() {
         return Color.parseColor(getColor());
     }
+
+    public static Group getTmpGroup(int id) {
+        Group group = new Group();
+        group.setId(id);
+        return group;
+    }
 }

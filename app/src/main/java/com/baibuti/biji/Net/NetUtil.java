@@ -4,6 +4,8 @@ import com.baibuti.biji.Net.Models.RespType;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 import okhttp3.FormBody;
@@ -28,50 +30,29 @@ public class NetUtil {
      */
     public static int NO_TIME = 0;
 
-    /**
-     * 不设置用户代理
-     */
-    public static String NO_UA = "";
+    public final static String POST = "POST";
+    public final static String PUT = "PUT";
+    public final static String DELETE = "DELETE";
 
-    /**
-     * HTTP sync GET url (UA)
-     * @param url
-     * @param UA
-     * @return
-     */
-    public static RespType httpGetSync(String url, String UA) {
-        return httpGetSync(url, UA, NO_TIME, NO_TIME);
+    public static Map<String, String> getOneHeader(String key, String value) {
+        Map<String, String> header = new HashMap<>();
+        header.put(key, value);
+        return header;
     }
 
-    /**
-     * HTTP sync GET url (not UA)
-     * @param url
-     * @return
-     */
     public static RespType httpGetSync(String url) {
-        return httpGetSync(url, NO_UA, NO_TIME, NO_TIME);
+        return httpGetSync(url, null, NO_TIME, NO_TIME);
     }
 
-    /**
-     * HTTP sync GET url (not UA)
-     * @param url
-     * @param TIME_CONN_SEC
-     * @param TIME_READ_SEC
-     * @return
-     */
+    public static RespType httpGetSync(String url, Map<String, String> headers) {
+        return httpGetSync(url, headers, NO_TIME, NO_TIME);
+    }
+
     public static RespType httpGetSync(String url, int TIME_CONN_SEC, int TIME_READ_SEC) {
-        return httpGetSync(url, NO_UA, TIME_CONN_SEC, TIME_READ_SEC);
+        return httpGetSync(url, null, TIME_CONN_SEC, TIME_READ_SEC);
     }
 
-    /**
-     * HTTP sync GET url (UA)
-     * @param url
-     * @param UA
-     * @param TIME_CONN_SEC
-     * @param TIME_READ_SEC
-     * @return
-     */
-    public static RespType httpGetSync(String url, String UA, int TIME_CONN_SEC, int TIME_READ_SEC) {
+    public static RespType httpGetSync(String url, Map<String, String> headers, int TIME_CONN_SEC, int TIME_READ_SEC) {
 
         OkHttpClient.Builder okHttpClientBuilder = new OkHttpClient.Builder();
 
@@ -88,8 +69,9 @@ public class NetUtil {
             // Req Builder
             Request.Builder requestBuilder = new Request.Builder().url(url);
 
-            if (!UA.isEmpty())
-                requestBuilder.addHeader("User-Agent", UA);
+            if (headers != null && !(headers.isEmpty()))
+                for (Map.Entry<String, String> header : headers.entrySet())
+                    requestBuilder.addHeader(header.getKey(), header.getValue());
 
             // Req Resp
             Request request = requestBuilder.build();
@@ -109,13 +91,19 @@ public class NetUtil {
         return Ret;
     }
 
-    /**
-     * HTTP sync Post (json)
-     * @param url
-     * @param json
-     * @return
-     */
+
+    ////////////////////////////////////////
+
+
     public static RespType httpPostSync(String url, String json) {
+        return httpPostSync(url, json, null);
+    }
+
+    public static RespType httpPostSync(String url, String json, Map<String, String> headers) {
+        return httpPostPutDeleteSync(url, POST, json, headers);
+    }
+
+    public static RespType httpPostPutDeleteSync(String url, String Method, String json, Map<String, String> headers) {
         OkHttpClient okHttpClient = new OkHttpClient();
         RespType Ret = null;
 
@@ -127,10 +115,18 @@ public class NetUtil {
                 return null;
 
             // Req Resp
-            Request request = new Request.Builder()
-                    .url(url)
-                    .post(body)
-                    .build();
+            Request.Builder builder = new Request.Builder().url(url);
+
+            if (Method.equals(PUT)) builder.put(body);
+            else if (Method.equals(DELETE)) builder.delete(body);
+            else builder.post(body);
+
+
+            if (headers != null && !(headers.isEmpty()))
+                for (Map.Entry<String, String> header : headers.entrySet())
+                    builder.addHeader(header.getKey(), header.getValue());
+
+            Request request = builder.build();
 
             Response response = okHttpClient.newCall(request).execute();
             Ret = new RespType(response.code(), response.headers(), response.body().string());
@@ -148,14 +144,13 @@ public class NetUtil {
         return Ret;
     }
 
-    /**
-     * HTTP sync Post (file)
-     * @param url
-     * @param key
-     * @param file
-     * @return
-     */
-    public static RespType httpPostSync(String url, String key, File file) {
+    ////////////////////////////////////////
+
+    public static RespType httpPostFileSync(String url, String key, File file) {
+        return httpPostFileSync(url, key, file, null);
+    }
+
+    public static RespType httpPostFileSync(String url, String key, File file, Map<String, String> headers) {
         OkHttpClient okHttpClient = new OkHttpClient();
         RespType Ret = null;
 
@@ -171,10 +166,13 @@ public class NetUtil {
                 return null;
 
             // Req Resp
-            Request request = new Request.Builder()
-                    .url(url)
-                    .post(requestBody.build())
-                    .build();
+            Request.Builder builder = new Request.Builder().url(url).post(requestBody.build());
+
+            if (headers != null && !(headers.isEmpty()))
+                for (Map.Entry<String, String> header : headers.entrySet())
+                    builder.addHeader(header.getKey(), header.getValue());
+
+            Request request = builder.build();
 
             Response response = okHttpClient.newCall(request).execute();
             Ret = new RespType(response.code(), response.headers(), response.body().string());

@@ -24,9 +24,11 @@ import android.view.Gravity;
 import android.view.KeyEvent;
 
 import android.view.ViewGroup;
+import android.widget.TextView;
 import android.widget.Toast;
 import android.view.MenuItem;
 
+import com.baibuti.biji.Net.Modules.Auth.AuthMgr;
 import com.baibuti.biji.UI.Fragment.ScheduleFragment;
 import com.baibuti.biji.UI.Fragment.NoteFragment;
 import com.baibuti.biji.UI.Fragment.SearchFragment;
@@ -100,6 +102,9 @@ public class MainActivity extends FragmentActivity implements IShowLog, Navigati
         initViews();
         initAdpts();
         initNav();
+
+        // TODO
+        checkLoginStatus();
     }
 
     /**
@@ -322,19 +327,10 @@ public class MainActivity extends FragmentActivity implements IShowLog, Navigati
         switch(item.getItemId()) {
             case R.id.id_nav_login:
                 Intent reglogIntent = new Intent(MainActivity.this, RegLogActivity.class);
-                startActivity(reglogIntent);
-                closeNavMenu();
+                startActivityForResult(reglogIntent, REQ_LOGIN);
             return false;
             case R.id.id_nav_about:
-                String msg = "SCUT 百步梯项目 - 笔迹\n\n" +
-                        "开发网站：https://github.com/Aoi-hosizora/Biji_Baibuti\n\n" +
-                        "作者：17级软件学院xxxxx\n\n" +
-                        "更多信息详看开发网站。";
-                new AlertDialog.Builder(this)
-                        .setTitle("关于")
-                        .setMessage(msg)
-                        .setPositiveButton("确定", null)
-                        .create().show();
+                about();
             break;
             case R.id.id_nav_feedback:
                 Intent browserIntent = new Intent(Intent.ACTION_VIEW);
@@ -344,6 +340,45 @@ public class MainActivity extends FragmentActivity implements IShowLog, Navigati
         }
         closeNavMenu();
         return true;
+    }
+
+    private void about() {
+        String msg = "SCUT 百步梯项目 - 笔迹\n\n" +
+                "开发网站：https://github.com/Aoi-hosizora/Biji_Baibuti\n\n" +
+                "作者：17级软件学院xxxxx\n\n" +
+                "更多信息详看开发网站。";
+        new AlertDialog.Builder(this)
+                .setTitle("关于")
+                .setMessage(msg)
+                .setPositiveButton("确定", null)
+                .create().show();
+    }
+
+    /**
+     * 刷新界面显示用户
+     * @param username
+     */
+    private void refreshUserInfo(String username) {
+        TextView usrlabel = m_navigationView.getHeaderView(0).findViewById(R.id.id_nav_username);
+        usrlabel.setText(username);
+    }
+
+    private void checkLoginStatus() {
+        // TODO
+        refreshUserInfo("未登录用户");
+    }
+
+    private final int REQ_LOGIN = 1;
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        switch (requestCode) {
+            case REQ_LOGIN:
+                if (resultCode == RESULT_OK) {
+                    refreshUserInfo(AuthMgr.getInstance().getUserName());
+                }
+            break;
+        }
     }
 
     // endregion 侧边栏 openNavMenu closeNavMenu
