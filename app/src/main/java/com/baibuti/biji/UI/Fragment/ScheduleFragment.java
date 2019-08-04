@@ -149,6 +149,11 @@ public class ScheduleFragment extends Fragment {
 
     }
 
+    /**
+     * 提取数字（格式\w*-\w*）
+     * @param s
+     * @return
+     */
     private List<Integer> getNumber(String s){
         String regEx = "[^0-9]";
         Pattern p = Pattern.compile(regEx);
@@ -165,6 +170,12 @@ public class ScheduleFragment extends Fragment {
         return temp;
     }
 
+    /**
+     * 将assets中的html资源转为字符串
+     * @param context
+     * @param fileName
+     * @return
+     */
     public String getHtmlString(Context context, String fileName) {
 
         StringBuilder stringBuilder = new StringBuilder();
@@ -184,6 +195,7 @@ public class ScheduleFragment extends Fragment {
 
     /**
      * 初始化课程控件
+     * @param v
      */
     private void initTimetableView(View v) {
 
@@ -260,7 +272,7 @@ public class ScheduleFragment extends Fragment {
     }
 
     /**
-     * 周次选择布局的左侧被点击时回调<br/>
+     * 周次选择布局的左侧被点击时回调
      * 对话框修改当前周次
      */
     protected void onWeekLeftLayoutClicked() {
