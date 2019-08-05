@@ -7,6 +7,7 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteStatement;
 import android.util.Log;
 
+import com.baibuti.biji.Data.Models.LogModule;
 import com.baibuti.biji.Data.Models.UtLog;
 import com.baibuti.biji.Net.Modules.Auth.AuthMgr;
 
@@ -138,37 +139,53 @@ public class UtLogDao {
     }
 
     /**
-     * 更新笔记日志
+     * 获得本地日志
+     * @param logModule
+     * @return
      */
-    public void updateNoteLog() {
-        updateOneModuleLog(UtLog.Log_Note);
+    public UtLog getLog(LogModule logModule) {
+        UtLog ret = null;
+        switch (logModule) {
+            case Mod_Note:
+                ret = queryOneModuleLog(UtLog.Log_Note);
+                break;
+            case Mod_Group:
+                ret = queryOneModuleLog(UtLog.Log_Group);
+                break;
+            case Mod_Star:
+                ret = queryOneModuleLog(UtLog.Log_Star);
+                break;
+            case Mod_File:
+                ret = queryOneModuleLog(UtLog.Log_File);
+                break;
+            case Mod_Schedule:
+                ret = queryOneModuleLog(UtLog.Log_Schedule);
+                break;
+        }
+        return ret;
     }
 
     /**
-     * 更新分组日志
+     * 更新本地日志
+     * @param logModule
      */
-    public void updateGroupLog() {
-        updateOneModuleLog(UtLog.Log_Group);
-    }
-
-    /**
-     * 更新收藏日志
-     */
-    public void updateStarLog() {
-        updateOneModuleLog(UtLog.Log_Star);
-    }
-
-    /**
-     * 更新文件日志
-     */
-    public void updateFileLog() {
-        updateOneModuleLog(UtLog.Log_File);
-    }
-
-    /**
-     * 更新课程日志
-     */
-    public void updateScheduleLog() {
-        updateOneModuleLog(UtLog.Log_Schedule);
+    public void updateLog(LogModule logModule) {
+        switch (logModule) {
+            case Mod_Note:
+                updateOneModuleLog(UtLog.Log_Note);
+                break;
+            case Mod_Group:
+                updateOneModuleLog(UtLog.Log_Group);
+                break;
+            case Mod_Star:
+                updateOneModuleLog(UtLog.Log_Star);
+                break;
+            case Mod_File:
+                updateOneModuleLog(UtLog.Log_File);
+                break;
+            case Mod_Schedule:
+                updateOneModuleLog(UtLog.Log_Schedule);
+                break;
+        }
     }
 }

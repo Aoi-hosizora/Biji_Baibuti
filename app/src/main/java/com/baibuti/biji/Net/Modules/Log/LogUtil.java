@@ -1,5 +1,6 @@
 package com.baibuti.biji.Net.Modules.Log;
 
+import com.baibuti.biji.Data.Models.LogModule;
 import com.baibuti.biji.Data.Models.UtLog;
 import com.baibuti.biji.Net.Models.RespBody.LogResp;
 import com.baibuti.biji.Net.Models.RespBody.MessageResp;
@@ -37,11 +38,13 @@ public class LogUtil {
 
     /**
      * 获得服务器上一个日志
-     * @param module UtLog.Log_xxx
+     * @param logModule
      * @return
      * @throws ServerErrorException
      */
-    public static UtLog getOneLog(String module) throws ServerErrorException {
+    public static UtLog getOneLog(LogModule logModule) throws ServerErrorException {
+        String module = logModule.toString();
+
         String url = String.format(Locale.CHINA, OneLogUrl, module);
         RespType resp = NetUtil.httpGetSync(url, NetUtil.getOneHeader("Authorization", AuthMgr.getInstance().getToken()));
         try {

@@ -10,6 +10,7 @@ import android.util.Log;
 import android.widget.Toast;
 
 import com.baibuti.biji.Data.Models.Group;
+import com.baibuti.biji.Data.Models.LogModule;
 import com.baibuti.biji.Net.Modules.Auth.AuthMgr;
 
 import java.util.ArrayList;
@@ -29,6 +30,15 @@ public class GroupDao {
     public GroupDao(Context context, String username) {
         helper = new MyOpenHelper(context, username);
         this.context = context;
+    }
+
+
+    /**
+     * 更新分组日志，可能存在冗杂
+     */
+    private void updateLog() {
+        UtLogDao utLogDao = new UtLogDao(context);
+        utLogDao.updateLog(LogModule.Mod_Group);
     }
 
     // region 查询全部 queryGroupAll selectAllGroup
@@ -338,6 +348,10 @@ public class GroupDao {
                 nextGroup.setOrder(i); // 压缩
                 updateGroup(nextGroup);
                 handleOrderDuplicateWhenUpdate(nextGroup);
+
+                // TODO
+
+                updateLog();
             }
             order++;
         }
@@ -441,11 +455,16 @@ public class GroupDao {
 
             ret = stat.executeInsert();
             db.setTransactionSuccessful();
-        } catch (SQLException e) {
+
+            updateLog();
+        }
+        catch (SQLException e) {
             e.printStackTrace();
-        } catch (Exception e) {
+        }
+        catch (Exception e) {
             e.printStackTrace();
-        } finally {
+        }
+        finally {
             db.endTransaction();
             db.close();
         }
@@ -483,6 +502,8 @@ public class GroupDao {
             values.put("g_color", group.getColor());
 
             db.update("db_group", values, "g_id=?", new String[]{group.getId() + ""});
+
+            updateLog();
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -510,6 +531,8 @@ public class GroupDao {
 
             // 处理删除间隙
             handleOrderGap();
+
+            updateLog();
         }
 
         catch (Exception e) {

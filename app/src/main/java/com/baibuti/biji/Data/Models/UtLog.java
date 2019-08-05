@@ -11,6 +11,9 @@ public class UtLog implements Serializable {
     public final static String Log_File = "File";
     public final static String Log_Schedule = "Schedule";
 
+    /**
+     * 所有模块集，只用在 UtLogDao
+     */
     public final static String[] Log_Modules = {
         Log_Note, Log_Group, Log_Star, Log_File, Log_Schedule
     };

@@ -7,6 +7,7 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteStatement;
 import android.util.Log;
 
+import com.baibuti.biji.Data.Models.LogModule;
 import com.baibuti.biji.Data.Models.SearchItem;
 import com.baibuti.biji.Net.Models.RespObj.ServerErrorException;
 import com.baibuti.biji.Net.Modules.Auth.AuthMgr;
@@ -21,8 +22,9 @@ import java.util.stream.Stream;
 
 public class SearchItemDao {
 
-
     private MyOpenHelper helper;
+    private Context context;
+
     private final static String TBL_NAME = "db_search_item_star";
 
     private final static String COL_URL = "sis_url";
@@ -35,6 +37,15 @@ public class SearchItemDao {
 
     public SearchItemDao(Context context, String username) {
         helper = new MyOpenHelper(context, username);
+        this.context = context;
+    }
+
+    /**
+     * 更新收藏日志
+     */
+    private void updateLog() {
+        UtLogDao utLogDao = new UtLogDao(context);
+        utLogDao.updateLog(LogModule.Mod_Star);
     }
 
     /**
@@ -141,6 +152,8 @@ public class SearchItemDao {
 
             Log.e("", "insertStarSearchItem: " + "sql = " + sql + ", ret = " + ret);
             db.setTransactionSuccessful();
+
+            updateLog();
         }
         catch (Exception ex) {
             ex.printStackTrace();
@@ -172,6 +185,8 @@ public class SearchItemDao {
             db.update(TBL_NAME, values, COL_URL + " = ?", new String[] { searchItem.getUrl() });
 
             db.setTransactionSuccessful();
+
+            updateLog();
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -200,6 +215,8 @@ public class SearchItemDao {
         try {
             ret = db.delete(TBL_NAME, COL_URL + " = ?", new String[] {searchItem.getUrl()});
             db.setTransactionSuccessful();
+
+            updateLog();
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -227,6 +244,8 @@ public class SearchItemDao {
                         ret += db.delete(TBL_NAME, COL_URL + " = ?", new String[]{searchItem.getUrl()});
                     }
                     db.setTransactionSuccessful();
+
+                    updateLog();
                 }
                 catch (Exception e) {
                     e.printStackTrace();
