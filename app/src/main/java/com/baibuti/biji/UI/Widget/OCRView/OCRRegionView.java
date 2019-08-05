@@ -5,14 +5,13 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.PaintFlagsDrawFilter;
-import android.graphics.RectF;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 
 import com.baibuti.biji.Interface.IShowLog;
-import com.baibuti.biji.Net.Models.Region;
+import com.baibuti.biji.Net.Models.RespObj.Region;
 import com.baibuti.biji.R;
 
 public class OCRRegionView extends View implements IShowLog {

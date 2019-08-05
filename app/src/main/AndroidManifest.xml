@@ -58,7 +58,7 @@
             </intent-filter>
         </activity>
 
-        <!-- StarSearchItemActivity Activity -->
+        <!-- StarSearchItem Activity -->
         <activity
             android:name=".UI.Activity.StarSearchItemActivity"
             android:screenOrientation="portrait">
@@ -68,12 +68,22 @@
             </intent-filter>
         </activity>
 
-        <!-- StarSearchItemActivity Activity -->
+        <!-- OCR Activity -->
         <activity
             android:name=".UI.Activity.OCRActivity"
             android:screenOrientation="portrait">
             <intent-filter>
                 <action android:name="activitytest.example.com.activitytest.OCRActivity" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </activity>
+
+        <!-- RegLog Activity -->
+        <activity
+            android:name=".UI.Activity.RegLogActivity"
+            android:screenOrientation="portrait">
+            <intent-filter>
+                <action android:name="activitytest.example.com.activitytest.RegLogActivity" />
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </activity>

@@ -102,12 +102,12 @@ public class EllipsizeTextView extends android.support.v7.widget.AppCompatTextVi
             if (layout.getLineCount() > maxLines) {
                 workingText = fullText.substring(0, layout.getLineEnd(maxLines - 1)).trim();
                 while (createWorkingLayout(workingText + ELLIPSIS).getLineCount() > maxLines) {
-                    int lastSpace = workingText.lastIndexOf(' ');
-                    if (lastSpace == -1) {
-                        break;
-                    }
+                    // int lastSpace = workingText.lastIndexOf(' ');
+                    // if (lastSpace == -1) {
+                    //     break;
+                    // }
                     // workingText = workingText.substring(0, lastSpace);
-                    workingText = workingText.substring(0, workingText.length() - 3);
+                    workingText = workingText.substring(0, workingText.length() - 5);
                 }
                 workingText = workingText + ELLIPSIS;
                 ellipsized = true;

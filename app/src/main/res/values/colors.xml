@@ -4,6 +4,7 @@
     <color name="colorPrimaryLight">#00BFFF</color>
     <color name="colorPrimaryLighter">#00CFFF</color>
     <color name="colorPrimaryDark">#0090FF</color>
+    <color name="colorPrimaryDarker">#0076FF</color>
 
     <color name="colorAccent">#009B95</color>
     <color name="colorHighLightAccent">@color/grey_250</color>

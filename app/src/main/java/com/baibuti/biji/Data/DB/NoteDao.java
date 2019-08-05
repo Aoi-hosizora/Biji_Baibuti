@@ -9,8 +9,14 @@ import android.database.sqlite.SQLiteStatement;
 import android.util.Log;
 
 import com.baibuti.biji.Data.Models.Group;
+import com.baibuti.biji.Data.Models.LogModule;
 import com.baibuti.biji.Data.Models.Note;
+import com.baibuti.biji.Net.Models.RespObj.ServerErrorException;
+import com.baibuti.biji.Net.Modules.Auth.AuthMgr;
+import com.baibuti.biji.Net.Modules.Note.NoteUtil;
 import com.baibuti.biji.Utils.OtherUtils.CommonUtil;
+
+import org.apache.poi.ss.formula.eval.NotImplementedException;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -24,16 +30,46 @@ import java.util.List;
 public class NoteDao {
     private MyOpenHelper helper;
     private GroupDao groupDao;
+    private Context context;
 
     public NoteDao(Context context) {
-        helper = new MyOpenHelper(context);
-        groupDao = new GroupDao(context);
+        this(context, (!(AuthMgr.getInstance().getUserName().isEmpty())) ? AuthMgr.getInstance().getUserName() : "");
+    }
+
+    public NoteDao(Context context, String username) {
+        helper = new MyOpenHelper(context, username);
+        groupDao = new GroupDao(context, username);
+        this.context = context;
+    }
+
+    /**
+     * 更新笔记日志
+     */
+    private void updateLog() {
+        UtLogDao utLogDao = new UtLogDao(context);
+        utLogDao.updateLog(LogModule.Mod_Note);
     }
 
     /**
      * 查询所有笔记
      */
     public List<Note> queryNotesAll(int groupId) { // ArrayList
+
+        if (ServerDbUpdateHelper.isLocalNewer(context, LogModule.Mod_Note)) {
+            // 本地新
+            // push
+        }
+        else {
+            // 服务器新
+            // pull
+            try {
+                Note[] notes = NoteUtil.getAllNotes();
+            }
+            catch (ServerErrorException ex) {
+                ex.printStackTrace();
+            }
+        }
+
         SQLiteDatabase db = helper.getWritableDatabase();
 
         List<Note> noteList = new ArrayList<>();
@@ -49,7 +85,6 @@ public class NoteDao {
 
 
             cursor = db.rawQuery(sql, null);
-            //cursor = db.query("note", null, null, null, null, null, "n_id desc");
 
             while (cursor.moveToNext()) {
 
@@ -64,9 +99,6 @@ public class NoteDao {
                 if (grouptmp == null)
                     grouptmp = groupDao.queryDefaultGroup();
 
-//                Group grouptmp = new Group();
-//                grouptmp.setId(cursor.getInt(cursor.getColumnIndex("n_group_id")));
-//                grouptmp.setName(cursor.getString(cursor.getColumnIndex("n_group_name")));
                 note.setGroupLabel(grouptmp, false);
 
                 note.setCreateTime(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").parse(
@@ -77,12 +109,13 @@ public class NoteDao {
                         cursor.getString(cursor.getColumnIndex("n_update_time"))
                 ));
 
-
                 noteList.add(note);
             }
-        } catch (Exception e) {
+        }
+        catch (Exception e) {
             e.printStackTrace();
-        } finally {
+        }
+        finally {
             if (cursor != null) {
                 cursor.close();
             }
@@ -90,6 +123,9 @@ public class NoteDao {
                 db.close();
             }
         }
+
+
+
         return noteList;
     }
 
@@ -123,7 +159,6 @@ public class NoteDao {
                 Date updateTime = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").parse(
                         cursor.getString(cursor.getColumnIndex("n_update_time"))
                 );
-
 
 
                 note = new Note(noteId, title, content, grouptmp, createTime, updateTime);
@@ -175,11 +210,17 @@ public class NoteDao {
 
             ret = stat.executeInsert();
             db.setTransactionSuccessful();
-        } catch (SQLException e) {
+
+            updateLog();
+
+        }
+        catch (SQLException e) {
             e.printStackTrace();
-        } catch (Exception e) {
+        }
+        catch (Exception e) {
             e.printStackTrace();
-        } finally {
+        }
+        finally {
             db.endTransaction();
             db.close();
         }
@@ -203,6 +244,7 @@ public class NoteDao {
         values.put("n_update_time", CommonUtil.date2string(note.getUpdateTime()));
 
         db.update("db_note", values, "n_id=?", new String[]{note.getId()+""});
+        updateLog();
         db.close();
     }
 
@@ -214,12 +256,15 @@ public class NoteDao {
         int ret = 0;
         try {
             ret = db.delete("db_note", "n_id=?", new String[]{noteId + ""});
-        } catch (Exception e) {
+
+            updateLog();
+        }
+        catch (Exception e) {
             e.printStackTrace();
-        } finally {
-            if (db != null) {
+        }
+        finally {
+            if (db != null)
                 db.close();
-            }
         }
         return ret;
     }
@@ -235,19 +280,24 @@ public class NoteDao {
             if (mNotes != null && mNotes.size() > 0) {
                 db.beginTransaction();//开始事务
                 try {
-                    for (Note note : mNotes) {
+                    for (Note note : mNotes)
                         ret += db.delete("db_note", "n_id=?", new String[]{note.getId() + ""});
-                    }
                     db.setTransactionSuccessful();
-                } catch (Exception e) {
+
+                    updateLog();
+                }
+                catch (Exception e) {
                     e.printStackTrace();
-                } finally {
+                }
+                finally {
                     db.endTransaction();
                 }
             }
-        } catch (Exception e) {
+        }
+        catch (Exception e) {
             e.printStackTrace();
-        } finally {
+        }
+        finally {
             if (db != null) {
                 db.close();
             }

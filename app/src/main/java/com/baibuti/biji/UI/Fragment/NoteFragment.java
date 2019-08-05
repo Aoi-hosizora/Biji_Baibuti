@@ -34,6 +34,9 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.baibuti.biji.Data.Adapters.GroupRadioAdapter;
+import com.baibuti.biji.Net.Models.RespObj.ServerErrorException;
+import com.baibuti.biji.Net.Modules.Note.GroupUtil;
+import com.baibuti.biji.Net.Modules.Note.NoteUtil;
 import com.baibuti.biji.UI.Activity.MainActivity;
 import com.baibuti.biji.UI.Activity.ModifyNoteActivity;
 import com.baibuti.biji.UI.Activity.OCRActivity;
@@ -82,10 +85,9 @@ public class NoteFragment extends Fragment implements View.OnClickListener, ISho
 
     private RecyclerViewEmptySupport mNoteList;
 
-    private FloatingActionsMenu m_fabmenu;
+    private FloatingActionsMenu m_fabMenu;
     private SearchFragment searchFragment;
     private SwipeRefreshLayout mSwipeRefresh;
-    // private SlidingMenu slidingMenu;
 
     private ProgressDialog loadingDialog;
     private ProgressDialog loadingGroupDialog;
@@ -93,13 +95,12 @@ public class NoteFragment extends Fragment implements View.OnClickListener, ISho
     private Toolbar m_toolbar;
 
     private DrawerLayout m_drawerLayout;
-    private NavigationView m_navigationView;
     private ListView m_nav_groupList;
 
     private Dialog m_LongClickNotePopupMenu;
     private Note LongClickNoteItem;
 
-    // endregion 声明: View UI ProgressDialog Toolbar
+    // endregion 声明: View UI ProgressDialog Toolbar DrawerLayout
 
     // region 声明: flag REQ
 
@@ -108,6 +109,9 @@ public class NoteFragment extends Fragment implements View.OnClickListener, ISho
 
     private static final int REQ_NOTE_NEW = 2; // 从 MNote 返回
     private static final int REQ_NOTE_UPDATE = 1; // 从 VMNote 返回
+
+    private static final int REQUEST_CROP = 3; // 剪辑
+    private static final int REQUEST_TAKE_PHOTO = 4; // 拍照
 
     // endregion 声明: flag REQ
 
@@ -120,7 +124,7 @@ public class NoteFragment extends Fragment implements View.OnClickListener, ISho
 
     // endregion 声明: 一些等待的秒数
 
-    // region 创建界面 菜单栏 浮动菜单 等待框 搜索框 右划菜单 onCreateView initToolbar initFloatingActionBar setupProgressAndSR initSearchFrag ShowLogE onClick initRightMenu closeDrawer
+    // region 创建界面 菜单栏 浮动菜单 等待框 搜索框 右划菜单 onCreateView initToolbar initFloatingActionBar setupProgressAndSR initSearchFrag ShowLogE onClick initRightMenu
 
     @Nullable
     @Override
@@ -134,7 +138,7 @@ public class NoteFragment extends Fragment implements View.OnClickListener, ISho
 
             ///
            // slidingMenu = ((MainActivity) getActivity()).getSlidingMenu();
-            m_fabmenu = (FloatingActionsMenu) view.findViewById(R.id.note_fabmenu);
+            m_fabMenu = (FloatingActionsMenu) view.findViewById(R.id.note_fabmenu);
 
             mNoteList = view.findViewById(R.id.note_list);
             View ListEmptyView = view.findViewById(R.id.note_emptylist);
@@ -168,8 +172,8 @@ public class NoteFragment extends Fragment implements View.OnClickListener, ISho
             public boolean onMenuItemClick(MenuItem item) {
                 switch (item.getItemId()) {
                     case R.id.action_search:
-                        if (m_fabmenu.isExpanded())
-                            m_fabmenu.collapse();
+                        if (m_fabMenu.isExpanded())
+                            m_fabMenu.collapse();
                         searchFragment.show(getActivity().getSupportFragmentManager(), com.wyt.searchbox.SearchFragment.TAG);
                         break;
                     case R.id.action_modifygroup:
@@ -177,6 +181,10 @@ public class NoteFragment extends Fragment implements View.OnClickListener, ISho
                         break;
                     case R.id.action_search_back:
                         SearchGroupBack();
+                        break;
+                    case R.id.action_noteUpdate:
+                        // TODO
+                        UpdateData();
                         break;
                 }
                 return true;
@@ -205,14 +213,14 @@ public class NoteFragment extends Fragment implements View.OnClickListener, ISho
         mNotePhoto.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                m_fabmenu.collapse();
+                m_fabMenu.collapse();
                 NotePhoto_Click();
             }
         });
         mNoteEdit.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                m_fabmenu.collapse();
+                m_fabMenu.collapse();
                 HandleNewUpdateNote(true, null, false);
             }
         });
@@ -228,7 +236,7 @@ public class NoteFragment extends Fragment implements View.OnClickListener, ISho
         mSwipeRefresh.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
-                refreshdata(500);
+                refreshData(500);
             }
         });
 
@@ -252,8 +260,8 @@ public class NoteFragment extends Fragment implements View.OnClickListener, ISho
             @Override
             public void OnSearchClick(String keyword) {
 
-                if (m_fabmenu.isExpanded())
-                    m_fabmenu.collapse();
+                if (m_fabMenu.isExpanded())
+                    m_fabMenu.collapse();
 
                 try {
                     if (!keyword.isEmpty()) {
@@ -265,7 +273,7 @@ public class NoteFragment extends Fragment implements View.OnClickListener, ISho
 
                         m_toolbar.getMenu().findItem(R.id.action_search_back).setVisible(true);
                         mSwipeRefresh.setEnabled(false);
-                        m_fabmenu.setVisibility(View.GONE);
+                        m_fabMenu.setVisibility(View.GONE);
                         m_toolbar.setTitle(String.format(getContext().getString(R.string.NoteFrag_menu_search_content), keyword));
                     }
                 } catch (Exception ex) {
@@ -283,7 +291,7 @@ public class NoteFragment extends Fragment implements View.OnClickListener, ISho
 
         // 布局
         m_drawerLayout = view.findViewById(R.id.id_noteFrag_drawer_layout);
-        m_navigationView = view.findViewById(R.id.id_noteFrag_Right_nav);
+        NavigationView m_navigationView = view.findViewById(R.id.id_noteFrag_Right_nav);
 
         m_drawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED);
         m_navigationView.setNavigationItemSelectedListener(new NavigationView.OnNavigationItemSelectedListener() {
@@ -316,6 +324,7 @@ public class NoteFragment extends Fragment implements View.OnClickListener, ISho
                             .setPositiveButton(R.string.NoteFrag_GroupingMgrAlertPosDoButton, new DialogInterface.OnClickListener() {
                                 @Override
                                 public void onClick(DialogInterface dialog, int which) {
+                                    SearchGroupBack();
                                     ShowGroupDialog();
                                 }
                             })
@@ -333,21 +342,6 @@ public class NoteFragment extends Fragment implements View.OnClickListener, ISho
                 m_drawerLayout.closeDrawer(Gravity.END);
             }
         });
-    }
-
-    /**
-     * 判断是否开着,MainAct用
-     * @return
-     */
-    public boolean getDrawerIsOpen() {
-        return m_drawerLayout.isDrawerOpen(Gravity.END);
-    }
-
-    /**
-     * 关闭侧边栏
-     */
-    public void closeDrawer() {
-        m_drawerLayout.closeDrawer(Gravity.END);
     }
 
     /**
@@ -461,11 +455,12 @@ public class NoteFragment extends Fragment implements View.OnClickListener, ISho
                 getActivity().runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
+                        NoteDao noteDao = new NoteDao(getContext());
                         NoteList = noteDao.queryNotesAll();
                         initListView(NoteList);
 
                         mSwipeRefresh.setEnabled(true);
-                        m_fabmenu.setVisibility(View.VISIBLE);
+                        m_fabMenu.setVisibility(View.VISIBLE);
 
                         m_toolbar.getMenu().findItem(R.id.action_search_back).setVisible(false);
                         m_toolbar.getMenu().findItem(R.id.action_search).setEnabled(true);
@@ -492,7 +487,7 @@ public class NoteFragment extends Fragment implements View.OnClickListener, ISho
 
     // endregion 搜索处理
 
-    // region 列表数据 初始化各种数据和适配器 下拉刷新 initData initAdapter refreshNoteList refreshGroupList refreshdata refreshAll
+    // region 列表数据 初始化各种数据和适配器 下拉刷新 initData initAdapter refreshNoteList refreshGroupList refreshData refreshAll
 
     private List<Note> NoteList;
     private List<Group> GroupList;
@@ -500,18 +495,21 @@ public class NoteFragment extends Fragment implements View.OnClickListener, ISho
     private NoteAdapter noteAdapter;
     private GroupAdapter groupAdapter;
 
-    private NoteDao noteDao;
-    private GroupDao groupDao;
+    // private NoteDao noteDao;
+    // private GroupDao groupDao;
+
+    /**
+     * 只更新数据库
+     */
+    public void initDao() {
+    }
 
     /**
      * 初始化 Dao 和 List 数据
      */
     public void initData() {
-        if (noteDao == null)
-            noteDao = new NoteDao(this.getContext());
-
-        if (groupDao == null)
-            groupDao = new GroupDao(this.getContext());
+        NoteDao noteDao = new NoteDao(this.getContext());
+        GroupDao groupDao = new GroupDao(this.getContext());
 
         NoteList = noteDao.queryNotesAll();
         GroupList = groupDao.queryGroupAll();
@@ -529,6 +527,7 @@ public class NoteFragment extends Fragment implements View.OnClickListener, ISho
      * 刷新 笔记列表
      */
     public void refreshNoteList() {
+        NoteDao noteDao = new NoteDao(getContext());
         noteDao = new NoteDao(getContext());
         NoteList = noteDao.queryNotesAll();
         Collections.sort(NoteList);
@@ -541,6 +540,7 @@ public class NoteFragment extends Fragment implements View.OnClickListener, ISho
      * 刷新 分组列表
      */
     public void refreshGroupList() {
+        GroupDao groupDao = new GroupDao(getContext());
         groupDao = new GroupDao(getContext());
         GroupList = groupDao.queryGroupAll();
         Collections.sort(GroupList);
@@ -553,7 +553,7 @@ public class NoteFragment extends Fragment implements View.OnClickListener, ISho
      *
      * @param ms 毫秒
      */
-    private void refreshdata(int ms) {
+    private void refreshData(int ms) {
 
         new Handler().postDelayed(new Runnable() {
             @Override
@@ -607,7 +607,7 @@ public class NoteFragment extends Fragment implements View.OnClickListener, ISho
                     public void UpdateGroupFinished() {
 
                         // 更新完分组信息后同时在列表中刷新数据
-                        refreshdata(SwipeRefreshSecond); // 100
+                        refreshData(SwipeRefreshSecond); // 100
 
                         if (IsSearching)
                             if (!IsSearchingNull)
@@ -630,11 +630,11 @@ public class NoteFragment extends Fragment implements View.OnClickListener, ISho
      */
     public void ModifyGroupMenuClick() {
 
-        if (m_fabmenu.isExpanded())
-            m_fabmenu.collapse();
+        if (m_fabMenu.isExpanded())
+            m_fabMenu.collapse();
 
         // 列表
-
+        GroupDao groupDao = new GroupDao(getContext());
         List<Group> groups = groupDao.queryGroupAll();
         Collections.sort(groups);
 
@@ -678,6 +678,21 @@ public class NoteFragment extends Fragment implements View.OnClickListener, ISho
 
     private boolean IsGrouping = false;
     private boolean IsGroupingNull = false;
+
+    /**
+     * 判断是否开着,MainAct用
+     * @return
+     */
+    public boolean getDrawerIsOpen() {
+        return m_drawerLayout.isDrawerOpen(Gravity.END);
+    }
+
+    /**
+     * 关闭侧边栏
+     */
+    public void closeDrawer() {
+        m_drawerLayout.closeDrawer(Gravity.END);
+    }
 
     /**
      * 按分组显示
@@ -726,6 +741,7 @@ public class NoteFragment extends Fragment implements View.OnClickListener, ISho
      */
     private List<Note> getGroupOfNote(Group group) {
         List<Note> ret = new ArrayList<>();
+        NoteDao noteDao = new NoteDao(getContext());
         List<Note> allNotes = noteDao.queryNotesAll();
         for (Note note : allNotes)
             if (note.getGroupLabel().getName().equals(group.getName()))
@@ -755,6 +771,7 @@ public class NoteFragment extends Fragment implements View.OnClickListener, ISho
                         // 修改保存数据库
                         Group group = GroupList.get(which);
                         note.setGroupLabel(group, true);
+                        NoteDao noteDao = new NoteDao(getContext());
                         noteDao.updateNote(note);
 
                         // 更新数据
@@ -819,8 +836,8 @@ public class NoteFragment extends Fragment implements View.OnClickListener, ISho
         noteAdapter.setOnItemClickListener(new NoteAdapter.OnItemClickListener() {
             @Override
             public void onItemClick(View view, int position) {
-                if (m_fabmenu.isExpanded()) // 先关闭弹出菜单
-                    m_fabmenu.collapse();
+                if (m_fabMenu.isExpanded()) // 先关闭弹出菜单
+                    m_fabMenu.collapse();
                 else {
                     SelectedNoteItem = position;
                     HandleNewUpdateNote(false, nlist.get(position), false);
@@ -831,8 +848,8 @@ public class NoteFragment extends Fragment implements View.OnClickListener, ISho
         noteAdapter.setOnItemLongClickListener(new NoteAdapter.OnRecyclerViewItemLongClickListener() {
             @Override
             public void onItemLongClick(final View view, final Note note) {
-                if (m_fabmenu.isExpanded())
-                    m_fabmenu.collapse();
+                if (m_fabMenu.isExpanded())
+                    m_fabMenu.collapse();
                 showPopupMenuOfNote(note);
             }
         });
@@ -872,8 +889,6 @@ public class NoteFragment extends Fragment implements View.OnClickListener, ISho
     // region 笔记增删改 文字识别 活动返回 NotePhoto_Click OpenOCRAct DeleteNote HandleNewUpdateNote onActivityResult
 
     private Uri imgUri; // 拍照时返回的uri
-    private static final int REQUEST_TAKE_PHOTO = 0;// 拍照
-    private static final int REQUEST_CROP = 3;// 剪辑
 
     /**
      * 浮动菜单 OCR
@@ -987,6 +1002,7 @@ public class NoteFragment extends Fragment implements View.OnClickListener, ISho
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
 
+                        NoteDao noteDao = new NoteDao(getContext());
                         int ret = noteDao.deleteNote(note.getId());
 
                         if (ret > 0) {
@@ -1076,13 +1092,14 @@ public class NoteFragment extends Fragment implements View.OnClickListener, ISho
      */
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
+
         super.onActivityResult(requestCode, resultCode, data);
+        ShowLogE("onActivityResult", "HasReturn");
 
         switch (requestCode) {
             case REQ_NOTE_NEW:
             case REQ_NOTE_UPDATE:
 
-                ShowLogE("onActivityResult", "HasReturn");
                 if (resultCode == RESULT_OK) {
 
                     int flag = data.getIntExtra("flag", NOTE_NEW);
@@ -1136,6 +1153,47 @@ public class NoteFragment extends Fragment implements View.OnClickListener, ISho
 
     // endregion 笔记增删改
 
+    // region DEBUG
+
+    private void UpdateData() {
+
+        // TODO
+
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+
+                    NoteDao noteDao = new NoteDao(getContext());
+                    GroupDao groupDao = new GroupDao(getContext());
+
+                    List<Note> notes = noteDao.queryNotesAll();
+                    for (Note note : notes)
+                        NoteUtil.insertNote(note);
+
+                    List<Group> groups = groupDao.queryGroupAll();
+                    for (Group group : groups)
+                        GroupUtil.insertGroup(group);
+
+                }
+                catch (ServerErrorException ex) {
+                    ex.printStackTrace();
+                    getActivity().runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            new android.app.AlertDialog.Builder(getActivity())
+                                    .setTitle("错误")
+                                    .setMessage(ex.getMessage())
+                                    .setPositiveButton("确定", null)
+                                    .create().show();
+                        }
+                    });
+                }
+            }
+        }).start();
+    }
+
+    // endregion DEBUG
 }
 
 

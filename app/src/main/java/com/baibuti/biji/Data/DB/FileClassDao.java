@@ -9,6 +9,7 @@ import android.database.sqlite.SQLiteStatement;
 import android.util.Log;
 
 import com.baibuti.biji.Data.Models.FileClass;
+import com.baibuti.biji.Net.Modules.Auth.AuthMgr;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -21,7 +22,11 @@ public class FileClassDao {
     private Context context;
 
     public FileClassDao(Context context) {
-        helper = new MyOpenHelper(context);
+        this(context, (!(AuthMgr.getInstance().getUserName().isEmpty())) ? AuthMgr.getInstance().getUserName() : "");
+    }
+
+    public FileClassDao(Context context, String Username) {
+        helper = new MyOpenHelper(context, Username);
         this.context = context;
     }
 
