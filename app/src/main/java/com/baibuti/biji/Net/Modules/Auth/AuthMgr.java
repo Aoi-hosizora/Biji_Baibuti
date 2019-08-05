@@ -51,15 +51,17 @@ public class AuthMgr {
         this.token = "";
         this.userName = "";
 
-        for (OnLoginChangeListener onLoginChangeListener : onLoginChangeListeners)
-            onLoginChangeListener.onLogout();
+        if (onLoginChangeListeners != null)
+            for (OnLoginChangeListener onLoginChangeListener : onLoginChangeListeners)
+                onLoginChangeListener.onLogout();
     }
 
     public void login(String username, String token) {
         this.token = token;
         this.userName = username;
 
-        for (OnLoginChangeListener onLoginChangeListener : onLoginChangeListeners)
-            onLoginChangeListener.onLogin(userName);
+        if (onLoginChangeListeners != null)
+            for (OnLoginChangeListener onLoginChangeListener : onLoginChangeListeners)
+                onLoginChangeListener.onLogin(userName);
     }
 }
