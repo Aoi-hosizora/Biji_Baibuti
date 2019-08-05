@@ -89,9 +89,6 @@ public class GroupDao {
             if (cursor != null && !cursor.isClosed()) {
                 cursor.close();
             }
-            if (db != null) {
-                db.close();
-            }
         }
         return groupList;
     }
@@ -139,9 +136,6 @@ public class GroupDao {
             if (cursor != null && !cursor.isClosed()) {
                 cursor.close();
             }
-            if (db != null) {
-                db.close();
-            }
         }
         return group;
     }
@@ -178,9 +172,6 @@ public class GroupDao {
             if (cursor != null && !cursor.isClosed()) {
                 cursor.close();
             }
-            if (db != null) {
-                db.close();
-            }
         }
         return group;
     }
@@ -200,7 +191,7 @@ public class GroupDao {
      * @param sumcnt 查询第几个分组，默认为1
      * @return
      */
-    public Group queryGroupByOrder(int order, int sumcnt) {
+    private Group queryGroupByOrder(int order, int sumcnt) {
         SQLiteDatabase db = helper.getWritableDatabase();
 
         Group group = null;
@@ -232,9 +223,6 @@ public class GroupDao {
         finally {
             if (cursor != null && !cursor.isClosed()) {
                 cursor.close();
-            }
-            if (db != null) {
-                db.close();
             }
         }
         return group;
@@ -280,7 +268,7 @@ public class GroupDao {
      *
      * @return 重复次数，可能存在多次重复情况
      */
-    public int checkOrderDuplicate(Group handleGroup) {
+    private int checkOrderDuplicate(Group handleGroup) {
         List<Group> tmp = selectAllGroup();
         int cnt=0;
         for (Group g : tmp)
@@ -293,7 +281,7 @@ public class GroupDao {
      * 更新时处理 Order 重复问题
      * @param handleGroup 更新的分组
      */
-    public void handleOrderDuplicateWhenUpdate(Group handleGroup) {
+    private void handleOrderDuplicateWhenUpdate(Group handleGroup) {
         // 关键 !!!
         if (handleGroup != null && checkOrderDuplicate(handleGroup) != 1) { // 为1，只存在一个，处理结束
 
@@ -418,7 +406,7 @@ public class GroupDao {
     /**
      * 处理默认分组的顺序不为顶层
      */
-    public void handleDefaultGroupOrder() {
+    private void handleDefaultGroupOrder() {
         Group def = queryDefaultGroup();
         if (def.getOrder() != 0) {
             def.setOrder(0);

@@ -113,6 +113,19 @@ public class NoteReqBody implements Serializable {
         return rets;
     }
 
+    /**
+     * Note[] -> NoteReqBody[]
+     * @return
+     */
+    public static NoteReqBody[] toNoteReqBodies(Note[] notes) {
+        if (notes == null)
+            return null;
+        NoteReqBody[] rets = new NoteReqBody[notes.length];
+        for (int i = 0; i < notes.length; i++)
+            rets[i] = toNoteReqBody(notes[i]);
+        return rets;
+    }
+
     // endregion Note <-> ReqBody
 
     // region NoteReqBody <-> Json
@@ -136,6 +149,18 @@ public class NoteReqBody implements Serializable {
             ex.printStackTrace();
             return "";
         }
+        return obj.toString();
+    }
+
+    /**
+     * NoteReqBody[] -> Json str
+     * @return
+     */
+    public static String getJsonFromNoteRodies(NoteReqBody[] noteReqBodies) {
+        SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.CHINA);
+        JSONArray obj = new JSONArray();
+        for (int i = 0; i < noteReqBodies.length; i++)
+            obj.put(noteReqBodies);
         return obj.toString();
     }
 
