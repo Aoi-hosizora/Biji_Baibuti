@@ -35,13 +35,13 @@ android {
     sourceSets {
         main {
             res.srcDirs = [
-                'src/main/res/modules/note',
-                'src/main/res/modules/search',
-                'src/main/res/modules/schedule',
-                'src/main/res/modules/file',
-                'src/main/res/modules/others',
-                'src/main/res/modules',
-                'src/main/res',
+                    'src/main/res/modules/note',
+                    'src/main/res/modules/search',
+                    'src/main/res/modules/schedule',
+                    'src/main/res/modules/file',
+                    'src/main/res/modules/others',
+                    'src/main/res/modules',
+                    'src/main/res',
             ]
         }
     }
@@ -113,7 +113,7 @@ dependencies {
     implementation 'com.blankj:utilcode:1.25.0'
 
     // 结巴分词
-    implementation ('jackmego.com.jieba_android:jieba_android-release:0.1.0') {
+    implementation('jackmego.com.jieba_android:jieba_android-release:0.1.0') {
         exclude group: 'com.android.support' // 版本冲突 27.1.1
     }
 

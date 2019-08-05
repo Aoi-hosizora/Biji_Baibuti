@@ -29,9 +29,11 @@ public class MyOpenHelper extends SQLiteOpenHelper {
      */
 
     private final static int DB_VERSION = 4;// 数据库版本
+    private Context mContext;
 
     public MyOpenHelper(Context context) {
         super(context, DB_NAME, null, DB_VERSION);
+        this.mContext = context;
     }
 
     private void Create_Db_group(SQLiteDatabase db) {
@@ -135,5 +137,9 @@ public class MyOpenHelper extends SQLiteOpenHelper {
                 return true;
 
         return false;
+    }
+
+    public String getDBPath(){
+        return mContext.getDatabasePath(DB_NAME).getPath();
     }
 }

@@ -37,6 +37,7 @@ import com.baibuti.biji.Data.Models.Document;
 import com.baibuti.biji.Data.Models.FileClass;
 import com.baibuti.biji.Data.Models.FileItem;
 import com.baibuti.biji.R;
+import com.baibuti.biji.UI.Activity.FileCloudActivity;
 import com.baibuti.biji.UI.Dialog.FileImportDialog;
 import com.baibuti.biji.Utils.StringUtils.Define;
 
@@ -104,7 +105,7 @@ public class FileFragment extends Fragment {
 
             closeDSL = true;
         }
-        Log.e("test_filefragment", "onCreateView: 执行");
+        Log.e("db_path", "onCreateView: "+ fileClassDao.getDBPath());
         return view;
     }
 
@@ -123,12 +124,18 @@ public class FileFragment extends Fragment {
         Toolbar mToolBar = view.findViewById(R.id.tab_file_toolbar);
         mToolBar.setTitle(R.string.FileFrag_Header);
 
-        mToolBar.setNavigationIcon(R.drawable.tab_menu);
+        mToolBar.setNavigationIcon(R.drawable.ic_cloud_upload_black_24dp);
         mToolBar.setNavigationOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Toast.makeText(getContext(),"This is a menu",Toast.LENGTH_LONG).show();
+                Toast.makeText(getContext(),"Enter cloud disk",Toast.LENGTH_LONG).show();
                 //添加菜单逻辑
+                try {
+                    Intent intent = new Intent(getActivity(), FileCloudActivity.class);
+                    getActivity().startActivity(intent);
+                }catch(Exception e){
+                    e.printStackTrace();
+                }
             }
         });
 

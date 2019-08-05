@@ -296,6 +296,10 @@ public class FileClassDao {
 
         return ret;
     }
+
+    public String getDBPath(){
+        return helper.getDBPath();
+    }
 }
 
 class EditDefaultFileClassException extends Exception {

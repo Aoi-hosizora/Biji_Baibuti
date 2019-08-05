@@ -6,7 +6,6 @@
     <uses-permission android:name="android.permission.CAMERA" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
-
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
 
@@ -16,7 +15,7 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
         tools:ignore="GoogleAppIndexingWarning">
-
+        <activity android:name=".UI.Activity.FileCloudActivity"></activity>
         <!-- Main Activity -->
         <activity
             android:name=".UI.Activity.MainActivity"
@@ -24,66 +23,58 @@
             android:windowSoftInputMode="adjustPan">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
+
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
-        </activity>
-
-        <!-- MNote Activity -->
+        </activity> <!-- MNote Activity -->
         <activity
             android:name=".UI.Activity.ModifyNoteActivity"
             android:screenOrientation="portrait">
             <intent-filter>
                 <action android:name="activitytest.example.com.activitytest.ModifyNoteActivity" />
+
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
-        </activity>
-
-        <!-- VMNote Activity -->
+        </activity> <!-- VMNote Activity -->
         <activity
             android:name=".UI.Activity.ViewModifyNoteActivity"
             android:screenOrientation="portrait">
             <intent-filter>
                 <action android:name="activitytest.example.com.activitytest.ViewModifyNoteActivity" />
+
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
-        </activity>
-
-        <!-- OpenSaveFile Activity -->
+        </activity> <!-- OpenSaveFile Activity -->
         <activity
             android:name=".UI.Activity.OpenSaveFileActivity"
             android:screenOrientation="portrait">
             <intent-filter>
                 <action android:name="activitytest.example.com.activitytest.OpenSaveFileActivity" />
+
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
-        </activity>
-
-        <!-- StarSearchItemActivity Activity -->
+        </activity> <!-- StarSearchItemActivity Activity -->
         <activity
             android:name=".UI.Activity.StarSearchItemActivity"
             android:screenOrientation="portrait">
             <intent-filter>
                 <action android:name="activitytest.example.com.activitytest.StarSearchItemActivity" />
+
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
-        </activity>
-
-        <!-- StarSearchItemActivity Activity -->
+        </activity> <!-- StarSearchItemActivity Activity -->
         <activity
             android:name=".UI.Activity.OCRActivity"
             android:screenOrientation="portrait">
             <intent-filter>
                 <action android:name="activitytest.example.com.activitytest.OCRActivity" />
+
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
-        </activity>
-
-        <!-- PreLoaded Font -->
+        </activity> <!-- PreLoaded Font -->
         <meta-data
             android:name="preloaded_fonts"
-            android:resource="@array/preloaded_fonts" />
-
-        <!-- File Provider -->
+            android:resource="@array/preloaded_fonts" /> <!-- File Provider -->
         <provider
             android:name="android.support.v4.content.FileProvider"
             android:authorities="com.baibuti.biji.FileProvider"
@@ -95,7 +86,6 @@
                 android:resource="@xml/public_file_path"
                 tools:replace="android:resource" />
         </provider>
-
     </application>
 
 </manifest>
