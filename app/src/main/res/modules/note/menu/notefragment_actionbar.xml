@@ -22,6 +22,11 @@
         android:title="同步"/>
 
     <item
+        android:id="@+id/action_log"
+        app:showAsAction="ifRoom"
+        android:title="log"/>
+
+    <item
         android:id="@+id/action_search"
         android:icon="@drawable/search"
         app:showAsAction="ifRoom"

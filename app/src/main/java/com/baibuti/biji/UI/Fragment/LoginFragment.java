@@ -101,6 +101,16 @@ public class LoginFragment extends Fragment implements View.OnClickListener {
         String username = m_LoginEditText.getText().toString();
         String password = m_PasswordEditText.getText().toString();
 
+        if (username.length() == 0) {
+            m_LoginLayout.setError("用户名为空");
+            return;
+        }
+
+        if (password.length() == 0) {
+            m_PasswordLayout.setError("密码为空");
+            return;
+        }
+
         m_logining.setMessage(String.format(Locale.CHINA, "用户 \"%s\" 登录中，请稍后...", username));
         m_logining.show();
 
@@ -139,7 +149,7 @@ public class LoginFragment extends Fragment implements View.OnClickListener {
 
     private void showErrorAlert(String message) {
         new AlertDialog.Builder(getContext())
-                .setTitle("登录错误")
+                .setTitle("错误")
                 .setMessage(message)
                 .setPositiveButton("确定", null)
                 .create().show();

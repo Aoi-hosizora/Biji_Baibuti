@@ -34,7 +34,12 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.baibuti.biji.Data.Adapters.GroupRadioAdapter;
+import com.baibuti.biji.Data.DB.UtLogDao;
+import com.baibuti.biji.Data.Models.LogModule;
+import com.baibuti.biji.Data.Models.UtLog;
 import com.baibuti.biji.Net.Models.RespObj.ServerErrorException;
+import com.baibuti.biji.Net.Modules.Auth.AuthMgr;
+import com.baibuti.biji.Net.Modules.Log.LogUtil;
 import com.baibuti.biji.Net.Modules.Note.GroupUtil;
 import com.baibuti.biji.Net.Modules.Note.NoteUtil;
 import com.baibuti.biji.UI.Activity.MainActivity;
@@ -153,6 +158,8 @@ public class NoteFragment extends Fragment implements View.OnClickListener, ISho
             initListView(NoteList);
             initSearchFrag();
             initRightMenu();
+
+            registerAuthActions();
         }
 
         return view;
@@ -185,6 +192,10 @@ public class NoteFragment extends Fragment implements View.OnClickListener, ISho
                     case R.id.action_noteUpdate:
                         // TODO
                         UpdateData();
+                        break;
+                    case R.id.action_log:
+                        // TODO
+                        UpdateLog();
                         break;
                 }
                 return true;
@@ -440,10 +451,11 @@ public class NoteFragment extends Fragment implements View.OnClickListener, ISho
     }
 
     /**
-     * 返回原界面，退出搜索或分类
+     * 返回原界面，退出搜索或分类，以及重新登陆
      */
     public void SearchGroupBack() {
-        loadingDialog.show();
+        if (!loadingDialog.isShowing())
+            loadingDialog.show();
         new Thread(new Runnable() {
             @Override
             public void run() {
@@ -452,34 +464,41 @@ public class NoteFragment extends Fragment implements View.OnClickListener, ISho
                 } catch (InterruptedException ex) {
                     ex.printStackTrace();
                 }
-                getActivity().runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        NoteDao noteDao = new NoteDao(getContext());
-                        NoteList = noteDao.queryNotesAll();
-                        initListView(NoteList);
+                try {
+                    getActivity().runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            NoteDao noteDao = new NoteDao(getContext());
+                            NoteList = noteDao.queryNotesAll();
+                            initListView(NoteList);
 
-                        mSwipeRefresh.setEnabled(true);
-                        m_fabMenu.setVisibility(View.VISIBLE);
+                            mSwipeRefresh.setEnabled(true);
+                            m_fabMenu.setVisibility(View.VISIBLE);
 
-                        m_toolbar.getMenu().findItem(R.id.action_search_back).setVisible(false);
-                        m_toolbar.getMenu().findItem(R.id.action_search).setEnabled(true);
-                        m_toolbar.getMenu().findItem(R.id.action_search).setIcon(R.drawable.search);
-                        m_toolbar.setTitle(R.string.NoteFrag_Header);
+                            m_toolbar.getMenu().findItem(R.id.action_search_back).setVisible(false);
+                            m_toolbar.getMenu().findItem(R.id.action_search).setEnabled(true);
+                            m_toolbar.getMenu().findItem(R.id.action_search).setIcon(R.drawable.search);
+                            m_toolbar.setTitle(R.string.NoteFrag_Header);
 
-                        IsSearching = false;
-                        SearchingStr = "";
-                        IsSearchingNull = false;
+                            IsSearching = false;
+                            SearchingStr = "";
+                            IsSearchingNull = false;
 
-                        IsGrouping = false;
-                        currGroup = null;
-                        currGroupIdx = -1;
-                        IsGroupingNull = false;
+                            IsGrouping = false;
+                            currGroup = null;
+                            currGroupIdx = -1;
+                            IsGroupingNull = false;
 
-                        loadingDialog.dismiss();
+                            loadingDialog.cancel();
 
-                    }
-                });
+                        }
+                    });
+                }
+                catch (NullPointerException ex) {
+                    ex.printStackTrace();
+                    Log.e("", "run: NullPointerException" );
+                }
+
             }
         }).start();
 
@@ -1193,7 +1212,45 @@ public class NoteFragment extends Fragment implements View.OnClickListener, ISho
         }).start();
     }
 
+    private void UpdateLog() {
+
+        // TODO
+
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                UtLogDao utLogDao = new UtLogDao(getContext());
+                try {
+                    LogUtil.updateModuleLog(utLogDao.getLog(LogModule.Mod_Note));
+                }
+                catch (ServerErrorException ex) {
+                    ex.printStackTrace();
+                }
+            }
+        }).start();
+    }
+
     // endregion DEBUG
+
+    /**
+     * 订阅登录注销事件
+     */
+    private void registerAuthActions() {
+        AuthMgr.getInstance().addLoginChangeListener(new AuthMgr.OnLoginChangeListener() {
+
+            @Override
+            public void onLogin(String UserName) {
+                SearchGroupBack();
+                // m_toolbar.setTitle(UserName + " 的笔记");
+            }
+
+            @Override
+            public void onLogout() {
+                SearchGroupBack();
+                // m_toolbar.setTitle("本地笔记");
+            }
+        });
+    }
 }
 
 

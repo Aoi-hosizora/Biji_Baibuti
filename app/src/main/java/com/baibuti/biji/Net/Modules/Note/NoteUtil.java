@@ -82,30 +82,6 @@ public class NoteUtil {
         }
     }
 
-    public static Note updateNotes(Note[] notes) throws ServerErrorException {
-        RespType resp = NetUtil.httpPostSync(
-                UpdateNoteUrl,
-                NoteReqBody.getJsonFromNoteRodies(NoteReqBody.toNoteReqBodies(notes)),
-                NetUtil.getOneHeader("Authorization", AuthMgr.getInstance().getToken())
-        );
-
-        try {
-            int code = resp.getCode();
-            if (code == 200) {
-                NoteReqBody ret = NoteReqBody.getNoteRespFromJson(resp.getBody());
-                return ret.toNote();
-            }
-            else {
-                MessageResp msg = MessageResp.getMsgRespFromJson(resp.getBody());
-                throw new ServerErrorException(msg.getMessage(), msg.getDetail(), code);
-            }
-        }
-        catch (NullPointerException ex) {
-            ex.printStackTrace();
-            return null;
-        }
-    }
-
     public static Note insertNote(Note Note) throws ServerErrorException {
         RespType resp = NetUtil.httpPostPutDeleteSync(
                 InsertNoteUrl, NetUtil.PUT,

@@ -45,7 +45,7 @@ public class NoteDao {
     /**
      * 更新笔记日志
      */
-    void updateLog() {
+    private void updateLog() {
         UtLogDao utLogDao = new UtLogDao(context);
         utLogDao.updateLog(LogModule.Mod_Note);
     }
@@ -200,11 +200,7 @@ public class NoteDao {
 
             stat.bindString(1, note.getTitle()); // title
             stat.bindString(2, note.getContent()); // content
-
-
-
             stat.bindLong(3, note.getGroupLabel().getId()); // groupid
-            // stat.bindString(4, note.getGroupLabel().getName()); // groupname
 
             stat.bindString(4, CommonUtil.date2string((note.getCreateTime()==null)?new Date():note.getCreateTime())); // createtime
             stat.bindString(5, CommonUtil.date2string((note.getUpdateTime()==null)?new Date():note.getUpdateTime())); // updatetime
@@ -214,9 +210,6 @@ public class NoteDao {
 
             ret = stat.executeInsert();
             db.setTransactionSuccessful();
-
-            updateLog();
-
         }
         catch (SQLException e) {
             e.printStackTrace();
@@ -229,6 +222,7 @@ public class NoteDao {
             db.close();
         }
         Log.e("insertNote", "insertNote: "+ ret);
+        updateLog();
         return ret;
     }
 
@@ -265,8 +259,8 @@ public class NoteDao {
         values.put("n_update_time", CommonUtil.date2string(note.getUpdateTime()));
 
         db.update("db_note", values, "n_id=?", new String[]{note.getId()+""});
-        updateLog();
         db.close();
+        updateLog();
     }
 
     /**
@@ -278,7 +272,6 @@ public class NoteDao {
         try {
             ret = db.delete("db_note", "n_id=?", new String[]{noteId + ""});
 
-            updateLog();
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -287,6 +280,7 @@ public class NoteDao {
             if (db != null)
                 db.close();
         }
+        updateLog();
         return ret;
     }
 
@@ -305,7 +299,6 @@ public class NoteDao {
                         ret += db.delete("db_note", "n_id=?", new String[]{note.getId() + ""});
                     db.setTransactionSuccessful();
 
-                    updateLog();
                 }
                 catch (Exception e) {
                     e.printStackTrace();
@@ -323,6 +316,7 @@ public class NoteDao {
                 db.close();
             }
         }
+        updateLog();
         return ret;
     }
 }

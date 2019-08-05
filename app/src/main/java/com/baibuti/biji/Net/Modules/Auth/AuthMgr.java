@@ -41,7 +41,7 @@ public class AuthMgr {
         void onLogout();
     }
 
-    private ArrayList<OnLoginChangeListener> onLoginChangeListeners;
+    private ArrayList<OnLoginChangeListener> onLoginChangeListeners = new ArrayList<>();
 
     public void addLoginChangeListener(OnLoginChangeListener onLoginChangeListener) {
         this.onLoginChangeListeners.add(onLoginChangeListener);

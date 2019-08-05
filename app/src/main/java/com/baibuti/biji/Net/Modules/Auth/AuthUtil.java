@@ -38,7 +38,7 @@ public class AuthUtil {
         }
         catch (NullPointerException ex) {
             ex.printStackTrace();
-            return null;
+            return new AuthStatus(404, "未收到响应，请检查网络连接。");
         }
     }
 
@@ -60,7 +60,7 @@ public class AuthUtil {
         }
         catch (NullPointerException ex) {
             ex.printStackTrace();
-            return new AuthStatus(false);
+            return new AuthStatus(404, "未收到响应，请检查网络连接。");
         }
     }
 

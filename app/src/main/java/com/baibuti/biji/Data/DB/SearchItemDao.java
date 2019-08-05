@@ -153,7 +153,6 @@ public class SearchItemDao {
             Log.e("", "insertStarSearchItem: " + "sql = " + sql + ", ret = " + ret);
             db.setTransactionSuccessful();
 
-            updateLog();
         }
         catch (Exception ex) {
             ex.printStackTrace();
@@ -162,6 +161,7 @@ public class SearchItemDao {
             db.endTransaction();
             db.close();
         }
+        updateLog();
         return ret;
     }
 
@@ -186,7 +186,6 @@ public class SearchItemDao {
 
             db.setTransactionSuccessful();
 
-            updateLog();
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -196,6 +195,7 @@ public class SearchItemDao {
             db.endTransaction();
             db.close();
         }
+        updateLog();
         return true;
     }
 
@@ -216,7 +216,6 @@ public class SearchItemDao {
             ret = db.delete(TBL_NAME, COL_URL + " = ?", new String[] {searchItem.getUrl()});
             db.setTransactionSuccessful();
 
-            updateLog();
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -226,6 +225,7 @@ public class SearchItemDao {
             db.close();
         }
 
+        updateLog();
         return ret;
     }
 
@@ -245,7 +245,6 @@ public class SearchItemDao {
                     }
                     db.setTransactionSuccessful();
 
-                    updateLog();
                 }
                 catch (Exception e) {
                     e.printStackTrace();
@@ -263,6 +262,7 @@ public class SearchItemDao {
                 db.close();
             }
         }
+        updateLog();
         return ret;
     }
 }

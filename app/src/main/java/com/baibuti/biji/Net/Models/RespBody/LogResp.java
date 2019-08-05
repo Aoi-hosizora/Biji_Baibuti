@@ -40,6 +40,20 @@ public class LogResp {
 
     // region LogResp <-> Json
 
+    public String toJson() {
+        try {
+            SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.CHINA);
+            JSONObject jsonObject = new JSONObject();
+            jsonObject.put("module", module);
+            jsonObject.put("ut", formatter.format(ut));
+            return jsonObject.toString();
+        }
+        catch (JSONException ex) {
+            ex.printStackTrace();
+            return "";
+        }
+    }
+
     /**
      * Json Str -> LogResp
      * @param json
@@ -123,6 +137,12 @@ public class LogResp {
         for (int i = 0; i < logResps.length; i++)
             utLogs[i] = logResps[i].toUtLog();
         return utLogs;
+    }
+
+    public static LogResp toLogResp(UtLog utLog) {
+        if (utLog == null)
+            return null;
+        return new LogResp(utLog.getModule(), utLog.getUpdateTime());
     }
 
     // endregion LogResp <-> UtLog

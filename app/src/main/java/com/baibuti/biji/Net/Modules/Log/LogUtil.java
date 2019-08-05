@@ -1,5 +1,7 @@
 package com.baibuti.biji.Net.Modules.Log;
 
+import android.util.Log;
+
 import com.baibuti.biji.Data.Models.LogModule;
 import com.baibuti.biji.Data.Models.UtLog;
 import com.baibuti.biji.Net.Models.RespBody.LogResp;
@@ -16,6 +18,7 @@ public class LogUtil {
 
     private final static String OneLogUrl = Urls.LogUrl + "/one/%s";
     private final static String AllLogUrl = Urls.LogUrl + "/all";
+    private final static String UpdateLogUrl = Urls.LogUrl + "/update";
 
     public static UtLog[] getAllLogs() throws ServerErrorException {
         RespType resp = NetUtil.httpGetSync(AllLogUrl, NetUtil.getOneHeader("Authorization", AuthMgr.getInstance().getToken()));
@@ -53,6 +56,34 @@ public class LogUtil {
                 LogResp ret = LogResp.toLogRespFromJson(resp.getBody());
                 return ret.toUtLog();
             }
+            else {
+                MessageResp msg = MessageResp.getMsgRespFromJson(resp.getBody());
+                throw new ServerErrorException(msg.getMessage(), msg.getDetail(), code);
+            }
+        }
+        catch (NullPointerException ex) {
+            ex.printStackTrace();
+            return null;
+        }
+    }
+
+    /**
+     * 更新指定模块的日志
+     * @param utLog
+     * @return
+     * @throws ServerErrorException
+     */
+    public static UtLog updateModuleLog(UtLog utLog) throws ServerErrorException {
+        Log.e("", "updateModuleLog: " + utLog.getModule() );
+        RespType resp = NetUtil.httpPostSync(
+                UpdateLogUrl,
+                LogResp.toLogResp(utLog).toJson(),
+                NetUtil.getOneHeader("Authorization", AuthMgr.getInstance().getToken())
+        );
+        try {
+            int code = resp.getCode();
+            if (code == 200)
+                return LogResp.toLogRespFromJson(resp.getBody()).toUtLog();
             else {
                 MessageResp msg = MessageResp.getMsgRespFromJson(resp.getBody());
                 throw new ServerErrorException(msg.getMessage(), msg.getDetail(), code);

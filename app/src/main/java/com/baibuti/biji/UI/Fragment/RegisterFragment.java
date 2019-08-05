@@ -88,6 +88,16 @@ public class RegisterFragment extends Fragment implements View.OnClickListener {
         String username = m_LoginEditText.getText().toString();
         String password = m_PasswordEditText.getText().toString();
 
+        if (username.length() < 5 || username.length() >= 30) {
+            m_LoginLayout.setError("用户名长度应在 5-30 之间");
+            return;
+        }
+
+        if (password.length() < 8 || password.length() >= 20) {
+            m_PasswordLayout.setError("密码长度应在 8-20 之间");
+            return;
+        }
+
         m_reging.setMessage(String.format(Locale.CHINA, "用户 \"%s\" 注册中，请稍后...", username));
         m_reging.show();
 

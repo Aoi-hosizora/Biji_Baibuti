@@ -336,10 +336,6 @@ public class GroupDao {
                 nextGroup.setOrder(i); // 压缩
                 updateGroup(nextGroup);
                 handleOrderDuplicateWhenUpdate(nextGroup);
-
-                // TODO
-
-                updateLog();
             }
             order++;
         }
@@ -444,7 +440,6 @@ public class GroupDao {
             ret = stat.executeInsert();
             db.setTransactionSuccessful();
 
-            updateLog();
         }
         catch (SQLException e) {
             e.printStackTrace();
@@ -456,6 +451,7 @@ public class GroupDao {
             db.endTransaction();
             db.close();
         }
+        updateLog();
         return ret;
     }
 
@@ -491,7 +487,6 @@ public class GroupDao {
 
             db.update("db_group", values, "g_id=?", new String[]{group.getId() + ""});
 
-            updateLog();
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -500,6 +495,7 @@ public class GroupDao {
                 db.close();
             }
         }
+        updateLog();
     }
 
     /**
@@ -520,7 +516,6 @@ public class GroupDao {
             // 处理删除间隙
             handleOrderGap();
 
-            updateLog();
         }
 
         catch (Exception e) {
@@ -534,6 +529,8 @@ public class GroupDao {
         if (selectAllGroup().isEmpty())
             queryDefaultGroup();
 
+
+        updateLog();
         return ret;
     }
 
