@@ -24,9 +24,11 @@ import android.view.Gravity;
 import android.view.KeyEvent;
 
 import android.view.ViewGroup;
+import android.widget.TextView;
 import android.widget.Toast;
 import android.view.MenuItem;
 
+import com.baibuti.biji.Net.Modules.Auth.AuthMgr;
 import com.baibuti.biji.UI.Fragment.ScheduleFragment;
 import com.baibuti.biji.UI.Fragment.NoteFragment;
 import com.baibuti.biji.UI.Fragment.SearchFragment;
@@ -100,6 +102,9 @@ public class MainActivity extends FragmentActivity implements IShowLog, Navigati
         initViews();
         initAdpts();
         initNav();
+
+        // TODO
+         checkLoginStatus();
     }
 
     /**
@@ -319,30 +324,113 @@ public class MainActivity extends FragmentActivity implements IShowLog, Navigati
 
     @Override
     public boolean onNavigationItemSelected(@NonNull MenuItem item) {
-        switch(item.getItemId()) {
+        switch (item.getItemId()) {
             case R.id.id_nav_login:
-                Toast.makeText(this, "待改", Toast.LENGTH_SHORT).show();
                 closeNavMenu();
-            return false;
+                if (m_navigationView.getMenu().findItem(R.id.id_nav_login).getTitle().equals(getString(R.string.nav_login)))
+                    toLogin();
+                else
+                    toLogout();
+                return false;
             case R.id.id_nav_about:
-                String msg = "SCUT 百步梯项目 - 笔迹\n\n" +
-                        "开发网站：https://github.com/Aoi-hosizora/Biji_Baibuti\n\n" +
-                        "作者：17级软件学院xxxxx\n\n" +
-                        "更多信息详看开发网站。";
-                new AlertDialog.Builder(this)
-                        .setTitle("关于")
-                        .setMessage(msg)
-                        .setPositiveButton("确定", null)
-                        .create().show();
+                about();
             break;
             case R.id.id_nav_feedback:
-                Intent intent = new Intent(Intent.ACTION_VIEW);
-                intent.setData(Uri.parse("https://github.com/Aoi-hosizora/Biji_Baibuti/issues"));
-                startActivity(intent);
+                Intent browserIntent = new Intent(Intent.ACTION_VIEW);
+                browserIntent.setData(Uri.parse("https://github.com/Aoi-hosizora/Biji_Baibuti/issues"));
+                startActivity(browserIntent);
             break;
         }
         closeNavMenu();
         return true;
+    }
+
+    private void about() {
+        String msg = "SCUT 百步梯项目 - 笔迹\n\n" +
+                "开发网站：https://github.com/Aoi-hosizora/Biji_Baibuti\n\n" +
+                "作者：17级软件学院xxxxx\n\n" +
+                "更多信息详看开发网站。";
+        new AlertDialog.Builder(this)
+                .setTitle("关于")
+                .setMessage(msg)
+                .setPositiveButton("确定", null)
+                .create().show();
+    }
+
+    /**
+     * 刷新界面显示用户
+     * @param username
+     */
+    private void refreshUserInfo(String username) {
+        TextView usrlabel = m_navigationView.getHeaderView(0).findViewById(R.id.id_nav_username);
+        usrlabel.setText(username);
+    }
+
+    /**
+     * 导航栏 登录
+     */
+    private void toLogin() {
+        Intent reglogIntent = new Intent(MainActivity.this, RegLogActivity.class);
+        startActivityForResult(reglogIntent, REQ_LOGIN);
+    }
+
+    /**
+     * 活动返回 登陆成功
+     */
+    private void login() {
+        m_navigationView.getMenu().findItem(R.id.id_nav_login).setTitle(R.string.nav_logout);
+        refreshUserInfo(AuthMgr.getInstance().getUserName());
+
+        // TODO 更新界面
+        checkLoginStatus();
+    }
+
+    /**
+     * 导航栏 注销
+     */
+    private void toLogout() {
+        AuthMgr.getInstance().logout();
+        m_navigationView.getMenu().findItem(R.id.id_nav_login).setTitle(R.string.nav_login);
+
+        // TODO 更新界面
+
+        // AuthMgr.getInstance().addLoginChangeListener(new AuthMgr.OnLoginChangeListener() {
+        //
+        //     @Override
+        //     public void onLogin(String UserName) {
+        //
+        //     }
+        //
+        //     @Override
+        //     public void onLogout() {
+        //
+        //     }
+        // });
+
+        Toast.makeText(this, "注销成功，请重新登录。", Toast.LENGTH_SHORT).show();
+        checkLoginStatus();
+    }
+
+    private void checkLoginStatus() {
+        // TODO
+        if (AuthMgr.getInstance().getToken().isEmpty())
+            refreshUserInfo("未登录用户");
+        else
+            refreshUserInfo(AuthMgr.getInstance().getUserName());
+
+    }
+
+    private final int REQ_LOGIN = 1;
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        switch (requestCode) {
+            case REQ_LOGIN:
+                if (resultCode == RESULT_OK)
+                    login();
+            break;
+        }
     }
 
     // endregion 侧边栏 openNavMenu closeNavMenu

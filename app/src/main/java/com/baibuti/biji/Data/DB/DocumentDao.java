@@ -7,6 +7,7 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteStatement;
 
 import com.baibuti.biji.Data.Models.Document;
+import com.baibuti.biji.Net.Modules.Auth.AuthMgr;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -16,7 +17,11 @@ public class DocumentDao {
     private Context context;
 
     public DocumentDao(Context context) {
-        helper = new MyOpenHelper(context);
+        this(context, (!(AuthMgr.getInstance().getUserName().isEmpty())) ? AuthMgr.getInstance().getUserName() : "");
+    }
+
+    public DocumentDao(Context context, String Username) {
+        helper = new MyOpenHelper(context, Username);
         this.context = context;
     }
 

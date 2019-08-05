@@ -53,7 +53,13 @@
 
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
+<<<<<<< HEAD
         </activity> <!-- StarSearchItemActivity Activity -->
+=======
+        </activity>
+
+        <!-- StarSearchItem Activity -->
+>>>>>>> master
         <activity
             android:name=".UI.Activity.StarSearchItemActivity"
             android:screenOrientation="portrait">
@@ -62,7 +68,13 @@
 
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
+<<<<<<< HEAD
         </activity> <!-- StarSearchItemActivity Activity -->
+=======
+        </activity>
+
+        <!-- OCR Activity -->
+>>>>>>> master
         <activity
             android:name=".UI.Activity.OCRActivity"
             android:screenOrientation="portrait">
@@ -71,7 +83,23 @@
 
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
+<<<<<<< HEAD
         </activity> <!-- PreLoaded Font -->
+=======
+        </activity>
+
+        <!-- RegLog Activity -->
+        <activity
+            android:name=".UI.Activity.RegLogActivity"
+            android:screenOrientation="portrait">
+            <intent-filter>
+                <action android:name="activitytest.example.com.activitytest.RegLogActivity" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </activity>
+
+        <!-- PreLoaded Font -->
+>>>>>>> master
         <meta-data
             android:name="preloaded_fonts"
             android:resource="@array/preloaded_fonts" /> <!-- File Provider -->

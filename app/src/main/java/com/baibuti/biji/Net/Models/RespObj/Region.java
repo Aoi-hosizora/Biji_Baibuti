@@ -1,4 +1,4 @@
-package com.baibuti.biji.Net.Models;
+package com.baibuti.biji.Net.Models.RespObj;
 
 import java.io.Serializable;
 

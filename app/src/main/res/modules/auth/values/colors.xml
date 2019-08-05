@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="RegLog_btn_BGColor">@color/colorPrimaryDark</color>
+    <color name="RegLog_btn_BGColor_HighLight">@color/colorPrimaryLight</color>
+</resources>

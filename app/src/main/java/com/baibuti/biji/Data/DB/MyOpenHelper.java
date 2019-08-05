@@ -6,10 +6,13 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 
+import java.util.Locale;
+
 
 public class MyOpenHelper extends SQLiteOpenHelper {
 
-    private final static String DB_NAME = "note.db";// 数据库文件名
+    private final static String DEF_DB_NAME = "note.db";
+    private final static String DB_USR_NAME = "biji_%s.db";
 
     /**
      * 数据库版本号更新记录：
@@ -26,14 +29,23 @@ public class MyOpenHelper extends SQLiteOpenHelper {
      *
      * 4:
      * create table db_search_item_star
+     *
      */
 
     private final static int DB_VERSION = 4;// 数据库版本
     private Context mContext;
 
+<<<<<<< HEAD
     public MyOpenHelper(Context context) {
         super(context, DB_NAME, null, DB_VERSION);
         this.mContext = context;
+=======
+    public MyOpenHelper(Context context, String UsrName) {
+        super(context, (UsrName == null || UsrName.isEmpty()) ?
+            DEF_DB_NAME : (String.format(Locale.CHINA, DB_USR_NAME, UsrName)),
+            null, DB_VERSION
+        );
+>>>>>>> master
     }
 
     private void Create_Db_group(SQLiteDatabase db) {
@@ -123,12 +135,13 @@ public class MyOpenHelper extends SQLiteOpenHelper {
             version = 4;
         }
     }
+
     /**
      * 判断表格是否存在
      * @param table 表名
      * @return
      */
-    public boolean getTblExists (String table){
+    public boolean getTblExists(String table) {
         SQLiteDatabase db = getWritableDatabase();
         String sql = "SELECT COUNT(*) FROM sqlite_master where type='table' and name='" + table + "'";
         Cursor cursor = db.rawQuery(sql, null);

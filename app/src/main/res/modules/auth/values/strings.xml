@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="RegLogAct_Title">登录注册</string>
+
+    <string name="RegLogAct_Register">注册</string>
+    <string name="RegLogAct_Login">登录</string>
+    <string name="RegLogAct_Clear">清空</string>
+
+    <string name="RegLogAct_ToRegister">去注册&#8230;</string>
+    <string name="RegLogAct_ToLogin">去登录&#8230;</string>
+
+    <string name="RegLogAct_UsrHint">用户名</string>
+    <string name="RegLogAct_PsdHint">密码</string>
+</resources>

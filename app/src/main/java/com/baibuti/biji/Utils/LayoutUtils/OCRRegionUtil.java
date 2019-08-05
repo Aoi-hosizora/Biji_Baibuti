@@ -1,6 +1,6 @@
 package com.baibuti.biji.Utils.LayoutUtils;
 
-import com.baibuti.biji.Net.Models.Region;
+import com.baibuti.biji.Net.Models.RespObj.Region;
 
 import java.util.ArrayList;
 import java.util.List;
