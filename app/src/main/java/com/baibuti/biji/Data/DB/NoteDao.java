@@ -45,7 +45,7 @@ public class NoteDao {
     /**
      * 更新笔记日志
      */
-    private void updateLog() {
+    void updateLog() {
         UtLogDao utLogDao = new UtLogDao(context);
         utLogDao.updateLog(LogModule.Mod_Note);
     }
@@ -55,20 +55,14 @@ public class NoteDao {
      */
     public List<Note> queryNotesAll(int groupId) { // ArrayList
 
-        if (ServerDbUpdateHelper.isLocalNewer(context, LogModule.Mod_Note)) {
-            // 本地新
-            // push
-        }
-        else {
-            // 服务器新
-            // pull
-            try {
-                Note[] notes = NoteUtil.getAllNotes();
-            }
-            catch (ServerErrorException ex) {
-                ex.printStackTrace();
-            }
-        }
+//        if (ServerDbUpdateHelper.isLocalNewer(context, LogModule.Mod_Note)) {
+//            // 本地新
+//            // push
+//
+//        }
+//        else // 服务器新 pull
+//            updateNoteFromServer();
+
 
         SQLiteDatabase db = helper.getWritableDatabase();
 
@@ -185,11 +179,18 @@ public class NoteDao {
     }
 
     /**
-     * 插入笔记
+     * 插入笔记，更新编号，不查询
+     * @param note
+     * @param idx
+     * @return
      */
-    public long insertNote(Note note) {
+    long insertNote(Note note, int idx) {
         SQLiteDatabase db = helper.getWritableDatabase();
-        String sql = "insert into db_note(n_title,n_content,n_group_id,n_create_time,n_update_time) values(?,?,?,?,?)";
+        String sql;
+        if (idx == -1)
+            sql = "insert into db_note(n_title,n_content,n_group_id,n_create_time,n_update_time) values(?,?,?,?,?)";
+        else
+            sql = "insert into db_note(n_title,n_content,n_group_id,n_create_time,n_update_time,n_id) values(?,?,?,?,?,?)";
 
         long ret = 0;
 
@@ -206,7 +207,10 @@ public class NoteDao {
             // stat.bindString(4, note.getGroupLabel().getName()); // groupname
 
             stat.bindString(4, CommonUtil.date2string((note.getCreateTime()==null)?new Date():note.getCreateTime())); // createtime
-             stat.bindString(5, CommonUtil.date2string((note.getUpdateTime()==null)?new Date():note.getUpdateTime())); // updatetime
+            stat.bindString(5, CommonUtil.date2string((note.getUpdateTime()==null)?new Date():note.getUpdateTime())); // updatetime
+
+            if (idx != -1)
+                stat.bindLong(6, idx); // id
 
             ret = stat.executeInsert();
             db.setTransactionSuccessful();
@@ -225,6 +229,23 @@ public class NoteDao {
             db.close();
         }
         Log.e("insertNote", "insertNote: "+ ret);
+        return ret;
+    }
+
+    /**
+     * 更新数据，插入笔记，自动编号
+     */
+    public long insertNote(Note note) {
+//        updateNoteFromServer();
+        long ret = insertNote(note, -1);
+
+//        try {
+//            NoteUtil.insertNote(note);
+//        }
+//        catch (ServerErrorException ex) {
+//            ex.printStackTrace();
+//        }
+
         return ret;
     }
 

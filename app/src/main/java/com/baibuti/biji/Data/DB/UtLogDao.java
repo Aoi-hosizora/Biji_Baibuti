@@ -47,7 +47,7 @@ public class UtLogDao {
      * @param module
      */
     private void buildModuleLog(String module) {
-        if (queryOneModuleLog(module) == null) {
+        if (queryOneModuleLog(module, false) == null) {
 
             SQLiteDatabase db = helper.getWritableDatabase();
             long ret = 0;
@@ -76,14 +76,20 @@ public class UtLogDao {
         }
     }
 
+    private UtLog queryOneModuleLog(String module) {
+        return queryOneModuleLog(module, true);
+    }
+
     /**
      * 查询日志项
      *
      * @param module
+     * @param isCheck
      * @return UtLog
      */
-    private UtLog queryOneModuleLog(String module) {
-        buildAllModuleLog();
+    private UtLog queryOneModuleLog(String module, boolean isCheck) {
+        if (isCheck)
+            buildAllModuleLog();
 
         SQLiteDatabase db = helper.getWritableDatabase();
         UtLog utLog = null;
