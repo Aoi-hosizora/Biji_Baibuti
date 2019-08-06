@@ -1,5 +1,7 @@
 package com.baibuti.biji.Net.Models.ReqBody;
 
+import android.util.Log;
+
 import com.baibuti.biji.Data.Models.SearchItem;
 
 import org.json.JSONArray;
@@ -52,7 +54,7 @@ public class StarReqBody implements Serializable {
      */
     public SearchItem toSearchItem() {
         // TODO
-        return new SearchItem(title, url, content);
+        return new SearchItem(title, content, url);
     }
 
     /**
@@ -118,6 +120,8 @@ public class StarReqBody implements Serializable {
      */
     public static StarReqBody getStarRespFromJson(JSONObject obj) {
         try {
+            Log.e("", "getStarRespFromJson: " + obj.toString() );
+            Log.e("", "getStarRespFromJson: " + obj.getString("url"));
             return new StarReqBody(
                     obj.getString("title"),
                     obj.getString("url"),
@@ -137,8 +141,8 @@ public class StarReqBody implements Serializable {
      */
     public static StarReqBody[] getStarRespsFromJson(String json) {
         try {
-            JSONArray obj = new JSONArray(json);
-            return getStarRespsFromJson(obj);
+            JSONArray objs = new JSONArray(json);
+            return getStarRespsFromJson(objs);
         }
         catch (JSONException ex) {
             ex.printStackTrace();
@@ -154,8 +158,9 @@ public class StarReqBody implements Serializable {
     public static StarReqBody[] getStarRespsFromJson(JSONArray objs) {
         try {
             StarReqBody[] ret = new StarReqBody[objs.length()];
-            for (int i = 0; i < objs.length(); i++)
+            for (int i = 0; i < objs.length(); i++) {
                 ret[i] = getStarRespFromJson(objs.getJSONObject(i));
+            }
             return ret;
         }
         catch (JSONException ex) {

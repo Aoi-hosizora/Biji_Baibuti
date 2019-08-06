@@ -49,11 +49,34 @@ public class SearchItemDao {
     }
 
     /**
-     * 查询所有收藏项
+     * 查询所有收藏项，在线
      *
      * @return ArrayList<SearchItem>
      */
     public ArrayList<SearchItem> queryAllStarSearchItems() {
+        return queryAllStarSearchItems(true);
+    }
+
+    /**
+     * 查询所有收藏项
+     *
+     * @param isLogSearch
+     * @return ArrayList<SearchItem>
+     */
+    public ArrayList<SearchItem> queryAllStarSearchItems(boolean isLogSearch) {
+
+        if (isLogSearch)
+            if (!(AuthMgr.getInstance().getToken().isEmpty())) {
+                Log.e("", "run: queryAllStarSearchItems");
+                if (ServerDbUpdateHelper.isLocalNewer(context, LogModule.Mod_Star)) { // 本地新
+                    // TODO 异步
+                    ServerDbUpdateHelper.pushData(context, LogModule.Mod_Star);
+                } else if (ServerDbUpdateHelper.isLocalOlder(context, LogModule.Mod_Star)) { // 服务器新
+                    // TODO 同步
+                    ServerDbUpdateHelper.pullData(context, LogModule.Mod_Star);
+                }
+            }
+
         SQLiteDatabase db = helper.getWritableDatabase();
 
         ArrayList<SearchItem> searchItems = new ArrayList<>();

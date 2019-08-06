@@ -497,6 +497,7 @@ public class NoteFragment extends Fragment implements View.OnClickListener, ISho
                 catch (NullPointerException ex) {
                     ex.printStackTrace();
                     Log.e("", "run: NullPointerException" );
+                    loadingDialog.cancel();
                 }
 
             }
@@ -1238,15 +1239,17 @@ public class NoteFragment extends Fragment implements View.OnClickListener, ISho
     private void registerAuthActions() {
         AuthMgr.getInstance().addLoginChangeListener(new AuthMgr.OnLoginChangeListener() {
 
+            // TODO
+
             @Override
             public void onLogin(String UserName) {
-                SearchGroupBack();
+//                SearchGroupBack();
                 // m_toolbar.setTitle(UserName + " 的笔记");
             }
 
             @Override
             public void onLogout() {
-                SearchGroupBack();
+//                SearchGroupBack();
                 // m_toolbar.setTitle("本地笔记");
             }
         });

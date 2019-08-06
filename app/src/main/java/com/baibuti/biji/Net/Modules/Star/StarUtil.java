@@ -1,5 +1,7 @@
 package com.baibuti.biji.Net.Modules.Star;
 
+import android.util.Log;
+
 import com.baibuti.biji.Data.Models.SearchItem;
 import com.baibuti.biji.Net.Models.ReqBody.StarReqBody;
 import com.baibuti.biji.Net.Models.RespBody.MessageResp;
@@ -21,6 +23,7 @@ public class StarUtil {
             int code = resp.getCode();
             if (code == 200) {
                 StarReqBody[] rets = StarReqBody.getStarRespsFromJson(resp.getBody());
+                Log.e("", "getAllStars: " + rets[0].getUrl() );
                 return StarReqBody.toSearchItems(rets);
             }
             else {
@@ -64,7 +67,7 @@ public class StarUtil {
                 StarReqBody.toStarReqBody(searchItem).toJson(),
                 NetUtil.getOneHeader("Authorization", AuthMgr.getInstance().getToken())
         );
-
+        Log.e("", "deleteStar: " + searchItem.getTitle() + " , " + searchItem.getUrl());
         try {
             int code = resp.getCode();
             if (code == 200) {

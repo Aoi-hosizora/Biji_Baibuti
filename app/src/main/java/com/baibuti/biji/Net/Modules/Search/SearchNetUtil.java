@@ -3,6 +3,7 @@ package com.baibuti.biji.Net.Modules.Search;
 import android.util.Log;
 
 import com.baibuti.biji.Data.Models.SearchItem;
+import com.baibuti.biji.Net.Models.RespType;
 import com.baibuti.biji.Net.NetUtil;
 import com.baibuti.biji.Net.Urls;
 
@@ -42,7 +43,10 @@ public class SearchNetUtil {
      */
     public static ArrayList<SearchItem> getSearchBaiduRet(String KeyWord, int page) {
         String url = String.format(Locale.CHINA, Urls.BaiduUrl, KeyWord, page - 1);
-        return getParseBaiduRet(NetUtil.httpGetSync(url, NetUtil.getOneHeader("User-Agent", NetUtil.DEF_UserAgent), TIME_CONN_1SEC, TIME_READ_1SEC).getBody());
+        RespType resp = NetUtil.httpGetSync(url, NetUtil.getOneHeader("User-Agent", NetUtil.DEF_UserAgent), TIME_CONN_1SEC, TIME_READ_1SEC);
+        if (resp == null)
+            return new ArrayList<>();
+        return getParseBaiduRet(resp.getBody());
     }
 
     /**

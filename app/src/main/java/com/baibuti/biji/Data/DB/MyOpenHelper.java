@@ -37,6 +37,8 @@ public class MyOpenHelper extends SQLiteOpenHelper {
 
     private final static int DB_VERSION = 5;// 数据库版本
 
+
+
     public MyOpenHelper(Context context, String UsrName) {
         super(context, (UsrName == null || UsrName.isEmpty()) ?
             DEF_DB_NAME : (String.format(Locale.CHINA, DB_USR_NAME, UsrName)),

@@ -55,15 +55,6 @@ public class NoteDao {
      */
     public List<Note> queryNotesAll(int groupId) { // ArrayList
 
-//        if (ServerDbUpdateHelper.isLocalNewer(context, LogModule.Mod_Note)) {
-//            // 本地新
-//            // push
-//
-//        }
-//        else // 服务器新 pull
-//            updateNoteFromServer();
-
-
         SQLiteDatabase db = helper.getWritableDatabase();
 
         List<Note> noteList = new ArrayList<>();
