@@ -345,18 +345,36 @@ public class StarSearchItemActivity extends AppCompatActivity implements View.On
     private void SearchItem_CancelStarClick(SearchItem searchItem) {
         SearchItemDao searchItemDao = new SearchItemDao(this);
 
-        if (searchItemDao.deleteStarSearchItem(searchItem) != -1)
-            Toast.makeText(this, String.format(getString(R.string.SearchFrag_CancelStarSuccess), searchItem.getTitle()), Toast.LENGTH_SHORT).show();
-        else
-            Toast.makeText(this, String.format(getString(R.string.SearchFrag_CancelStarFailed), searchItem.getTitle()), Toast.LENGTH_SHORT).show();
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                if (searchItemDao.deleteStarSearchItem(searchItem) != -1)
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            Toast.makeText(StarSearchItemActivity.this, String.format(getString(R.string.SearchFrag_CancelStarSuccess), searchItem.getTitle()), Toast.LENGTH_SHORT).show();
+                        }
+                    });
+                else
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            Toast.makeText(StarSearchItemActivity.this, String.format(getString(R.string.SearchFrag_CancelStarFailed), searchItem.getTitle()), Toast.LENGTH_SHORT).show();
+                        }
+                    });
+                searchItemList.remove(searchItem);
 
-        searchItemList.remove(searchItem);
+                if (FindSearchedItemList != null)
+                    FindSearchedItemList.remove(searchItem);
 
-        if (FindSearchedItemList != null)
-            FindSearchedItemList.remove(searchItem);
-
-        // refreshListData();
-        refreshListView();
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        refreshListView();
+                    }
+                });
+            }
+        }).start();
     }
 
     /**
@@ -374,17 +392,22 @@ public class StarSearchItemActivity extends AppCompatActivity implements View.On
                         @Override
                         public void run() {
                             ArrayList<SearchItem> s = searchItemDao.queryAllStarSearchItems();
-                            runOnUiThread(new Runnable() {
-                                @Override
-                                public void run() {
-                                    if (searchItemDao.deleteStarSearchItems(s) != -1) {
+                            if (searchItemDao.deleteStarSearchItems(s) != -1) {
+                                runOnUiThread(new Runnable() {
+                                    @Override
+                                    public void run() {
                                         Toast.makeText(StarSearchItemActivity.this, getString(R.string.SearchFrag_CancelAllStarSuccess), Toast.LENGTH_SHORT).show();
                                         refreshListData();
                                     }
-                                    else
+                                });
+                            }
+                            else
+                                runOnUiThread(new Runnable() {
+                                    @Override
+                                    public void run() {
                                         Toast.makeText(StarSearchItemActivity.this, getString(R.string.SearchFrag_CancelAllStarFailed), Toast.LENGTH_SHORT).show();
-                                }
-                            });
+                                    }
+                                });
                         }
                     }).start();
                 }

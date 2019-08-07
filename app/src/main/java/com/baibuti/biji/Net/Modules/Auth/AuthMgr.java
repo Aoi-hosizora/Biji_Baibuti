@@ -64,4 +64,9 @@ public class AuthMgr {
             for (OnLoginChangeListener onLoginChangeListener : onLoginChangeListeners)
                 onLoginChangeListener.onLogin(userName);
     }
+
+    public boolean isLogin() {
+        return token != null && !(token.isEmpty()) &&
+                userName != null && !(userName.isEmpty());
+    }
 }

@@ -77,7 +77,7 @@ public class LoginFragment extends Fragment implements View.OnClickListener {
         m_logining = new ProgressDialog(getContext());
         m_logining.setCancelable(false);
 
-        if (AuthMgr.getInstance().getToken() != null && !(AuthMgr.getInstance().getToken().isEmpty()))
+        if (AuthMgr.getInstance().isLogin())
             m_LoginEditText.setText(AuthMgr.getInstance().getUserName());
     }
 

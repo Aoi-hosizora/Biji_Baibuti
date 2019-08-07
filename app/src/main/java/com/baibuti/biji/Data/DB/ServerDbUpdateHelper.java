@@ -24,7 +24,7 @@ public class ServerDbUpdateHelper {
      * @return
      */
     public static boolean isLocalNewer(Context context, LogModule logModule) {
-        if (AuthMgr.getInstance().getToken().isEmpty())
+        if (!(AuthMgr.getInstance().isLogin()))
             return true;
 
         UtLogDao utLogDao = new UtLogDao(context);
@@ -52,7 +52,7 @@ public class ServerDbUpdateHelper {
      * @return
      */
     public static boolean isLocalOlder(Context context, LogModule logModule) {
-        if (AuthMgr.getInstance().getToken().isEmpty())
+        if (!(AuthMgr.getInstance().isLogin()))
             return false;
 
         UtLogDao utLogDao = new UtLogDao(context);
@@ -79,7 +79,7 @@ public class ServerDbUpdateHelper {
      * @param logModule
      */
     public static void pullData(Context context, LogModule logModule) {
-        if (AuthMgr.getInstance().getToken().isEmpty())
+        if (!(AuthMgr.getInstance().isLogin()))
             return;
 
         Log.e("", "pullData: " + logModule.toString());
@@ -103,12 +103,12 @@ public class ServerDbUpdateHelper {
             break;
             case Mod_Star: {
                 SearchItemDao searchItemDao = new SearchItemDao(context);
-                searchItemDao.deleteStarSearchItems(searchItemDao.queryAllStarSearchItems(false));
+                searchItemDao.deleteStarSearchItems(searchItemDao.queryAllStarSearchItems(false), false);
                 try {
                     SearchItem[] searchItems = StarUtil.getAllStars();
                     for (SearchItem searchItem : searchItems) {
                         Log.e("", "pullData: " + searchItem.getUrl() );
-                        searchItemDao.insertStarSearchItem(searchItem);
+                        searchItemDao.insertStarSearchItem(searchItem, false);
                     }
                 } catch (ServerErrorException ex) {
                     ex.printStackTrace();
@@ -123,6 +123,10 @@ public class ServerDbUpdateHelper {
         }
 
         // 更新 Log
+        pullLog(context, logModule);
+    }
+
+    public static void pullLog(Context context, LogModule logModule) {
         try {
             UtLog utLog = LogUtil.getOneLog(logModule);
             UtLogDao utLogDao = new UtLogDao(context);
@@ -142,7 +146,7 @@ public class ServerDbUpdateHelper {
      * @param logModule
      */
     public static void pushData(Context context, LogModule logModule) {
-        if (AuthMgr.getInstance().getToken().isEmpty())
+        if (!(AuthMgr.getInstance().isLogin()))
             return;
 
         Log.e("", "pushData: " + logModule.toString());
@@ -220,6 +224,10 @@ public class ServerDbUpdateHelper {
             break;
         }
 
+        pushLog(context, logModule);
+    }
+
+    public static void pushLog(Context context, LogModule logModule) {
         try {
             UtLogDao utLogDao = new UtLogDao(context);
             LogUtil.updateModuleLog(utLogDao.getLog(logModule)); // 更新服务器为本地日志

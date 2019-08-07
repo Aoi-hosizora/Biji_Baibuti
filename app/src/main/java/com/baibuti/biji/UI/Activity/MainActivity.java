@@ -413,7 +413,7 @@ public class MainActivity extends FragmentActivity implements IShowLog, Navigati
 
     private void checkLoginStatus() {
         // TODO
-        if (AuthMgr.getInstance().getToken().isEmpty())
+        if (!(AuthMgr.getInstance().isLogin()))
             refreshUserInfo("未登录用户");
         else
             refreshUserInfo(AuthMgr.getInstance().getUserName());

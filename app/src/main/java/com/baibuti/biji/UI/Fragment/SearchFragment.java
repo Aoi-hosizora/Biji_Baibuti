@@ -451,21 +451,53 @@ public class SearchFragment extends Fragment implements View.OnClickListener, IS
         SearchItemDao searchItemDao = new SearchItemDao(getContext());
         if (!searchItemDao.hasStaredSearchItem(searchItem)) {
             // 未收藏
-
-            if (searchItemDao.insertStarSearchItem(searchItem) != -1)
-                Toast.makeText(getActivity(), String.format(getString(R.string.SearchFrag_StarSuccess), searchItem.getTitle()), Toast.LENGTH_SHORT).show();
-            else
-                Toast.makeText(getActivity(), String.format(getString(R.string.SearchFrag_StarFailed), searchItem.getTitle()), Toast.LENGTH_SHORT).show();
+            new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    if (searchItemDao.insertStarSearchItem(searchItem) != -1)
+                        getActivity().runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                Toast.makeText(getActivity(), String.format(getString(R.string.SearchFrag_StarSuccess), searchItem.getTitle()), Toast.LENGTH_SHORT).show();
+                                searchItemAdapter.notifyDataSetChanged();
+                            }
+                        });
+                    else
+                        getActivity().runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                Toast.makeText(getActivity(), String.format(getString(R.string.SearchFrag_StarFailed), searchItem.getTitle()), Toast.LENGTH_SHORT).show();
+                                searchItemAdapter.notifyDataSetChanged();
+                            }
+                        });
+                }
+            }).start();
         }
         else {
             // 已收藏
+            new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    if (searchItemDao.deleteStarSearchItem(searchItem) != -1)
+                        getActivity().runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                Toast.makeText(getActivity(), String.format(getString(R.string.SearchFrag_CancelStarSuccess), searchItem.getTitle()), Toast.LENGTH_SHORT).show();
 
-            if (searchItemDao.deleteStarSearchItem(searchItem) != -1)
-                Toast.makeText(getActivity(), String.format(getString(R.string.SearchFrag_CancelStarSuccess), searchItem.getTitle()), Toast.LENGTH_SHORT).show();
-            else
-                Toast.makeText(getActivity(), String.format(getString(R.string.SearchFrag_CancelStarFailed), searchItem.getTitle()), Toast.LENGTH_SHORT).show();
+                                searchItemAdapter.notifyDataSetChanged();
+                            }
+                        });
+                    else
+                        getActivity().runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                Toast.makeText(getActivity(), String.format(getString(R.string.SearchFrag_CancelStarFailed), searchItem.getTitle()), Toast.LENGTH_SHORT).show();
+                                searchItemAdapter.notifyDataSetChanged();
+                            }
+                        });
+                }
+            }).start();
         }
-        searchItemAdapter.notifyDataSetChanged();
     }
 
     /**
