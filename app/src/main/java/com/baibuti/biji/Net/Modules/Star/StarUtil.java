@@ -16,6 +16,7 @@ public class StarUtil {
     private static final String AllStarUrl = Urls.StarUrl + "/all";
     private static final String InsertStarUrl = Urls.StarUrl + "/insert";
     private static final String DeleteStarUrl = Urls.StarUrl + "/delete";
+    private static final String PushStarUrl = Urls.StarUrl + "/push";
 
     public static SearchItem[] getAllStars() throws ServerErrorException {
         RespType resp = NetUtil.httpGetSync(AllStarUrl, NetUtil.getOneHeader("Authorization", AuthMgr.getInstance().getToken()));
@@ -82,6 +83,29 @@ public class StarUtil {
         catch (NullPointerException ex) {
             ex.printStackTrace();
             return null;
+        }
+    }
+
+    public static boolean pushStar(SearchItem[] searchItems) throws ServerErrorException {
+        RespType resp = NetUtil.httpPostPutDeleteSync(
+                PushStarUrl, NetUtil.POST,
+                StarReqBody.toStarReqBodiesJson(StarReqBody.toStarReqBodies(searchItems)),
+                NetUtil.getOneHeader("Authorization", AuthMgr.getInstance().getToken())
+        );
+
+        try {
+            int code = resp.getCode();
+            if (code == 200) {
+                return true;
+            }
+            else {
+                MessageResp msg = MessageResp.getMsgRespFromJson(resp.getBody());
+                throw new ServerErrorException(msg.getMessage(), msg.getDetail(), code);
+            }
+        }
+        catch (NullPointerException ex) {
+            ex.printStackTrace();
+            return false;
         }
     }
 }

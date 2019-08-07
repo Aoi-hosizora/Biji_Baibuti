@@ -109,6 +109,8 @@ public class ServerDbUpdateHelper {
                     for (SearchItem searchItem : searchItems) {
                         Log.e("", "pullData: " + searchItem.getUrl() );
                         searchItemDao.insertStarSearchItem(searchItem, false);
+
+                        pullLog(context, logModule);
                     }
                 } catch (ServerErrorException ex) {
                     ex.printStackTrace();
@@ -121,9 +123,6 @@ public class ServerDbUpdateHelper {
             break;
 
         }
-
-        // 更新 Log
-        pullLog(context, logModule);
     }
 
     public static void pullLog(Context context, LogModule logModule) {
@@ -185,37 +184,14 @@ public class ServerDbUpdateHelper {
             case Mod_Star: {
 
                 SearchItemDao searchItemDao = new SearchItemDao(context);
-
                 List<SearchItem> searchItems = searchItemDao.queryAllStarSearchItems(false);
-                // TODO
-
                 try {
-                    SearchItem[] searchItems1 = StarUtil.getAllStars();
-                    for (SearchItem searchItem : searchItems1) {
-                        Log.e("", "pushData: " + searchItem.getTitle() );
-                        try {
-                            StarUtil.deleteStar(searchItem);
-                        } catch (ServerErrorException ex) {
-                            ex.printStackTrace();
-                        }
-                    }
+                    StarUtil.pushStar(searchItems.toArray(new SearchItem[0]));
+                    pushLog(context, logModule);
                 }
                 catch (ServerErrorException ex) {
-                    Log.e("", "pushData: ServerErrorException getAllStars error"  );
                     ex.printStackTrace();
                 }
-                catch (NullPointerException ex) {
-                    Log.e("", "pushData: NullPointerException getAllStars error"  );
-                    ex.printStackTrace();
-                }
-
-                for (SearchItem searchItem : searchItems)
-                    try {
-                        StarUtil.insertStar(searchItem);
-                    }
-                    catch (ServerErrorException ex) {
-                        ex.printStackTrace();
-                    }
             }
             break;
             case Mod_File: { }
@@ -223,8 +199,6 @@ public class ServerDbUpdateHelper {
             case Mod_Schedule: { }
             break;
         }
-
-        pushLog(context, logModule);
     }
 
     public static void pushLog(Context context, LogModule logModule) {

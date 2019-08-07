@@ -19,7 +19,7 @@ public class StarReqBody implements Serializable {
     public StarReqBody(String title, String url, String content) {
         this.title = title;
         this.url = url;
-        this.content = content;
+        this.content = content.replaceAll("[\n|\r]", " ");
     }
 
     public String getTitle() {
@@ -77,6 +77,33 @@ public class StarReqBody implements Serializable {
         for (int i = 0; i < starReqBodies.length; i++)
             rets[i] = starReqBodies[i].toSearchItem();
         return rets;
+    }
+
+    /**
+     * SearchItem[] -> StarReqBody[]
+     * @return
+     */
+    public static StarReqBody[] toStarReqBodies(SearchItem[] searchItems) {
+        if (searchItems == null)
+            return null;
+        StarReqBody[] rets = new StarReqBody[searchItems.length];
+        for (int i = 0; i < searchItems.length; i++)
+            rets[i] = toStarReqBody(searchItems[i]);
+        return rets;
+    }
+
+    /**
+     * StarReqBody[] -> Json str
+     * @return
+     */
+    public static String toStarReqBodiesJson(StarReqBody[] starReqBodies) {
+        if (starReqBodies == null)
+            return "";
+        JSONArray jsonArray = new JSONArray();
+        for (StarReqBody starReqBody : starReqBodies) {
+            jsonArray.put(starReqBody.toJson());
+        }
+        return jsonArray.toString();
     }
     
     // endregion SearchItem <-> StarReqBody
