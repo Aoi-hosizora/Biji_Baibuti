@@ -18,6 +18,7 @@ public class GroupUtil {
     private static final String UpdateGroupUrl = Urls.GroupUrl + "/update";
     private static final String InsertGroupUrl = Urls.GroupUrl + "/insert";
     private static final String DeleteGroupUrl = Urls.GroupUrl + "/delete";
+    private static final String PushGroupUrl = Urls.GroupUrl + "/push";
 
     public static Group[] getAllGroups() throws ServerErrorException {
         RespType resp = NetUtil.httpGetSync(AllGroupUrl, NetUtil.getOneHeader("Authorization", AuthMgr.getInstance().getToken()));
@@ -127,6 +128,30 @@ public class GroupUtil {
         catch (NullPointerException ex) {
             ex.printStackTrace();
             return null;
+        }
+    }
+
+
+    public static boolean pushGroups(Group[] groups) throws ServerErrorException {
+        RespType resp = NetUtil.httpPostPutDeleteSync(
+                PushGroupUrl, NetUtil.POST,
+                GroupReqBody.getJsonFromGroupReqRodies(GroupReqBody.toGroupReqBodies(groups)),
+                NetUtil.getOneHeader("Authorization", AuthMgr.getInstance().getToken())
+        );
+
+        try {
+            int code = resp.getCode();
+            if (code == 200) {
+                return true;
+            }
+            else {
+                MessageResp msg = MessageResp.getMsgRespFromJson(resp.getBody());
+                throw new ServerErrorException(msg.getMessage(), msg.getDetail(), code);
+            }
+        }
+        catch (NullPointerException ex) {
+            ex.printStackTrace();
+            return false;
         }
     }
 }

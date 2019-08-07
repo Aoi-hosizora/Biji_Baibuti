@@ -7,6 +7,8 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.Serializable;
+import java.text.SimpleDateFormat;
+import java.util.Locale;
 
 public class GroupReqBody implements Serializable {
 
@@ -71,6 +73,20 @@ public class GroupReqBody implements Serializable {
      */
     public static GroupReqBody toGroupReqBody(Group group) {
         return new GroupReqBody(group.getId(), group.getName(), group.getOrder(), group.getColor());
+    }
+
+    /**
+     * Group[] -> GroupReqBody[]
+     * @param groups
+     * @return
+     */
+    public static GroupReqBody[] toGroupReqBodies(Group[] groups) {
+        if (groups == null)
+            return null;
+        GroupReqBody[] rets = new GroupReqBody[groups.length];
+        for (int i = 0; i < groups.length; i++)
+            rets[i] = toGroupReqBody(groups[i]);
+        return rets;
     }
 
     /**
@@ -177,6 +193,17 @@ public class GroupReqBody implements Serializable {
             ex.printStackTrace();
             return null;
         }
+    }
+
+    /**
+     * GroupReqBody[] -> Json str
+     * @return
+     */
+    public static String getJsonFromGroupReqRodies(GroupReqBody[] groupReqBodies) {
+        JSONArray obj = new JSONArray();
+        for (GroupReqBody groupReqBody : groupReqBodies)
+            obj.put(groupReqBody.toJson());
+        return obj.toString();
     }
 
     // endregion GroupReqBody <-> Json

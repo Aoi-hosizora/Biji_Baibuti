@@ -9,6 +9,11 @@ import com.baibuti.biji.R;
 import com.baibuti.biji.Data.DB.GroupDao;
 import com.baibuti.biji.Data.DB.NoteDao;
 
+import org.apache.poi.ss.formula.functions.T;
+
+import java.util.ArrayList;
+import java.util.List;
+
 public class GroupDeleteDialog {
 
     private NoteDao noteDao;
@@ -56,10 +61,16 @@ public class GroupDeleteDialog {
      * 删除分组的判断，是否要删除对应的笔记
      */
     private void HandleDeleteGroupNote( final Group group) {
-        if (noteDao.queryNotesAll(inputGroup.getId()).isEmpty())
-            HandleDeleteGroup(group); // 无关联
-        else
-            HandleDeleteNote(group); // 有关联
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                if (noteDao.queryAllNotesFromGroupId(inputGroup.getId()).isEmpty())
+                    // TODO
+                    HandleDeleteGroup(group); // 无关联
+                else
+                    HandleDeleteNote(group); // 有关联
+            }
+        }).start();
     }
 
     /**
@@ -100,46 +111,62 @@ public class GroupDeleteDialog {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         // 删除分组并修改为默认分组
-                        try {
-                            for (Note note : noteDao.queryNotesAll(group.getId())) {
-                                // 不更改修改时间修改分组
-                                note.setGroupLabel(groupDao.queryDefaultGroup(), false);
-                                noteDao.updateNote(note);
-                            }
+                        new Thread(new Runnable() {
+                            @Override
+                            public void run() {
+                                try {
+                                    // TODO !!!!
+                                    List<Note> notes = noteDao.queryAllNotesFromGroupId(group.getId());
+                                    for (Note note : notes) {
+                                        // 不更改修改时间修改分组
+                                        note.setGroupLabel(groupDao.queryDefaultGroup(), false);
+                                        noteDao.updateNote(note);
+                                    }
 
-                        }
-                        catch (Exception ex) {
-                            ex.printStackTrace();
-                        }
-                        //////////////////////////////////////////////////
-                        try {
-                            groupDao.deleteGroup(group.getId());
-                        } catch (Exception ex) {
-                            ex.printStackTrace();
-                        }
-                        dialog.dismiss();
-                        DismissAndReturn();
+                                }
+                                catch (Exception ex) {
+                                    ex.printStackTrace();
+                                }
+                                //////////////////////////////////////////////////
+                                try {
+                                    groupDao.deleteGroup(group.getId());
+                                }
+                                catch (Exception ex) {
+                                    ex.printStackTrace();
+                                }
+                                dialog.dismiss();
+                                DismissAndReturn();
+                            }
+                        }).start();
                     }
                 })
                 .setNegativeButton(R.string.GroupDialog_DeleteNoteAlertNegativeButtonForDeleteGroupAndNote, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         // 删除分组及笔记
-                        try {
-                            for (Note note : noteDao.queryNotesAll(group.getId()))
-                                noteDao.deleteNote(note.getId());
-                        }
-                        catch (Exception ex) {
-                            ex.printStackTrace();
-                        }
-                        //////////////////////////////////////////////////
-                        try {
-                            groupDao.deleteGroup(group.getId());
-                        } catch (Exception ex) {
-                            ex.printStackTrace();
-                        }
-                        dialog.dismiss();
-                        DismissAndReturn();
+
+                        new Thread(new Runnable() {
+                            @Override
+                            public void run() {
+                                try {
+                                    // TODO !!!!
+                                    List<Note> notes = noteDao.queryAllNotesFromGroupId(group.getId());
+                                    for (Note note : notes)
+                                        noteDao.deleteNote(note.getId());
+                                }
+                                catch (Exception ex) {
+                                    ex.printStackTrace();
+                                }
+                                //////////////////////////////////////////////////
+                                try {
+                                    groupDao.deleteGroup(group.getId());
+                                } catch (Exception ex) {
+                                    ex.printStackTrace();
+                                }
+                                dialog.dismiss();
+                                DismissAndReturn();
+                            }
+                        }).start();
                     }
                 })
                 .create();

@@ -97,6 +97,7 @@ public class NoteReqBody implements Serializable {
      * @return
      */
     public static NoteReqBody toNoteReqBody(Note note) {
+        if (note == null) return null;
         return new NoteReqBody(note.getId(), note.getTitle(), note.getContent(), note.getGroupLabel().getId(), note.getCreateTime(), note.getUpdateTime());
     }
 
@@ -159,8 +160,8 @@ public class NoteReqBody implements Serializable {
     public static String getJsonFromNoteRodies(NoteReqBody[] noteReqBodies) {
         SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.CHINA);
         JSONArray obj = new JSONArray();
-        for (int i = 0; i < noteReqBodies.length; i++)
-            obj.put(noteReqBodies);
+        for (NoteReqBody noteReqBody : noteReqBodies)
+            obj.put(noteReqBody.toJson());
         return obj.toString();
     }
 

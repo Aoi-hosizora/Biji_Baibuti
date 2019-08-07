@@ -18,6 +18,7 @@ public class NoteUtil {
     private static final String UpdateNoteUrl = Urls.NoteUrl + "/update";
     private static final String InsertNoteUrl = Urls.NoteUrl + "/insert";
     private static final String DeleteNoteUrl = Urls.NoteUrl + "/delete";
+    private static final String PushNoteUrl = Urls.NoteUrl + "/push";
 
     public static Note[] getAllNotes() throws ServerErrorException {
         RespType resp = NetUtil.httpGetSync(AllNoteUrl, NetUtil.getOneHeader("Authorization", AuthMgr.getInstance().getToken()));
@@ -106,10 +107,10 @@ public class NoteUtil {
         }
     }
 
-    public static Note deleteNote(Note Note) throws ServerErrorException {
+    public static Note deleteNote(Note note) throws ServerErrorException {
         RespType resp = NetUtil.httpPostPutDeleteSync(
                 DeleteNoteUrl, NetUtil.DELETE,
-                NoteReqBody.toNoteReqBody(Note).toJson(),
+                NoteReqBody.toNoteReqBody(note).toJson(),
                 NetUtil.getOneHeader("Authorization", AuthMgr.getInstance().getToken())
         );
 
@@ -127,6 +128,29 @@ public class NoteUtil {
         catch (NullPointerException ex) {
             ex.printStackTrace();
             return null;
+        }
+    }
+
+    public static boolean pushNotes(Note[] notes) throws ServerErrorException {
+        RespType resp = NetUtil.httpPostPutDeleteSync(
+                PushNoteUrl, NetUtil.POST,
+                NoteReqBody.getJsonFromNoteRodies(NoteReqBody.toNoteReqBodies(notes)),
+                NetUtil.getOneHeader("Authorization", AuthMgr.getInstance().getToken())
+        );
+
+        try {
+            int code = resp.getCode();
+            if (code == 200) {
+                return true;
+            }
+            else {
+                MessageResp msg = MessageResp.getMsgRespFromJson(resp.getBody());
+                throw new ServerErrorException(msg.getMessage(), msg.getDetail(), code);
+            }
+        }
+        catch (NullPointerException ex) {
+            ex.printStackTrace();
+            return false;
         }
     }
 }

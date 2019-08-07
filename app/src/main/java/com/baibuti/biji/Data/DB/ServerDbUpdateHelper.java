@@ -3,6 +3,7 @@ package com.baibuti.biji.Data.DB;
 import android.content.Context;
 import android.util.Log;
 
+import com.baibuti.biji.Data.Models.Group;
 import com.baibuti.biji.Data.Models.LogModule;
 import com.baibuti.biji.Data.Models.Note;
 import com.baibuti.biji.Data.Models.SearchItem;
@@ -10,20 +11,21 @@ import com.baibuti.biji.Data.Models.UtLog;
 import com.baibuti.biji.Net.Models.RespObj.ServerErrorException;
 import com.baibuti.biji.Net.Modules.Auth.AuthMgr;
 import com.baibuti.biji.Net.Modules.Log.LogUtil;
+import com.baibuti.biji.Net.Modules.Note.GroupUtil;
 import com.baibuti.biji.Net.Modules.Note.NoteUtil;
 import com.baibuti.biji.Net.Modules.Star.StarUtil;
 
 import java.util.Date;
 import java.util.List;
 
-public class ServerDbUpdateHelper {
+class ServerDbUpdateHelper {
 
     /**
      * 返回是否本地比服务器日志新，以本地新为主
      * @param logModule
      * @return
      */
-    public static boolean isLocalNewer(Context context, LogModule logModule) {
+    static boolean isLocalNewer(Context context, LogModule logModule) {
         if (!(AuthMgr.getInstance().isLogin()))
             return true;
 
@@ -51,7 +53,7 @@ public class ServerDbUpdateHelper {
      * @param logModule
      * @return
      */
-    public static boolean isLocalOlder(Context context, LogModule logModule) {
+    static boolean isLocalOlder(Context context, LogModule logModule) {
         if (!(AuthMgr.getInstance().isLogin()))
             return false;
 
@@ -78,7 +80,7 @@ public class ServerDbUpdateHelper {
      * @param context 数据库上下文
      * @param logModule
      */
-    public static void pullData(Context context, LogModule logModule) {
+    static void pullData(Context context, LogModule logModule) {
         if (!(AuthMgr.getInstance().isLogin()))
             return;
 
@@ -87,19 +89,51 @@ public class ServerDbUpdateHelper {
         // 更新数据
         switch (logModule) {
             case Mod_Note: {
-                // NoteDao noteDao = new NoteDao(context);
-                // noteDao.deleteNote(noteDao.queryNotesAll());
-                // try {
-                //     Note[] notes = NoteUtil.getAllNotes();
-                //     for (Note note : notes) {
-                //         noteDao.insertNote(note, note.getId());
-                //     }
-                // } catch (ServerErrorException ex) {
-                //     ex.printStackTrace();
-                // }
+                NoteDao noteDao = new NoteDao(context);
+                List<Note> allNotes = noteDao.queryAllNotesFromGroupId(-1, false);
+                for (Note note : allNotes)
+                    noteDao.deleteNote(note.getId(), false);
+
+                try {
+                    Note[] notes = NoteUtil.getAllNotes();
+                    GroupDao groupDao = new GroupDao(context);
+                    if (notes != null)
+                        for (Note note : notes) {
+                            note.setGroupLabel(groupDao.queryGroupById(note.getGroupLabel().getId(), false), false);
+                            noteDao.insertNote(note, note.getId()); // not check log
+                            pullLog(context, logModule);
+                        }
+                }
+                catch (ServerErrorException ex) {
+                    ex.printStackTrace();
+                }
             }
             break;
-            case Mod_Group: { }
+            case Mod_Group: {
+                // 先Group后Note
+                GroupDao groupDao = new GroupDao(context);
+                List<Group> groups = groupDao.queryGroupAll(false);
+                for (Group group : groups)
+                    try {
+                        // 不会抛出
+                        groupDao.deleteGroup(group.getId(), false);
+                    }
+                    catch (EditDefaultGroupException ex) {
+                        ex.printStackTrace();
+                    }
+
+                try {
+                    Group[] groups1 = GroupUtil.getAllGroups();
+                    if (groups1 != null)
+                        for (Group group : groups1) {
+                            groupDao.insertGroup(group, group.getId()); // not check log
+                            pullLog(context, logModule);
+                        }
+                }
+                catch (ServerErrorException ex) {
+                    ex.printStackTrace();
+                }
+            }
             break;
             case Mod_Star: {
                 SearchItemDao searchItemDao = new SearchItemDao(context);
@@ -125,7 +159,7 @@ public class ServerDbUpdateHelper {
         }
     }
 
-    public static void pullLog(Context context, LogModule logModule) {
+    static void pullLog(Context context, LogModule logModule) {
         try {
             UtLog utLog = LogUtil.getOneLog(logModule);
             UtLogDao utLogDao = new UtLogDao(context);
@@ -144,7 +178,7 @@ public class ServerDbUpdateHelper {
      * @param context 数据库上下文
      * @param logModule
      */
-    public static void pushData(Context context, LogModule logModule) {
+    static void pushData(Context context, LogModule logModule) {
         if (!(AuthMgr.getInstance().isLogin()))
             return;
 
@@ -152,34 +186,29 @@ public class ServerDbUpdateHelper {
 
         switch (logModule) {
             case Mod_Note: {
-                // NoteDao noteDao = new NoteDao(context);
-//
-                // List<Note> notes = noteDao.queryNotesAll();
-                // // TODO
-//
-                // try {
-                //     Note[] notes1 = NoteUtil.getAllNotes();
-                //     for (Note note1 : notes1)
-                //         try {
-                //             NoteUtil.deleteNote(note1);
-                //         }
-                //         catch (ServerErrorException ex) {
-                //             ex.printStackTrace();
-                //         }
-                // }
-                // catch (ServerErrorException ex) {
-                //     ex.printStackTrace();
-                // }
-                // for (Note note : notes)
-                //     try {
-                //         NoteUtil.insertNote(note);
-                //     }
-                //     catch (ServerErrorException ex) {
-                //         ex.printStackTrace();
-                //     }
+
+                NoteDao noteDao = new NoteDao(context);
+                List<Note> notes = noteDao.queryAllNotesFromGroupId(-1, false);
+                try {
+                    NoteUtil.pushNotes(notes.toArray(new Note[0]));
+                    pushLog(context, logModule);
+                }
+                catch (ServerErrorException ex) {
+                    ex.printStackTrace();
+                }
             }
             break;
-            case Mod_Group: { }
+            case Mod_Group: {
+                GroupDao groupDao = new GroupDao(context);
+                List<Group> groups = groupDao.queryGroupAll(false);
+                try {
+                    GroupUtil.pushGroups(groups.toArray(new Group[0]));
+                    pushLog(context, logModule);
+                }
+                catch (ServerErrorException ex) {
+                    ex.printStackTrace();
+                }
+            }
             break;
             case Mod_Star: {
 
@@ -201,7 +230,7 @@ public class ServerDbUpdateHelper {
         }
     }
 
-    public static void pushLog(Context context, LogModule logModule) {
+    static void pushLog(Context context, LogModule logModule) {
         try {
             UtLogDao utLogDao = new UtLogDao(context);
             LogUtil.updateModuleLog(utLogDao.getLog(logModule)); // 更新服务器为本地日志

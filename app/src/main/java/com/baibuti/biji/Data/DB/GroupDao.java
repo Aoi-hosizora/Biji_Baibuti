@@ -11,7 +11,9 @@ import android.widget.Toast;
 
 import com.baibuti.biji.Data.Models.Group;
 import com.baibuti.biji.Data.Models.LogModule;
+import com.baibuti.biji.Net.Models.RespObj.ServerErrorException;
 import com.baibuti.biji.Net.Modules.Auth.AuthMgr;
+import com.baibuti.biji.Net.Modules.Note.GroupUtil;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -32,7 +34,6 @@ public class GroupDao {
         this.context = context;
     }
 
-
     /**
      * 更新分组日志，可能存在冗杂
      */
@@ -41,12 +42,43 @@ public class GroupDao {
         utLogDao.updateLog(LogModule.Mod_Group);
     }
 
-    // region 查询全部 queryGroupAll selectAllGroup
     /**
-     * 查询所有分类列表
+     * 进行 push pull
+     */
+    private void pushpull() {
+
+        // TODO 需要处理分组
+
+        if (AuthMgr.getInstance().isLogin()) {
+            if (ServerDbUpdateHelper.isLocalNewer(context, LogModule.Mod_Group)) { // 本地新
+                // TODO 异步
+                ServerDbUpdateHelper.pushData(context, LogModule.Mod_Group);
+            }
+            else if (ServerDbUpdateHelper.isLocalOlder(context, LogModule.Mod_Group)) { // 服务器新
+                // TODO 同步
+                ServerDbUpdateHelper.pullData(context, LogModule.Mod_Group);
+            }
+        }
+    }
+
+    // region 查询全部 queryGroupAll selectAllGroup
+
+    /**
+     * 查询所有分类列表，同步
      * @return
      */
-    public List<Group> queryGroupAll() { // ArrayList
+    public List<Group> queryGroupAll() {
+        return queryGroupAll(true);
+    }
+
+    /**
+     * 查询所有分类列表，同步?
+     * @param isLogCheck
+     * @return
+     */
+    public List<Group> queryGroupAll(boolean isLogCheck) { // ArrayList
+
+        if (isLogCheck) pushpull();
 
         List<Group> groupList = selectAllGroup();
 
@@ -62,7 +94,10 @@ public class GroupDao {
         return groupList;
     }
 
-    // 内部 select
+    /**
+     * 内部 select, 不处理同步
+     * @return
+     */
     private List<Group> selectAllGroup() {
         SQLiteDatabase db = helper.getWritableDatabase();
         List<Group> groupList = new ArrayList<Group>();
@@ -104,12 +139,25 @@ public class GroupDao {
 
     // region 自定义查询 queryGroupByName queryGroupById queryGroupByOrder
 
+
+    // /**
+    //  * 查询分组名，同步
+    //  * @param groupName
+    //  * @return
+    //  */
+    // public Group queryGroupByName(String groupName) {
+    //     return queryGroupByName(groupName, false);
+    // }
+
     /**
-     * 按照分组名查询
+     * 按照分组名查询，同步？
      * @param groupName
      * @return
      */
-    public Group queryGroupByName(String groupName) {
+    public Group queryGroupByName(String groupName, boolean isLogCheck) {
+
+        if (isLogCheck) pushpull();
+
         SQLiteDatabase db = helper.getWritableDatabase();
 
         Group group = null;
@@ -141,11 +189,23 @@ public class GroupDao {
     }
 
     /**
-     * 按照分组 id 查询
+     * 按照分组 id 查询，同步
      * @param groupId
      * @return
      */
     public Group queryGroupById(int groupId) {
+        return queryGroupById(groupId, true);
+    }
+
+    /**
+     * 按照分组 id 查询，同步？
+     * @param groupId
+     * @return
+     */
+    public Group queryGroupById(int groupId, boolean isCheckLog) {
+
+        if (isCheckLog) pushpull();
+
         SQLiteDatabase db = helper.getWritableDatabase();
 
         Group group = null;
@@ -178,6 +238,7 @@ public class GroupDao {
 
     /**
      * 按照分组顺序查询，默认查询第一个
+     * 不同步, 效率问题!!!
      * @param order
      * @return
      */
@@ -187,6 +248,7 @@ public class GroupDao {
 
     /**
      * 按照分组顺序查询，需保证唯一
+     * 不同步, 效率问题!!!
      * @param order
      * @param sumcnt 查询第几个分组，默认为1
      * @return
@@ -227,7 +289,6 @@ public class GroupDao {
         }
         return group;
     }
-
 
     // endregion 自定义查询
 
@@ -290,7 +351,7 @@ public class GroupDao {
             // 绕过默认分组
             if (handleGroup.getOrder() == 0) {
                 handleGroup.setOrder(1);
-                updateGroup(handleGroup);
+                updateGroup(handleGroup, false);
             }
 
             Group firstGroup = queryGroupByOrder(handleGroup.getOrder());
@@ -306,7 +367,7 @@ public class GroupDao {
                 // 将重复的下移，正常情况下最多只存在两个重复
                 firstGroup.setOrder(firstGroup.getOrder() + 1);
 
-                updateGroup(firstGroup); // 存进数据库才能 checkOrderDuplicate
+                updateGroup(firstGroup, false); // 存进数据库才能 checkOrderDuplicate
 
                 handleOrderDuplicateWhenUpdate(firstGroup); // 递归
                 // 若checkOrderDuplicate(firstGroup) == 1，修改的分组不重复，结束递归
@@ -334,7 +395,7 @@ public class GroupDao {
             }
             if (hasGap) {
                 nextGroup.setOrder(i); // 压缩
-                updateGroup(nextGroup);
+                updateGroup(nextGroup, false);
                 handleOrderDuplicateWhenUpdate(nextGroup);
             }
             order++;
@@ -359,9 +420,10 @@ public class GroupDao {
      * @return 默认分组引用
      */
     public Group queryDefaultGroup() {
+
         Group group = null;
 
-        group = this.queryGroupByName(Group.GetDefaultGroupName);
+        group = this.queryGroupByName(Group.GetDefaultGroupName, false);
         if (group != null)
             return group;
 
@@ -380,9 +442,9 @@ public class GroupDao {
         def.setColor("#F0F0F0");
         def.setName(Group.GetDefaultGroupName);
 
-        this.insertGroup(def);
+        this.insertGroup(def, def.getId());
 
-        return this.queryGroupByName(Group.GetDefaultGroupName);
+        return this.queryGroupByName(Group.GetDefaultGroupName, false);
     }
 
     /**
@@ -413,16 +475,56 @@ public class GroupDao {
     // endregion queryDefaultGroup insertDefaultGroup
 
     // region 数据增删改 insertGroup updateGroup deleteGroup
+
     /**
-     * 添加一个分类
+     * 添加分组，同步
+     * @param group
+     * @return
      */
     public long insertGroup(Group group) {
+
+
+        pushpull();
+
+        long ret = insertGroup(group, -1);
+
+
+        if (AuthMgr.getInstance().isLogin()) {
+            try {
+                if (GroupUtil.insertGroup(group) != null)
+                    ServerDbUpdateHelper.pushLog(context, LogModule.Mod_Group);
+            }
+            catch (ServerErrorException ex) {
+                ex.printStackTrace();
+            }
+        }
+
+        return ret;
+    }
+
+    /**
+     * 添加一个分类，不同步
+     * @param group
+     * @param idx
+     * @return
+     */
+    public long insertGroup(Group group, int idx) {
+
+        // if (isCheckLog) pushpull();
+
         HandleDuplicate(group, null);
 
         int order = queryGroupCnt(); // 每次都插入到最后
 
         SQLiteDatabase db = helper.getWritableDatabase();
-        String sql = "insert into db_group(g_name,g_order,g_color) values(?,?,?)";
+        String sql;
+
+        if (idx == -1)
+            sql = "insert into db_group(g_name,g_order,g_color) values(?,?,?)";
+        else
+            sql = "insert into db_group(g_name,g_order,g_color, g_id) values(?,?,?,?)";
+
+
         long ret = 0;
 
         SQLiteStatement stat = db.compileStatement(sql);
@@ -436,6 +538,9 @@ public class GroupDao {
             stat.bindLong(2, order);
 
             stat.bindString(3, group.getColor());
+
+            if (idx != -1)
+                stat.bindLong(4, idx); // id
 
             ret = stat.executeInsert();
             db.setTransactionSuccessful();
@@ -452,14 +557,23 @@ public class GroupDao {
             db.close();
         }
         updateLog();
+
         return ret;
     }
 
     /**
-     * 更新一个分类
+     * 更新一个分类，同步
      */
     public void updateGroup(Group group) {
-        Group oldGroup = queryGroupById(group.getId());
+        updateGroup(group, true);
+    }
+
+    /**
+     * 更新一个分类，同步?
+     */
+    public void updateGroup(Group group, boolean isCheckLog) {
+
+        Group oldGroup = queryGroupById(group.getId(), isCheckLog);
         try {
             if (checkDefaultGroup(oldGroup)) {
                 if (!oldGroup.getName().equals(group.getName()))
@@ -490,20 +604,41 @@ public class GroupDao {
         }
         catch (Exception e) {
             e.printStackTrace();
-        } finally {
+        }
+        finally {
             if (db != null) {
                 db.close();
             }
         }
+
+        if (isCheckLog && AuthMgr.getInstance().isLogin()) {
+            try {
+                if (GroupUtil.updateGroup(group) != null)
+                    ServerDbUpdateHelper.pushLog(context, LogModule.Mod_Group);
+            }
+            catch (ServerErrorException ex) {
+                ex.printStackTrace();
+            }
+        }
+
         updateLog();
+    }
+
+    public int deleteGroup(int groupId) throws EditDefaultGroupException {
+        return deleteGroup(groupId, true);
     }
 
     /**
      * 删除一个分类
      */
-    public int deleteGroup(int groupId) throws EditDefaultGroupException {
-        if (checkDefaultGroup(queryGroupById(groupId)))
-            throw new EditDefaultGroupException();
+    public int deleteGroup(int groupId, boolean isCheckLog) throws EditDefaultGroupException {
+
+        // check: 同步，检查默认
+        // uncheck: 不同步，忽略默认
+
+        if (isCheckLog)
+            if (checkDefaultGroup(queryGroupById(groupId)))
+                throw new EditDefaultGroupException();
 
         //////////////////////////////////////////////////
 
@@ -512,10 +647,8 @@ public class GroupDao {
         int ret = 0;
         try {
             ret = db.delete("db_group", "g_id=?", new String[]{groupId + ""});
-
             // 处理删除间隙
             handleOrderGap();
-
         }
 
         catch (Exception e) {
@@ -529,8 +662,18 @@ public class GroupDao {
         if (selectAllGroup().isEmpty())
             queryDefaultGroup();
 
-
         updateLog();
+
+        if (isCheckLog && AuthMgr.getInstance().isLogin()) {
+            try {
+                if (GroupUtil.updateGroup(queryGroupById(groupId, false)) != null)
+                    ServerDbUpdateHelper.pushLog(context, LogModule.Mod_Group);
+            }
+            catch (ServerErrorException ex) {
+                ex.printStackTrace();
+            }
+        }
+
         return ret;
     }
 

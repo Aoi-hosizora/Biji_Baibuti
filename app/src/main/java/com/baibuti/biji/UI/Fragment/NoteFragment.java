@@ -469,7 +469,7 @@ public class NoteFragment extends Fragment implements View.OnClickListener, ISho
                         @Override
                         public void run() {
                             NoteDao noteDao = new NoteDao(getContext());
-                            NoteList = noteDao.queryNotesAll();
+                            NoteList = noteDao.queryAllNotes();
                             initListView(NoteList);
 
                             mSwipeRefresh.setEnabled(true);
@@ -531,7 +531,7 @@ public class NoteFragment extends Fragment implements View.OnClickListener, ISho
         NoteDao noteDao = new NoteDao(this.getContext());
         GroupDao groupDao = new GroupDao(this.getContext());
 
-        NoteList = noteDao.queryNotesAll();
+        NoteList = noteDao.queryAllNotes();
         GroupList = groupDao.queryGroupAll();
     }
 
@@ -549,7 +549,7 @@ public class NoteFragment extends Fragment implements View.OnClickListener, ISho
     public void refreshNoteList() {
         NoteDao noteDao = new NoteDao(getContext());
         noteDao = new NoteDao(getContext());
-        NoteList = noteDao.queryNotesAll();
+        NoteList = noteDao.queryAllNotes();
         Collections.sort(NoteList);
         noteAdapter = new NoteAdapter();
         noteAdapter.setmNotes(NoteList);
@@ -578,10 +578,22 @@ public class NoteFragment extends Fragment implements View.OnClickListener, ISho
         new Handler().postDelayed(new Runnable() {
             @Override
             public void run() {
-                refreshAll();
-                initListView(NoteList);
+                new Thread(new Runnable() {
+                    @Override
+                    public void run() {
 
-                mSwipeRefresh.setRefreshing(false);
+                        refreshAll();
+
+                        getActivity().runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                initListView(NoteList);
+
+                                mSwipeRefresh.setRefreshing(false);
+                            }
+                        });
+                    }
+                }).start();
             }
 
         }, ms);
@@ -762,7 +774,7 @@ public class NoteFragment extends Fragment implements View.OnClickListener, ISho
     private List<Note> getGroupOfNote(Group group) {
         List<Note> ret = new ArrayList<>();
         NoteDao noteDao = new NoteDao(getContext());
-        List<Note> allNotes = noteDao.queryNotesAll();
+        List<Note> allNotes = noteDao.queryAllNotes();
         for (Note note : allNotes)
             if (note.getGroupLabel().getName().equals(group.getName()))
                 ret.add(note);
@@ -1187,7 +1199,7 @@ public class NoteFragment extends Fragment implements View.OnClickListener, ISho
                     NoteDao noteDao = new NoteDao(getContext());
                     GroupDao groupDao = new GroupDao(getContext());
 
-                    List<Note> notes = noteDao.queryNotesAll();
+                    List<Note> notes = noteDao.queryAllNotes();
                     for (Note note : notes)
                         NoteUtil.insertNote(note);
 

@@ -3,7 +3,9 @@
 ## 架构说明
 
 + 本地存储 <-> 服务器存储
+
 ![DB_Query](./../../../../../../../../../assets/DB_Query.png)
+
 ![DB_Insert](./../../../../../../../../../assets/DB_Insert.png)
 
 ## 服务器连接代码说明
@@ -88,18 +90,18 @@
     + 在增删改查部分都加上 `if (isLogCheck) pushpull();`
     
     ```java
-        private void updateLog() {
-            UtLogDao utLogDao = new UtLogDao(context);
-            utLogDao.updateLog(LogModule.Mod_Star);
-        }
-      
-        private void pushpull() {
-            if (AuthMgr.getInstance().isLogin())
-                if (ServerDbUpdateHelper.isLocalNewer(context, LogModule.Mod_Star))
-                    ServerDbUpdateHelper.pushData(context, LogModule.Mod_Star);
-                else if (ServerDbUpdateHelper.isLocalOlder(context, LogModule.Mod_Star))
-                    ServerDbUpdateHelper.pullData(context, LogModule.Mod_Star);
-        }
+    private void updateLog() {
+        UtLogDao utLogDao = new UtLogDao(context);
+        utLogDao.updateLog(LogModule.Mod_Star);
+    }
+  
+    private void pushpull() {
+        if (AuthMgr.getInstance().isLogin())
+            if (ServerDbUpdateHelper.isLocalNewer(context, LogModule.Mod_Star))
+                ServerDbUpdateHelper.pushData(context, LogModule.Mod_Star);
+            else if (ServerDbUpdateHelper.isLocalOlder(context, LogModule.Mod_Star))
+                ServerDbUpdateHelper.pullData(context, LogModule.Mod_Star);
+    }
     ```
     
     + 查：本地服务器同步 -> 本地查询

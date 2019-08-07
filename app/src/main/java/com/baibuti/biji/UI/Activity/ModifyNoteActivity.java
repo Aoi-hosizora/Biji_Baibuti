@@ -481,33 +481,56 @@ public class ModifyNoteActivity extends AppCompatActivity implements View.OnClic
         if (flag == NOTE_NEW) { // 从 Note Frag 打开的
 
             // 插入到数据库一条新信息
-            long noteId = noteDao.insertNote(note);
-            note.setId((int) noteId);
             CommonUtil.closeSoftKeyInput(this);
 
-            Intent intent_fromnotefrag = new Intent();
-            intent_fromnotefrag.putExtra("notedata", note);
-            intent_fromnotefrag.putExtra("flag", NOTE_NEW); // NEW
-            setResult(RESULT_OK, intent_fromnotefrag);
-            finish();
+            new Thread(new Runnable() {
+                @Override
+                public void run() {
+
+                    long noteId = noteDao.insertNote(note);
+                    note.setId((int) noteId);
+
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            Intent intent_fromnotefrag = new Intent();
+                            intent_fromnotefrag.putExtra("notedata", note);
+                            intent_fromnotefrag.putExtra("flag", NOTE_NEW); // NEW
+                            setResult(RESULT_OK, intent_fromnotefrag);
+                            finish();
+                        }
+                    });
+                }
+            }).start();
         }
         else { // 从 VMNOTE 打开的
 
-            if (isModify)
-                // 修改数据库
-                noteDao.updateNote(note);
             CommonUtil.closeSoftKeyInput(this);
 
-            Intent intent_fromvmnote = new Intent();
+            new Thread(new Runnable() {
+                @Override
+                public void run() {
 
-            intent_fromvmnote.putExtra("notedata", note);
-            intent_fromvmnote.putExtra("flag", NOTE_UPDATE); // UPDATE
-            intent_fromvmnote.putExtra("isModify", isModify);
-            setResult(RESULT_OK, intent_fromvmnote);
+                    if (isModify)
+                        // 修改数据库
+                        noteDao.updateNote(note);
 
-            finish();
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            Intent intent_fromvmnote = new Intent();
+
+                            intent_fromvmnote.putExtra("notedata", note);
+                            intent_fromvmnote.putExtra("flag", NOTE_UPDATE); // UPDATE
+                            intent_fromvmnote.putExtra("isModify", isModify);
+                            setResult(RESULT_OK, intent_fromvmnote);
+
+                            finish();
+                        }
+                    });
+                }
+            }).start();
         }
-
     }
 
     

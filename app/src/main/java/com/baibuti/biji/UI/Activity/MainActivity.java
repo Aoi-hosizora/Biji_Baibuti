@@ -93,11 +93,19 @@ public class MainActivity extends FragmentActivity implements IShowLog, Navigati
             }
         }
 
-        // FB 数据库查看
-        Stetho.initializeWithDefaults(this);
 
-        // 初始化结巴分词
-        SearchUtil.initJieba(getApplicationContext());
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+
+                // FB 数据库查看
+                Stetho.initializeWithDefaults(getApplicationContext());
+
+                // 初始化结巴分词
+                SearchUtil.initJieba(getApplicationContext());
+
+            }
+        }).start();
 
         initViews();
         initAdpts();
