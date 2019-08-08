@@ -404,10 +404,11 @@ public class MainActivity extends FragmentActivity implements IShowLog, Navigati
             public void run() {
                 try {
                     if (AuthUtil.logout()) {
-                        AuthMgr.getInstance().logout();
+
                         runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
+                                AuthMgr.getInstance().logout();
                                 m_navigationView.getMenu().findItem(R.id.id_nav_login).setTitle(R.string.nav_login);
                                 Toast.makeText(MainActivity.this, "注销成功，请重新登录。", Toast.LENGTH_SHORT).show();
                                 checkLoginStatus();
@@ -418,6 +419,7 @@ public class MainActivity extends FragmentActivity implements IShowLog, Navigati
                         runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
+                                AuthMgr.getInstance().logout();
                                 new AlertDialog.Builder(MainActivity.this)
                                         .setTitle("错误")
                                         .setMessage("注销未知错误。")

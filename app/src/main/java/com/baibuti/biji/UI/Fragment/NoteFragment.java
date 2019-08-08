@@ -1,5 +1,6 @@
 package com.baibuti.biji.UI.Fragment;
 
+import android.app.Activity;
 import android.app.Dialog;
 import android.app.ProgressDialog;
 import android.content.DialogInterface;
@@ -482,32 +483,42 @@ public class NoteFragment extends Fragment implements View.OnClickListener, ISho
                                 ex.printStackTrace();
                             }
 
-                            getActivity().runOnUiThread(new Runnable() {
-                                @Override
-                                public void run() {
-                                    initListView(NoteList);
 
-                                    mSwipeRefresh.setEnabled(true);
-                                    m_fabMenu.setVisibility(View.VISIBLE);
+                            // TODO !!!
+                            //     java.lang.NullPointerException: Attempt to invoke virtual method '
+                            //          void android.support.v4.app.FragmentActivity.runOnUiThread(java.lang.Runnable)
+                            //     ' on a null object reference
 
-                                    m_toolbar.getMenu().findItem(R.id.action_search_back).setVisible(false);
-                                    m_toolbar.getMenu().findItem(R.id.action_search).setEnabled(true);
-                                    m_toolbar.getMenu().findItem(R.id.action_search).setIcon(R.drawable.search);
-                                    m_toolbar.setTitle(R.string.NoteFrag_Header);
+                            Activity a = getActivity();
 
-                                    IsSearching = false;
-                                    SearchingStr = "";
-                                    IsSearchingNull = false;
+                            if (a != null) {
+                                a.runOnUiThread(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        initListView(NoteList);
 
-                                    IsGrouping = false;
-                                    currGroup = null;
-                                    currGroupIdx = -1;
-                                    IsGroupingNull = false;
+                                        mSwipeRefresh.setEnabled(true);
+                                        m_fabMenu.setVisibility(View.VISIBLE);
 
-                                    loadingDialog.cancel();
+                                        m_toolbar.getMenu().findItem(R.id.action_search_back).setVisible(false);
+                                        m_toolbar.getMenu().findItem(R.id.action_search).setEnabled(true);
+                                        m_toolbar.getMenu().findItem(R.id.action_search).setIcon(R.drawable.search);
+                                        m_toolbar.setTitle(R.string.NoteFrag_Header);
 
-                                }
-                            });
+                                        IsSearching = false;
+                                        SearchingStr = "";
+                                        IsSearchingNull = false;
+
+                                        IsGrouping = false;
+                                        currGroup = null;
+                                        currGroupIdx = -1;
+                                        IsGroupingNull = false;
+
+                                        loadingDialog.cancel();
+
+                                    }
+                                });
+                            }
                         }
                     }).start();
                 }
@@ -663,6 +674,7 @@ public class NoteFragment extends Fragment implements View.OnClickListener, ISho
                                 SearchGroupBack();
                     }
                 });
+                dialog.setCancelable(false);
                 dialog.show();
             }
         }, ShowGroupDlgSecond); // 10
@@ -1388,8 +1400,6 @@ public class NoteFragment extends Fragment implements View.OnClickListener, ISho
         AuthMgr.getInstance().addLoginChangeListener(new AuthMgr.OnLoginChangeListener() {
 
             // TODO
-
-            @Override
             public void onLogin(String UserName) {
                 SearchGroupBack();
             }

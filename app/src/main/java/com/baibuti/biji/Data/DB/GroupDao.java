@@ -45,7 +45,7 @@ public class GroupDao {
     /**
      * 进行 push pull
      */
-    private void pushpull() {
+    public void pushpull() {
 
         // TODO 需要处理分组
 

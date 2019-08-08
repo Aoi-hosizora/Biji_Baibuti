@@ -3,6 +3,7 @@ package com.baibuti.biji.UI.Dialog;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.os.Bundle;
+import android.support.annotation.Nullable;
 import android.util.Log;
 import android.widget.Button;
 import android.view.View;
@@ -72,10 +73,11 @@ public class GroupDialog extends AlertDialog implements OnClickListener, IShowLo
         noteDao = new NoteDao(getContext());
         groupDao = new GroupDao(getContext());
 
-        handleOrder();
         new Thread(new Runnable() {
             @Override
             public void run() {
+
+                handleOrder();
 
                 refreshGroupList();
 
@@ -120,11 +122,19 @@ public class GroupDialog extends AlertDialog implements OnClickListener, IShowLo
     private NoteDao noteDao;
 
     /**
-     * 刷新列表
+     * 刷新列表，同步
      */
     private void refreshGroupList() {
+        refreshGroupList(true);
+    }
 
-        GroupList = groupDao.queryGroupAll();
+    /**
+     * 刷新列表
+     * @param isLogCheck 次序时不同步，默认同步
+     */
+    private void refreshGroupList(boolean isLogCheck) {
+
+        GroupList = groupDao.queryGroupAll(isLogCheck);
 
         activity.runOnUiThread(new Runnable() {
             @Override
@@ -265,7 +275,7 @@ public class GroupDialog extends AlertDialog implements OnClickListener, IShowLo
     private int currentPos;
 
     /**
-     * 移动分组 Order
+     * 移动分组 Order，不同步
      * @param currentGroup 当前分组
      * @param isUP
      *          true: UE, Order--
@@ -289,17 +299,17 @@ public class GroupDialog extends AlertDialog implements OnClickListener, IShowLo
                     Group upGroup = groupDao.queryGroupByOrder(motoorder - 1);
                     if (upGroup != null) {
                         upGroup.setOrder(motoorder);
-                        groupDao.updateGroup(upGroup);
+                        groupDao.updateGroup(upGroup, false);
                     }
 
                     currentPos--;
 
-                    groupDao.updateGroup(currentGroup); // 更新数据库
+                    groupDao.updateGroup(currentGroup, false); // 更新数据库
 
                     activity.runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
-                            moveGroupOrdepRe();
+                            moveGroupOrderRe();
                         }
                     });
                 }
@@ -316,17 +326,17 @@ public class GroupDialog extends AlertDialog implements OnClickListener, IShowLo
                     Group downGroup = groupDao.queryGroupByOrder(motoorder + 1); // 向下交换
                     if (downGroup != null) {
                         downGroup.setOrder(motoorder);
-                        groupDao.updateGroup(downGroup);
+                        groupDao.updateGroup(downGroup, false);
                     }
 
                     currentPos++;
 
-                    groupDao.updateGroup(currentGroup); // 更新数据库
+                    groupDao.updateGroup(currentGroup, false); // 更新数据库
 
                     activity.runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
-                            moveGroupOrdepRe();
+                            moveGroupOrderRe();
                         }
                     });
                 }
@@ -335,14 +345,14 @@ public class GroupDialog extends AlertDialog implements OnClickListener, IShowLo
         }
     }
 
-    private void moveGroupOrdepRe() {
+    private void moveGroupOrderRe() {
 
         new Thread(new Runnable() {
             @Override
             public void run() {
 
                 // 更新显示
-                refreshGroupList();
+                refreshGroupList(false);
 
                 activity.runOnUiThread(new Runnable() {
                     @Override
@@ -368,12 +378,49 @@ public class GroupDialog extends AlertDialog implements OnClickListener, IShowLo
     /////////////////////////////////////////////////////
 
     private void DismissAndReturn(boolean isReturn) {
-        handleOrder();
 
-        if (mListener != null)
-            mListener.UpdateGroupFinished(); // 同时令 Note Frac 更新分组信息
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                handleOrder();
 
-        if (isReturn)
-            dismiss();
+                activity.runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+
+                        // 不允许 back
+                        if (mListener != null)
+                            mListener.UpdateGroupFinished(); // 同时令 Note Frac 更新分组信息
+
+                        if (isReturn)
+                            dismiss();
+
+                    }
+                });
+            }
+        }).start();
+
+    }
+
+    @Override
+    public void dismiss() {
+
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+
+                // 最后同步
+                groupDao.pushpull();
+
+                activity.runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+
+                        GroupDialog.super.dismiss();
+                    }
+                });
+            }
+        }).start();
+
     }
 }

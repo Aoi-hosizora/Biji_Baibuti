@@ -98,6 +98,14 @@ public class NoteDao {
         Log.e("", "queryAllNotesFromGroupId: 2 " + groupId + isLogCheck);
         if (isLogCheck) pushpull();
 
+        // TODO !!!
+        //  W/System.err: java.lang.NullPointerException:
+        //  Attempt to invoke virtual method '
+        //      android.database.sqlite.SQLiteDatabase android.content.Context.openOrCreateDatabase(
+        //          java.lang.String, int, android.database.sqlite.SQLiteDatabase$CursorFactory, android.database.DatabaseErrorHandler
+        //      )
+        //  ' on a null object reference
+
         SQLiteDatabase db = helper.getWritableDatabase();
 
         List<Note> noteList = new ArrayList<>();
