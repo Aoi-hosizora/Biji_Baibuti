@@ -1,7 +1,9 @@
 package com.baibuti.biji.UI.Dialog;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.support.annotation.UiThread;
 
 import com.baibuti.biji.Data.Models.Group;
 import com.baibuti.biji.Data.Models.Note;
@@ -19,18 +21,18 @@ public class GroupDeleteDialog {
     private NoteDao noteDao;
     private GroupDao groupDao;
     private Group inputGroup;
-    private Context context;
+    private Activity activity;
     private OnDeleteGroupListener mListener; //接口
 
     public interface OnDeleteGroupListener{
         void DeleteGroupFinished(); // 修改引发的事件
     }
 
-    public GroupDeleteDialog(Context context, Group inputGroup, OnDeleteGroupListener mListener) {
-        this.context = context;
+    public GroupDeleteDialog(Activity activity, Group inputGroup, OnDeleteGroupListener mListener) {
+        this.activity = activity;
         this.inputGroup = inputGroup;
-        this.noteDao = new NoteDao(context);
-        this.groupDao = new GroupDao(context);
+        this.noteDao = new NoteDao(activity);
+        this.groupDao = new GroupDao(activity);
         this.mListener = mListener;
     }
 
@@ -66,9 +68,21 @@ public class GroupDeleteDialog {
             public void run() {
                 if (noteDao.queryAllNotesFromGroupId(inputGroup.getId()).isEmpty())
                     // TODO
-                    HandleDeleteGroup(group); // 无关联
+                    activity.runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+
+                            HandleDeleteGroup(group); // 无关联
+                        }
+                    });
                 else
-                    HandleDeleteNote(group); // 有关联
+                    activity.runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+
+                            HandleDeleteNote(group); // 有关联
+                        }
+                    });
             }
         }).start();
     }
@@ -76,21 +90,28 @@ public class GroupDeleteDialog {
     /**
      * 无笔记对应，直接删除分组
      */
+    @UiThread
     private void HandleDeleteGroup(final Group group) {
         android.support.v7.app.AlertDialog deleteDialog = new android.support.v7.app.AlertDialog
-                .Builder(context)
+                .Builder(activity)
                 .setTitle(R.string.GroupDialog_DeleteGroupAlertTitle)
-                .setMessage(String.format(context.getText(R.string.GroupDialog_DeleteGroupAlertMsg).toString(), group.getName()))
+                .setMessage(String.format(activity.getText(R.string.GroupDialog_DeleteGroupAlertMsg).toString(), group.getName()))
                 .setNegativeButton(R.string.GroupDialog_DeleteGroupAlertNegativeButtonForCancel, null)
                 .setPositiveButton(R.string.GroupDialog_DeleteGroupAlertPositiveButtonForOK, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        try {
-                            groupDao.deleteGroup(group.getId());
-                        }
-                        catch (Exception ex) {
-                            ex.printStackTrace();
-                        }
+
+                            new Thread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    try {
+                                        groupDao.deleteGroup(group.getId());
+                                    } catch (Exception ex) {
+                                        ex.printStackTrace();
+                                    }
+                                }
+                            }).start();
+
                         dialog.dismiss();
                         DismissAndReturn();
                     }
@@ -102,9 +123,10 @@ public class GroupDeleteDialog {
     /**
      * 删除分组时判断处理对应的笔记
      */
+    @UiThread
     private void HandleDeleteNote(final Group group) {
         android.support.v7.app.AlertDialog alertDialog = new android.support.v7.app.AlertDialog
-                .Builder(context)
+                .Builder(activity)
                 .setTitle(R.string.GroupDialog_DeleteNoteAlertTitle)
                 .setMessage(R.string.GroupDialog_DeleteNoteAlertMsg)
                 .setNeutralButton(R.string.GroupDialog_DeleteNoteAlertNeutralButtonForNoDelete, null)
@@ -180,7 +202,7 @@ public class GroupDeleteDialog {
      */
     private void HandleDeleteDefaultGroup() {
         android.support.v7.app.AlertDialog.Builder dupalert = new android.support.v7.app.AlertDialog
-                .Builder(context)
+                .Builder(activity)
                 .setTitle(R.string.GroupDialog_ModifyDefaultAlertTitle)
                 .setPositiveButton(R.string.GroupDialog_ModifyDefaultAlertPositiveButtonForOK, null)
                 .setMessage(R.string.GroupDialog_ModifyDefaultAlertMsgForDelete);

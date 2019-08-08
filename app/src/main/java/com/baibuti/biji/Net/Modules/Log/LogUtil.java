@@ -74,13 +74,14 @@ public class LogUtil {
      * @throws ServerErrorException
      */
     public static UtLog updateModuleLog(UtLog utLog) throws ServerErrorException {
-        Log.e("", "updateModuleLog: " + utLog.getModule() );
+        Log.e("", "updateModuleLog: " + utLog.getModule());
+        Log.e("", "updateModuleLog: " + LogResp.toLogResp(utLog).toJson() );
         RespType resp = NetUtil.httpPostSync(
                 UpdateLogUrl,
                 LogResp.toLogResp(utLog).toJson(),
                 NetUtil.getOneHeader("Authorization", AuthMgr.getInstance().getToken())
         );
-        try {
+        if (resp != null) {
             int code = resp.getCode();
             if (code == 200)
                 return LogResp.toLogRespFromJson(resp.getBody()).toUtLog();
@@ -89,9 +90,6 @@ public class LogUtil {
                 throw new ServerErrorException(msg.getMessage(), msg.getDetail(), code);
             }
         }
-        catch (NullPointerException ex) {
-            ex.printStackTrace();
-            return null;
-        }
+        return null;
     }
 }

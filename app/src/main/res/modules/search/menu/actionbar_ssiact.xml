@@ -3,10 +3,10 @@
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
 
-    <item
-        android:id="@+id/action_starUpdate"
-        app:showAsAction="ifRoom"
-        android:title="同步"/>
+    <!--<item-->
+        <!--android:id="@+id/action_starUpdate"-->
+        <!--app:showAsAction="ifRoom"-->
+        <!--android:title="同步"/>-->
 
     <item
         android:id="@+id/action_FindSearchStar"

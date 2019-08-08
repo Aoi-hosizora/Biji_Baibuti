@@ -254,9 +254,9 @@ public class StarSearchItemActivity extends AppCompatActivity implements View.On
             case R.id.action_FindSearchStar:
                 m_searchFragment.show(getSupportFragmentManager(), com.wyt.searchbox.SearchFragment.TAG);
                 break;
-            case R.id.action_starUpdate:
-                UpdateData();
-                break;
+//            case R.id.action_starUpdate:
+//                UpdateData();
+//                break;
         }
         return super.onOptionsItemSelected(item);
     }
@@ -513,35 +513,35 @@ public class StarSearchItemActivity extends AppCompatActivity implements View.On
 
     // region DEBUG
 
-    private void UpdateData() {
-
-        // TODO
-
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    SearchItemDao searchItemDao = new SearchItemDao(StarSearchItemActivity.this);
-                    List<SearchItem> searchItems = searchItemDao.queryAllStarSearchItems();
-                    for (SearchItem searchItem: searchItems)
-                        StarUtil.insertStar(searchItem);
-                }
-                catch (ServerErrorException ex) {
-                    ex.printStackTrace();
-                    runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            new android.app.AlertDialog.Builder(StarSearchItemActivity.this)
-                                    .setTitle("错误")
-                                    .setMessage(ex.getMessage())
-                                    .setPositiveButton("确定", null)
-                                    .create().show();
-                        }
-                    });
-                }
-            }
-        }).start();
-    }
+    // private void UpdateData() {
+//
+    //     // TODO
+//
+    //     new Thread(new Runnable() {
+    //         @Override
+    //         public void run() {
+    //             try {
+    //                 SearchItemDao searchItemDao = new SearchItemDao(StarSearchItemActivity.this);
+    //                 List<SearchItem> searchItems = searchItemDao.queryAllStarSearchItems();
+    //                 for (SearchItem searchItem: searchItems)
+    //                     StarUtil.insertStar(searchItem);
+    //             }
+    //             catch (ServerErrorException ex) {
+    //                 ex.printStackTrace();
+    //                 runOnUiThread(new Runnable() {
+    //                     @Override
+    //                     public void run() {
+    //                         new android.app.AlertDialog.Builder(StarSearchItemActivity.this)
+    //                                 .setTitle("错误")
+    //                                 .setMessage(ex.getMessage())
+    //                                 .setPositiveButton("确定", null)
+    //                                 .create().show();
+    //                     }
+    //                 });
+    //             }
+    //         }
+    //     }).start();
+    // }
 
     // endregion DEBUG
 }

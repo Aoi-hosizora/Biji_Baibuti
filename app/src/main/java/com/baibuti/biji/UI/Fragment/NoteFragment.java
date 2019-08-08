@@ -194,14 +194,14 @@ public class NoteFragment extends Fragment implements View.OnClickListener, ISho
                     case R.id.action_search_back:
                         SearchGroupBack();
                         break;
-                    case R.id.action_noteUpdate:
-                        // TODO
-                        UpdateData();
-                        break;
-                    case R.id.action_log:
-                        // TODO
-                        UpdateLog();
-                        break;
+                    // case R.id.action_noteUpdate:
+                    //     // TODO
+                    //     UpdateData();
+                    //     break;
+                    // case R.id.action_log:
+                    //     // TODO
+                    //     UpdateLog();
+                    //     break;
                 }
                 return true;
             }
@@ -469,7 +469,18 @@ public class NoteFragment extends Fragment implements View.OnClickListener, ISho
                         public void run() {
 
                             NoteDao noteDao = new NoteDao(getContext());
-                            NoteList = noteDao.queryAllNotes();
+
+                            // TODO !!!
+                            //     java.lang.NullPointerException: Attempt to invoke virtual method '
+                            //          android.database.sqlite.SQLiteDatabase android.content.Context.openOrCreateDatabase
+                            //          (java.lang.String, int, android.database.sqlite.SQLiteDatabase$CursorFactory, android.database.DatabaseErrorHandler)
+                            //     ' on a null object reference
+                            try {
+                                NoteList = noteDao.queryAllNotes();
+                            }
+                            catch (Exception ex) {
+                                ex.printStackTrace();
+                            }
 
                             getActivity().runOnUiThread(new Runnable() {
                                 @Override
@@ -622,7 +633,7 @@ public class NoteFragment extends Fragment implements View.OnClickListener, ISho
         new Handler().postDelayed(new Runnable() {
             @Override
             public void run() {
-                GroupDialog dialog = new GroupDialog(getContext(), new GroupDialog.OnUpdateGroupListener() {
+                GroupDialog dialog = new GroupDialog(getActivity(), new GroupDialog.OnUpdateGroupListener() {
 
                     @Override
                     public void OnUICreateFinished() {
@@ -667,33 +678,46 @@ public class NoteFragment extends Fragment implements View.OnClickListener, ISho
 
         // 列表
         GroupDao groupDao = new GroupDao(getContext());
-        List<Group> groups = groupDao.queryGroupAll();
-        Collections.sort(groups);
 
-        groups.add(0, Group.AllGroups);
-
-        GroupRadioAdapter groupRadioAdapter = new GroupRadioAdapter(getContext(), groups, new GroupRadioAdapter.OnRadioButtonSelect() {
-
+        new Thread(new Runnable() {
             @Override
-            public void onSelect(int position) {
-                Group curr = groups.get(position);
-                if (curr == Group.AllGroups)
-                    showAsDefault();
-                else 
-                    showAsGroup(curr, position);
+            public void run() {
+
+                List<Group> groups = groupDao.queryGroupAll();
+
+                getActivity().runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        Collections.sort(groups);
+
+                        groups.add(0, Group.AllGroups);
+
+                        GroupRadioAdapter groupRadioAdapter = new GroupRadioAdapter(getContext(), groups, new GroupRadioAdapter.OnRadioButtonSelect() {
+
+                            @Override
+                            public void onSelect(int position) {
+                                Group curr = groups.get(position);
+                                if (curr == Group.AllGroups)
+                                    showAsDefault();
+                                else
+                                    showAsGroup(curr, position);
+                            }
+                        });
+
+                        m_nav_groupList.setAdapter(groupRadioAdapter);
+
+                        if (currGroup != null)
+                            groupRadioAdapter.setChecked(currGroupIdx);
+                        else
+                            groupRadioAdapter.setChecked(Group.AllGroups);
+
+                        groupAdapter.notifyDataSetChanged();
+
+                        m_drawerLayout.openDrawer(Gravity.END);
+                    }
+                });
             }
-        });
-
-        m_nav_groupList.setAdapter(groupRadioAdapter);
-
-        if (currGroup != null)
-            groupRadioAdapter.setChecked(currGroupIdx);
-        else
-            groupRadioAdapter.setChecked(Group.AllGroups);
-
-        groupAdapter.notifyDataSetChanged();
-
-        m_drawerLayout.openDrawer(Gravity.END);
+        }).start();
     }
 
     private Group currGroup = null;
@@ -730,13 +754,12 @@ public class NoteFragment extends Fragment implements View.OnClickListener, ISho
      * 按分组显示
      * @param group
      */
-    @WorkerThread
     private void showAsGroup(Group group, int idx) {
         currGroup = group;
         currGroupIdx = idx;
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
+//        new Thread(new Runnable() {
+//            @Override
+//            public void run() {
 
                 List<Note> groupNotes = getGroupOfNote(group);
 
@@ -762,8 +785,8 @@ public class NoteFragment extends Fragment implements View.OnClickListener, ISho
                                 getString(R.string.NoteFrag_GroupingTitle), group.getName()));
                     }
                 });
-            }
-        });
+//            }
+//        });
 
     }
 
@@ -1301,60 +1324,60 @@ public class NoteFragment extends Fragment implements View.OnClickListener, ISho
 
     // region DEBUG
 
-    private void UpdateData() {
-
-        // TODO
-
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    NoteDao noteDao = new NoteDao(getContext());
-                    GroupDao groupDao = new GroupDao(getContext());
-
-                    List<Note> notes = noteDao.queryAllNotes();
-                    for (Note note : notes)
-                        NoteUtil.insertNote(note);
-
-                    List<Group> groups = groupDao.queryGroupAll();
-                    for (Group group : groups)
-                        GroupUtil.insertGroup(group);
-
-                }
-                catch (ServerErrorException ex) {
-                    ex.printStackTrace();
-                    getActivity().runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            new android.app.AlertDialog.Builder(getActivity())
-                                    .setTitle("错误")
-                                    .setMessage(ex.getMessage())
-                                    .setPositiveButton("确定", null)
-                                    .create().show();
-                        }
-                    });
-                }
-            }
-        }).start();
-    }
-
-    private void UpdateLog() {
-
-        // TODO
-
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                UtLogDao utLogDao = new UtLogDao(getContext());
-                try {
-                    LogUtil.updateModuleLog(utLogDao.getLog(LogModule.Mod_Note));
-                }
-                catch (ServerErrorException ex) {
-                    ex.printStackTrace();
-                }
-            }
-        }).start();
-    }
+    // private void UpdateData() {
+//
+    //     // TODO
+//
+    //     new Thread(new Runnable() {
+    //         @Override
+    //         public void run() {
+    //             try {
+    //                 NoteDao noteDao = new NoteDao(getContext());
+    //                 GroupDao groupDao = new GroupDao(getContext());
+//
+    //                 List<Note> notes = noteDao.queryAllNotes();
+    //                 for (Note note : notes)
+    //                     NoteUtil.insertNote(note);
+//
+    //                 List<Group> groups = groupDao.queryGroupAll();
+    //                 for (Group group : groups)
+    //                     GroupUtil.insertGroup(group);
+//
+    //             }
+    //             catch (ServerErrorException ex) {
+    //                 ex.printStackTrace();
+    //                 getActivity().runOnUiThread(new Runnable() {
+    //                     @Override
+    //                     public void run() {
+    //                         new android.app.AlertDialog.Builder(getActivity())
+    //                                 .setTitle("错误")
+    //                                 .setMessage(ex.getMessage())
+    //                                 .setPositiveButton("确定", null)
+    //                                 .create().show();
+    //                     }
+    //                 });
+    //             }
+    //         }
+    //     }).start();
+    // }
+//
+    // private void UpdateLog() {
+//
+    //     // TODO
+//
+    //     new Thread(new Runnable() {
+    //         @Override
+    //         public void run() {
+    //             UtLogDao utLogDao = new UtLogDao(getContext());
+    //             try {
+    //                 LogUtil.updateModuleLog(utLogDao.getLog(LogModule.Mod_Note));
+    //             }
+    //             catch (ServerErrorException ex) {
+    //                 ex.printStackTrace();
+    //             }
+    //         }
+    //     }).start();
+    // }
 
     // endregion DEBUG
 
@@ -1369,13 +1392,11 @@ public class NoteFragment extends Fragment implements View.OnClickListener, ISho
             @Override
             public void onLogin(String UserName) {
                 SearchGroupBack();
-                // m_toolbar.setTitle(UserName + " 的笔记");
             }
 
             @Override
             public void onLogout() {
                 SearchGroupBack();
-                // m_toolbar.setTitle("本地笔记");
             }
         });
     }

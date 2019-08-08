@@ -1,5 +1,6 @@
 package com.baibuti.biji.UI.Dialog;
 
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.graphics.Color;
@@ -26,6 +27,8 @@ import java.util.Locale;
 
 public class GroupAddDialog extends AlertDialog implements OnClickListener, IShowLog {
     private OnUpdateGroupListener mListener; //接口
+
+    private Activity activity;
 
     private EditText editText;
     private TextView colorText;
@@ -54,8 +57,9 @@ public class GroupAddDialog extends AlertDialog implements OnClickListener, ISho
         void UpdateGroupFinished(); // 修改引发的事件
     }
 
-    public GroupAddDialog(Context context, Group inputGroup, OnUpdateGroupListener mListener) {
-        super(context);
+    public GroupAddDialog(Activity activity, Group inputGroup, OnUpdateGroupListener mListener) {
+        super(activity);
+        this.activity = activity;
         this.mListener = mListener;
         this.inputGroup = inputGroup;
     }
@@ -207,13 +211,24 @@ public class GroupAddDialog extends AlertDialog implements OnClickListener, ISho
 
                 else {
                     // 新建分组不重复
-                    try {
-                        groupDao.insertGroup(newGroup);
-                        DismissAndReturn();
-                    }
-                    catch (Exception ex) {
-                        ex.printStackTrace();
-                    }
+                    new Thread(new Runnable() {
+                        @Override
+                        public void run() {
+
+                            try {
+                                groupDao.insertGroup(newGroup);
+                                activity.runOnUiThread(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        DismissAndReturn();
+                                    }
+                                });
+                            }
+                            catch (Exception ex) {
+                                ex.printStackTrace();
+                            }
+                        }
+                    }).start();
                 }
             }
             else {
@@ -236,13 +251,24 @@ public class GroupAddDialog extends AlertDialog implements OnClickListener, ISho
                             inputGroup.setName(newGroupName);
                             inputGroup.setColor(newGroupColor);
                             inputGroup.setOrder(newGroupOrder);
-                            try {
-                                groupDao.updateGroup(inputGroup);
-                            }
-                            catch (Exception ex) {
-                                ex.printStackTrace();
-                            }
-                            DismissAndReturn();
+                            new Thread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    try {
+                                        groupDao.updateGroup(inputGroup);
+                                    }
+                                    catch (Exception ex) {
+                                        ex.printStackTrace();
+                                    }
+
+                                    activity.runOnUiThread(new Runnable() {
+                                        @Override
+                                        public void run() {
+                                            DismissAndReturn();
+                                        }
+                                    });
+                                }
+                            }).start();
                         }
                     }
                 }
@@ -254,7 +280,7 @@ public class GroupAddDialog extends AlertDialog implements OnClickListener, ISho
      * 弹出删除判断
      */
     private void DeleteGroup() {
-        GroupDeleteDialog groupDeleteDialog = new GroupDeleteDialog(getContext(), inputGroup, new GroupDeleteDialog.OnDeleteGroupListener() {
+        GroupDeleteDialog groupDeleteDialog = new GroupDeleteDialog(activity, inputGroup, new GroupDeleteDialog.OnDeleteGroupListener() {
             @Override
             public void DeleteGroupFinished() { // 接口事件
                 DismissAndReturn();
