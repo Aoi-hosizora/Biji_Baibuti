@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <color name="OCRAct_btn_textColor">@color/colorAccent</color>
+    <color name="OCRAct_btn_HighLightColor">@color/colorDarkHighLightAccent</color>
+
+</resources>

@@ -193,7 +193,7 @@ public class OCRActivity extends AppCompatActivity implements View.OnClickListen
     private void setEnabled(Button button, boolean en) {
         button.setEnabled(en);
         if (en)
-            button.setTextColor(getResources().getColor(R.color.light_pink));
+            button.setTextColor(getResources().getColor(R.color.colorAccent));
         else
             button.setTextColor(getResources().getColor(R.color.grey_700));
     }
