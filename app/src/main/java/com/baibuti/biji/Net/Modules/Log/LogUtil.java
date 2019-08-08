@@ -25,6 +25,10 @@ public class LogUtil {
         try {
             int code = resp.getCode();
             if (code == 200) {
+                String newToken = resp.getHeaders().get("Authorization");
+                if (newToken != null && !(newToken.isEmpty()))
+                    AuthMgr.getInstance().setToken(newToken);
+
                 LogResp[] rets = LogResp.toLogRespsFromJson(resp.getBody());
                 return LogResp.toUtLogs(rets);
             }
@@ -53,6 +57,10 @@ public class LogUtil {
         try {
             int code = resp.getCode();
             if (code == 200) {
+                String newToken = resp.getHeaders().get("Authorization");
+                if (newToken != null && !(newToken.isEmpty()))
+                    AuthMgr.getInstance().setToken(newToken);
+
                 LogResp ret = LogResp.toLogRespFromJson(resp.getBody());
                 return ret.toUtLog();
             }
@@ -83,8 +91,13 @@ public class LogUtil {
         );
         if (resp != null) {
             int code = resp.getCode();
-            if (code == 200)
+            if (code == 200) {
+                String newToken = resp.getHeaders().get("Authorization");
+                if (newToken != null && !(newToken.isEmpty()))
+                    AuthMgr.getInstance().setToken(newToken);
+
                 return LogResp.toLogRespFromJson(resp.getBody()).toUtLog();
+            }
             else {
                 MessageResp msg = MessageResp.getMsgRespFromJson(resp.getBody());
                 throw new ServerErrorException(msg.getMessage(), msg.getDetail(), code);

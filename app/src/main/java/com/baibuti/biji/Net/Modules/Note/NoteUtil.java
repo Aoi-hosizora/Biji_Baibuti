@@ -25,6 +25,10 @@ public class NoteUtil {
         try {
             int code = resp.getCode();
             if (code == 200) {
+                String newToken = resp.getHeaders().get("Authorization");
+                if (newToken != null && !(newToken.isEmpty()))
+                    AuthMgr.getInstance().setToken(newToken);
+
                 NoteReqBody[] rets = NoteReqBody.getNoteRespsFromJson(resp.getBody());
                 return NoteReqBody.toNotes(rets);
             }
@@ -45,6 +49,10 @@ public class NoteUtil {
         try {
             int code = resp.getCode();
             if (code == 200) {
+                String newToken = resp.getHeaders().get("Authorization");
+                if (newToken != null && !(newToken.isEmpty()))
+                    AuthMgr.getInstance().setToken(newToken);
+
                 NoteReqBody ret = NoteReqBody.getNoteRespFromJson(resp.getBody());
                 return ret.toNote();
             }
@@ -69,6 +77,10 @@ public class NoteUtil {
         try {
             int code = resp.getCode();
             if (code == 200) {
+                String newToken = resp.getHeaders().get("Authorization");
+                if (newToken != null && !(newToken.isEmpty()))
+                    AuthMgr.getInstance().setToken(newToken);
+
                 NoteReqBody ret = NoteReqBody.getNoteRespFromJson(resp.getBody());
                 return ret.toNote();
             }
@@ -93,6 +105,10 @@ public class NoteUtil {
         try {
             int code = resp.getCode();
             if (code == 200) {
+                String newToken = resp.getHeaders().get("Authorization");
+                if (newToken != null && !(newToken.isEmpty()))
+                    AuthMgr.getInstance().setToken(newToken);
+
                 NoteReqBody ret = NoteReqBody.getNoteRespFromJson(resp.getBody());
                 return ret.toNote();
             }
@@ -117,6 +133,10 @@ public class NoteUtil {
         try {
             int code = resp.getCode();
             if (code == 200) {
+                String newToken = resp.getHeaders().get("Authorization");
+                if (newToken != null && !(newToken.isEmpty()))
+                    AuthMgr.getInstance().setToken(newToken);
+
                 NoteReqBody ret = NoteReqBody.getNoteRespFromJson(resp.getBody());
                 return ret.toNote();
             }
@@ -141,6 +161,10 @@ public class NoteUtil {
         try {
             int code = resp.getCode();
             if (code == 200) {
+                String newToken = resp.getHeaders().get("Authorization");
+                if (newToken != null && !(newToken.isEmpty()))
+                    AuthMgr.getInstance().setToken(newToken);
+
                 return true;
             }
             else {

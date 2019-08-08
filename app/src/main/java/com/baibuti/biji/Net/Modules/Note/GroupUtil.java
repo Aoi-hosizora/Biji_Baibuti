@@ -25,6 +25,10 @@ public class GroupUtil {
         try {
             int code = resp.getCode();
             if (code == 200) {
+                String newToken = resp.getHeaders().get("Authorization");
+                if (newToken != null && !(newToken.isEmpty()))
+                    AuthMgr.getInstance().setToken(newToken);
+
                 GroupReqBody[] rets = GroupReqBody.getGroupRespsFromJson(resp.getBody());
                 return GroupReqBody.toGroups(rets);
             }
@@ -45,6 +49,10 @@ public class GroupUtil {
         try {
             int code = resp.getCode();
             if (code == 200) {
+                String newToken = resp.getHeaders().get("Authorization");
+                if (newToken != null && !(newToken.isEmpty()))
+                    AuthMgr.getInstance().setToken(newToken);
+
                 GroupReqBody ret = GroupReqBody.getGroupRespFromJson(resp.getBody());
                 return ret.toGroup();
             }
@@ -69,6 +77,10 @@ public class GroupUtil {
         try {
             int code = resp.getCode();
             if (code == 200) {
+                String newToken = resp.getHeaders().get("Authorization");
+                if (newToken != null && !(newToken.isEmpty()))
+                    AuthMgr.getInstance().setToken(newToken);
+
                 GroupReqBody ret = GroupReqBody.getGroupRespFromJson(resp.getBody());
                 return ret.toGroup();
             }
@@ -93,6 +105,10 @@ public class GroupUtil {
         try {
             int code = resp.getCode();
             if (code == 200) {
+                String newToken = resp.getHeaders().get("Authorization");
+                if (newToken != null && !(newToken.isEmpty()))
+                    AuthMgr.getInstance().setToken(newToken);
+
                 GroupReqBody ret = GroupReqBody.getGroupRespFromJson(resp.getBody());
                 return ret.toGroup();
             }
@@ -117,6 +133,10 @@ public class GroupUtil {
         try {
             int code = resp.getCode();
             if (code == 200) {
+                String newToken = resp.getHeaders().get("Authorization");
+                if (newToken != null && !(newToken.isEmpty()))
+                    AuthMgr.getInstance().setToken(newToken);
+
                 GroupReqBody ret = GroupReqBody.getGroupRespFromJson(resp.getBody());
                 return ret.toGroup();
             }
@@ -142,6 +162,10 @@ public class GroupUtil {
         try {
             int code = resp.getCode();
             if (code == 200) {
+                String newToken = resp.getHeaders().get("Authorization");
+                if (newToken != null && !(newToken.isEmpty()))
+                    AuthMgr.getInstance().setToken(newToken);
+
                 return true;
             }
             else {

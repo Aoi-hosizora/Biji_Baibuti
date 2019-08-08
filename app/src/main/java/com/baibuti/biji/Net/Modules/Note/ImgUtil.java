@@ -22,6 +22,10 @@ public class ImgUtil {
         try {
             int code = resp.getCode();
             if (code == 200) {
+                String newToken = resp.getHeaders().get("Authorization");
+                if (newToken != null && !(newToken.isEmpty()))
+                    AuthMgr.getInstance().setToken(newToken);
+
                 MessageResp msg = MessageResp.getMsgRespFromJson(resp.getBody());
                 return new UploadStatus(msg.getDetail(), msg.getMessage());
             }

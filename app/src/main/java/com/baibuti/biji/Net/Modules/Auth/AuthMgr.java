@@ -1,5 +1,7 @@
 package com.baibuti.biji.Net.Modules.Auth;
 
+import android.util.Log;
+
 import java.util.ArrayList;
 
 public class AuthMgr {
@@ -33,6 +35,7 @@ public class AuthMgr {
     }
 
     public void setToken(String token) {
+        Log.e("", "setToken: " + token );
         this.token = token;
     }
 

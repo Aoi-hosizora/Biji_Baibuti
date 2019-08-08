@@ -23,6 +23,10 @@ public class StarUtil {
         try {
             int code = resp.getCode();
             if (code == 200) {
+                String newToken = resp.getHeaders().get("Authorization");
+                if (newToken != null && !(newToken.isEmpty()))
+                    AuthMgr.getInstance().setToken(newToken);
+
                 StarReqBody[] rets = StarReqBody.getStarRespsFromJson(resp.getBody());
                 Log.e("", "getAllStars: " + rets[0].getUrl() );
                 return StarReqBody.toSearchItems(rets);
@@ -48,6 +52,10 @@ public class StarUtil {
         try {
             int code = resp.getCode();
             if (code == 200) {
+                String newToken = resp.getHeaders().get("Authorization");
+                if (newToken != null && !(newToken.isEmpty()))
+                    AuthMgr.getInstance().setToken(newToken);
+
                 StarReqBody ret = StarReqBody.getStarRespFromJson(resp.getBody());
                 return ret.toSearchItem();
             }
@@ -72,6 +80,10 @@ public class StarUtil {
         try {
             int code = resp.getCode();
             if (code == 200) {
+                String newToken = resp.getHeaders().get("Authorization");
+                if (newToken != null && !(newToken.isEmpty()))
+                    AuthMgr.getInstance().setToken(newToken);
+
                 StarReqBody ret = StarReqBody.getStarRespFromJson(resp.getBody());
                 return ret.toSearchItem();
             }
@@ -96,6 +108,10 @@ public class StarUtil {
         try {
             int code = resp.getCode();
             if (code == 200) {
+                String newToken = resp.getHeaders().get("Authorization");
+                if (newToken != null && !(newToken.isEmpty()))
+                    AuthMgr.getInstance().setToken(newToken);
+
                 return true;
             }
             else {
