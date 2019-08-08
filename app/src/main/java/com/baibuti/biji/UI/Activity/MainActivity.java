@@ -23,6 +23,7 @@ import android.util.Log;
 import android.view.Gravity;
 import android.view.KeyEvent;
 
+import android.view.MotionEvent;
 import android.view.ViewGroup;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -35,7 +36,6 @@ import com.baibuti.biji.UI.Fragment.ScheduleFragment;
 import com.baibuti.biji.UI.Fragment.NoteFragment;
 import com.baibuti.biji.UI.Fragment.SearchFragment;
 import com.baibuti.biji.UI.Fragment.FileFragment;
-import com.baibuti.biji.Interface.IShowLog;
 import com.baibuti.biji.R;
 import com.baibuti.biji.Utils.StrSrchUtils.SearchUtil;
 import com.facebook.stetho.Stetho;
@@ -44,7 +44,7 @@ import com.baibuti.biji.Utils.LayoutUtils.BottomNavigationHelper;
 import java.util.ArrayList;
 import java.util.List;
 
-public class MainActivity extends FragmentActivity implements IShowLog, NavigationView.OnNavigationItemSelectedListener {
+public class MainActivity extends FragmentActivity implements NavigationView.OnNavigationItemSelectedListener {
 
     // region 声明显示元素 mViewPager bottomNavigationView m_drawerLayout m_navigationView
 
@@ -222,7 +222,6 @@ public class MainActivity extends FragmentActivity implements IShowLog, Navigati
         NavMenuDefSelect();
     }
 
-    @Override
     public void ShowLogE(String FunctionName, String Msg) {
         String ClassName = "MainActivity";
         Log.e(getResources().getString(R.string.IShowLog_LogE),
@@ -267,6 +266,12 @@ public class MainActivity extends FragmentActivity implements IShowLog, Navigati
             if (mViewPager.getCurrentItem() == 0 &&
                     (mNoteFrag.getIsSearching() || mNoteFrag.getIsGrouping())) {
                 mNoteFrag.SearchGroupBack();
+                return true;
+            }
+
+            if (mViewPager.getCurrentItem() == 0 &&
+                    mNoteFrag.isFabExpanded()) {
+                mNoteFrag.collapseFab();
                 return true;
             }
 

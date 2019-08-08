@@ -2,21 +2,16 @@ package com.baibuti.biji.UI.Dialog;
 
 import android.app.Activity;
 import android.app.AlertDialog;
-import android.content.Context;
-import android.graphics.Color;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.view.View.OnClickListener;
 
 import com.baibuti.biji.Data.Models.Group;
-import com.baibuti.biji.Interface.IShowLog;
 import com.baibuti.biji.R;
 import com.baibuti.biji.Data.DB.GroupDao;
 import com.baibuti.biji.Data.DB.NoteDao;
@@ -25,7 +20,7 @@ import com.larswerkman.holocolorpicker.ColorPicker;
 
 import java.util.Locale;
 
-public class GroupAddDialog extends AlertDialog implements OnClickListener, IShowLog {
+public class GroupAddDialog extends AlertDialog implements OnClickListener {
     private OnUpdateGroupListener mListener; //接口
 
     private Activity activity;
@@ -143,7 +138,6 @@ public class GroupAddDialog extends AlertDialog implements OnClickListener, ISho
      * @param FunctionName
      * @param Msg
      */
-    @Override
     public void ShowLogE(String FunctionName, String Msg) {
         String ClassName = "GroupAddDialog";
         Log.e(getContext().getString(R.string.IShowLog_LogE),

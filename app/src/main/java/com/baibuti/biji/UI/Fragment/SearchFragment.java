@@ -29,7 +29,6 @@ import android.widget.Toast;
 import com.baibuti.biji.Data.Adapters.SearchItemAdapter;
 import com.baibuti.biji.Data.DB.SearchItemDao;
 import com.baibuti.biji.Data.Models.SearchItem;
-import com.baibuti.biji.Interface.IShowLog;
 import com.baibuti.biji.R;
 import com.baibuti.biji.UI.Activity.MainActivity;
 import com.baibuti.biji.UI.Activity.StarSearchItemActivity;
@@ -42,7 +41,7 @@ import com.baibuti.biji.Net.Modules.Search.SearchNetUtil;
 import java.util.ArrayList;
 import java.util.Locale;
 
-public class SearchFragment extends Fragment implements View.OnClickListener, IShowLog {
+public class SearchFragment extends Fragment implements View.OnClickListener {
 
     // region 定义界面元素 view m_toolbar m_SearchButton m_QuestionEditText m_SearchRetList m_SearchingDialog m_LongClickItemPopupMenu m_LongClickedSearchItem
 
@@ -228,7 +227,6 @@ public class SearchFragment extends Fragment implements View.OnClickListener, IS
                 .create().show();
     }
 
-    @Override
     public void ShowLogE(String FunctionName, String Msg) {
         String ClassName = "SearchFragment";
         Log.e(getResources().getString(R.string.IShowLog_LogE),

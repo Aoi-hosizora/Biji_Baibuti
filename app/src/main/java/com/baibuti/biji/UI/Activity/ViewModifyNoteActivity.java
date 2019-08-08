@@ -13,6 +13,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.MotionEvent;
 import android.view.View;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -20,7 +21,6 @@ import android.widget.Toast;
 
 import com.baibuti.biji.Data.Models.Note;
 import com.baibuti.biji.UI.Dialog.ImagePopupDialog;
-import com.baibuti.biji.Interface.IShowLog;
 import com.baibuti.biji.R;
 import com.baibuti.biji.Utils.OtherUtils.CommonUtil;
 import com.baibuti.biji.Utils.LayoutUtils.PopupMenuUtil;
@@ -41,7 +41,7 @@ import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
 
 
-public class ViewModifyNoteActivity extends AppCompatActivity implements View.OnClickListener, IShowLog {
+public class ViewModifyNoteActivity extends AppCompatActivity implements View.OnClickListener {
 
     // region 声明: UI ProgressDialog m_LongClickImgPopupMenu
 
@@ -109,30 +109,22 @@ public class ViewModifyNoteActivity extends AppCompatActivity implements View.On
         GroupNameTextView_View.setTextColor(note.getGroupLabel().getIntColor());
 
         //////////////////////////////////////////////////
+
         ContentEditText_View.post(new Runnable() {
             @Override
             public void run() {
                 dealWithContent();
             }
         });
-//        ContentEditText_View.setOnTouchListener(new View.OnTouchListener() {
-//            @Override
-//            public boolean onTouch(View v, MotionEvent motionEvent) {
-//                switch (motionEvent.getAction()){
-//                    case MotionEvent.ACTION_UP:
-////                        Log.d("YYPT", "click the scrollView");
-//                        //点击整个页面都会让内容框获得焦点，且弹出软键盘
-//                        v.setFocusable(true);
-//                        v.setFocusableInTouchMode(true);
-//                        v.requestFocus();
-//                        ShowModifyNoteActivity();
-//                        break;
-//                }
-//                return false;
-//            }
-//        });
-
     }
+
+//    @Override
+//    public boolean onTouchEvent(MotionEvent event) {
+//        if (event.getAction() == MotionEvent.ACTION_UP)
+//            ShowModifyNoteActivity();
+//
+//        return super.onTouchEvent(event);
+//    }
 
     /**
      * 初始化弹出菜单
@@ -215,11 +207,10 @@ public class ViewModifyNoteActivity extends AppCompatActivity implements View.On
     }
 
     /**
-     * IShowLog 接口，全局设置 Log 格式
+     * 全局设置 Log 格式
      * @param FunctionName
      * @param Msg
      */
-    @Override
     public void ShowLogE(String FunctionName, String Msg) {
         String ClassName = "ViewModifyNoteActivity";
         Log.e(getResources().getString(R.string.IShowLog_LogE),

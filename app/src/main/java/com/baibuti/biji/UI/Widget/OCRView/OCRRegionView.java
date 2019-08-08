@@ -10,11 +10,10 @@ import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 
-import com.baibuti.biji.Interface.IShowLog;
 import com.baibuti.biji.Net.Models.RespObj.Region;
 import com.baibuti.biji.R;
 
-public class OCRRegionView extends View implements IShowLog {
+public class OCRRegionView extends View {
 
     // DEF
     public static final int DEF_OPACITY_CHECKED = 120;
@@ -67,7 +66,6 @@ public class OCRRegionView extends View implements IShowLog {
         void onClickAfterDown(Region.Frame frame);
     }
 
-    @Override
     public void ShowLogE(String FunctionName, String Msg) {
         String ClassName = "OCRRegionView";
         Log.e(getResources().getString(R.string.IShowLog_LogE),

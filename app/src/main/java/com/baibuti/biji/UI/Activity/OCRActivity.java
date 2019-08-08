@@ -19,7 +19,6 @@ import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.baibuti.biji.Interface.IShowLog;
 import com.baibuti.biji.Net.Models.RespObj.Region;
 import com.baibuti.biji.Net.Modules.OCR.OCRRetUtil;
 import com.baibuti.biji.R;
@@ -34,7 +33,7 @@ import com.baibuti.biji.Utils.LayoutUtils.OCRRegionUtil;
  *
  * Bundle: INT_IMGPATH(String) 传入 图片路径
  */
-public class OCRActivity extends AppCompatActivity implements IShowLog, View.OnClickListener {
+public class OCRActivity extends AppCompatActivity implements View.OnClickListener {
 
     public static final String INT_BUNDLE = "INT_BUNDLE";
     public static final String INT_IMGPATH = "INT_IMGPATH";
@@ -72,7 +71,6 @@ public class OCRActivity extends AppCompatActivity implements IShowLog, View.OnC
         initView(ImgPath);
     }
 
-    @Override
     public void ShowLogE(String FunctionName, String Msg) {
         String ClassName = "OCRActivity";
         Log.e(getResources().getString(R.string.IShowLog_LogE),

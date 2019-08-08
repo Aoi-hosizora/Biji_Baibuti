@@ -9,7 +9,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 
-import com.baibuti.biji.Interface.IShowLog;
 import com.baibuti.biji.Net.Models.RespObj.Region;
 import com.baibuti.biji.R;
 import com.baibuti.biji.Utils.LayoutUtils.OCRRegionUtil;
@@ -18,7 +17,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 
-public class OCRRegionGroupLayout extends ViewGroup implements IShowLog {
+public class OCRRegionGroupLayout extends ViewGroup {
 
     private Region region;
     private Bitmap imgBG;
@@ -90,7 +89,6 @@ public class OCRRegionGroupLayout extends ViewGroup implements IShowLog {
         }
     }
 
-    @Override
     public void ShowLogE(String FunctionName, String Msg) {
         String ClassName = "OCRRegionGroupLayout";
         Log.e(getResources().getString(R.string.IShowLog_LogE),

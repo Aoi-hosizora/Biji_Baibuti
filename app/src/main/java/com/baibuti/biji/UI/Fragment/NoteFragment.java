@@ -13,6 +13,8 @@ import android.provider.MediaStore;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.annotation.WorkerThread;
+import android.support.constraint.ConstraintLayout;
+import android.support.design.widget.AppBarLayout;
 import android.support.design.widget.NavigationView;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
@@ -28,6 +30,8 @@ import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.AccelerateInterpolator;
+import android.view.animation.DecelerateInterpolator;
 import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
@@ -36,14 +40,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.baibuti.biji.Data.Adapters.GroupRadioAdapter;
-import com.baibuti.biji.Data.DB.UtLogDao;
-import com.baibuti.biji.Data.Models.LogModule;
-import com.baibuti.biji.Data.Models.UtLog;
-import com.baibuti.biji.Net.Models.RespObj.ServerErrorException;
 import com.baibuti.biji.Net.Modules.Auth.AuthMgr;
-import com.baibuti.biji.Net.Modules.Log.LogUtil;
-import com.baibuti.biji.Net.Modules.Note.GroupUtil;
-import com.baibuti.biji.Net.Modules.Note.NoteUtil;
 import com.baibuti.biji.UI.Activity.MainActivity;
 import com.baibuti.biji.UI.Activity.ModifyNoteActivity;
 import com.baibuti.biji.UI.Activity.OCRActivity;
@@ -53,8 +50,8 @@ import com.baibuti.biji.Data.Adapters.GroupAdapter;
 import com.baibuti.biji.Data.Models.Note;
 import com.baibuti.biji.Data.Adapters.NoteAdapter;
 import com.baibuti.biji.UI.Dialog.GroupDialog;
-import com.baibuti.biji.Interface.IShowLog;
 import com.baibuti.biji.R;
+import com.baibuti.biji.UI.Widget.ListView.RecyclerListScrollHelper;
 import com.baibuti.biji.UI.Widget.ListView.SpacesItemDecoration;
 import com.baibuti.biji.UI.Widget.ListView.RecyclerViewEmptySupport;
 import com.baibuti.biji.Data.DB.GroupDao;
@@ -69,8 +66,6 @@ import com.getbase.floatingactionbutton.FloatingActionsMenu;
 import com.wyt.searchbox.SearchFragment;
 import com.baibuti.biji.Utils.StrSrchUtils.SearchUtil;
 
-import org.apache.poi.ss.formula.functions.T;
-
 import java.io.File;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -79,16 +74,11 @@ import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
-import javax.annotation.concurrent.ThreadSafe;
-
 import me.kareluo.imaging.IMGEditActivity;
 
 import static android.app.Activity.RESULT_OK;
 
-/**
- * 待整理 !!!!!!
- */
-public class NoteFragment extends Fragment implements View.OnClickListener, IShowLog {
+public class NoteFragment extends Fragment implements View.OnClickListener {
 
     // region 声明: View UI ProgressDialog Toolbar DrawerLayout
 
@@ -104,6 +94,7 @@ public class NoteFragment extends Fragment implements View.OnClickListener, ISho
     private ProgressDialog loadingGroupDialog;
 
     private Toolbar m_toolbar;
+    private AppBarLayout m_appBarLayout;
 
     private DrawerLayout m_drawerLayout;
     private ListView m_nav_groupList;
@@ -133,9 +124,14 @@ public class NoteFragment extends Fragment implements View.OnClickListener, ISho
     private final static int ShowGroupDlgSecond = 10;
     private final static int HideGroupPrgSecond = 100;
 
+    /**
+     * 滑动列表 隐藏速度 (越小越慢)
+     */
+    private final int ScrollShowHideInterpolator = 1;
+
     // endregion 声明: 一些等待的秒数
 
-    // region 创建界面 菜单栏 浮动菜单 等待框 搜索框 右划菜单 onCreateView initToolbar initFloatingActionBar setupProgressAndSR initSearchFrag ShowLogE onClick initRightMenu
+    // region 创建界面 菜单栏 浮动菜单 等待框 搜索框 右划菜单 onCreateView initToolbar initFabMenu setupProgressAndSR initSearchFrag ShowLogE onClick initRightMenu
 
     @Nullable
     @Override
@@ -158,12 +154,14 @@ public class NoteFragment extends Fragment implements View.OnClickListener, ISho
             setupProgressAndSR();
 
             initToolbar(view);
-            initFloatingActionBar(view);
+            initFabMenu(view);
             initData(); // GetDao & List
             initAdapter();
             initListView(NoteList);
             initSearchFrag();
             initRightMenu();
+
+            initListScroll();
 
             registerAuthActions();
         }
@@ -178,6 +176,7 @@ public class NoteFragment extends Fragment implements View.OnClickListener, ISho
      */
     private void initToolbar(View view) {
 
+        m_appBarLayout = view.findViewById(R.id.NoteFrag_AppbarLayout);
         m_toolbar = view.findViewById(R.id.NoteFrag_Toolbar);
         m_toolbar.inflateMenu(R.menu.notefragment_actionbar);
         m_toolbar.setOnMenuItemClickListener(new Toolbar.OnMenuItemClickListener() {
@@ -185,8 +184,6 @@ public class NoteFragment extends Fragment implements View.OnClickListener, ISho
             public boolean onMenuItemClick(MenuItem item) {
                 switch (item.getItemId()) {
                     case R.id.action_search:
-                        if (m_fabMenu.isExpanded())
-                            m_fabMenu.collapse();
                         searchFragment.show(getActivity().getSupportFragmentManager(), com.wyt.searchbox.SearchFragment.TAG);
                         break;
                     case R.id.action_modifygroup:
@@ -215,9 +212,34 @@ public class NoteFragment extends Fragment implements View.OnClickListener, ISho
      *
      * @param view
      */
-    private void initFloatingActionBar(View view) {
+    private void initFabMenu(View view) {
         FloatingActionButton mNotePhoto = view.findViewById(R.id.note_photo);
         FloatingActionButton mNoteEdit = view.findViewById(R.id.note_edit);
+
+        View back = view.findViewById(R.id.note_fabmenu_back);
+        back.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                m_fabMenu.collapse();
+            }
+        });
+
+        m_fabMenu.setOnFloatingActionsMenuUpdateListener(new FloatingActionsMenu.OnFloatingActionsMenuUpdateListener() {
+            @Override
+            public void onMenuExpanded() {
+                new Handler().postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        back.setVisibility(View.VISIBLE);
+                    }
+                }, 50);
+            }
+
+            @Override
+            public void onMenuCollapsed() {
+                back.setVisibility(View.GONE);
+            }
+        });
 
         mNotePhoto.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -236,12 +258,26 @@ public class NoteFragment extends Fragment implements View.OnClickListener, ISho
     }
 
     /**
+     * 判断 fab 是否展开
+     * @return
+     */
+    public boolean isFabExpanded() {
+        return m_fabMenu.isExpanded();
+    }
+
+    /**
+     * 隐藏 fab
+     */
+    public void collapseFab() {
+        m_fabMenu.collapse();
+    }
+
+    /**
      * 设置 SwipeRefresh ProgressDialog
      */
     private void setupProgressAndSR() {
         mSwipeRefresh = view.findViewById(R.id.note_listsrl);
         mSwipeRefresh.setColorSchemeResources(R.color.colorPrimary);
-        // mSwipeRefresh.setColorSchemeColors(Color.RED,Color.BLUE,Color.GREEN);
         mSwipeRefresh.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
@@ -268,9 +304,6 @@ public class NoteFragment extends Fragment implements View.OnClickListener, ISho
         searchFragment.setOnSearchClickListener(new com.wyt.searchbox.custom.IOnSearchClickListener() {
             @Override
             public void OnSearchClick(String keyword) {
-
-                if (m_fabMenu.isExpanded())
-                    m_fabMenu.collapse();
 
                 try {
                     if (!keyword.isEmpty()) {
@@ -354,12 +387,33 @@ public class NoteFragment extends Fragment implements View.OnClickListener, ISho
     }
 
     /**
-     * IShowLog 接口，全局设置 Log 格式
+     * List 滑动隐藏
+     */
+    private void initListScroll() {
+        mNoteList.addOnScrollListener(new RecyclerListScrollHelper(new RecyclerListScrollHelper.OnShowHideScrollListener() {
+
+            @Override
+            public void onHide() {
+                // m_appBarLayout.animate().translationY(-m_appBarLayout.getHeight()).setInterpolator(new AccelerateInterpolator(ScrollShowHideInterpolator));
+
+                ConstraintLayout.LayoutParams layoutParams = (ConstraintLayout.LayoutParams) m_fabMenu.getLayoutParams();
+                m_fabMenu.animate().translationY(m_fabMenu.getHeight()+layoutParams.bottomMargin).setInterpolator(new AccelerateInterpolator(ScrollShowHideInterpolator));
+            }
+
+            @Override
+            public void onShow() {
+                // m_appBarLayout.animate().translationY(0).setInterpolator(new DecelerateInterpolator(ScrollShowHideInterpolator));
+                m_fabMenu.animate().translationY(0).setInterpolator(new DecelerateInterpolator(ScrollShowHideInterpolator));
+            }
+        }));
+    }
+
+    /**
+     * 全局设置 Log 格式
      *
      * @param FunctionName
      * @param Msg
      */
-    @Override
     public void ShowLogE(String FunctionName, String Msg) {
         String ClassName = "NoteFragment";
         Log.e(getResources().getString(R.string.IShowLog_LogE),
@@ -677,9 +731,6 @@ public class NoteFragment extends Fragment implements View.OnClickListener, ISho
      */
     public void ModifyGroupMenuClick() {
 
-        if (m_fabMenu.isExpanded())
-            m_fabMenu.collapse();
-
         // 列表
         GroupDao groupDao = new GroupDao(getContext());
 
@@ -939,20 +990,14 @@ public class NoteFragment extends Fragment implements View.OnClickListener, ISho
         noteAdapter.setOnItemClickListener(new NoteAdapter.OnItemClickListener() {
             @Override
             public void onItemClick(View view, int position) {
-                if (m_fabMenu.isExpanded()) // 先关闭弹出菜单
-                    m_fabMenu.collapse();
-                else {
-                    SelectedNoteItem = position;
-                    HandleNewUpdateNote(false, nlist.get(position), false);
-                }
+                SelectedNoteItem = position;
+                HandleNewUpdateNote(false, nlist.get(position), false);
             }
         });
 
         noteAdapter.setOnItemLongClickListener(new NoteAdapter.OnRecyclerViewItemLongClickListener() {
             @Override
             public void onItemLongClick(final View view, final Note note) {
-                if (m_fabMenu.isExpanded())
-                    m_fabMenu.collapse();
                 showPopupMenuOfNote(note);
             }
         });

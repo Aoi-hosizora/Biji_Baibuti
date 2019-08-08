@@ -12,14 +12,13 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import com.baibuti.biji.Interface.IShowLog;
 import com.baibuti.biji.R;
 import com.baibuti.biji.UI.Widget.PhotoView.PhotoView;
 import com.baibuti.biji.Utils.ImgDocUtils.BitmapUtils;
 
 import java.util.ArrayList;
 
-public class ImagePopupDialog extends Dialog implements IShowLog {
+public class ImagePopupDialog extends Dialog {
 
     private ViewPager mPager;
     private TextView mPageIndexTextView;
@@ -38,11 +37,10 @@ public class ImagePopupDialog extends Dialog implements IShowLog {
     }
 
     /**
-     * IShowLog 接口，全局设置 Log 格式
+     * 全局设置 Log 格式
      * @param FunctionName
      * @param Msg
      */
-    @Override
     public void ShowLogE(String FunctionName, String Msg) {
         String ClassName = "ImagePopupDialog";
         Log.e(getContext().getResources().getString(R.string.IShowLog_LogE),

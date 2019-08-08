@@ -34,7 +34,6 @@ import android.widget.Toast;
 import com.baibuti.biji.Data.Models.Group;
 import com.baibuti.biji.Data.Adapters.GroupAdapter;
 import com.baibuti.biji.Data.Models.Note;
-import com.baibuti.biji.Interface.IShowLog;
 import com.baibuti.biji.R;
 import com.baibuti.biji.Data.DB.GroupDao;
 import com.baibuti.biji.Data.DB.NoteDao;
@@ -73,7 +72,7 @@ import static com.baibuti.biji.Utils.OtherUtils.ExtractUtil.assets2SD;
  * Created by Windows 10 on 016 2019/02/16.
  */
 
-public class ModifyNoteActivity extends AppCompatActivity implements View.OnClickListener, IShowLog {
+public class ModifyNoteActivity extends AppCompatActivity implements View.OnClickListener {
 
     // region 声明: UI ProgressDialog Menu PopupMenu
     
@@ -313,7 +312,6 @@ public class ModifyNoteActivity extends AppCompatActivity implements View.OnClic
         }
     }
 
-    @Override
     public void ShowLogE(String FunctionName, String Msg) {
         String ClassName = "ModifyNoteActivity";
         Log.e(getResources().getString(R.string.IShowLog_LogE),

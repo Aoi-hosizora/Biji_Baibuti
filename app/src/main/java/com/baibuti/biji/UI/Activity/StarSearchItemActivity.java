@@ -23,9 +23,6 @@ import android.widget.Toast;
 import com.baibuti.biji.Data.Adapters.SearchItemAdapter;
 import com.baibuti.biji.Data.DB.SearchItemDao;
 import com.baibuti.biji.Data.Models.SearchItem;
-import com.baibuti.biji.Interface.IShowLog;
-import com.baibuti.biji.Net.Models.RespObj.ServerErrorException;
-import com.baibuti.biji.Net.Modules.Star.StarUtil;
 import com.baibuti.biji.R;
 import com.baibuti.biji.UI.Widget.ListView.SpacesItemDecoration;
 import com.baibuti.biji.UI.Widget.ListView.RecyclerViewEmptySupport;
@@ -34,9 +31,8 @@ import com.baibuti.biji.Utils.LayoutUtils.PopupMenuUtil;
 import com.baibuti.biji.Utils.StrSrchUtils.SearchUtil;
 
 import java.util.ArrayList;
-import java.util.List;
 
-public class StarSearchItemActivity extends AppCompatActivity implements View.OnClickListener, IShowLog {
+public class StarSearchItemActivity extends AppCompatActivity implements View.OnClickListener {
 
     // region 定义界面元素 m_menu m_searchFragment m_StarListView m_LongClickItemPopupMenu m_SwipeRefresh
 
@@ -191,7 +187,6 @@ public class StarSearchItemActivity extends AppCompatActivity implements View.On
         refreshListData();
     }
 
-    @Override
     public void ShowLogE(String FunctionName, String Msg) {
         String ClassName = "StarSearchItemActivity";
         Log.e(getResources().getString(R.string.IShowLog_LogE),

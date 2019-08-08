@@ -1,7 +1,6 @@
 package com.baibuti.biji.UI.Dialog;
 
 import android.app.Activity;
-import android.content.Context;
 import android.content.DialogInterface;
 import android.support.annotation.UiThread;
 
@@ -11,9 +10,6 @@ import com.baibuti.biji.R;
 import com.baibuti.biji.Data.DB.GroupDao;
 import com.baibuti.biji.Data.DB.NoteDao;
 
-import org.apache.poi.ss.formula.functions.T;
-
-import java.util.ArrayList;
 import java.util.List;
 
 public class GroupDeleteDialog {

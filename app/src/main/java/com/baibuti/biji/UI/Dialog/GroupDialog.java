@@ -3,7 +3,6 @@ package com.baibuti.biji.UI.Dialog;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.os.Bundle;
-import android.support.annotation.Nullable;
 import android.util.Log;
 import android.widget.Button;
 import android.view.View;
@@ -13,7 +12,6 @@ import android.widget.ListView;
 
 import com.baibuti.biji.Data.Models.Group;
 import com.baibuti.biji.Data.Adapters.GroupRadioAdapter;
-import com.baibuti.biji.Interface.IShowLog;
 import com.baibuti.biji.R;
 import com.baibuti.biji.Data.DB.GroupDao;
 import com.baibuti.biji.Data.DB.NoteDao;
@@ -21,7 +19,7 @@ import com.baibuti.biji.Data.DB.NoteDao;
 import java.util.Collections;
 import java.util.List;
 
-public class GroupDialog extends AlertDialog implements OnClickListener, IShowLog {
+public class GroupDialog extends AlertDialog implements OnClickListener {
     private OnUpdateGroupListener mListener; //接口
 
     private Activity activity;
@@ -109,7 +107,6 @@ public class GroupDialog extends AlertDialog implements OnClickListener, IShowLo
      * @param FunctionName
      * @param Msg
      */
-    @Override
     public void ShowLogE(String FunctionName, String Msg) {
         String ClassName = "GroupDialog";
         Log.e(getContext().getString(R.string.IShowLog_LogE),
