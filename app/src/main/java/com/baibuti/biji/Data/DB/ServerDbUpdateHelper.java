@@ -233,6 +233,9 @@ class ServerDbUpdateHelper {
     static void pushLog(Context context, LogModule logModule) {
         try {
             UtLogDao utLogDao = new UtLogDao(context);
+
+            Log.e("", "pushLog: " + utLogDao.getLog(logModule).getModule());
+
             LogUtil.updateModuleLog(utLogDao.getLog(logModule)); // 更新服务器为本地日志
         }
         catch (ServerErrorException ex) {

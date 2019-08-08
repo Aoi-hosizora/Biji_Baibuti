@@ -348,7 +348,7 @@ public class NoteDao {
      * @return
      */
     public int deleteNote(int noteId) {
-        Log.e("", "deleteNote: ");
+        Log.e("", "deleteNote: " + noteId);
         return deleteNote(noteId, true);
     }
 
@@ -359,7 +359,9 @@ public class NoteDao {
      * @return
      */
     int deleteNote(int noteId, boolean isLogCheck) {
-        Log.e("", "deleteNote: ");
+        Log.e("", "deleteNote: " + isLogCheck);
+
+        Note note = queryNoteById(noteId, false);
 
         if (isLogCheck) pushpull();
 
@@ -380,7 +382,6 @@ public class NoteDao {
 
         if (isLogCheck && AuthMgr.getInstance().isLogin()) {
             try {
-                Note note = queryNoteById(noteId, false);
                 if (note != null)
                     if (NoteUtil.deleteNote(note) != null)
                         ServerDbUpdateHelper.pushLog(context, LogModule.Mod_Note);

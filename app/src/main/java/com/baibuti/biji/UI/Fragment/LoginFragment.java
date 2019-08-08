@@ -122,7 +122,8 @@ public class LoginFragment extends Fragment implements View.OnClickListener {
                 getActivity().runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
-                        m_logining.cancel();
+                        m_logining.dismiss();
+
                         if (status.isSuccess()) {
                             Toast.makeText(getActivity(),
                                 String.format(Locale.CHINA, "用户 \"%s\" 登录成功", status.getUsername()), Toast.LENGTH_SHORT).show();

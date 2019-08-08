@@ -5,6 +5,7 @@ import com.baibuti.biji.Net.Models.ReqBody.RegisterReqBody;
 import com.baibuti.biji.Net.Models.RespBody.AuthResp;
 import com.baibuti.biji.Net.Models.RespObj.AuthStatus;
 import com.baibuti.biji.Net.Models.RespBody.MessageResp;
+import com.baibuti.biji.Net.Models.RespObj.ServerErrorException;
 import com.baibuti.biji.Net.Models.RespType;
 import com.baibuti.biji.Net.NetUtil;
 import com.baibuti.biji.Net.Urls;
@@ -14,6 +15,7 @@ public class AuthUtil {
 
     private static final String LoginUrl = Urls.AuthUrl + "/login";
     private static final String RegisterUrl = Urls.AuthUrl + "/register";
+    private static final String LogoutUrl = Urls.AuthUrl + "/logout";
 
     public static AuthStatus login(String username, String password) {
         return login(username, password, 0);
@@ -39,6 +41,31 @@ public class AuthUtil {
         catch (NullPointerException ex) {
             ex.printStackTrace();
             return new AuthStatus(404, "未收到响应，请检查网络连接。");
+        }
+    }
+
+    public static boolean logout() throws ServerErrorException {
+        RespType resp = NetUtil.httpPostPutDeleteSync(
+                LogoutUrl, NetUtil.POST,"{}",
+                NetUtil.getOneHeader("Authorization", AuthMgr.getInstance().getToken())
+        );
+
+        try {
+            int code = resp.getCode();
+            if (code == 200) {
+                return true;
+            }
+            else if (code == 401) {
+                return false;
+            }
+            else {
+                MessageResp msg = MessageResp.getMsgRespFromJson(resp.getBody());
+                throw new ServerErrorException(msg.getMessage(), msg.getDetail(), code);
+            }
+        }
+        catch (NullPointerException ex) {
+            ex.printStackTrace();
+            return false;
         }
     }
 

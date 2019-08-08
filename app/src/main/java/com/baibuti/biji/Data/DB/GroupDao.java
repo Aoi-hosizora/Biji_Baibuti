@@ -636,6 +636,8 @@ public class GroupDao {
         // check: 同步，检查默认
         // uncheck: 不同步，忽略默认
 
+        Group g = queryGroupById(groupId, false);
+
         if (isCheckLog)
             if (checkDefaultGroup(queryGroupById(groupId)))
                 throw new EditDefaultGroupException();
@@ -666,7 +668,7 @@ public class GroupDao {
 
         if (isCheckLog && AuthMgr.getInstance().isLogin()) {
             try {
-                if (GroupUtil.updateGroup(queryGroupById(groupId, false)) != null)
+                if (GroupUtil.updateGroup(g) != null)
                     ServerDbUpdateHelper.pushLog(context, LogModule.Mod_Group);
             }
             catch (ServerErrorException ex) {

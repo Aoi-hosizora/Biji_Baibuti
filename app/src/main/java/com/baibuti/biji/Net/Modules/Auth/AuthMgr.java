@@ -51,18 +51,28 @@ public class AuthMgr {
         this.token = "";
         this.userName = "";
 
-        if (onLoginChangeListeners != null)
-            for (OnLoginChangeListener onLoginChangeListener : onLoginChangeListeners)
-                onLoginChangeListener.onLogout();
+        try {
+            if (onLoginChangeListeners != null)
+                for (OnLoginChangeListener onLoginChangeListener : onLoginChangeListeners)
+                    onLoginChangeListener.onLogout();
+        }
+        catch (Exception ex) {
+            ex.printStackTrace();
+        }
     }
 
     public void login(String username, String token) {
         this.token = token;
         this.userName = username;
 
-        if (onLoginChangeListeners != null)
-            for (OnLoginChangeListener onLoginChangeListener : onLoginChangeListeners)
-                onLoginChangeListener.onLogin(userName);
+        try {
+            if (onLoginChangeListeners != null)
+                for (OnLoginChangeListener onLoginChangeListener : onLoginChangeListeners)
+                    onLoginChangeListener.onLogin(userName);
+        }
+        catch (Exception ex) {
+            ex.printStackTrace();
+        }
     }
 
     public boolean isLogin() {

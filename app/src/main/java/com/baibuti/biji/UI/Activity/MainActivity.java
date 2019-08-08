@@ -28,7 +28,9 @@ import android.widget.TextView;
 import android.widget.Toast;
 import android.view.MenuItem;
 
+import com.baibuti.biji.Net.Models.RespObj.ServerErrorException;
 import com.baibuti.biji.Net.Modules.Auth.AuthMgr;
+import com.baibuti.biji.Net.Modules.Auth.AuthUtil;
 import com.baibuti.biji.UI.Fragment.ScheduleFragment;
 import com.baibuti.biji.UI.Fragment.NoteFragment;
 import com.baibuti.biji.UI.Fragment.SearchFragment;
@@ -397,8 +399,51 @@ public class MainActivity extends FragmentActivity implements IShowLog, Navigati
      * 导航栏 注销
      */
     private void toLogout() {
-        AuthMgr.getInstance().logout();
-        m_navigationView.getMenu().findItem(R.id.id_nav_login).setTitle(R.string.nav_login);
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    if (AuthUtil.logout()) {
+                        AuthMgr.getInstance().logout();
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                m_navigationView.getMenu().findItem(R.id.id_nav_login).setTitle(R.string.nav_login);
+                                Toast.makeText(MainActivity.this, "注销成功，请重新登录。", Toast.LENGTH_SHORT).show();
+                                checkLoginStatus();
+                            }
+                        });
+                    }
+                    else {
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                new AlertDialog.Builder(MainActivity.this)
+                                        .setTitle("错误")
+                                        .setMessage("注销未知错误。")
+                                        .setPositiveButton("确定", null)
+                                        .create().show();
+                                m_navigationView.getMenu().findItem(R.id.id_nav_login).setTitle(R.string.nav_login);
+                                checkLoginStatus();
+                            }
+                        });
+                    }
+                }
+                catch (ServerErrorException ex) {
+                    ex.printStackTrace();
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            new AlertDialog.Builder(MainActivity.this)
+                                    .setTitle("注销错误")
+                                    .setMessage(ex.getMessage())
+                                    .setPositiveButton("确定", null)
+                                    .create().show();
+                        }
+                    });
+                }
+            }
+        }).start();
 
         // TODO 更新界面
 
@@ -414,9 +459,6 @@ public class MainActivity extends FragmentActivity implements IShowLog, Navigati
         //
         //     }
         // });
-
-        Toast.makeText(this, "注销成功，请重新登录。", Toast.LENGTH_SHORT).show();
-        checkLoginStatus();
     }
 
     private void checkLoginStatus() {

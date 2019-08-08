@@ -159,9 +159,22 @@ public class ModifyNoteActivity extends AppCompatActivity implements View.OnClic
 
         groupDao = new GroupDao(this);
         noteDao = new NoteDao(this);
-        GroupList = groupDao.queryGroupAll();
-        groupAdapter = new GroupAdapter(this, GroupList);
-        groupAdapter.notifyDataSetChanged();
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+
+                GroupList = groupDao.queryGroupAll();
+                groupAdapter = new GroupAdapter(ModifyNoteActivity.this, GroupList);
+
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+
+                        groupAdapter.notifyDataSetChanged();
+                    }
+                });
+            }
+        }).start();
 
         note = (Note) getIntent().getSerializableExtra("notedata");
         flag = getIntent().getIntExtra("flag", NOTE_NEW);
@@ -469,23 +482,29 @@ public class ModifyNoteActivity extends AppCompatActivity implements View.OnClic
         note.setContent(Content);
 
         // 处理分组信息
-        Group re = groupDao.queryGroupById(selectedGropId);
-        if (re != null)
-            note.setGroupLabel(re, true);
-        else
-            note.setGroupLabel(groupDao.queryGroupById(0), true);
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
 
-        //////////////////////////////////////////////////
+                Group re = groupDao.queryGroupById(selectedGropId);
+                if (re != null)
+                    note.setGroupLabel(re, true);
+                else
+                    note.setGroupLabel(groupDao.queryGroupById(0), true);
 
 
-        if (flag == NOTE_NEW) { // 从 Note Frag 打开的
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
 
-            // 插入到数据库一条新信息
-            CommonUtil.closeSoftKeyInput(this);
+                        // 插入到数据库一条新信息
+                        CommonUtil.closeSoftKeyInput(ModifyNoteActivity.this);
+                    }
+                });
+                //////////////////////////////////////////////////
 
-            new Thread(new Runnable() {
-                @Override
-                public void run() {
+
+                if (flag == NOTE_NEW) { // 从 Note Frag 打开的
 
                     long noteId = noteDao.insertNote(note);
                     note.setId((int) noteId);
@@ -501,15 +520,7 @@ public class ModifyNoteActivity extends AppCompatActivity implements View.OnClic
                         }
                     });
                 }
-            }).start();
-        }
-        else { // 从 VMNOTE 打开的
-
-            CommonUtil.closeSoftKeyInput(this);
-
-            new Thread(new Runnable() {
-                @Override
-                public void run() {
+                else { // 从 VMNOTE 打开的
 
                     if (isModify)
                         // 修改数据库
@@ -529,8 +540,9 @@ public class ModifyNoteActivity extends AppCompatActivity implements View.OnClic
                         }
                     });
                 }
-            }).start();
-        }
+
+            }
+        }).start();
     }
 
     
@@ -719,28 +731,44 @@ public class ModifyNoteActivity extends AppCompatActivity implements View.OnClic
      * 显示分组设置
      */
     private void showGroupSetting() {
-        refreshGroupList();
 
-        AlertDialog GroupSettingDialog = new AlertDialog
-                .Builder(this)
-                .setTitle(R.string.MNoteActivity_GroupSetAlertTitle)
-                .setNegativeButton(R.string.MNoteActivity_GroupSetAlertNegativeButtonForCancel, new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        dialog.cancel();
-                    }
-                })
-                .setSingleChoiceItems(groupAdapter, 0, new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        selectedGropId = GroupList.get(which).getId();
-                        GroupNameTextView.setText(GroupList.get(which).getName());
-                        GroupNameTextView.setTextColor(GroupList.get(which).getIntColor());
-                        dialog.cancel();
-                    }
-                }).create();
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
 
-        GroupSettingDialog.show();
+                refreshGroupList();
+
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+
+                        AlertDialog GroupSettingDialog = new AlertDialog
+                                .Builder(ModifyNoteActivity.this)
+                                .setTitle(R.string.MNoteActivity_GroupSetAlertTitle)
+                                .setNegativeButton(R.string.MNoteActivity_GroupSetAlertNegativeButtonForCancel, new DialogInterface.OnClickListener() {
+                                    @Override
+                                    public void onClick(DialogInterface dialog, int which) {
+                                        dialog.cancel();
+                                    }
+                                })
+                                .setSingleChoiceItems(groupAdapter, 0, new DialogInterface.OnClickListener() {
+                                    @Override
+                                    public void onClick(DialogInterface dialog, int which) {
+                                        selectedGropId = GroupList.get(which).getId();
+                                        GroupNameTextView.setText(GroupList.get(which).getName());
+                                        GroupNameTextView.setTextColor(GroupList.get(which).getIntColor());
+                                        dialog.cancel();
+                                    }
+                                }).create();
+
+                        GroupSettingDialog.show();
+
+                    }
+                });
+            }
+        }).start();
+
+
     }
 
     // endregion 其他功能

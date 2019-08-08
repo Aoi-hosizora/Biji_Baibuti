@@ -87,7 +87,8 @@ public class GroupDeleteDialog {
                     public void onClick(DialogInterface dialog, int which) {
                         try {
                             groupDao.deleteGroup(group.getId());
-                        } catch (Exception ex) {
+                        }
+                        catch (Exception ex) {
                             ex.printStackTrace();
                         }
                         dialog.dismiss();
