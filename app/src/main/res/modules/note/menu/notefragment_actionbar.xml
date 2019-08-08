@@ -15,15 +15,6 @@
         android:title="@string/NoteFrag_menu_modify_group"
         android:icon="@drawable/ic_label_outline_white_24dp"/>
 
-
-    <!--<item-->
-        <!--android:id="@+id/action_noteUpdate"-->
-        <!--android:title="同步"/>-->
-
-    <!--<item-->
-        <!--android:id="@+id/action_log"-->
-        <!--android:title="log"/>-->
-
     <item
         android:id="@+id/action_search"
         android:icon="@drawable/search"

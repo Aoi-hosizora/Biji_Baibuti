@@ -195,14 +195,6 @@ public class NoteFragment extends Fragment implements View.OnClickListener, ISho
                     case R.id.action_search_back:
                         SearchGroupBack();
                         break;
-                    // case R.id.action_noteUpdate:
-                    //     // TODO
-                    //     UpdateData();
-                    //     break;
-                    // case R.id.action_log:
-                    //     // TODO
-                    //     UpdateLog();
-                    //     break;
                 }
                 return true;
             }
@@ -247,7 +239,7 @@ public class NoteFragment extends Fragment implements View.OnClickListener, ISho
      * 设置 SwipeRefresh ProgressDialog
      */
     private void setupProgressAndSR() {
-        mSwipeRefresh = (SwipeRefreshLayout) view.findViewById(R.id.note_listsrl);
+        mSwipeRefresh = view.findViewById(R.id.note_listsrl);
         mSwipeRefresh.setColorSchemeResources(R.color.colorPrimary);
         // mSwipeRefresh.setColorSchemeColors(Color.RED,Color.BLUE,Color.GREEN);
         mSwipeRefresh.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
@@ -386,11 +378,11 @@ public class NoteFragment extends Fragment implements View.OnClickListener, ISho
                 LongClickNoteItem = null;
                 m_LongClickNotePopupMenu.cancel();
             break;
-            // case R.id.id_NoteFrag_PopupMenu_ChangeGroup:
-            //     modifyNoteGroup(LongClickNoteItem);
-            //     LongClickNoteItem = null;
-            //     m_LongClickNotePopupMenu.cancel();
-            // break;
+             case R.id.id_NoteFrag_PopupMenu_ChangeGroup:
+                 modifyNoteGroup(LongClickNoteItem);
+                 LongClickNoteItem = null;
+                 m_LongClickNotePopupMenu.cancel();
+             break;
             case R.id.id_NoteFrag_PopupMenu_DeleteNote:
                 DeleteNote(getView(), LongClickNoteItem);
                 LongClickNoteItem = null;
@@ -831,107 +823,89 @@ public class NoteFragment extends Fragment implements View.OnClickListener, ISho
         return ret;
     }
 
-    // /**
-    //  * 修改分组
-    //  */
-    // private void modifyNoteGroup(Note note) {
-    //     new Thread(new Runnable() {
-    //         @Override
-    //         public void run() {
-    //             refreshGroupList();
-//
-    //             getActivity().runOnUiThread(new Runnable() {
-    //                 @Override
-    //                 public void run() {
-    //                     AlertDialog GroupSettingDialog = new AlertDialog
-    //                             .Builder(getContext())
-    //                             .setTitle(R.string.MNoteActivity_GroupSetAlertTitle)
-    //                             .setNegativeButton(R.string.MNoteActivity_GroupSetAlertNegativeButtonForCancel, new DialogInterface.OnClickListener() {
-    //                                 @Override
-    //                                 public void onClick(DialogInterface dialog, int which) {
-    //                                     dialog.cancel();
-    //                                 }
-    //                             })
-    //                             .setSingleChoiceItems(groupAdapter, 0, new DialogInterface.OnClickListener() {
-    //                                 @Override
-    //                                 public void onClick(DialogInterface dialog, int which) {
-//
-    //                                     getActivity().runOnUiThread(new Runnable() {
-    //                                         @Override
-    //                                         public void run() {
-//
-//
-    //                                     new Thread(new Runnable() {
-    //                                         @Override
-    //                                         public void run() {
-//
-    //                                             // 修改保存数据库
-    //                                             Group group = GroupList.get(which);
-    //                                             note.setGroupLabel(group, true);
-    //                                             NoteDao noteDao = new NoteDao(getContext());
-    //                                             noteDao.updateNote(note);
-//
-    //                                             // 更新数据
-    //                                             if (IsSearching)
-//  //                                   getActivity().runOnUiThread(new Runnable() {
-//  //                                       @Override
-//  //                                       public void run() {
-    //                                                 if (!IsSearchingNull)
-    //                                                     initListView(search(SearchingStr));
-    //                                                 else
-    //                                                     initListView(NoteList);
-//  //                                       }
-//  //                                   });
-    //                                             else if (IsGrouping) {
-    //                                                 if (!IsGroupingNull) {
-    //                                                     List<Note> notes = getGroupOfNote(currGroup);
-//  //                                       getActivity().runOnUiThread(new Runnable() {
-//  //                                           @Override
-//  //                                           public void run() {
-    //                                                     initListView(notes);
-//  //                                           }
-//  //                                       });
-    //                                                 } else {
-//  //                                       getActivity().runOnUiThread(new Runnable() {
-//  //                                           @Override
-//  //                                           public void run() {
-    //                                                     initListView(NoteList);
-//  //                                           }
-//  //                                       });
-    //                                                 }
-//
-    //                                             }
-//
-    //                                             getActivity().runOnUiThread(new Runnable() {
-    //                                                 @Override
-    //                                                 public void run() {
-//
-    //                                                     // 排序显示
-    //                                                     Collections.sort(NoteList);
-    //                                                     noteAdapter.notifyDataSetChanged();
-//
-    //                                                     // 提示
-    //                                                     Toast.makeText(getActivity(), String.format(Locale.CHINA,
-    //                                                             getString(R.string.NoteFrag_ModifyGroupToast), note.getTitle(), group.getName()), Toast.LENGTH_SHORT).show();
-//
-    //                                                     dialog.cancel();
-    //                                                 }
-    //                                             });
-    //                                         }
-    //                                     });
-//
-    //                                         }
-    //                                     });
-    //                                 }
-    //                             }).create();
-//
-    //                     GroupSettingDialog.show();
-    //                 }
-    //             });
-    //         }
-    //     }).start();
-//
-    // }
+     /**
+      * 修改分组
+      */
+     private void modifyNoteGroup(final Note note) {
+
+         ProgressDialog loading = new ProgressDialog(getContext());
+         loading.setMessage("分组数据加载中...");
+         loading.setCancelable(false);
+         if (!loading.isShowing())
+             loading.show();
+
+         new Thread(new Runnable() {
+             @Override
+             public void run() {
+
+                 refreshGroupList();
+
+                 getActivity().runOnUiThread(new Runnable() {
+                     @Override
+                     public void run() {
+
+                         AlertDialog GroupSettingDialog = new AlertDialog
+                                 .Builder(getContext())
+                                 .setTitle(R.string.MNoteActivity_GroupSetAlertTitle)
+                                 .setNegativeButton(R.string.MNoteActivity_GroupSetAlertNegativeButtonForCancel, null)
+                                 .setSingleChoiceItems(groupAdapter, 0, new DialogInterface.OnClickListener() {
+
+                                     @Override
+                                     public void onClick(final DialogInterface dialog, int which) {
+
+                                         new Thread(new Runnable() {
+                                             @Override
+                                             public void run() {
+
+                                                 // 修改保存数据库
+                                                 NoteDao noteDao = new NoteDao(getContext());
+                                                 Group group = GroupList.get(which);
+                                                 note.setGroupLabel(group, true);
+                                                 noteDao.updateNote(note);
+
+                                                 getActivity().runOnUiThread(new Runnable() {
+                                                     @Override
+                                                     public void run() {
+
+                                                         // 更新数据
+                                                         if (IsSearching && !IsSearchingNull)
+                                                             initListView(search(SearchingStr));
+                                                         else if (IsGrouping && !IsGroupingNull)
+                                                             initListView(getGroupOfNote(currGroup));
+                                                         else
+                                                             initListView(NoteList);
+
+
+                                                         // 排序显示
+                                                         Collections.sort(NoteList);
+                                                         noteAdapter.notifyDataSetChanged();
+
+                                                         // 提示
+                                                         Toast.makeText(getActivity(), String.format(Locale.CHINA,
+                                                                 getString(R.string.NoteFrag_ModifyGroupToast), note.getTitle(), group.getName()), Toast.LENGTH_SHORT).show();
+
+                                                         dialog.dismiss();
+                                                     }
+                                                 });
+                                             }
+                                         }).start();
+                                     }
+                                 }).create();
+
+
+                         GroupSettingDialog.setOnShowListener(new DialogInterface.OnShowListener() {
+                             @Override
+                             public void onShow(DialogInterface dialog) {
+                                 loading.dismiss();
+                             }
+                         });
+
+                         GroupSettingDialog.show();
+                     }
+                 });
+             }
+         }).start();
+     }
 
     // endregion 显示分组 分组显示
 
@@ -959,8 +933,6 @@ public class NoteFragment extends Fragment implements View.OnClickListener, ISho
         noteAdapter.setmNotes(nlist);
 
         mNoteList.setAdapter(noteAdapter);
-
-//        mNoteList.setEmptyView(ListEmptyView);
 
         noteAdapter.notifyDataSetChanged();
 
@@ -998,7 +970,7 @@ public class NoteFragment extends Fragment implements View.OnClickListener, ISho
         LinearLayout root = PopupMenuUtil.initPopupMenu(getContext(), m_LongClickNotePopupMenu, R.layout.popupmenu_note_longclicknote);
 
         root.findViewById(R.id.id_NoteFrag_PopupMenu_ViewNote).setOnClickListener(NoteFragment.this);
-       //  root.findViewById(R.id.id_NoteFrag_PopupMenu_ChangeGroup).setOnClickListener(NoteFragment.this);
+         root.findViewById(R.id.id_NoteFrag_PopupMenu_ChangeGroup).setOnClickListener(NoteFragment.this);
         root.findViewById(R.id.id_NoteFrag_PopupMenu_DeleteNote).setOnClickListener(NoteFragment.this);
         root.findViewById(R.id.id_NoteFrag_PopupMenu_Cancel).setOnClickListener(NoteFragment.this);
 
@@ -1166,6 +1138,9 @@ public class NoteFragment extends Fragment implements View.OnClickListener, ISho
                                                             noteAdapter.notifyDataSetChanged();
 
                                                             Snackbar.make(view, R.string.NoteFrag_DeleteAlertDeleteSuccess, Snackbar.LENGTH_LONG)
+
+                                                                    // TODO !!!!!!!!!!!!
+
                                                                     // .setAction(R.string.NoteFrag_DeleteAlertUndo, new View.OnClickListener() {
                                                                     //     @Override
                                                                     //     public void onClick(View v) {
@@ -1334,65 +1309,6 @@ public class NoteFragment extends Fragment implements View.OnClickListener, ISho
 
     // endregion 笔记增删改
 
-    // region DEBUG
-
-    // private void UpdateData() {
-//
-    //     // TODO
-//
-    //     new Thread(new Runnable() {
-    //         @Override
-    //         public void run() {
-    //             try {
-    //                 NoteDao noteDao = new NoteDao(getContext());
-    //                 GroupDao groupDao = new GroupDao(getContext());
-//
-    //                 List<Note> notes = noteDao.queryAllNotes();
-    //                 for (Note note : notes)
-    //                     NoteUtil.insertNote(note);
-//
-    //                 List<Group> groups = groupDao.queryGroupAll();
-    //                 for (Group group : groups)
-    //                     GroupUtil.insertGroup(group);
-//
-    //             }
-    //             catch (ServerErrorException ex) {
-    //                 ex.printStackTrace();
-    //                 getActivity().runOnUiThread(new Runnable() {
-    //                     @Override
-    //                     public void run() {
-    //                         new android.app.AlertDialog.Builder(getActivity())
-    //                                 .setTitle("错误")
-    //                                 .setMessage(ex.getMessage())
-    //                                 .setPositiveButton("确定", null)
-    //                                 .create().show();
-    //                     }
-    //                 });
-    //             }
-    //         }
-    //     }).start();
-    // }
-//
-    // private void UpdateLog() {
-//
-    //     // TODO
-//
-    //     new Thread(new Runnable() {
-    //         @Override
-    //         public void run() {
-    //             UtLogDao utLogDao = new UtLogDao(getContext());
-    //             try {
-    //                 LogUtil.updateModuleLog(utLogDao.getLog(LogModule.Mod_Note));
-    //             }
-    //             catch (ServerErrorException ex) {
-    //                 ex.printStackTrace();
-    //             }
-    //         }
-    //     }).start();
-    // }
-
-    // endregion DEBUG
-
     /**
      * 订阅登录注销事件
      */
@@ -1411,5 +1327,3 @@ public class NoteFragment extends Fragment implements View.OnClickListener, ISho
         });
     }
 }
-
-
