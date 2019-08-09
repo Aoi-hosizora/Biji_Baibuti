@@ -555,7 +555,7 @@ public class ViewModifyNoteActivity extends AppCompatActivity implements View.On
 
     /**
      * 对图片 打开OCR活动
-     * @param imgPath
+     * @param imgPath 可能是 网络图片
      */
     private void openOCRAct(String imgPath) {
         Intent intent = new Intent(ViewModifyNoteActivity.this, OCRActivity.class);

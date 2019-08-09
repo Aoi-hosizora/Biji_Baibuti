@@ -7,6 +7,11 @@ import android.graphics.ColorMatrixColorFilter;
 import android.graphics.Paint;
 import android.graphics.BitmapFactory;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+
 /**
  * Created by sunlinlin on 2017/3/28.
  */
@@ -122,6 +127,7 @@ public class BitmapUtil {
         }
         return binarymap;
     }
+
     /**
      * 通过文件路径来获取Bitmap
      * @param pathName
@@ -129,6 +135,30 @@ public class BitmapUtil {
      */
     public static Bitmap getBitmapFromFile(String pathName) {
         return BitmapFactory.decodeFile(pathName);
+    }
+
+    /**
+     * 存储 bitmap
+     * @param bitmap
+     * @param pathname
+     * @return
+     */
+    public static void saveBitmap(Bitmap bitmap, String pathname) {
+        File bf = new File(pathname);
+        if (bf.exists())
+            bf.delete();
+        try {
+            FileOutputStream out = new FileOutputStream(bf);
+            bitmap.compress(Bitmap.CompressFormat.PNG, 90, out);
+            out.flush();
+            out.close();
+        }
+        catch (FileNotFoundException ex) {
+            ex.printStackTrace();
+        }
+        catch (IOException ex) {
+            ex.printStackTrace();
+        }
     }
 
 }

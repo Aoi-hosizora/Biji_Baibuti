@@ -68,10 +68,6 @@ import me.kareluo.imaging.IMGEditActivity;
 import static com.baibuti.biji.Utils.OtherUtils.ExtractUtil.assets2SD;
 
 
-/**
- * Created by Windows 10 on 016 2019/02/16.
- */
-
 public class ModifyNoteActivity extends AppCompatActivity implements View.OnClickListener {
 
     // region 声明: UI ProgressDialog Menu PopupMenu
@@ -1161,7 +1157,7 @@ public class ModifyNoteActivity extends AppCompatActivity implements View.OnClic
                     // <img src="https://www.baidu.com/img/bd_logo1.png"> <- `https://` 不可漏
 
                     // 测试插入网络图片
-                    // emitter.onNext("https://raw.githubusercontent.com/Aoi-hosizora/Biji_Baibuti/a5bb15af4098296ace557e281843513b2f672e0f/assets/DB_Query.png");
+                     emitter.onNext("https://raw.githubusercontent.com/Aoi-hosizora/Biji_Baibuti/a5bb15af4098296ace557e281843513b2f672e0f/assets/DB_Query.png");
 
                     emitter.onComplete();
                 } catch (Exception e) {
