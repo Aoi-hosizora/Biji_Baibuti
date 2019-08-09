@@ -1,16 +1,13 @@
 package com.baibuti.biji.Net.Models.RespBody;
 
 import com.baibuti.biji.Data.Models.UtLog;
-import com.baibuti.biji.Utils.OtherUtils.CommonUtil;
+import com.baibuti.biji.Utils.OtherUtils.DateColorUtil;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.Locale;
 
 public class LogResp {
 
@@ -42,10 +39,9 @@ public class LogResp {
 
     public String toJson() {
         try {
-            SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.CHINA);
             JSONObject jsonObject = new JSONObject();
             jsonObject.put("module", module);
-            jsonObject.put("ut", formatter.format(ut));
+            jsonObject.put("ut", DateColorUtil.Date2Str(ut));
             return jsonObject.toString();
         }
         catch (JSONException ex) {
@@ -77,14 +73,9 @@ public class LogResp {
      */
     public static LogResp toLogRespFromJson(JSONObject json) {
         try {
-            SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.CHINA);
-            return new LogResp(json.getString("module"), formatter.parse(json.getString("ut")));
+            return new LogResp(json.getString("module"), DateColorUtil.Str2Date(json.getString("ut")));
         }
         catch (JSONException ex) {
-            ex.printStackTrace();
-            return null;
-        }
-        catch (ParseException ex) {
             ex.printStackTrace();
             return null;
         }

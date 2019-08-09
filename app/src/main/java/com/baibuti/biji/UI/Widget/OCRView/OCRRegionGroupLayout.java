@@ -3,6 +3,7 @@ package com.baibuti.biji.UI.Widget.OCRView;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.Bitmap;
+import android.graphics.Color;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.View;
@@ -124,6 +125,12 @@ public class OCRRegionGroupLayout extends ViewGroup {
                 OCRRegionView regionView = (OCRRegionView) child;
                 if (regionView.getFrame() == null)
                     continue;
+
+                // 如果背景为空，直接填充呈白色
+                if (imgBG == null) {
+                    imgBG = Bitmap.createBitmap(400, 400, Bitmap.Config.ARGB_8888);
+                    imgBG.eraseColor(Color.parseColor("#FFFFFF"));
+                }
 
                 Region.Point[] point4 = OCRRegionUtil.parsePnts(
                     regionView.getFrame().getPoints(),

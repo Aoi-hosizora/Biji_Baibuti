@@ -16,6 +16,7 @@ import com.baibuti.biji.R;
 import com.baibuti.biji.Data.DB.GroupDao;
 import com.baibuti.biji.Data.DB.NoteDao;
 import com.baibuti.biji.Utils.OtherUtils.CommonUtil;
+import com.baibuti.biji.Utils.OtherUtils.DateColorUtil;
 import com.larswerkman.holocolorpicker.ColorPicker;
 
 import java.util.Locale;
@@ -76,7 +77,7 @@ public class GroupAddDialog extends AlertDialog implements OnClickListener {
             @Override
             public void onColorChanged(int color) {
                 colorText.setText(String.format(Locale.CHINA, "%s%s",
-                        getContext().getString(R.string.GroupDialog_AddAlertColorText), CommonUtil.ColorInt_HexEncoding(color)));
+                        getContext().getString(R.string.GroupDialog_AddAlertColorText), DateColorUtil.ColorInt_HexEncoding(color)));
             }
         });
 
@@ -84,7 +85,7 @@ public class GroupAddDialog extends AlertDialog implements OnClickListener {
             @Override
             public void onColorSelected(int color) {
                 colorText.setText(String.format(Locale.CHINA, "%s%s",
-                        getContext().getString(R.string.GroupDialog_AddAlertColorText), CommonUtil.ColorInt_HexEncoding(color)));
+                        getContext().getString(R.string.GroupDialog_AddAlertColorText), DateColorUtil.ColorInt_HexEncoding(color)));
             }
         });
 
@@ -183,7 +184,7 @@ public class GroupAddDialog extends AlertDialog implements OnClickListener {
             newGroupOrder = 0;
 
         // TODO
-        String newGroupColor = CommonUtil.ColorInt_HexEncoding(colorPalette.getColor());
+        String newGroupColor = DateColorUtil.ColorInt_HexEncoding(colorPalette.getColor());
         ShowLogE("UpdateGroup", "COLOR: " + newGroupColor);
 
         // 更改好的分组信息

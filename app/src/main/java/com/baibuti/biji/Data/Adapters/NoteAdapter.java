@@ -11,6 +11,7 @@ import com.baibuti.biji.Data.Models.Note;
 import com.baibuti.biji.R;
 import com.baibuti.biji.UI.Widget.ListView.RecyclerViewEmptySupport;
 import com.baibuti.biji.Utils.OtherUtils.CommonUtil;
+import com.baibuti.biji.Utils.OtherUtils.DateColorUtil;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -102,7 +103,7 @@ public class NoteAdapter extends RecyclerViewEmptySupport.Adapter<NoteAdapter.Vi
         holder.tv_list_summary.setText(getShortNoteContent(note));
         holder.tv_list_time.setText(note.getUpdateTime_ShortString());
         holder.tv_list_group.setText(note.getGroupLabel().getName());
-        holder.tv_list_group.setTextColor(CommonUtil.ColorHex_IntEncoding(note.getGroupLabel().getColor()));
+        holder.tv_list_group.setTextColor(DateColorUtil.ColorHex_IntEncoding(note.getGroupLabel().getColor()));
     }
 
     @Override

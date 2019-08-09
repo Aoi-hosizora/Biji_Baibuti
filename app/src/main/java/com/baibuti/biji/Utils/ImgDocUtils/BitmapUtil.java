@@ -11,7 +11,7 @@ import android.graphics.BitmapFactory;
  * Created by sunlinlin on 2017/3/28.
  */
 
-public class BitmapUtils {
+public class BitmapUtil {
     /**
      * 灰度化
      * @param bmSrc

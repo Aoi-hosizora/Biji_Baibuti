@@ -2,17 +2,14 @@ package com.baibuti.biji.Net.Models.ReqBody;
 
 import com.baibuti.biji.Data.Models.Group;
 import com.baibuti.biji.Data.Models.Note;
+import com.baibuti.biji.Utils.OtherUtils.DateColorUtil;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.Serializable;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.List;
-import java.util.Locale;
 
 public class NoteReqBody implements Serializable {
 
@@ -136,15 +133,14 @@ public class NoteReqBody implements Serializable {
      * @return
      */
     public String toJson() {
-        SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.CHINA);
         JSONObject obj = new JSONObject();
         try {
             obj.put("id", id);
             obj.put("title", title);
             obj.put("content", content);
             obj.put("group_id", group_id);
-            obj.put("create_time", formatter.format(create_time));
-            obj.put("update_time", formatter.format(update_time));
+            obj.put("create_time", DateColorUtil.Date2Str(create_time));
+            obj.put("update_time", DateColorUtil.Date2Str(update_time));
         }
         catch (JSONException ex) {
             ex.printStackTrace();
@@ -158,7 +154,6 @@ public class NoteReqBody implements Serializable {
      * @return
      */
     public static String getJsonFromNoteRodies(NoteReqBody[] noteReqBodies) {
-        SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.CHINA);
         JSONArray obj = new JSONArray();
         for (NoteReqBody noteReqBody : noteReqBodies)
             obj.put(noteReqBody.toJson());
@@ -187,10 +182,9 @@ public class NoteReqBody implements Serializable {
      * @return
      */
     public static NoteReqBody getNoteRespFromJson(JSONObject obj) {
-        SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.CHINA);
         try {
-            Date ct = formatter.parse(obj.getString("create_time"));
-            Date ut = formatter.parse(obj.getString("update_time"));
+            Date ct = DateColorUtil.Str2Date(obj.getString("create_time"));
+            Date ut = DateColorUtil.Str2Date(obj.getString("update_time"));
             return new NoteReqBody(
                 obj.getInt("id"),
                 obj.getString("title"),
@@ -201,10 +195,6 @@ public class NoteReqBody implements Serializable {
             );
         }
         catch (JSONException ex) {
-            ex.printStackTrace();
-            return null;
-        }
-        catch (ParseException ex) {
             ex.printStackTrace();
             return null;
         }

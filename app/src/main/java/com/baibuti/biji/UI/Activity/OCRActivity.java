@@ -7,6 +7,7 @@ import android.content.ClipboardManager;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -20,10 +21,11 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.baibuti.biji.Net.Models.RespObj.Region;
+import com.baibuti.biji.Net.Modules.Note.ImgUtil;
 import com.baibuti.biji.Net.Modules.OCR.OCRRetUtil;
 import com.baibuti.biji.R;
 import com.baibuti.biji.UI.Widget.OCRView.OCRRegionGroupLayout;
-import com.baibuti.biji.Utils.ImgDocUtils.BitmapUtils;
+import com.baibuti.biji.Utils.ImgDocUtils.BitmapUtil;
 import com.baibuti.biji.Utils.LayoutUtils.OCRRegionUtil;
 
 /**
@@ -128,15 +130,57 @@ public class OCRActivity extends AppCompatActivity implements View.OnClickListen
         setEnabled(m_CopyButton, false);
         setRetLabelText(0, 0);
 
-        m_ocrRegionGroupLayout.setImgBG(BitmapUtils.getBitmapFromFile(ImgPath));
+        initBG(ImgPath);
+    }
+
+    /**
+     * 加载背景
+     */
+    private void initBG(String ImgPath) {
+
+        Bitmap bg = BitmapUtil.getBitmapFromFile(ImgPath);
+
+        if (bg == null) 
+            new Thread(new Runnable() {
+                @Override
+                public void run() {
+
+                    ImgUtil.GetImgAsync(ImgPath, new ImgUtil.IImageBack() {
+                        @Override
+                        public void onGetImg(Bitmap bitmap) {
+
+                            Log.e("", "onGetImg: " + ImgPath);
+
+                            runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    m_ocrRegionGroupLayout.setImgBG(bitmap);
+                                    toOCRHandler();
+                                }
+                            });
+                        }
+                    });
+                }
+            }).start();
+        else {
+            m_ocrRegionGroupLayout.setImgBG(bg);
+            toOCRHandler();
+        }
+
+    }
+
+    /**
+     * 加载完背景，启动 OCR 延迟
+     */
+    private void toOCRHandler() {
 
         // 延迟
         new Handler().postDelayed(new Runnable() {
             @Override
             public void run() {
-                getRetTmp(ImgPath);
+                getRetTmp();
                 // TODO !!!!!
-//                getRet(ImgPath);
+                // getRet($bitmap);
             }
         }, MS_GETDATA); // 1000
     }
@@ -243,9 +287,8 @@ public class OCRActivity extends AppCompatActivity implements View.OnClickListen
 
     /**
      * 获得 结果，并调用设置布局 (dev env)
-     * @param url
      */
-    private void getRetTmp(String url) {
+    private void getRetTmp() {
         Region ret = new Region(
             new Region.Point(600, 400),
             3,

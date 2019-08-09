@@ -1,9 +1,10 @@
 package com.baibuti.biji.UI.Dialog;
 
+import android.app.Activity;
 import android.app.Dialog;
-import android.content.Context;
 import android.graphics.Bitmap;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.util.Log;
@@ -12,18 +13,25 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.baibuti.biji.Net.Modules.Note.ImgUtil;
 import com.baibuti.biji.R;
 import com.baibuti.biji.UI.Widget.PhotoView.PhotoView;
-import com.baibuti.biji.Utils.ImgDocUtils.BitmapUtils;
+import com.baibuti.biji.Utils.ImgDocUtils.BitmapUtil;
 
 import java.util.ArrayList;
+import java.util.Locale;
+
+import okhttp3.internal.annotations.EverythingIsNonNull;
 
 public class ImagePopupDialog extends Dialog {
 
+    private Activity activity;
+
     private ViewPager mPager;
     private TextView mPageIndexTextView;
+    private PagerAdapter mAdapter;
 
-    private Bitmap[] imgs;
+    private volatile Bitmap[] imgs;
     private int index;
 
     private onLongClickImageListener m_onLongClickImageListener;
@@ -49,30 +57,74 @@ public class ImagePopupDialog extends Dialog {
 
     /**
      * 以图片为输入，备用
-     * @param context
+     * @param activity
      * @param imgs Bitmap[]
      * @param index 当前图片
      */
-    public ImagePopupDialog(Context context, Bitmap[] imgs, int index) {
-        super(context);
+    public ImagePopupDialog(Activity activity, Bitmap[] imgs, int index) {
+        super(activity);
+        this.activity = activity;
         this.imgs = imgs;
         this.index = index;
     }
 
     /**
      * 以url为输入
-     * @param context
+     * @param activity
      * @param urls String[] 图片路径
      * @param index 当前图片
      */
-    public ImagePopupDialog(Context context, String[] urls, int index) {
-        super(context);
+    public ImagePopupDialog(Activity activity, String[] urls, int index) {
+        super(activity);
+        this.activity = activity;
 
-        ArrayList<Bitmap> bitmaps = new ArrayList<>();
-        for (String url : urls)
-            bitmaps.add(BitmapUtils.getBitmapFromFile(url));
+        // TODO
+        //  E/: ImagePopupDialog: /storage/emulated/0/Biji/NoteImage/20190809141402253_Small.jpg -> false
+        //  E/BitmapFactory: Unable to decode stream: java.io.FileNotFoundException:
+        //      https:/raw.githubusercontent.com/Aoi-hosizora/Biji_Baibuti/a5bb15af4098296ace557e281843513b2f672e0f/assets/DB_Query.png (No such file or directory)
+        //  E/: ImagePopupDialog: https://raw.githubusercontent.com/Aoi-hosizora/Biji_Baibuti/a5bb15af4098296ace557e281843513b2f672e0f/assets/DB_Query.png -> true
 
-        this.imgs = bitmaps.toArray(new Bitmap[bitmaps.size()]);
+        final ArrayList<Bitmap> bitmaps = new ArrayList<>();
+
+        for (int i = 0; i < urls.length; i++) {
+            final String url = urls[i];
+
+            // TODO File
+            Bitmap file = BitmapUtil.getBitmapFromFile(url);
+
+            if (file == null) {
+                bitmaps.add(null);
+                final int ki = i;
+                new Thread(new Runnable() {
+                    @Override
+                    public void run() {
+                        ImgUtil.GetImgAsync(url, new ImgUtil.IImageBack() {
+                            @Override
+                            public void onGetImg(Bitmap bitmap) {
+
+                                // TODO
+                                //    getItemPosition POSITION_NONE
+
+                                Log.e("", "onGetImg: " + url);
+                                imgs[ki] = bitmap;
+
+                                activity.runOnUiThread(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        mAdapter.notifyDataSetChanged();
+                                    }
+                                });
+                            }
+                        });
+
+                    }
+                }).start();
+            }
+            else
+                bitmaps.add(file);
+        }
+
+        this.imgs = bitmaps.toArray(new Bitmap[0]);
         this.index = index;
     }
 
@@ -93,7 +145,7 @@ public class ImagePopupDialog extends Dialog {
      * @param position
      */
     private void RefreshPageIndexTextView(int position) {
-        String tip = String.format("%d / %d", position + 1, imgs.length);
+        String tip = String.format(Locale.CHINA, "%d / %d", position + 1, imgs.length);
         mPageIndexTextView.setText(tip);
     }
 
@@ -105,19 +157,26 @@ public class ImagePopupDialog extends Dialog {
 
         mPager.setPageMargin((int) (getContext().getResources().getDisplayMetrics().density * 15));
 
-        mPager.setAdapter(new PagerAdapter() {
+        mAdapter = new PagerAdapter() {
+
             @Override
             public int getCount() {
                 return imgs.length;
             }
 
             @Override
+            @EverythingIsNonNull
             public boolean isViewFromObject(View view, Object object) {
                 return view == object;
             }
 
             @Override
-            public Object instantiateItem(ViewGroup container, int position) {
+            public int getItemPosition(@NonNull Object object) {
+                return POSITION_NONE;
+            }
+
+            @Override
+            public @NonNull Object instantiateItem(@NonNull ViewGroup container, int position) {
                 // ShowLogE("setupPager", "instantiateItem: " + position);
 
                 PhotoView view = new PhotoView(getContext());
@@ -125,6 +184,8 @@ public class ImagePopupDialog extends Dialog {
                 view.enableRotate();
 
                 view.setScaleType(ImageView.ScaleType.FIT_CENTER);
+
+                // KEY
                 view.setImageResource(imgs[position]);
 
                 view.setOnLongClickListener(new View.OnLongClickListener() {
@@ -148,11 +209,13 @@ public class ImagePopupDialog extends Dialog {
             }
 
             @Override
+            @EverythingIsNonNull
             public void destroyItem(ViewGroup container, int position, Object object) {
                 container.removeView((View) object);
             }
-        });
+        };
 
+        mPager.setAdapter(mAdapter);
         mPager.setCurrentItem(index);
         RefreshPageIndexTextView(index);
 
@@ -171,6 +234,4 @@ public class ImagePopupDialog extends Dialog {
         });
 
     }
-
-
 }

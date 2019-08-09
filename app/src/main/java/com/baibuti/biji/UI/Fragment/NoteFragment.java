@@ -58,7 +58,7 @@ import com.baibuti.biji.Data.DB.GroupDao;
 import com.baibuti.biji.Data.DB.NoteDao;
 import com.baibuti.biji.Utils.FileDirUtils.FilePathUtil;
 import com.baibuti.biji.Utils.FileDirUtils.SDCardUtil;
-import com.baibuti.biji.Utils.ImgDocUtils.ImageUtils;
+import com.baibuti.biji.Utils.ImgDocUtils.ImageUtil;
 import com.baibuti.biji.Utils.LayoutUtils.PopupMenuUtil;
 import com.baibuti.biji.Utils.OtherUtils.CommonUtil;
 import com.getbase.floatingactionbutton.FloatingActionButton;
@@ -1088,7 +1088,7 @@ public class NoteFragment extends Fragment implements View.OnClickListener {
         int screenWidth = CommonUtil.getScreenWidth(getContext());
         int screenHeight = CommonUtil.getScreenHeight(getContext());
 
-        Bitmap bitmap = ImageUtils.getSmallBitmap(imgUri + "", screenWidth, screenHeight); // 压缩图片
+        Bitmap bitmap = ImageUtil.getSmallBitmap(imgUri + "", screenWidth, screenHeight); // 压缩图片
         String smallImagePath = SDCardUtil.saveSmallImgToSdCard(bitmap);
         SDCardUtil.deleteFile("" + imgUri);
 

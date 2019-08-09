@@ -10,10 +10,9 @@ import android.util.Log;
 import com.baibuti.biji.Data.Models.LogModule;
 import com.baibuti.biji.Data.Models.UtLog;
 import com.baibuti.biji.Net.Modules.Auth.AuthMgr;
+import com.baibuti.biji.Utils.OtherUtils.DateColorUtil;
 
-import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.Locale;
 
 
 public class UtLogDao {
@@ -47,10 +46,8 @@ public class UtLogDao {
 
             db.beginTransaction();
             try {
-                SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.CHINA);
-
                 stat.bindString(1, module); // COL_MODULE
-                stat.bindString(2, formatter.format(new Date())); // COL_UT
+                stat.bindString(2, DateColorUtil.Date2Str(new Date())); // COL_UT
 
                 stat.executeInsert();
                 db.setTransactionSuccessful();
@@ -88,9 +85,7 @@ public class UtLogDao {
             cursor = db.rawQuery(sql, null);
 
             if (cursor.moveToFirst()) {
-                SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.CHINA);
-
-                Date ut = formatter.parse(cursor.getString(cursor.getColumnIndex(COL_UT)));
+                Date ut = DateColorUtil.Str2Date(cursor.getString(cursor.getColumnIndex(COL_UT)));
                 utLog = new UtLog(module, ut);
             }
         }
@@ -116,10 +111,8 @@ public class UtLogDao {
         db.beginTransaction();
         try {
             ContentValues values = new ContentValues();
-            SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.CHINA);
-
             values.put(COL_MODULE, module);
-            values.put(COL_UT, formatter.format(update_time));
+            values.put(COL_UT, DateColorUtil.Date2Str(update_time));
             db.update(TBL_NAME, values, COL_MODULE + " = ?", new String[] { module });
 
             db.setTransactionSuccessful();

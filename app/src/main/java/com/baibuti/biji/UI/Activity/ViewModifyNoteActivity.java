@@ -13,7 +13,6 @@ import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.MotionEvent;
 import android.view.View;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -24,7 +23,7 @@ import com.baibuti.biji.UI.Dialog.ImagePopupDialog;
 import com.baibuti.biji.R;
 import com.baibuti.biji.Utils.OtherUtils.CommonUtil;
 import com.baibuti.biji.Utils.LayoutUtils.PopupMenuUtil;
-import com.baibuti.biji.Utils.StrSrchUtils.StringUtils;
+import com.baibuti.biji.Utils.StrSrchUtils.StringUtil;
 import com.baibuti.biji.Utils.ImgDocUtils.ToDocUtil;
 import com.sendtion.xrichtext.RichTextView;
 
@@ -594,11 +593,8 @@ public class ViewModifyNoteActivity extends AppCompatActivity implements View.On
         ContentEditText_View.setOnRtImageClickListener(new RichTextView.OnRtImageClickListener() {
             @Override
             public void onRtImageClick(String imagePath) {
-                ArrayList<String> imageList = StringUtils.getTextFromHtml(note.getContent(), true);
+                ArrayList<String> imageList = StringUtil.getTextFromHtml(note.getContent(), true);
                 int currentPosition = imageList.indexOf(imagePath);
-
-                ShowLogE("dealWithContent", "点击图片："+currentPosition+"："+imagePath);
-
                 ShowClickImg(imageList, currentPosition);
             }
         });
@@ -645,7 +641,7 @@ public class ViewModifyNoteActivity extends AppCompatActivity implements View.On
                     if (ContentEditText_View != null) {
                         if (text.contains("<img") && text.contains("src=")) {
                             // imagePath可能是本地路径，也可能是网络地址
-                            String imagePath = StringUtils.getImgSrc(text);
+                            String imagePath = StringUtil.getImgSrc(text);
                             ContentEditText_View.addImageViewAtIndex(ContentEditText_View.getLastIndex(), imagePath);
                         } else {
                             ContentEditText_View.addTextViewAtIndex(ContentEditText_View.getLastIndex(), text);
@@ -666,7 +662,7 @@ public class ViewModifyNoteActivity extends AppCompatActivity implements View.On
      */
     private void showEditData(ObservableEmitter<String> emitter, String html) {
         try {
-            List<String> textList = StringUtils.cutStringByImgTag(html);
+            List<String> textList = StringUtil.cutStringByImgTag(html);
             for (int i = 0; i < textList.size(); i++) {
                 String text = textList.get(i);
                 emitter.onNext(text);

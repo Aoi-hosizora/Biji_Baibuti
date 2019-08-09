@@ -14,9 +14,8 @@ import com.baibuti.biji.Data.Models.Note;
 import com.baibuti.biji.Net.Models.RespObj.ServerErrorException;
 import com.baibuti.biji.Net.Modules.Auth.AuthMgr;
 import com.baibuti.biji.Net.Modules.Note.NoteUtil;
-import com.baibuti.biji.Utils.OtherUtils.CommonUtil;
+import com.baibuti.biji.Utils.OtherUtils.DateColorUtil;
 
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -134,11 +133,11 @@ public class NoteDao {
 
                 note.setGroupLabel(grouptmp, false);
 
-                note.setCreateTime(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").parse(
+                note.setCreateTime(DateColorUtil.Str2Date(
                         cursor.getString(cursor.getColumnIndex("n_create_time"))
                 ));
 
-                note.setUpdateTime(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").parse(
+                note.setUpdateTime(DateColorUtil.Str2Date(
                         cursor.getString(cursor.getColumnIndex("n_update_time"))
                 ));
 
@@ -191,11 +190,11 @@ public class NoteDao {
                 if (grouptmp == null)
                     grouptmp = groupDao.queryDefaultGroup();
 
-                Date createTime = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").parse(
+                Date createTime = DateColorUtil.Str2Date(
                         cursor.getString(cursor.getColumnIndex("n_create_time"))
                 );
 
-                Date updateTime = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").parse(
+                Date updateTime = DateColorUtil.Str2Date(
                         cursor.getString(cursor.getColumnIndex("n_update_time"))
                 );
 
@@ -248,8 +247,8 @@ public class NoteDao {
             stat.bindString(2, note.getContent()); // content
             stat.bindLong(3, note.getGroupLabel().getId()); // groupid
 
-            stat.bindString(4, CommonUtil.date2string((note.getCreateTime()==null)?new Date():note.getCreateTime())); // createtime
-            stat.bindString(5, CommonUtil.date2string((note.getUpdateTime()==null)?new Date():note.getUpdateTime())); // updatetime
+            stat.bindString(4, DateColorUtil.Date2Str((note.getCreateTime()==null)?new Date():note.getCreateTime())); // createtime
+            stat.bindString(5, DateColorUtil.Date2Str((note.getUpdateTime()==null)?new Date():note.getUpdateTime())); // updatetime
 
             if (idx != -1)
                 stat.bindLong(6, idx); // id
@@ -330,7 +329,7 @@ public class NoteDao {
 
         values.put("n_group_id", note.getGroupLabel().getId());
 
-        values.put("n_update_time", CommonUtil.date2string(note.getUpdateTime()));
+        values.put("n_update_time", DateColorUtil.Date2Str(note.getUpdateTime()));
 
         db.update("db_note", values, "n_id=?", new String[]{note.getId()+""});
         db.close();

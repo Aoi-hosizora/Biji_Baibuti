@@ -40,10 +40,10 @@ import com.baibuti.biji.Data.DB.NoteDao;
 import com.baibuti.biji.UI.Dialog.ImagePopupDialog;
 import com.baibuti.biji.Utils.OtherUtils.CommonUtil;
 import com.baibuti.biji.Utils.FileDirUtils.FilePathUtil;
-import com.baibuti.biji.Utils.ImgDocUtils.ImageUtils;
+import com.baibuti.biji.Utils.ImgDocUtils.ImageUtil;
 import com.baibuti.biji.Utils.LayoutUtils.PopupMenuUtil;
 import com.baibuti.biji.Utils.FileDirUtils.SDCardUtil;
-import com.baibuti.biji.Utils.StrSrchUtils.StringUtils;
+import com.baibuti.biji.Utils.StrSrchUtils.StringUtil;
 import com.baibuti.biji.Utils.OtherUtils.ExtractUtil;
 import com.sendtion.xrichtext.RichTextEditor;
 
@@ -804,7 +804,7 @@ public class ModifyNoteActivity extends AppCompatActivity implements View.OnClic
     //                 @Override
     //                 public void onClick(DialogInterface dialog, int which) {
     //
-    //                     Bitmap bitmap = BitmapUtils.getBitmapFromFile(imagePath);
+    //                     Bitmap bitmap = BitmapUtil.getBitmapFromFile(imagePath);
     //                     // 异步识别文字
     //                     idenWordsSync(bitmap);
     //                     dialog.dismiss();
@@ -1006,14 +1006,13 @@ public class ModifyNoteActivity extends AppCompatActivity implements View.OnClic
             public void onRtImageClick(final String imagePath) {
                 if (!TextUtils.isEmpty(getEditData())) {
 
-                    ArrayList<String> imageList = StringUtils.getTextFromHtml(getEditData(), true);
+                    ArrayList<String> imageList = StringUtil.getTextFromHtml(getEditData(), true);
                     if (!TextUtils.isEmpty(imagePath)) {
                         int currentPosition = imageList.indexOf(imagePath);
-                        ShowLogE("dealWithContent", "点击图片："+currentPosition+"："+imagePath);
                         ShowClickImg(imageList, currentPosition);
                     }
 
-//                    List<String> imageList = StringUtils.getTextFromHtml(getEditData(), true);
+//                    List<String> imageList = StringUtil.getTextFromHtml(getEditData(), true);
 //                    if (!TextUtils.isEmpty(imagePath)) {
 //                        // int currentPosition = imageList.indexOf(imagePath);
 //                        // ShowdealWithContentForOCR(imagePath);
@@ -1099,7 +1098,7 @@ public class ModifyNoteActivity extends AppCompatActivity implements View.OnClic
                 if (ContentEditText != null) {
                     if (text.contains("<img") && text.contains("src=")) {
                         //imagePath可能是本地路径，也可能是网络地址
-                        String imagePath = StringUtils.getImgSrc(text);
+                        String imagePath = StringUtil.getImgSrc(text);
                         //插入空的EditText，以便在图片前后插入文字
                         ContentEditText.addEditTextAtIndex(ContentEditText.getLastIndex(), "");
                         ContentEditText.addImageViewAtIndex(ContentEditText.getLastIndex(), imagePath);
@@ -1118,7 +1117,7 @@ public class ModifyNoteActivity extends AppCompatActivity implements View.OnClic
      */
     protected void showEditData(ObservableEmitter<String> emitter, String html) {
         try {
-            List<String> textList = StringUtils.cutStringByImgTag(html);
+            List<String> textList = StringUtil.cutStringByImgTag(html);
             for (int i = 0; i < textList.size(); i++) {
                 String text = textList.get(i);
                 emitter.onNext(text);
@@ -1147,7 +1146,7 @@ public class ModifyNoteActivity extends AppCompatActivity implements View.OnClic
 
                     ShowLogE("insertImagesSync", "data: " + data); // _Edited
 
-                    Bitmap bitmap = ImageUtils.getSmallBitmap(data + "", screenWidth, screenHeight); // 压缩图片
+                    Bitmap bitmap = ImageUtil.getSmallBitmap(data + "", screenWidth, screenHeight); // 压缩图片
                     String smallImagePath = SDCardUtil.saveSmallImgToSdCard(bitmap);
 
                     ShowLogE("insertImagesSync", "imagePath: " + smallImagePath); // _Small
@@ -1158,8 +1157,11 @@ public class ModifyNoteActivity extends AppCompatActivity implements View.OnClic
                     emitter.onNext(smallImagePath);
 
                     // TODO 网络图片插入
-                    // 测试插入网络图片 http://p695w3yko.bkt.clouddn.com/18-5-5/44849367.jpg
-                    //subscriber.onNext("http://p695w3yko.bkt.clouddn.com/18-5-5/30271511.jpg");
+
+                    // <img src="https://www.baidu.com/img/bd_logo1.png"> <- `https://` 不可漏
+
+                    // 测试插入网络图片
+                    // emitter.onNext("https://raw.githubusercontent.com/Aoi-hosizora/Biji_Baibuti/a5bb15af4098296ace557e281843513b2f672e0f/assets/DB_Query.png");
 
                     emitter.onComplete();
                 } catch (Exception e) {
