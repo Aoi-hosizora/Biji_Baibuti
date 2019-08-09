@@ -10,11 +10,13 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.provider.MediaStore;
 import android.support.annotation.NonNull;
+import android.support.annotation.WorkerThread;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.text.TextUtils;
@@ -34,10 +36,15 @@ import android.widget.Toast;
 import com.baibuti.biji.Data.Models.Group;
 import com.baibuti.biji.Data.Adapters.GroupAdapter;
 import com.baibuti.biji.Data.Models.Note;
+import com.baibuti.biji.Net.Models.RespObj.ServerErrorException;
+import com.baibuti.biji.Net.Models.RespObj.UploadStatus;
+import com.baibuti.biji.Net.Modules.Auth.AuthMgr;
+import com.baibuti.biji.Net.Modules.Note.ImgUtil;
 import com.baibuti.biji.R;
 import com.baibuti.biji.Data.DB.GroupDao;
 import com.baibuti.biji.Data.DB.NoteDao;
 import com.baibuti.biji.UI.Dialog.ImagePopupDialog;
+import com.baibuti.biji.Utils.ImgDocUtils.ToDocUtil;
 import com.baibuti.biji.Utils.OtherUtils.CommonUtil;
 import com.baibuti.biji.Utils.FileDirUtils.FilePathUtil;
 import com.baibuti.biji.Utils.ImgDocUtils.ImageUtil;
@@ -49,6 +56,7 @@ import com.sendtion.xrichtext.RichTextEditor;
 
 
 import java.io.File;
+import java.lang.reflect.Array;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -394,7 +402,7 @@ public class ModifyNoteActivity extends AppCompatActivity implements View.OnClic
 
     // endregion 顶部工具栏 弹出菜单 事件处理
     
-    // region 修改 保存处理 CheckIsModify CancelSaveNoteData saveNoteData
+    // region 修改 保存处理 图片上传 CheckIsModify CancelSaveNoteData saveNoteData handleSaveImgToServer
 
     /**
      * 判断是否修改
@@ -454,7 +462,7 @@ public class ModifyNoteActivity extends AppCompatActivity implements View.OnClic
         if (TitleEditText.getText().toString().isEmpty()) {
 
             // 替换换行
-            String Con = Content.replaceAll("[\n|\r|\n\r|\r\n].*", "");
+            String Con = Content.replaceAll("[\n|\r].*", "");
             // 替换HTML标签
             Con = Con.replaceAll("<img src=.*", getResources().getString(R.string.MNoteActivity_SaveAlertImgReplaceMozi));
 
@@ -471,51 +479,58 @@ public class ModifyNoteActivity extends AppCompatActivity implements View.OnClic
         // 判断是否修改
         boolean isModify = CheckIsModify();
 
+        final String motoNote = note.getContent();
+
         // 设置内容
         note.setTitle(TitleEditText.getText().toString());
         note.setContent(Content);
 
-        // 处理分组信息
         new Thread(new Runnable() {
             @Override
             public void run() {
 
+                // 处理分组
                 Group re = groupDao.queryGroupById(selectedGropId);
                 if (re != null)
                     note.setGroupLabel(re, true);
                 else
                     note.setGroupLabel(groupDao.queryGroupById(0), true);
 
-
+                // 处理界面
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
-
-                        // 插入到数据库一条新信息
                         CommonUtil.closeSoftKeyInput(ModifyNoteActivity.this);
                     }
                 });
-                //////////////////////////////////////////////////
 
+                // 处理图片
+                if (AuthMgr.getInstance().isLogin()) {
+                    note.setContent(handleSaveImgToServer(note.getContent(), motoNote));
+                }
 
-                if (flag == NOTE_NEW) { // 从 Note Frag 打开的
+                // 处理保存
+                if (flag == NOTE_NEW) {
 
+                    // 从 Note Frag 打开的 新建
                     long noteId = noteDao.insertNote(note);
                     note.setId((int) noteId);
 
                     runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
-                            Intent intent_fromnotefrag = new Intent();
-                            intent_fromnotefrag.putExtra("notedata", note);
-                            intent_fromnotefrag.putExtra("flag", NOTE_NEW); // NEW
-                            setResult(RESULT_OK, intent_fromnotefrag);
+
+                            Intent intent_FromNoteFrag = new Intent();
+                            intent_FromNoteFrag.putExtra("notedata", note);
+                            intent_FromNoteFrag.putExtra("flag", NOTE_NEW); // NEW
+                            setResult(RESULT_OK, intent_FromNoteFrag);
                             finish();
                         }
                     });
                 }
-                else { // 从 VMNOTE 打开的
+                else {
 
+                    // 从 VMNOTE 打开的 修改
                     if (isModify)
                         // 修改数据库
                         noteDao.updateNote(note);
@@ -523,12 +538,13 @@ public class ModifyNoteActivity extends AppCompatActivity implements View.OnClic
                     runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
-                            Intent intent_fromvmnote = new Intent();
 
-                            intent_fromvmnote.putExtra("notedata", note);
-                            intent_fromvmnote.putExtra("flag", NOTE_UPDATE); // UPDATE
-                            intent_fromvmnote.putExtra("isModify", isModify);
-                            setResult(RESULT_OK, intent_fromvmnote);
+                            Intent intent_FromVMNote = new Intent();
+
+                            intent_FromVMNote.putExtra("notedata", note);
+                            intent_FromVMNote.putExtra("flag", NOTE_UPDATE); // UPDATE
+                            intent_FromVMNote.putExtra("isModify", isModify);
+                            setResult(RESULT_OK, intent_FromVMNote);
 
                             finish();
                         }
@@ -537,6 +553,73 @@ public class ModifyNoteActivity extends AppCompatActivity implements View.OnClic
 
             }
         }).start();
+    }
+
+    /**
+     * 将笔记的图片上传并修改
+     * @param note 新笔记 用来上传图片
+     * @param motoNote 旧笔记 用来删除笔记
+     * @return
+     */
+    @WorkerThread
+    private String handleSaveImgToServer(String note, String motoNote) {
+
+        String ret = note;
+
+        // 切割块
+        List<String> motoTextList = StringUtil.cutStringByImgTag(motoNote); // 旧 删除用
+        List<String> textList = StringUtil.cutStringByImgTag(note); // 新 上传用
+
+        // 获取 服务器上原有的图片
+        ArrayList<String> NewUrls = new ArrayList<>();
+        for (String blocks : textList) {
+            if (blocks.contains("<img") && blocks.contains("src=")) {
+                String imagePath = StringUtil.getImgSrc(blocks);
+                if (imagePath.startsWith(ImgUtil.GetImgUrlHead)) {
+                    NewUrls.add(imagePath);
+                }
+            }
+        }
+
+        ArrayList<String> DelUrls = new ArrayList<>();
+        for (String blocks : motoTextList) {
+            if (blocks.contains("<img") && blocks.contains("src=")) {
+                String imagePath = StringUtil.getImgSrc(blocks);
+                if (imagePath.startsWith(ImgUtil.GetImgUrlHead)) {
+                    if (NewUrls.indexOf(imagePath) == -1) // 不存在新内，删除
+                        DelUrls.add(imagePath);
+                }
+            }
+        }
+
+        // 异步删除原有的图片
+        if (DelUrls.size() > 0)
+            ImgUtil.DeleteImgsAsync(DelUrls.toArray(new String[0]));
+
+
+        // 遍历本地图片
+        for (String blocks : textList) {
+            // 图片块
+            if (blocks.contains("<img") && blocks.contains("src=")) {
+                // 图片路径
+                String imagePath = StringUtil.getImgSrc(blocks);
+                // 本地路径，网络路径忽略
+                if (imagePath.startsWith(SDCardUtil.SDCardRoot)) { // /storage/emulated/0/
+                    try {
+                        UploadStatus uploadStatus = ImgUtil.uploadImg(imagePath);
+                        if (uploadStatus != null) {
+                            String newFileName = uploadStatus.getNewFileName();
+                            Log.e("", "handleSaveImgToServer: " + imagePath + " -> " + newFileName);
+                            ret = ret.replaceAll(imagePath, newFileName);
+                        }
+                    }
+                    catch (ServerErrorException ex) {
+                        ex.printStackTrace();
+                    }
+                }
+            }
+        }
+        return ret;
     }
 
     
@@ -970,7 +1053,8 @@ public class ModifyNoteActivity extends AppCompatActivity implements View.OnClic
         for (RichTextEditor.EditData itemData : editList) {
             if (itemData.inputStr != null) {
                 content.append(itemData.inputStr);
-            } else if (itemData.imagePath != null) {
+            }
+            else if (itemData.imagePath != null) {
                 content.append("<img src=\"").append(itemData.imagePath).append("\"/>");
             }
         }
@@ -1033,7 +1117,7 @@ public class ModifyNoteActivity extends AppCompatActivity implements View.OnClic
      */
     private void ShowClickImg(ArrayList<String> imageList, int currentPosition) {
         try {
-            String[] imgs = imageList.toArray(new String[imageList.size()]);
+            String[] imgs = imageList.toArray(new String[0]);
             ImagePopupDialog dialog = new ImagePopupDialog(this, imgs, currentPosition);
             dialog.setOnLongClickImageListener(new ImagePopupDialog.onLongClickImageListener() {
 
@@ -1157,7 +1241,7 @@ public class ModifyNoteActivity extends AppCompatActivity implements View.OnClic
                     // <img src="https://www.baidu.com/img/bd_logo1.png"> <- `https://` 不可漏
 
                     // 测试插入网络图片
-                     emitter.onNext("https://raw.githubusercontent.com/Aoi-hosizora/Biji_Baibuti/a5bb15af4098296ace557e281843513b2f672e0f/assets/DB_Query.png");
+                    // emitter.onNext("https://raw.githubusercontent.com/Aoi-hosizora/Biji_Baibuti/a5bb15af4098296ace557e281843513b2f672e0f/assets/DB_Query.png");
 
                     emitter.onComplete();
                 } catch (Exception e) {
