@@ -42,6 +42,10 @@ public class NetUtil {
         return header;
     }
 
+    ///////////////////////////////////////////////////////////////////////////////////////////
+    ////////////////////////////////////// HTTP GET Sync //////////////////////////////////////
+    ///////////////////////////////////////////////////////////////////////////////////////////
+
     public static RespType httpGetSync(String url) {
         return httpGetSync(url, null, NO_TIME, NO_TIME);
     }
@@ -93,7 +97,9 @@ public class NetUtil {
         return Ret;
     }
 
-    ////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////////////////////////
+    ////////////////////////////////////// HTTP GET Async //////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////////////////////////
 
     public static void httpGetAsync(String url, Callback responseCallback) {
         httpGetAsync(url, null, NO_TIME, NO_TIME, responseCallback);
@@ -140,7 +146,9 @@ public class NetUtil {
         }
     }
 
-    ////////////////////////////////////////
+    ///////////////////////////////////////////////////////////////////////////////////////////
+    ////////////////////////////////////// HTTP PPD Sync //////////////////////////////////////
+    ///////////////////////////////////////////////////////////////////////////////////////////
 
 
     public static RespType httpPostSync(String url, String json) {
@@ -192,7 +200,9 @@ public class NetUtil {
         return Ret;
     }
 
-    ////////////////////////////////////////
+    /////////////////////////////////////////////////////////////////////////////////////////////////
+    ////////////////////////////////////// HTTP Post File Sync //////////////////////////////////////
+    /////////////////////////////////////////////////////////////////////////////////////////////////
 
     public static RespType httpPostFileSync(String url, String key, File file) {
         return httpPostFileSync(url, key, file, null);
@@ -236,5 +246,52 @@ public class NetUtil {
             ex.printStackTrace();
         }
         return Ret;
+    }
+
+    ////////////////////////////////////////////////////////////////////////////////////////////
+    ////////////////////////////////////// HTTP PPD Async //////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////////////////////////
+
+    public static void httpPostPutDeleteAsync(String url, String Method, String json, Map<String, String> headers) {
+        httpPostPutDeleteAsync(url, Method, json, headers, new Callback() {
+            @Override
+            public void onFailure(Call call, IOException e) { }
+
+            @Override
+            public void onResponse(Call call, Response response) throws IOException { }
+        });
+    }
+    public static void httpPostPutDeleteAsync(String url, String Method, String json, Map<String, String> headers, Callback responseCallback) {
+        OkHttpClient okHttpClient = new OkHttpClient();
+
+        try {
+            RequestBody body;
+            if (json != null && !(json.isEmpty()))
+                body = FormBody.create(MediaType.parse("application/json; charset=utf-8"), json);
+            else
+                return;
+
+            // Req Resp
+            Request.Builder builder = new Request.Builder().url(url);
+
+            if (Method.equals(PUT)) builder.put(body);
+            else if (Method.equals(DELETE)) builder.delete(body);
+            else builder.post(body);
+
+
+            if (headers != null && !(headers.isEmpty()))
+                for (Map.Entry<String, String> header : headers.entrySet())
+                    builder.addHeader(header.getKey(), header.getValue());
+
+            Request request = builder.build();
+
+            okHttpClient.newCall(request).enqueue(responseCallback);
+        }
+        catch (NullPointerException ex) {
+            ex.printStackTrace();
+        }
+        catch (Exception ex) {
+            ex.printStackTrace();
+        }
     }
 }

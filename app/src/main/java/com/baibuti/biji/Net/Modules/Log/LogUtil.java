@@ -1,9 +1,11 @@
 package com.baibuti.biji.Net.Modules.Log;
 
+import android.support.annotation.NonNull;
 import android.util.Log;
 
 import com.baibuti.biji.Data.Models.LogModule;
 import com.baibuti.biji.Data.Models.UtLog;
+import com.baibuti.biji.Interface.IPushCallBack;
 import com.baibuti.biji.Net.Models.RespBody.LogResp;
 import com.baibuti.biji.Net.Models.RespBody.MessageResp;
 import com.baibuti.biji.Net.Models.RespObj.ServerErrorException;
@@ -12,7 +14,13 @@ import com.baibuti.biji.Net.Modules.Auth.AuthMgr;
 import com.baibuti.biji.Net.NetUtil;
 import com.baibuti.biji.Net.Urls;
 
+import java.io.IOException;
 import java.util.Locale;
+
+import okhttp3.Call;
+import okhttp3.Callback;
+import okhttp3.Response;
+import okhttp3.internal.annotations.EverythingIsNonNull;
 
 public class LogUtil {
 
@@ -76,33 +84,36 @@ public class LogUtil {
     }
 
     /**
-     * 更新指定模块的日志
+     * 异步更新指定模块的日志
      * @param utLog
      * @return
      * @throws ServerErrorException
      */
-    public static UtLog updateModuleLog(UtLog utLog) throws ServerErrorException {
+    public static void updateModuleLogAsync(UtLog utLog, @NonNull IPushCallBack pushCallBack) throws ServerErrorException {
         Log.e("", "updateModuleLog: " + utLog.getModule());
         Log.e("", "updateModuleLog: " + LogResp.toLogResp(utLog).toJson() );
-        RespType resp = NetUtil.httpPostSync(
-                UpdateLogUrl,
-                LogResp.toLogResp(utLog).toJson(),
-                NetUtil.getOneHeader("Authorization", AuthMgr.getInstance().getToken())
-        );
-        if (resp != null) {
-            int code = resp.getCode();
-            if (code == 200) {
-                String newToken = resp.getHeaders().get("Authorization");
-                if (newToken != null && !(newToken.isEmpty()))
-                    AuthMgr.getInstance().setToken(newToken);
+        NetUtil.httpPostPutDeleteAsync(
+            UpdateLogUrl, NetUtil.POST,
+            LogResp.toLogResp(utLog).toJson(),
+            NetUtil.getOneHeader("Authorization", AuthMgr.getInstance().getToken()),
+            new Callback() {
+                @Override
+                @EverythingIsNonNull
 
-                return LogResp.toLogRespFromJson(resp.getBody()).toUtLog();
+                public void onFailure(Call call, IOException e) { }
+
+                @Override
+                @EverythingIsNonNull
+                public void onResponse(Call call, Response response) throws IOException {
+                    int code = response.code();
+                    if (code == 200) {
+                        String newToken = response.headers().get("Authorization");
+                        if (newToken != null && !(newToken.isEmpty()))
+                            AuthMgr.getInstance().setToken(newToken);
+                        pushCallBack.onCallBack();
+                    }
+                }
             }
-            else {
-                MessageResp msg = MessageResp.getMsgRespFromJson(resp.getBody());
-                throw new ServerErrorException(msg.getMessage(), msg.getDetail(), code);
-            }
-        }
-        return null;
+        );
     }
 }

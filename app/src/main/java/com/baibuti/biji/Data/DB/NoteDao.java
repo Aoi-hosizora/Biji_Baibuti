@@ -52,9 +52,6 @@ public class NoteDao {
      * 进行 push pull
      */
     private void pushpull() {
-
-        // TODO 需要处理分组
-
         if (AuthMgr.getInstance().isLogin()) {
             if (ServerDbUpdateHelper.isLocalNewer(context, LogModule.Mod_Note)) { // 本地新
                 // TODO 异步

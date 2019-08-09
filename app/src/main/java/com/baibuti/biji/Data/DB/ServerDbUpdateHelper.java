@@ -8,6 +8,7 @@ import com.baibuti.biji.Data.Models.LogModule;
 import com.baibuti.biji.Data.Models.Note;
 import com.baibuti.biji.Data.Models.SearchItem;
 import com.baibuti.biji.Data.Models.UtLog;
+import com.baibuti.biji.Interface.IPushCallBack;
 import com.baibuti.biji.Net.Models.RespObj.ServerErrorException;
 import com.baibuti.biji.Net.Modules.Auth.AuthMgr;
 import com.baibuti.biji.Net.Modules.Log.LogUtil;
@@ -77,6 +78,7 @@ class ServerDbUpdateHelper {
 
     /**
      * 从服务器更新数据
+     * 同步
      * @param context 数据库上下文
      * @param logModule
      */
@@ -159,6 +161,12 @@ class ServerDbUpdateHelper {
         }
     }
 
+    /**
+     * 从服务器获取日志
+     * 同步
+     * @param context
+     * @param logModule
+     */
     static void pullLog(Context context, LogModule logModule) {
         try {
             UtLog utLog = LogUtil.getOneLog(logModule);
@@ -174,7 +182,8 @@ class ServerDbUpdateHelper {
     }
 
     /**
-     * 更新服务器数据，异步
+     * 更新服务器数据
+     * 异步
      * @param context 数据库上下文
      * @param logModule
      */
@@ -186,12 +195,15 @@ class ServerDbUpdateHelper {
 
         switch (logModule) {
             case Mod_Note: {
-
                 NoteDao noteDao = new NoteDao(context);
                 List<Note> notes = noteDao.queryAllNotesFromGroupId(-1, false);
                 try {
-                    NoteUtil.pushNotes(notes.toArray(new Note[0]));
-                    pushLog(context, logModule);
+                    NoteUtil.pushNotesAsync(notes.toArray(new Note[0]), new IPushCallBack() {
+                        @Override
+                        public void onCallBack() {
+                            pushLog(context, logModule);
+                        }
+                    });
                 }
                 catch (ServerErrorException ex) {
                     ex.printStackTrace();
@@ -202,8 +214,12 @@ class ServerDbUpdateHelper {
                 GroupDao groupDao = new GroupDao(context);
                 List<Group> groups = groupDao.queryGroupAll(false);
                 try {
-                    GroupUtil.pushGroups(groups.toArray(new Group[0]));
-                    pushLog(context, logModule);
+                    GroupUtil.pushGroupsAsync(groups.toArray(new Group[0]), new IPushCallBack() {
+                        @Override
+                        public void onCallBack() {
+                            pushLog(context, logModule);
+                        }
+                    });
                 }
                 catch (ServerErrorException ex) {
                     ex.printStackTrace();
@@ -211,12 +227,15 @@ class ServerDbUpdateHelper {
             }
             break;
             case Mod_Star: {
-
                 SearchItemDao searchItemDao = new SearchItemDao(context);
                 List<SearchItem> searchItems = searchItemDao.queryAllStarSearchItems(false);
                 try {
-                    StarUtil.pushStar(searchItems.toArray(new SearchItem[0]));
-                    pushLog(context, logModule);
+                    StarUtil.pushStarAsync(searchItems.toArray(new SearchItem[0]), new IPushCallBack() {
+                        @Override
+                        public void onCallBack() {
+                            pushLog(context, logModule);
+                        }
+                    });
                 }
                 catch (ServerErrorException ex) {
                     ex.printStackTrace();
@@ -230,13 +249,23 @@ class ServerDbUpdateHelper {
         }
     }
 
+    /**
+     * 更新服务器日志
+     * 异步
+     * @param context
+     * @param logModule
+     */
     static void pushLog(Context context, LogModule logModule) {
         try {
             UtLogDao utLogDao = new UtLogDao(context);
 
             Log.e("", "pushLog: " + utLogDao.getLog(logModule).getModule());
 
-            LogUtil.updateModuleLog(utLogDao.getLog(logModule)); // 更新服务器为本地日志
+            LogUtil.updateModuleLogAsync(utLogDao.getLog(logModule), new IPushCallBack() {
+                @Override
+                public void onCallBack() { }
+            });
+            // 更新服务器为本地日志
         }
         catch (ServerErrorException ex) {
             ex.printStackTrace();

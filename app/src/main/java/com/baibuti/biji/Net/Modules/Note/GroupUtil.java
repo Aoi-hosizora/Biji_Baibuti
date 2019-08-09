@@ -1,6 +1,9 @@
 package com.baibuti.biji.Net.Modules.Note;
 
+import android.support.annotation.NonNull;
+
 import com.baibuti.biji.Data.Models.Group;
+import com.baibuti.biji.Interface.IPushCallBack;
 import com.baibuti.biji.Net.Models.ReqBody.GroupReqBody;
 import com.baibuti.biji.Net.Models.RespBody.MessageResp;
 import com.baibuti.biji.Net.Models.RespObj.ServerErrorException;
@@ -9,7 +12,13 @@ import com.baibuti.biji.Net.Modules.Auth.AuthMgr;
 import com.baibuti.biji.Net.NetUtil;
 import com.baibuti.biji.Net.Urls;
 
+import java.io.IOException;
 import java.util.Locale;
+
+import okhttp3.Call;
+import okhttp3.Callback;
+import okhttp3.Response;
+import okhttp3.internal.annotations.EverythingIsNonNull;
 
 public class GroupUtil {
 
@@ -151,31 +160,28 @@ public class GroupUtil {
         }
     }
 
+    public static void pushGroupsAsync(Group[] groups, @NonNull IPushCallBack pushCallBack) throws ServerErrorException {
+        NetUtil.httpPostPutDeleteAsync(
+            PushGroupUrl, NetUtil.POST,
+            GroupReqBody.getJsonFromGroupReqRodies(GroupReqBody.toGroupReqBodies(groups)),
+            NetUtil.getOneHeader("Authorization", AuthMgr.getInstance().getToken()),
+            new Callback() {
+                @Override
+                @EverythingIsNonNull
+                public void onFailure(Call call, IOException e) { }
 
-    public static boolean pushGroups(Group[] groups) throws ServerErrorException {
-        RespType resp = NetUtil.httpPostPutDeleteSync(
-                PushGroupUrl, NetUtil.POST,
-                GroupReqBody.getJsonFromGroupReqRodies(GroupReqBody.toGroupReqBodies(groups)),
-                NetUtil.getOneHeader("Authorization", AuthMgr.getInstance().getToken())
+                @Override
+                @EverythingIsNonNull
+                public void onResponse(Call call, Response response) throws IOException {
+                    int code = response.code();
+                    if (code == 200) {
+                        String newToken = response.headers().get("Authorization");
+                        if (newToken != null && !(newToken.isEmpty()))
+                            AuthMgr.getInstance().setToken(newToken);
+                        pushCallBack.onCallBack();
+                    }
+                }
+            }
         );
-
-        try {
-            int code = resp.getCode();
-            if (code == 200) {
-                String newToken = resp.getHeaders().get("Authorization");
-                if (newToken != null && !(newToken.isEmpty()))
-                    AuthMgr.getInstance().setToken(newToken);
-
-                return true;
-            }
-            else {
-                MessageResp msg = MessageResp.getMsgRespFromJson(resp.getBody());
-                throw new ServerErrorException(msg.getMessage(), msg.getDetail(), code);
-            }
-        }
-        catch (NullPointerException ex) {
-            ex.printStackTrace();
-            return false;
-        }
     }
 }

@@ -1,8 +1,10 @@
 package com.baibuti.biji.Net.Modules.Star;
 
+import android.support.annotation.NonNull;
 import android.util.Log;
 
 import com.baibuti.biji.Data.Models.SearchItem;
+import com.baibuti.biji.Interface.IPushCallBack;
 import com.baibuti.biji.Net.Models.ReqBody.StarReqBody;
 import com.baibuti.biji.Net.Models.RespBody.MessageResp;
 import com.baibuti.biji.Net.Models.RespObj.ServerErrorException;
@@ -10,6 +12,13 @@ import com.baibuti.biji.Net.Models.RespType;
 import com.baibuti.biji.Net.Modules.Auth.AuthMgr;
 import com.baibuti.biji.Net.NetUtil;
 import com.baibuti.biji.Net.Urls;
+
+import java.io.IOException;
+
+import okhttp3.Call;
+import okhttp3.Callback;
+import okhttp3.Response;
+import okhttp3.internal.annotations.EverythingIsNonNull;
 
 public class StarUtil {
 
@@ -98,30 +107,28 @@ public class StarUtil {
         }
     }
 
-    public static boolean pushStar(SearchItem[] searchItems) throws ServerErrorException {
-        RespType resp = NetUtil.httpPostPutDeleteSync(
-                PushStarUrl, NetUtil.POST,
-                StarReqBody.toStarReqBodiesJson(StarReqBody.toStarReqBodies(searchItems)),
-                NetUtil.getOneHeader("Authorization", AuthMgr.getInstance().getToken())
+    public static void pushStarAsync(SearchItem[] searchItems, @NonNull IPushCallBack pushCallBack) throws ServerErrorException {
+        NetUtil.httpPostPutDeleteAsync(
+            PushStarUrl, NetUtil.POST,
+            StarReqBody.toStarReqBodiesJson(StarReqBody.toStarReqBodies(searchItems)),
+            NetUtil.getOneHeader("Authorization", AuthMgr.getInstance().getToken()),
+            new Callback() {
+                @Override
+                @EverythingIsNonNull
+                public void onFailure(Call call, IOException e) { }
+
+                @Override
+                @EverythingIsNonNull
+                public void onResponse(Call call, Response response) throws IOException {
+                    int code = response.code();
+                    if (code == 200) {
+                        String newToken = response.headers().get("Authorization");
+                        if (newToken != null && !(newToken.isEmpty()))
+                            AuthMgr.getInstance().setToken(newToken);
+                        pushCallBack.onCallBack();
+                    }
+                }
+            }
         );
-
-        try {
-            int code = resp.getCode();
-            if (code == 200) {
-                String newToken = resp.getHeaders().get("Authorization");
-                if (newToken != null && !(newToken.isEmpty()))
-                    AuthMgr.getInstance().setToken(newToken);
-
-                return true;
-            }
-            else {
-                MessageResp msg = MessageResp.getMsgRespFromJson(resp.getBody());
-                throw new ServerErrorException(msg.getMessage(), msg.getDetail(), code);
-            }
-        }
-        catch (NullPointerException ex) {
-            ex.printStackTrace();
-            return false;
-        }
     }
 }
