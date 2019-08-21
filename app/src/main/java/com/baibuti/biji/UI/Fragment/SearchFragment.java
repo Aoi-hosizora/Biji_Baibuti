@@ -29,7 +29,6 @@ import android.widget.Toast;
 import com.baibuti.biji.Data.Adapters.SearchItemAdapter;
 import com.baibuti.biji.Data.DB.SearchItemDao;
 import com.baibuti.biji.Data.Models.SearchItem;
-import com.baibuti.biji.Interface.IShowLog;
 import com.baibuti.biji.R;
 import com.baibuti.biji.UI.Activity.MainActivity;
 import com.baibuti.biji.UI.Activity.StarSearchItemActivity;
@@ -42,7 +41,7 @@ import com.baibuti.biji.Net.Modules.Search.SearchNetUtil;
 import java.util.ArrayList;
 import java.util.Locale;
 
-public class SearchFragment extends Fragment implements View.OnClickListener, IShowLog {
+public class SearchFragment extends Fragment implements View.OnClickListener {
 
     // region 定义界面元素 view m_toolbar m_SearchButton m_QuestionEditText m_SearchRetList m_SearchingDialog m_LongClickItemPopupMenu m_LongClickedSearchItem
 
@@ -228,7 +227,6 @@ public class SearchFragment extends Fragment implements View.OnClickListener, IS
                 .create().show();
     }
 
-    @Override
     public void ShowLogE(String FunctionName, String Msg) {
         String ClassName = "SearchFragment";
         Log.e(getResources().getString(R.string.IShowLog_LogE),
@@ -451,21 +449,53 @@ public class SearchFragment extends Fragment implements View.OnClickListener, IS
         SearchItemDao searchItemDao = new SearchItemDao(getContext());
         if (!searchItemDao.hasStaredSearchItem(searchItem)) {
             // 未收藏
-
-            if (searchItemDao.insertStarSearchItem(searchItem) != -1)
-                Toast.makeText(getActivity(), String.format(getString(R.string.SearchFrag_StarSuccess), searchItem.getTitle()), Toast.LENGTH_SHORT).show();
-            else
-                Toast.makeText(getActivity(), String.format(getString(R.string.SearchFrag_StarFailed), searchItem.getTitle()), Toast.LENGTH_SHORT).show();
+            new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    if (searchItemDao.insertStarSearchItem(searchItem) != -1)
+                        getActivity().runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                Toast.makeText(getActivity(), String.format(getString(R.string.SearchFrag_StarSuccess), searchItem.getTitle()), Toast.LENGTH_SHORT).show();
+                                searchItemAdapter.notifyDataSetChanged();
+                            }
+                        });
+                    else
+                        getActivity().runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                Toast.makeText(getActivity(), String.format(getString(R.string.SearchFrag_StarFailed), searchItem.getTitle()), Toast.LENGTH_SHORT).show();
+                                searchItemAdapter.notifyDataSetChanged();
+                            }
+                        });
+                }
+            }).start();
         }
         else {
             // 已收藏
+            new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    if (searchItemDao.deleteStarSearchItem(searchItem) != -1)
+                        getActivity().runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                Toast.makeText(getActivity(), String.format(getString(R.string.SearchFrag_CancelStarSuccess), searchItem.getTitle()), Toast.LENGTH_SHORT).show();
 
-            if (searchItemDao.deleteStarSearchItem(searchItem) != -1)
-                Toast.makeText(getActivity(), String.format(getString(R.string.SearchFrag_CancelStarSuccess), searchItem.getTitle()), Toast.LENGTH_SHORT).show();
-            else
-                Toast.makeText(getActivity(), String.format(getString(R.string.SearchFrag_CancelStarFailed), searchItem.getTitle()), Toast.LENGTH_SHORT).show();
+                                searchItemAdapter.notifyDataSetChanged();
+                            }
+                        });
+                    else
+                        getActivity().runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                Toast.makeText(getActivity(), String.format(getString(R.string.SearchFrag_CancelStarFailed), searchItem.getTitle()), Toast.LENGTH_SHORT).show();
+                                searchItemAdapter.notifyDataSetChanged();
+                            }
+                        });
+                }
+            }).start();
         }
-        searchItemAdapter.notifyDataSetChanged();
     }
 
     /**

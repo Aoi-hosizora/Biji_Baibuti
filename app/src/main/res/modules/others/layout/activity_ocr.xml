@@ -57,9 +57,8 @@
             android:id="@+id/id_OCRActivity_SelectAllButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:background="@color/grey_900"
-            android:textColor="@color/light_pink"
-            android:text="@string/OCRActivity_SelectAllButton"/>
+            android:text="@string/OCRActivity_SelectAllButton"
+            android:theme="@style/OCRActFlatButton"/>
 
         <TextView
             android:layout_width="0dp"
@@ -70,9 +69,8 @@
             android:id="@+id/id_OCRActivity_CopyButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:background="@color/grey_900"
-            android:textColor="@color/light_pink"
-            android:text="@string/OCRActivity_CopyButton"/>
+            android:text="@string/OCRActivity_CopyButton"
+            android:theme="@style/OCRActFlatButton"/>
 
     </LinearLayout>
 

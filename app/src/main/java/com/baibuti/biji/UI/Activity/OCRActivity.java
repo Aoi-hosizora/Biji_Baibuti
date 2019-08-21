@@ -7,6 +7,7 @@ import android.content.ClipboardManager;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -19,13 +20,18 @@ import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.baibuti.biji.Interface.IShowLog;
 import com.baibuti.biji.Net.Models.RespObj.Region;
+import com.baibuti.biji.Net.Modules.Note.ImgUtil;
 import com.baibuti.biji.Net.Modules.OCR.OCRRetUtil;
 import com.baibuti.biji.R;
 import com.baibuti.biji.UI.Widget.OCRView.OCRRegionGroupLayout;
-import com.baibuti.biji.Utils.ImgDocUtils.BitmapUtils;
+import com.baibuti.biji.Utils.FileDirUtils.SDCardUtil;
+import com.baibuti.biji.Utils.ImgDocUtils.BitmapUtil;
 import com.baibuti.biji.Utils.LayoutUtils.OCRRegionUtil;
+
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.Locale;
 
 /**
  * OCR 用
@@ -34,7 +40,7 @@ import com.baibuti.biji.Utils.LayoutUtils.OCRRegionUtil;
  *
  * Bundle: INT_IMGPATH(String) 传入 图片路径
  */
-public class OCRActivity extends AppCompatActivity implements IShowLog, View.OnClickListener {
+public class OCRActivity extends AppCompatActivity implements View.OnClickListener {
 
     public static final String INT_BUNDLE = "INT_BUNDLE";
     public static final String INT_IMGPATH = "INT_IMGPATH";
@@ -65,6 +71,8 @@ public class OCRActivity extends AppCompatActivity implements IShowLog, View.OnC
 
         Intent lastIntent = getIntent();
         Bundle bundle = lastIntent.getBundleExtra(INT_BUNDLE);
+
+        // 本地/网络地址
         String ImgPath = bundle.getString(INT_IMGPATH, "");
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
@@ -72,7 +80,6 @@ public class OCRActivity extends AppCompatActivity implements IShowLog, View.OnC
         initView(ImgPath);
     }
 
-    @Override
     public void ShowLogE(String FunctionName, String Msg) {
         String ClassName = "OCRActivity";
         Log.e(getResources().getString(R.string.IShowLog_LogE),
@@ -81,7 +88,7 @@ public class OCRActivity extends AppCompatActivity implements IShowLog, View.OnC
 
     /**
      * 初始化界面，显示图片和等待框
-     * @param ImgPath
+     * @param ImgPath 本地 / 网络地址
      */
     private void initView(String ImgPath) {
         setTitle(R.string.OCRActivity_Title);
@@ -130,15 +137,65 @@ public class OCRActivity extends AppCompatActivity implements IShowLog, View.OnC
         setEnabled(m_CopyButton, false);
         setRetLabelText(0, 0);
 
-        m_ocrRegionGroupLayout.setImgBG(BitmapUtils.getBitmapFromFile(ImgPath));
+        initBG(ImgPath);
+    }
+
+    /**
+     * 加载背景
+     * @param ImgPath 本地 / 网络地址
+     */
+    private void initBG(String ImgPath) {
+
+        Bitmap bg = BitmapUtil.getBitmapFromFile(ImgPath);
+
+        if (bg == null) 
+            new Thread(new Runnable() {
+                @Override
+                public void run() {
+
+                    ImgUtil.GetImgAsync(ImgPath, new ImgUtil.IImageBack() {
+                        @Override
+                        public void onGetImg(Bitmap bitmap) {
+
+                            Log.e("", "onGetImg: " + ImgPath);
+
+                            runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    // TODO 保存文件
+                                    String time = new SimpleDateFormat("yyyyMMddHHmmssSSS", Locale.CHINA).format(new Date());
+                                    String fileName = SDCardUtil.getOCTTmpDir() + time + ".jpg";
+                                    BitmapUtil.saveBitmap(bitmap, fileName);
+                                    m_ocrRegionGroupLayout.setImgBG(bitmap);
+                                    toOCRHandler(fileName);
+                                }
+                            });
+                        }
+                    });
+                }
+            }).start();
+        else {
+            m_ocrRegionGroupLayout.setImgBG(bg);
+            toOCRHandler(ImgPath);
+        }
+
+    }
+
+    /**
+     * 加载完背景，启动 OCR 延迟
+     * @param localDir 本地地址
+     */
+    private void toOCRHandler(String localDir) {
+
+        Log.e("", "toOCRHandler: localDir = " + localDir );
 
         // 延迟
         new Handler().postDelayed(new Runnable() {
             @Override
             public void run() {
-                getRetTmp(ImgPath);
+                getRetTmp(localDir);
                 // TODO !!!!!
-//                getRet(ImgPath);
+                // getRet($bitmap);
             }
         }, MS_GETDATA); // 1000
     }
@@ -195,7 +252,7 @@ public class OCRActivity extends AppCompatActivity implements IShowLog, View.OnC
     private void setEnabled(Button button, boolean en) {
         button.setEnabled(en);
         if (en)
-            button.setTextColor(getResources().getColor(R.color.light_pink));
+            button.setTextColor(getResources().getColor(R.color.colorAccent));
         else
             button.setTextColor(getResources().getColor(R.color.grey_700));
     }
@@ -245,9 +302,16 @@ public class OCRActivity extends AppCompatActivity implements IShowLog, View.OnC
 
     /**
      * 获得 结果，并调用设置布局 (dev env)
-     * @param url
+     *
+     * @param localDir 本地地址
      */
-    private void getRetTmp(String url) {
+    private void getRetTmp(String localDir) {
+
+        // OCR 临时存储
+        if (localDir.contains(SDCardUtil.getOCTTmpDir()))
+            if (SDCardUtil.deleteFile(localDir))
+                Log.e("", "run: delete OCRtmp" + localDir );
+
         Region ret = new Region(
             new Region.Point(600, 400),
             3,
@@ -270,76 +334,48 @@ public class OCRActivity extends AppCompatActivity implements IShowLog, View.OnC
     }
 
     /**
-     * 访问网络获得获得结果，等待信号
-     * @param url
+     * 访问网络获得获得结果
+     * @param localDir 本地地址
      */
-    private void getRet(String url) {
+    private void getRet(String localDir) {
 
         // TODO
         new Thread(new Runnable() {
             @Override
             public void run() {
-                Region ret = OCRRetUtil.getOCRRet(url);
+                Region ret = OCRRetUtil.getOCRRet(localDir);
 
-                Message message = new Message();
-                message.what = HandleWhat.HND_OCRRet;
+                // OCR 临时存储
+                if (localDir.contains(SDCardUtil.getOCTTmpDir()))
+                    if (SDCardUtil.deleteFile(localDir))
+                        Log.e("", "run: delete OCRtmp" + localDir );
 
-                Bundle bundle = new Bundle();
-                bundle.putSerializable(HandleWhat.BND_Region, ret);
-                message.setData(bundle);
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
 
-                handler.sendMessage(message);
+                        if (m_ocringProgressDlg.isShowing())
+                            m_ocringProgressDlg.dismiss();
+
+                        if (m_region == null) { // 错误
+                            new AlertDialog.Builder(OCRActivity.this)
+                                .setTitle(R.string.OCRActivity_ErrorTitle)
+                                .setMessage(R.string.OCRActivity_ErrorMessage)
+                                .setPositiveButton(R.string.OCRActivity_ErrorReturnButton, new DialogInterface.OnClickListener() {
+                                    @Override
+                                    public void onClick(DialogInterface dialog, int which) {
+
+                                        finish();
+                                    }
+                                })
+                                .create().show();
+                        }
+                        else
+                            if (!isCanceled) // 正常 不取消
+                                setupOCRLayout();
+                    }
+                });
             }
         }).start();
     }
-
-    /**
-     * 返回 OCR 结果，并调用设置布局
-     * @param msg
-     */
-    private void onHandleRetOCR(Message msg) {
-        Bundle bundle = msg.getData();
-        m_region = (Region) bundle.getSerializable(HandleWhat.BND_Region);
-
-        if (m_ocringProgressDlg.isShowing())
-            m_ocringProgressDlg.dismiss();
-
-        if (m_region == null)
-            new AlertDialog.Builder(this)
-                .setTitle(R.string.OCRActivity_ErrorTitle)
-                .setMessage(R.string.OCRActivity_ErrorMessage)
-                .setPositiveButton(R.string.OCRActivity_ErrorReturnButton, new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-
-                        finish();
-                    }
-                })
-                .create().show();
-        else
-            if (!isCanceled)
-                setupOCRLayout();
-    }
-
-    class HandleWhat {
-        /**
-         * 处理搜索响应
-         */
-        static final int HND_OCRRet = 1;
-
-        static final String BND_Region = "BND_Region";
-    }
-
-
-    /**
-     * 网络信号处理
-     */
-    private final Handler handler = new Handler((Message msg) -> {
-        switch (msg.what) {
-            case HandleWhat.HND_OCRRet:
-                onHandleRetOCR(msg);
-                break;
-        }
-        return false;
-    });
 }

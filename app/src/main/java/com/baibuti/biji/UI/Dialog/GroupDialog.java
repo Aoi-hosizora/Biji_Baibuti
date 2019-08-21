@@ -1,7 +1,7 @@
 package com.baibuti.biji.UI.Dialog;
 
+import android.app.Activity;
 import android.app.AlertDialog;
-import android.content.Context;
 import android.os.Bundle;
 import android.util.Log;
 import android.widget.Button;
@@ -12,7 +12,6 @@ import android.widget.ListView;
 
 import com.baibuti.biji.Data.Models.Group;
 import com.baibuti.biji.Data.Adapters.GroupRadioAdapter;
-import com.baibuti.biji.Interface.IShowLog;
 import com.baibuti.biji.R;
 import com.baibuti.biji.Data.DB.GroupDao;
 import com.baibuti.biji.Data.DB.NoteDao;
@@ -20,8 +19,10 @@ import com.baibuti.biji.Data.DB.NoteDao;
 import java.util.Collections;
 import java.util.List;
 
-public class GroupDialog extends AlertDialog implements OnClickListener, IShowLog {
+public class GroupDialog extends AlertDialog implements OnClickListener {
     private OnUpdateGroupListener mListener; //接口
+
+    private Activity activity;
 
     private Button mButtonEdit;
     private Button mButtonCancel;
@@ -42,8 +43,9 @@ public class GroupDialog extends AlertDialog implements OnClickListener, IShowLo
         void OnUICreateFinished(); // 显示成功
     }
 
-    public GroupDialog(Context context, OnUpdateGroupListener mListener) {
-        super(context);
+    public GroupDialog(Activity activity, OnUpdateGroupListener mListener) {
+        super(activity);
+        this.activity = activity;
         this.mListener = mListener;
     }
 
@@ -69,20 +71,34 @@ public class GroupDialog extends AlertDialog implements OnClickListener, IShowLo
         noteDao = new NoteDao(getContext());
         groupDao = new GroupDao(getContext());
 
-        handleOrder();
-        refreshGroupList();
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
 
-        setEnabled(mButtonUE, false);
-        setEnabled(mButtonSHITA, false);
+                handleOrder();
 
-        groupAdapter.setChecked(GroupListViewClickId);
+                refreshGroupList();
 
-        GroupListView = (ListView) findViewById(R.id.id_GroupDialog_GroupListView);
-        GroupListView.setAdapter(groupAdapter);
-        GroupListView.setVisibility(View.VISIBLE);
+                activity.runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
 
-        if (mListener != null)
-            mListener.OnUICreateFinished();
+                        setEnabled(mButtonUE, false);
+                        setEnabled(mButtonSHITA, false);
+
+                        groupAdapter.setChecked(GroupListViewClickId);
+
+                        GroupListView = (ListView) findViewById(R.id.id_GroupDialog_GroupListView);
+                        GroupListView.setAdapter(groupAdapter);
+                        GroupListView.setVisibility(View.VISIBLE);
+
+                        if (mListener != null)
+                            mListener.OnUICreateFinished();
+                    }
+                });
+            }
+        }).start();
+
     }
 
     /**
@@ -91,7 +107,6 @@ public class GroupDialog extends AlertDialog implements OnClickListener, IShowLo
      * @param FunctionName
      * @param Msg
      */
-    @Override
     public void ShowLogE(String FunctionName, String Msg) {
         String ClassName = "GroupDialog";
         Log.e(getContext().getString(R.string.IShowLog_LogE),
@@ -104,19 +119,35 @@ public class GroupDialog extends AlertDialog implements OnClickListener, IShowLo
     private NoteDao noteDao;
 
     /**
-     * 刷新列表
+     * 刷新列表，同步
      */
     private void refreshGroupList() {
-        GroupList = groupDao.queryGroupAll();
-        Collections.sort(GroupList);
-        groupAdapter = new GroupRadioAdapter(getContext(), GroupList, new GroupRadioAdapter.OnRadioButtonSelect() {
+        refreshGroupList(true);
+    }
+
+    /**
+     * 刷新列表
+     * @param isLogCheck 次序时不同步，默认同步
+     */
+    private void refreshGroupList(boolean isLogCheck) {
+
+        GroupList = groupDao.queryGroupAll(isLogCheck);
+
+        activity.runOnUiThread(new Runnable() {
             @Override
-            public void onSelect(int position) {
-                GroupListViewClickId = position;
-                refreshUeShitaEnabled(position);
+            public void run() {
+
+                Collections.sort(GroupList);
+                groupAdapter = new GroupRadioAdapter(getContext(), GroupList, new GroupRadioAdapter.OnRadioButtonSelect() {
+                    @Override
+                    public void onSelect(int position) {
+                        GroupListViewClickId = position;
+                        refreshUeShitaEnabled(position);
+                    }
+                });
+                groupAdapter.notifyDataSetChanged();
             }
         });
-        groupAdapter.notifyDataSetChanged();
     }
 
     private void setEnabled(Button button, boolean en) {
@@ -176,20 +207,33 @@ public class GroupDialog extends AlertDialog implements OnClickListener, IShowLo
      *          notnull 更新分组
      */
     private void showGroupAddDialog(final Group inputGroup) {
-        GroupAddDialog dialog = new GroupAddDialog(getContext(), inputGroup, new GroupAddDialog.OnUpdateGroupListener() {
+        GroupAddDialog dialog = new GroupAddDialog(activity, inputGroup, new GroupAddDialog.OnUpdateGroupListener() {
 
             @Override
             public void UpdateGroupFinished() {
-                refreshGroupList();
 
-                if (inputGroup == null)  // 新分组
-                    GroupListViewClickId = GroupList.size() - 1; // 选择最后一项
+                new Thread(new Runnable() {
+                    @Override
+                    public void run() {
 
-                groupAdapter.setChecked(GroupListViewClickId);
-                GroupListView.setAdapter(groupAdapter); // 必要
+                        refreshGroupList();
 
-                DismissAndReturn(false);
+                        activity.runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
 
+                                if (inputGroup == null)  // 新分组
+                                    GroupListViewClickId = GroupList.size() - 1; // 选择最后一项
+
+                                groupAdapter.setChecked(GroupListViewClickId);
+                                GroupListView.setAdapter(groupAdapter); // 必要
+
+                                DismissAndReturn(false);
+
+                            }
+                        });
+                    }
+                }).start();
             }
         });
         dialog.setView(new EditText(getContext()));  //若对话框无法弹出输入法，加上这句话
@@ -197,22 +241,38 @@ public class GroupDialog extends AlertDialog implements OnClickListener, IShowLo
     }
 
     private void showGroupDeleteDialog(Group inputGroup) {
-        GroupDeleteDialog groupDeleteDialog = new GroupDeleteDialog(getContext(), inputGroup, new GroupDeleteDialog.OnDeleteGroupListener() {
+        GroupDeleteDialog groupDeleteDialog = new GroupDeleteDialog(activity, inputGroup, new GroupDeleteDialog.OnDeleteGroupListener() {
             @Override
             public void DeleteGroupFinished() {
-                refreshGroupList();
-                GroupListViewClickId--;
-                groupAdapter.setChecked(GroupListViewClickId);
-                GroupListView.setAdapter(groupAdapter); // 必要
 
-                DismissAndReturn(false);
+                new Thread(new Runnable() {
+                    @Override
+                    public void run() {
+
+                        refreshGroupList();
+
+                        activity.runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+
+                                GroupListViewClickId--;
+                                groupAdapter.setChecked(GroupListViewClickId);
+                                GroupListView.setAdapter(groupAdapter); // 必要
+
+                                DismissAndReturn(false);
+                            }
+                        });
+                    }
+                }).start();
             }
         });
         groupDeleteDialog.showDialog();
     }
 
+    private int currentPos;
+
     /**
-     * 移动分组 Order
+     * 移动分组 Order，不同步
      * @param currentGroup 当前分组
      * @param isUP
      *          true: UE, Order--
@@ -222,55 +282,89 @@ public class GroupDialog extends AlertDialog implements OnClickListener, IShowLo
 
         ShowLogE("moveGroupOrder", "currentGroup.order: " + currentGroup.getOrder());
 
-        int currentpos = GroupListViewClickId;
+        currentPos = GroupListViewClickId;
 
-        if (isUP && currentpos != 1 && currentpos != 0) { // 上移
-            ShowLogE("moveGroupOrder", "UP");
-            int motoorder = currentGroup.getOrder();
+        if (isUP && currentPos != 1 && currentPos != 0) { // 上移
+            new Thread(new Runnable() {
+                @Override
+                public void run() {
 
-            currentGroup.setOrder(motoorder - 1);
-            Group upGroup = groupDao.queryGroupByOrder(motoorder - 1);
-            if (upGroup != null) {
-                upGroup.setOrder(motoorder);
-                groupDao.updateGroup(upGroup);
+                    ShowLogE("moveGroupOrder", "UP");
+                    int motoorder = currentGroup.getOrder();
+
+                    currentGroup.setOrder(motoorder - 1);
+                    Group upGroup = groupDao.queryGroupByOrder(motoorder - 1);
+                    if (upGroup != null) {
+                        upGroup.setOrder(motoorder);
+                        groupDao.updateGroup(upGroup, false);
+                    }
+
+                    currentPos--;
+
+                    groupDao.updateGroup(currentGroup, false); // 更新数据库
+
+                    activity.runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            moveGroupOrderRe();
+                        }
+                    });
+                }
+            }).start();
+        }
+        else if (!isUP && currentPos != GroupList.size() - 1 && currentPos != 0) { // 下移
+            new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    ShowLogE("moveGroupOrder", "DOWN");
+                    int motoorder = currentGroup.getOrder();
+
+                    currentGroup.setOrder(motoorder + 1);
+                    Group downGroup = groupDao.queryGroupByOrder(motoorder + 1); // 向下交换
+                    if (downGroup != null) {
+                        downGroup.setOrder(motoorder);
+                        groupDao.updateGroup(downGroup, false);
+                    }
+
+                    currentPos++;
+
+                    groupDao.updateGroup(currentGroup, false); // 更新数据库
+
+                    activity.runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            moveGroupOrderRe();
+                        }
+                    });
+                }
+            }).start();
+
+        }
+    }
+
+    private void moveGroupOrderRe() {
+
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+
+                // 更新显示
+                refreshGroupList(false);
+
+                activity.runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+
+                        GroupListView.setAdapter(groupAdapter); // 必要
+                        groupAdapter.setChecked(currentPos);
+                        GroupListViewClickId = currentPos;
+                        refreshUeShitaEnabled(GroupListViewClickId);
+                        DismissAndReturn(false);
+
+                    }
+                });
             }
-
-            currentpos--;
-
-            groupDao.updateGroup(currentGroup); // 更新数据库
-//            groupDao.handleOrderDuplicateWhenUpdate(currentGroup); // 处理重复 order
-//            groupDao.handleOrderGap(); // 处理错误Gap
-        }
-        else if (!isUP && currentpos != GroupList.size() - 1 && currentpos != 0) { // 下移
-            ShowLogE("moveGroupOrder", "DOWN");
-            int motoorder = currentGroup.getOrder();
-
-            currentGroup.setOrder(motoorder + 1);
-            Group downGroup = groupDao.queryGroupByOrder(motoorder + 1); // 向下交换
-            if (downGroup != null) {
-                downGroup.setOrder(motoorder);
-                groupDao.updateGroup(downGroup);
-            }
-
-            currentpos++;
-
-            groupDao.updateGroup(currentGroup); // 更新数据库
-//            groupDao.handleOrderDuplicateWhenUpdate(currentGroup); // 处理重复 order
-//            groupDao.handleOrderGap(); // 处理错误Gap
-        }
-        else {
-            return;
-        }
-
-
-
-        // 更新显示
-        refreshGroupList();
-        GroupListView.setAdapter(groupAdapter); // 必要
-        groupAdapter.setChecked(currentpos);
-        GroupListViewClickId = currentpos;
-        refreshUeShitaEnabled(GroupListViewClickId);
-        DismissAndReturn(false);
+        }).start();
     }
 
     private void handleOrder() {
@@ -281,12 +375,49 @@ public class GroupDialog extends AlertDialog implements OnClickListener, IShowLo
     /////////////////////////////////////////////////////
 
     private void DismissAndReturn(boolean isReturn) {
-        handleOrder();
 
-        if (mListener != null)
-            mListener.UpdateGroupFinished(); // 同时令 Note Frac 更新分组信息
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                handleOrder();
 
-        if (isReturn)
-            dismiss();
+                activity.runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+
+                        // 不允许 back
+                        if (mListener != null)
+                            mListener.UpdateGroupFinished(); // 同时令 Note Frac 更新分组信息
+
+                        if (isReturn)
+                            dismiss();
+
+                    }
+                });
+            }
+        }).start();
+
+    }
+
+    @Override
+    public void dismiss() {
+
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+
+                // 最后同步
+                groupDao.pushpull();
+
+                activity.runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+
+                        GroupDialog.super.dismiss();
+                    }
+                });
+            }
+        }).start();
+
     }
 }

@@ -1,7 +1,6 @@
 package com.baibuti.biji.Net.Models;
 
 import okhttp3.Headers;
-import okhttp3.ResponseBody;
 
 public class RespType {
 

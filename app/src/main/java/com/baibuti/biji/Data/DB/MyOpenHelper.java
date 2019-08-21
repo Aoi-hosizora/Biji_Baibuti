@@ -30,22 +30,18 @@ public class MyOpenHelper extends SQLiteOpenHelper {
      * 4:
      * create table db_search_item_star
      *
+     * 5:
+     * create table db_log
+     *
      */
 
-    private final static int DB_VERSION = 4;// 数据库版本
-    private Context mContext;
+    private final static int DB_VERSION = 5;// 数据库版本
 
-<<<<<<< HEAD
-    public MyOpenHelper(Context context) {
-        super(context, DB_NAME, null, DB_VERSION);
-        this.mContext = context;
-=======
     public MyOpenHelper(Context context, String UsrName) {
         super(context, (UsrName == null || UsrName.isEmpty()) ?
             DEF_DB_NAME : (String.format(Locale.CHINA, DB_USR_NAME, UsrName)),
             null, DB_VERSION
         );
->>>>>>> master
     }
 
     private void Create_Db_group(SQLiteDatabase db) {
@@ -87,6 +83,12 @@ public class MyOpenHelper extends SQLiteOpenHelper {
                 "sis_content varchar)");
     }
 
+    private void Create_Db_log(SQLiteDatabase db) {
+        db.execSQL("create table if not exists db_log (" +
+                "log_module varchar primary key, " +
+                "log_ut datetime)");
+    }
+
     @Override
     public void onCreate(SQLiteDatabase db) {
         // 创建分类表
@@ -103,6 +105,9 @@ public class MyOpenHelper extends SQLiteOpenHelper {
 
         // 创建搜索收藏表
         Create_Db_searchItemStar(db);
+
+        // 创建日志表
+        Create_Db_log(db);
     }
 
     @Override
@@ -133,6 +138,11 @@ public class MyOpenHelper extends SQLiteOpenHelper {
         if (version == 3) {
             Create_Db_searchItemStar(db);
             version = 4;
+        }
+
+        if (version == 4) {
+            Create_Db_log(db);
+            version = 5;
         }
     }
 

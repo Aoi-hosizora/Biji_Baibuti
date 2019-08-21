@@ -3,13 +3,13 @@ package com.baibuti.biji.UI.Widget.OCRView;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.Bitmap;
+import android.graphics.Color;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 
-import com.baibuti.biji.Interface.IShowLog;
 import com.baibuti.biji.Net.Models.RespObj.Region;
 import com.baibuti.biji.R;
 import com.baibuti.biji.Utils.LayoutUtils.OCRRegionUtil;
@@ -18,7 +18,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 
-public class OCRRegionGroupLayout extends ViewGroup implements IShowLog {
+public class OCRRegionGroupLayout extends ViewGroup {
 
     private Region region;
     private Bitmap imgBG;
@@ -90,7 +90,6 @@ public class OCRRegionGroupLayout extends ViewGroup implements IShowLog {
         }
     }
 
-    @Override
     public void ShowLogE(String FunctionName, String Msg) {
         String ClassName = "OCRRegionGroupLayout";
         Log.e(getResources().getString(R.string.IShowLog_LogE),
@@ -126,6 +125,12 @@ public class OCRRegionGroupLayout extends ViewGroup implements IShowLog {
                 OCRRegionView regionView = (OCRRegionView) child;
                 if (regionView.getFrame() == null)
                     continue;
+
+                // 如果背景为空，直接填充呈白色
+                if (imgBG == null) {
+                    imgBG = Bitmap.createBitmap(400, 400, Bitmap.Config.ARGB_8888);
+                    imgBG.eraseColor(Color.parseColor("#FFFFFF"));
+                }
 
                 Region.Point[] point4 = OCRRegionUtil.parsePnts(
                     regionView.getFrame().getPoints(),

@@ -1,7 +1,7 @@
 <resources>
 
     <!-- Title -->
-    <string name="SearchFrag_Header">搜题</string>
+    <string name="SearchFrag_Header">搜索</string>
 
     <!-- //////////////////////////////////////////////////// -->
     <!-- ///////////////////  SearchFrag  /////////////////// -->

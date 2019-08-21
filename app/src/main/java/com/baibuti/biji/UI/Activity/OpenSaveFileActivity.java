@@ -19,7 +19,6 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.baibuti.biji.Interface.IShowLog;
 import com.baibuti.biji.R;
 
 import java.io.File;
@@ -29,7 +28,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
-public class OpenSaveFileActivity extends AppCompatActivity implements View.OnClickListener, IShowLog {
+public class OpenSaveFileActivity extends AppCompatActivity implements View.OnClickListener {
 
     // region 声明: Flag isReturnType
 
@@ -255,7 +254,6 @@ public class OpenSaveFileActivity extends AppCompatActivity implements View.OnCl
         });
     }
 
-    @Override
     public void ShowLogE(String FunctionName, String Msg) {
         String ClassName = "OpenSaveFileActivity";
         Log.e(getResources().getString(R.string.IShowLog_LogE),

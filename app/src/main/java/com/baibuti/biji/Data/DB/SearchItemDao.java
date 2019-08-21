@@ -49,11 +49,41 @@ public class SearchItemDao {
     }
 
     /**
-     * 查询所有收藏项
+     * 进行 push pull
+     */
+    private void pushpull() {
+        if (AuthMgr.getInstance().isLogin()) {
+            Log.e("", "run: queryAllStarSearchItems");
+            if (ServerDbUpdateHelper.isLocalNewer(context, LogModule.Mod_Star)) { // 本地新
+                // TODO 异步
+                ServerDbUpdateHelper.pushData(context, LogModule.Mod_Star);
+            }
+            else if (ServerDbUpdateHelper.isLocalOlder(context, LogModule.Mod_Star)) { // 服务器新
+                // TODO 同步
+                ServerDbUpdateHelper.pullData(context, LogModule.Mod_Star);
+            }
+        }
+    }
+
+    /**
+     * 查询所有收藏项，在线
      *
      * @return ArrayList<SearchItem>
      */
     public ArrayList<SearchItem> queryAllStarSearchItems() {
+        return queryAllStarSearchItems(true);
+    }
+
+    /**
+     * 查询所有收藏项
+     *
+     * @param isLogCheck
+     * @return ArrayList<SearchItem>
+     */
+    ArrayList<SearchItem> queryAllStarSearchItems(boolean isLogCheck) {
+
+        if (isLogCheck) pushpull();
+
         SQLiteDatabase db = helper.getWritableDatabase();
 
         ArrayList<SearchItem> searchItems = new ArrayList<>();
@@ -89,7 +119,7 @@ public class SearchItemDao {
      *      null 未找到
      *      not null
      */
-    public SearchItem queryOneStarSearchItem(String Url) {
+    private SearchItem queryOneStarSearchItem(String Url) {
         SQLiteDatabase db = helper.getWritableDatabase();
 
         SearchItem searchItem = null;
@@ -127,13 +157,20 @@ public class SearchItemDao {
         return queryOneStarSearchItem(searchItem.getUrl()) != null;
     }
 
+    public long insertStarSearchItem(SearchItem searchItem) {
+        return insertStarSearchItem(searchItem, true);
+    }
+
     /**
      * 插入新收藏项
      *
      * @param searchItem
+     * @param isLogCheck
      * @return
      */
-    public long insertStarSearchItem(SearchItem searchItem) {
+    long insertStarSearchItem(SearchItem searchItem, boolean isLogCheck) {
+
+        if (isLogCheck) pushpull();
 
         SQLiteDatabase db = helper.getWritableDatabase();
         long ret = 0;
@@ -153,7 +190,6 @@ public class SearchItemDao {
             Log.e("", "insertStarSearchItem: " + "sql = " + sql + ", ret = " + ret);
             db.setTransactionSuccessful();
 
-            updateLog();
         }
         catch (Exception ex) {
             ex.printStackTrace();
@@ -162,41 +198,22 @@ public class SearchItemDao {
             db.endTransaction();
             db.close();
         }
+        updateLog();
+
+        if (isLogCheck && AuthMgr.getInstance().isLogin()) {
+            try {
+                if (StarUtil.insertStar(searchItem) != null)
+                    ServerDbUpdateHelper.pushLog(context, LogModule.Mod_Star);
+            }
+            catch (ServerErrorException ex) {
+                ex.printStackTrace();
+            }
+        }
         return ret;
     }
 
-    /**
-     * 更新原有收藏项
-     *
-     * @param searchItem
-     * @return 成功修改
-     */
-    public boolean updateStarSearchItem(SearchItem searchItem) {
-        SQLiteDatabase db = helper.getWritableDatabase();
-
-        db.beginTransaction();
-        try {
-            ContentValues values = new ContentValues();
-
-            values.put(COL_URL, searchItem.getUrl());
-            values.put(COL_TTL, searchItem.getTitle());
-            values.put(COL_CNT, searchItem.getContent());
-
-            db.update(TBL_NAME, values, COL_URL + " = ?", new String[] { searchItem.getUrl() });
-
-            db.setTransactionSuccessful();
-
-            updateLog();
-        }
-        catch (Exception e) {
-            e.printStackTrace();
-            return false;
-        }
-        finally {
-            db.endTransaction();
-            db.close();
-        }
-        return true;
+    public long deleteStarSearchItem(SearchItem searchItem) {
+        return deleteStarSearchItem(searchItem, true);
     }
 
     /**
@@ -205,7 +222,10 @@ public class SearchItemDao {
      * @param searchItem
      * @return
      */
-    public long deleteStarSearchItem(SearchItem searchItem) {
+    long deleteStarSearchItem(SearchItem searchItem, boolean isLogCheck) {
+
+
+        if (isLogCheck) pushpull();
 
         SQLiteDatabase db = helper.getWritableDatabase();
 
@@ -216,7 +236,6 @@ public class SearchItemDao {
             ret = db.delete(TBL_NAME, COL_URL + " = ?", new String[] {searchItem.getUrl()});
             db.setTransactionSuccessful();
 
-            updateLog();
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -226,14 +245,29 @@ public class SearchItemDao {
             db.close();
         }
 
+        updateLog();
+
+        if (isLogCheck && AuthMgr.getInstance().isLogin()) {
+            try {
+                if (StarUtil.deleteStar(searchItem) != null)
+                    ServerDbUpdateHelper.pushLog(context, LogModule.Mod_Star);
+            }
+            catch (ServerErrorException ex) {
+                ex.printStackTrace();
+            }
+        }
         return ret;
+    }
+
+    public int deleteStarSearchItems(ArrayList<SearchItem> searchItems) {
+        return deleteStarSearchItems(searchItems, false);
     }
 
     /**
      * 批量删除收藏项
      * @param searchItems
      */
-    public int deleteStarSearchItems(ArrayList<SearchItem> searchItems) {
+    int deleteStarSearchItems(ArrayList<SearchItem> searchItems, boolean isLogCheck) {
         SQLiteDatabase db = helper.getWritableDatabase();
         int ret = 0;
         try {
@@ -245,7 +279,6 @@ public class SearchItemDao {
                     }
                     db.setTransactionSuccessful();
 
-                    updateLog();
                 }
                 catch (Exception e) {
                     e.printStackTrace();
@@ -258,11 +291,10 @@ public class SearchItemDao {
         catch (Exception e) {
             e.printStackTrace();
         }
-        finally {
-            if (db != null) {
-                db.close();
-            }
-        }
+        updateLog();
+
+        if (isLogCheck) pushpull();
+
         return ret;
     }
 }

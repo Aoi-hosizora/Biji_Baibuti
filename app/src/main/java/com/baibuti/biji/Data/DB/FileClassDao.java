@@ -22,7 +22,7 @@ public class FileClassDao {
     private Context context;
 
     public FileClassDao(Context context) {
-        this(context, (!(AuthMgr.getInstance().getUserName().isEmpty())) ? AuthMgr.getInstance().getUserName() : "");
+        this(context, (AuthMgr.getInstance().isLogin()) ? AuthMgr.getInstance().getUserName() : "");
     }
 
     public FileClassDao(Context context, String Username) {

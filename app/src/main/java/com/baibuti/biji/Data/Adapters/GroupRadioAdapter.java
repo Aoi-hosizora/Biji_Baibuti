@@ -11,13 +11,12 @@ import android.widget.ImageView;
 import android.widget.RadioButton;
 
 import com.baibuti.biji.Data.Models.Group;
-import com.baibuti.biji.Interface.IShowLog;
 import com.baibuti.biji.R;
 
 import java.util.HashMap;
 import java.util.List;
 
-public class GroupRadioAdapter extends BaseAdapter implements IShowLog {
+public class GroupRadioAdapter extends BaseAdapter {
 
     public List<Group> list;
     LayoutInflater inflater;
@@ -34,7 +33,6 @@ public class GroupRadioAdapter extends BaseAdapter implements IShowLog {
         this.mOnRadioButtonSelect=mOnRadioButtonSelect;
     }
 
-    @Override
     public void ShowLogE(String FunctionName, String Msg) {
         String ClassName = "GroupRadioAdapter";
         Log.e("BijiLogE",

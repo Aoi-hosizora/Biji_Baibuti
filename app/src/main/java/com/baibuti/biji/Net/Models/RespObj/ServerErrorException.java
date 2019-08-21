@@ -29,6 +29,6 @@ public class ServerErrorException extends Exception {
 
     public String getMessage() {
         // TODO
-        return String.format(Locale.CHINA, "%s: %s", errorTitle, errorDetail);
+        return String.format(Locale.CHINA, "(%d) %s: %s", errorCode, errorTitle, errorDetail);
     }
 }

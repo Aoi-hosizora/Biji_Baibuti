@@ -18,6 +18,7 @@ import android.widget.Toast;
 
 import com.baibuti.biji.Data.Models.MySubject;
 import com.baibuti.biji.R;
+import com.baibuti.biji.UI.Activity.MainActivity;
 import com.zhuangfei.timetable.TimetableView;
 import com.zhuangfei.timetable.listener.ISchedule;
 import com.zhuangfei.timetable.listener.IWeekView;
@@ -92,7 +93,7 @@ public class ScheduleFragment extends Fragment {
         m_toolbar.setNavigationOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Toast.makeText(getContext(), "ddd", Toast.LENGTH_SHORT).show();
+                ((MainActivity) getActivity()).openNavMenu();
             }
         });
         m_toolbar.setTitle(R.string.ClassFrag_Header);

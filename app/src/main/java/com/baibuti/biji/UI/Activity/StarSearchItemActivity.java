@@ -23,9 +23,6 @@ import android.widget.Toast;
 import com.baibuti.biji.Data.Adapters.SearchItemAdapter;
 import com.baibuti.biji.Data.DB.SearchItemDao;
 import com.baibuti.biji.Data.Models.SearchItem;
-import com.baibuti.biji.Interface.IShowLog;
-import com.baibuti.biji.Net.Models.RespObj.ServerErrorException;
-import com.baibuti.biji.Net.Modules.Star.StarUtil;
 import com.baibuti.biji.R;
 import com.baibuti.biji.UI.Widget.ListView.SpacesItemDecoration;
 import com.baibuti.biji.UI.Widget.ListView.RecyclerViewEmptySupport;
@@ -34,9 +31,8 @@ import com.baibuti.biji.Utils.LayoutUtils.PopupMenuUtil;
 import com.baibuti.biji.Utils.StrSrchUtils.SearchUtil;
 
 import java.util.ArrayList;
-import java.util.List;
 
-public class StarSearchItemActivity extends AppCompatActivity implements View.OnClickListener, IShowLog {
+public class StarSearchItemActivity extends AppCompatActivity implements View.OnClickListener {
 
     // region 定义界面元素 m_menu m_searchFragment m_StarListView m_LongClickItemPopupMenu m_SwipeRefresh
 
@@ -55,7 +51,7 @@ public class StarSearchItemActivity extends AppCompatActivity implements View.On
     // region 定义临时搜索数据 m_LongClickedSearchItem searchItemList searchItemAdapter
 
     private SearchItem m_LongClickedSearchItem;
-    private ArrayList<SearchItem> searchItemList;
+    private ArrayList<SearchItem> searchItemList = new ArrayList<SearchItem>();
     private SearchItemAdapter searchItemAdapter;
 
     /**
@@ -189,10 +185,8 @@ public class StarSearchItemActivity extends AppCompatActivity implements View.On
         });
 
         refreshListData();
-        refreshListView();
     }
 
-    @Override
     public void ShowLogE(String FunctionName, String Msg) {
         String ClassName = "StarSearchItemActivity";
         Log.e(getResources().getString(R.string.IShowLog_LogE),
@@ -255,9 +249,9 @@ public class StarSearchItemActivity extends AppCompatActivity implements View.On
             case R.id.action_FindSearchStar:
                 m_searchFragment.show(getSupportFragmentManager(), com.wyt.searchbox.SearchFragment.TAG);
                 break;
-            case R.id.action_starUpdate:
-                UpdateData();
-                break;
+//            case R.id.action_starUpdate:
+//                UpdateData();
+//                break;
         }
         return super.onOptionsItemSelected(item);
     }
@@ -299,8 +293,20 @@ public class StarSearchItemActivity extends AppCompatActivity implements View.On
      */
     private void refreshListData() {
         SearchItemDao searchItemDao = new SearchItemDao(this);
-        searchItemList = searchItemDao.queryAllStarSearchItems();
-        updateTitle();
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                searchItemList = searchItemDao.queryAllStarSearchItems();
+
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        updateTitle();
+                        refreshListView();
+                    }
+                });
+            }
+        }).start();
     }
 
     /**
@@ -334,18 +340,36 @@ public class StarSearchItemActivity extends AppCompatActivity implements View.On
     private void SearchItem_CancelStarClick(SearchItem searchItem) {
         SearchItemDao searchItemDao = new SearchItemDao(this);
 
-        if (searchItemDao.deleteStarSearchItem(searchItem) != -1)
-            Toast.makeText(this, String.format(getString(R.string.SearchFrag_CancelStarSuccess), searchItem.getTitle()), Toast.LENGTH_SHORT).show();
-        else
-            Toast.makeText(this, String.format(getString(R.string.SearchFrag_CancelStarFailed), searchItem.getTitle()), Toast.LENGTH_SHORT).show();
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                if (searchItemDao.deleteStarSearchItem(searchItem) != -1)
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            Toast.makeText(StarSearchItemActivity.this, String.format(getString(R.string.SearchFrag_CancelStarSuccess), searchItem.getTitle()), Toast.LENGTH_SHORT).show();
+                        }
+                    });
+                else
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            Toast.makeText(StarSearchItemActivity.this, String.format(getString(R.string.SearchFrag_CancelStarFailed), searchItem.getTitle()), Toast.LENGTH_SHORT).show();
+                        }
+                    });
+                searchItemList.remove(searchItem);
 
-        searchItemList.remove(searchItem);
+                if (FindSearchedItemList != null)
+                    FindSearchedItemList.remove(searchItem);
 
-        if (FindSearchedItemList != null)
-            FindSearchedItemList.remove(searchItem);
-
-        // refreshListData();
-        refreshListView();
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        refreshListView();
+                    }
+                });
+            }
+        }).start();
     }
 
     /**
@@ -359,13 +383,28 @@ public class StarSearchItemActivity extends AppCompatActivity implements View.On
                 @Override
                 public void onClick(DialogInterface dialog, int which) {
                     SearchItemDao searchItemDao = new SearchItemDao(StarSearchItemActivity.this);
-                    if (searchItemDao.deleteStarSearchItems(searchItemDao.queryAllStarSearchItems()) != -1) {
-                        Toast.makeText(StarSearchItemActivity.this, getString(R.string.SearchFrag_CancelAllStarSuccess), Toast.LENGTH_SHORT).show();
-                        refreshListData();
-                        refreshListView();
-                    }
-                    else
-                        Toast.makeText(StarSearchItemActivity.this, getString(R.string.SearchFrag_CancelAllStarFailed), Toast.LENGTH_SHORT).show();
+                    new Thread(new Runnable() {
+                        @Override
+                        public void run() {
+                            ArrayList<SearchItem> s = searchItemDao.queryAllStarSearchItems();
+                            if (searchItemDao.deleteStarSearchItems(s) != -1) {
+                                runOnUiThread(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        Toast.makeText(StarSearchItemActivity.this, getString(R.string.SearchFrag_CancelAllStarSuccess), Toast.LENGTH_SHORT).show();
+                                        refreshListData();
+                                    }
+                                });
+                            }
+                            else
+                                runOnUiThread(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        Toast.makeText(StarSearchItemActivity.this, getString(R.string.SearchFrag_CancelAllStarFailed), Toast.LENGTH_SHORT).show();
+                                    }
+                                });
+                        }
+                    }).start();
                 }
             })
             .setNegativeButton(R.string.StarSearchItemAct_AlertDlg_NegButton, null)
@@ -393,7 +432,6 @@ public class StarSearchItemActivity extends AppCompatActivity implements View.On
                     m_SwipeRefresh.setEnabled(true);
                     FindSearchedItemList = null;
                     refreshListData();
-                    refreshListView();
                     m_LoadingProgress.dismiss();
                 }
             }, TIME_SRL_MS);
@@ -448,48 +486,57 @@ public class StarSearchItemActivity extends AppCompatActivity implements View.On
         FindSearchedItemString = searchStr;
 
         SearchItemDao searchItemDao = new SearchItemDao(this);
-        ArrayList<SearchItem> AllSearchItems = searchItemDao.queryAllStarSearchItems();
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                ArrayList<SearchItem> AllSearchItems = searchItemDao.queryAllStarSearchItems();
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        FindSearchedItemList = SearchUtil.getSearchItems(AllSearchItems.toArray(new SearchItem[0]), FindSearchedItemString);
 
-        FindSearchedItemList = SearchUtil.getSearchItems(AllSearchItems.toArray(new SearchItem[0]), FindSearchedItemString);
-
-        searchItemList = FindSearchedItemList;
-        refreshListView();
-        m_SwipeRefresh.setEnabled(false);
+                        searchItemList = FindSearchedItemList;
+                        refreshListView();
+                        m_SwipeRefresh.setEnabled(false);
+                    }
+                });
+            }
+        }).start();
     }
 
     // endregion 搜索处理
 
     // region DEBUG
 
-    private void UpdateData() {
-
-        // TODO
-
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    SearchItemDao searchItemDao = new SearchItemDao(StarSearchItemActivity.this);
-                    List<SearchItem> searchItems = searchItemDao.queryAllStarSearchItems();
-                    for (SearchItem searchItem: searchItems)
-                        StarUtil.insertStar(searchItem);
-                }
-                catch (ServerErrorException ex) {
-                    ex.printStackTrace();
-                    runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            new android.app.AlertDialog.Builder(StarSearchItemActivity.this)
-                                    .setTitle("错误")
-                                    .setMessage(ex.getMessage())
-                                    .setPositiveButton("确定", null)
-                                    .create().show();
-                        }
-                    });
-                }
-            }
-        }).start();
-    }
+    // private void UpdateData() {
+//
+    //     // TODO
+//
+    //     new Thread(new Runnable() {
+    //         @Override
+    //         public void run() {
+    //             try {
+    //                 SearchItemDao searchItemDao = new SearchItemDao(StarSearchItemActivity.this);
+    //                 List<SearchItem> searchItems = searchItemDao.queryAllStarSearchItems();
+    //                 for (SearchItem searchItem: searchItems)
+    //                     StarUtil.insertStar(searchItem);
+    //             }
+    //             catch (ServerErrorException ex) {
+    //                 ex.printStackTrace();
+    //                 runOnUiThread(new Runnable() {
+    //                     @Override
+    //                     public void run() {
+    //                         new android.app.AlertDialog.Builder(StarSearchItemActivity.this)
+    //                                 .setTitle("错误")
+    //                                 .setMessage(ex.getMessage())
+    //                                 .setPositiveButton("确定", null)
+    //                                 .create().show();
+    //                     }
+    //                 });
+    //             }
+    //         }
+    //     }).start();
+    // }
 
     // endregion DEBUG
 }

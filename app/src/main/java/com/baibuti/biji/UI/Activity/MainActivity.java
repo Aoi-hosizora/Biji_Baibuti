@@ -23,17 +23,19 @@ import android.util.Log;
 import android.view.Gravity;
 import android.view.KeyEvent;
 
+import android.view.MotionEvent;
 import android.view.ViewGroup;
 import android.widget.TextView;
 import android.widget.Toast;
 import android.view.MenuItem;
 
+import com.baibuti.biji.Net.Models.RespObj.ServerErrorException;
 import com.baibuti.biji.Net.Modules.Auth.AuthMgr;
+import com.baibuti.biji.Net.Modules.Auth.AuthUtil;
 import com.baibuti.biji.UI.Fragment.ScheduleFragment;
 import com.baibuti.biji.UI.Fragment.NoteFragment;
 import com.baibuti.biji.UI.Fragment.SearchFragment;
 import com.baibuti.biji.UI.Fragment.FileFragment;
-import com.baibuti.biji.Interface.IShowLog;
 import com.baibuti.biji.R;
 import com.baibuti.biji.Utils.StrSrchUtils.SearchUtil;
 import com.facebook.stetho.Stetho;
@@ -42,7 +44,7 @@ import com.baibuti.biji.Utils.LayoutUtils.BottomNavigationHelper;
 import java.util.ArrayList;
 import java.util.List;
 
-public class MainActivity extends FragmentActivity implements IShowLog, NavigationView.OnNavigationItemSelectedListener {
+public class MainActivity extends FragmentActivity implements NavigationView.OnNavigationItemSelectedListener {
 
     // region 声明显示元素 mViewPager bottomNavigationView m_drawerLayout m_navigationView
 
@@ -93,11 +95,19 @@ public class MainActivity extends FragmentActivity implements IShowLog, Navigati
             }
         }
 
-        // FB 数据库查看
-        Stetho.initializeWithDefaults(this);
 
-        // 初始化结巴分词
-        SearchUtil.initJieba(getApplicationContext());
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+
+                // FB 数据库查看
+                Stetho.initializeWithDefaults(getApplicationContext());
+
+                // 初始化结巴分词
+                SearchUtil.initJieba(getApplicationContext());
+
+            }
+        }).start();
 
         initViews();
         initAdpts();
@@ -212,7 +222,6 @@ public class MainActivity extends FragmentActivity implements IShowLog, Navigati
         NavMenuDefSelect();
     }
 
-    @Override
     public void ShowLogE(String FunctionName, String Msg) {
         String ClassName = "MainActivity";
         Log.e(getResources().getString(R.string.IShowLog_LogE),
@@ -257,6 +266,12 @@ public class MainActivity extends FragmentActivity implements IShowLog, Navigati
             if (mViewPager.getCurrentItem() == 0 &&
                     (mNoteFrag.getIsSearching() || mNoteFrag.getIsGrouping())) {
                 mNoteFrag.SearchGroupBack();
+                return true;
+            }
+
+            if (mViewPager.getCurrentItem() == 0 &&
+                    mNoteFrag.isFabExpanded()) {
+                mNoteFrag.collapseFab();
                 return true;
             }
 
@@ -389,8 +404,53 @@ public class MainActivity extends FragmentActivity implements IShowLog, Navigati
      * 导航栏 注销
      */
     private void toLogout() {
-        AuthMgr.getInstance().logout();
-        m_navigationView.getMenu().findItem(R.id.id_nav_login).setTitle(R.string.nav_login);
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    if (AuthUtil.logout()) {
+
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                AuthMgr.getInstance().logout();
+                                m_navigationView.getMenu().findItem(R.id.id_nav_login).setTitle(R.string.nav_login);
+                                Toast.makeText(MainActivity.this, "注销成功，请重新登录。", Toast.LENGTH_SHORT).show();
+                                checkLoginStatus();
+                            }
+                        });
+                    }
+                    else {
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                AuthMgr.getInstance().logout();
+                                new AlertDialog.Builder(MainActivity.this)
+                                        .setTitle("错误")
+                                        .setMessage("注销未知错误。")
+                                        .setPositiveButton("确定", null)
+                                        .create().show();
+                                m_navigationView.getMenu().findItem(R.id.id_nav_login).setTitle(R.string.nav_login);
+                                checkLoginStatus();
+                            }
+                        });
+                    }
+                }
+                catch (ServerErrorException ex) {
+                    ex.printStackTrace();
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            new AlertDialog.Builder(MainActivity.this)
+                                    .setTitle("注销错误")
+                                    .setMessage(ex.getMessage())
+                                    .setPositiveButton("确定", null)
+                                    .create().show();
+                        }
+                    });
+                }
+            }
+        }).start();
 
         // TODO 更新界面
 
@@ -406,14 +466,11 @@ public class MainActivity extends FragmentActivity implements IShowLog, Navigati
         //
         //     }
         // });
-
-        Toast.makeText(this, "注销成功，请重新登录。", Toast.LENGTH_SHORT).show();
-        checkLoginStatus();
     }
 
     private void checkLoginStatus() {
         // TODO
-        if (AuthMgr.getInstance().getToken().isEmpty())
+        if (!(AuthMgr.getInstance().isLogin()))
             refreshUserInfo("未登录用户");
         else
             refreshUserInfo(AuthMgr.getInstance().getUserName());

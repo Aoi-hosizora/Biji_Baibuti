@@ -10,11 +10,13 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.provider.MediaStore;
 import android.support.annotation.NonNull;
+import android.support.annotation.WorkerThread;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.text.TextUtils;
@@ -34,22 +36,27 @@ import android.widget.Toast;
 import com.baibuti.biji.Data.Models.Group;
 import com.baibuti.biji.Data.Adapters.GroupAdapter;
 import com.baibuti.biji.Data.Models.Note;
-import com.baibuti.biji.Interface.IShowLog;
+import com.baibuti.biji.Net.Models.RespObj.ServerErrorException;
+import com.baibuti.biji.Net.Models.RespObj.UploadStatus;
+import com.baibuti.biji.Net.Modules.Auth.AuthMgr;
+import com.baibuti.biji.Net.Modules.Note.ImgUtil;
 import com.baibuti.biji.R;
 import com.baibuti.biji.Data.DB.GroupDao;
 import com.baibuti.biji.Data.DB.NoteDao;
 import com.baibuti.biji.UI.Dialog.ImagePopupDialog;
+import com.baibuti.biji.Utils.ImgDocUtils.ToDocUtil;
 import com.baibuti.biji.Utils.OtherUtils.CommonUtil;
 import com.baibuti.biji.Utils.FileDirUtils.FilePathUtil;
-import com.baibuti.biji.Utils.ImgDocUtils.ImageUtils;
+import com.baibuti.biji.Utils.ImgDocUtils.ImageUtil;
 import com.baibuti.biji.Utils.LayoutUtils.PopupMenuUtil;
 import com.baibuti.biji.Utils.FileDirUtils.SDCardUtil;
-import com.baibuti.biji.Utils.StrSrchUtils.StringUtils;
+import com.baibuti.biji.Utils.StrSrchUtils.StringUtil;
 import com.baibuti.biji.Utils.OtherUtils.ExtractUtil;
 import com.sendtion.xrichtext.RichTextEditor;
 
 
 import java.io.File;
+import java.lang.reflect.Array;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -69,11 +76,7 @@ import me.kareluo.imaging.IMGEditActivity;
 import static com.baibuti.biji.Utils.OtherUtils.ExtractUtil.assets2SD;
 
 
-/**
- * Created by Windows 10 on 016 2019/02/16.
- */
-
-public class ModifyNoteActivity extends AppCompatActivity implements View.OnClickListener, IShowLog {
+public class ModifyNoteActivity extends AppCompatActivity implements View.OnClickListener {
 
     // region 声明: UI ProgressDialog Menu PopupMenu
     
@@ -159,9 +162,22 @@ public class ModifyNoteActivity extends AppCompatActivity implements View.OnClic
 
         groupDao = new GroupDao(this);
         noteDao = new NoteDao(this);
-        GroupList = groupDao.queryGroupAll();
-        groupAdapter = new GroupAdapter(this, GroupList);
-        groupAdapter.notifyDataSetChanged();
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+
+                GroupList = groupDao.queryGroupAll();
+                groupAdapter = new GroupAdapter(ModifyNoteActivity.this, GroupList);
+
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+
+                        groupAdapter.notifyDataSetChanged();
+                    }
+                });
+            }
+        }).start();
 
         note = (Note) getIntent().getSerializableExtra("notedata");
         flag = getIntent().getIntExtra("flag", NOTE_NEW);
@@ -300,7 +316,6 @@ public class ModifyNoteActivity extends AppCompatActivity implements View.OnClic
         }
     }
 
-    @Override
     public void ShowLogE(String FunctionName, String Msg) {
         String ClassName = "ModifyNoteActivity";
         Log.e(getResources().getString(R.string.IShowLog_LogE),
@@ -387,7 +402,7 @@ public class ModifyNoteActivity extends AppCompatActivity implements View.OnClic
 
     // endregion 顶部工具栏 弹出菜单 事件处理
     
-    // region 修改 保存处理 CheckIsModify CancelSaveNoteData saveNoteData
+    // region 修改 保存处理 图片上传 CheckIsModify CancelSaveNoteData saveNoteData handleSaveImgToServer
 
     /**
      * 判断是否修改
@@ -447,7 +462,7 @@ public class ModifyNoteActivity extends AppCompatActivity implements View.OnClic
         if (TitleEditText.getText().toString().isEmpty()) {
 
             // 替换换行
-            String Con = Content.replaceAll("[\n|\r|\n\r|\r\n].*", "");
+            String Con = Content.replaceAll("[\n|\r].*", "");
             // 替换HTML标签
             Con = Con.replaceAll("<img src=.*", getResources().getString(R.string.MNoteActivity_SaveAlertImgReplaceMozi));
 
@@ -464,50 +479,147 @@ public class ModifyNoteActivity extends AppCompatActivity implements View.OnClic
         // 判断是否修改
         boolean isModify = CheckIsModify();
 
+        final String motoNote = note.getContent();
+
         // 设置内容
         note.setTitle(TitleEditText.getText().toString());
         note.setContent(Content);
 
-        // 处理分组信息
-        Group re = groupDao.queryGroupById(selectedGropId);
-        if (re != null)
-            note.setGroupLabel(re, true);
-        else
-            note.setGroupLabel(groupDao.queryGroupById(0), true);
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
 
-        //////////////////////////////////////////////////
+                // 处理分组
+                Group re = groupDao.queryGroupById(selectedGropId);
+                if (re != null)
+                    note.setGroupLabel(re, true);
+                else
+                    note.setGroupLabel(groupDao.queryGroupById(0), true);
 
+                // 处理界面
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        CommonUtil.closeSoftKeyInput(ModifyNoteActivity.this);
+                    }
+                });
 
-        if (flag == NOTE_NEW) { // 从 Note Frag 打开的
+                // 处理图片
+                if (AuthMgr.getInstance().isLogin()) {
+                    note.setContent(handleSaveImgToServer(note.getContent(), motoNote));
+                }
 
-            // 插入到数据库一条新信息
-            long noteId = noteDao.insertNote(note);
-            note.setId((int) noteId);
-            CommonUtil.closeSoftKeyInput(this);
+                // 处理保存
+                if (flag == NOTE_NEW) {
 
-            Intent intent_fromnotefrag = new Intent();
-            intent_fromnotefrag.putExtra("notedata", note);
-            intent_fromnotefrag.putExtra("flag", NOTE_NEW); // NEW
-            setResult(RESULT_OK, intent_fromnotefrag);
-            finish();
+                    // 从 Note Frag 打开的 新建
+                    long noteId = noteDao.insertNote(note);
+                    note.setId((int) noteId);
+
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+
+                            Intent intent_FromNoteFrag = new Intent();
+                            intent_FromNoteFrag.putExtra("notedata", note);
+                            intent_FromNoteFrag.putExtra("flag", NOTE_NEW); // NEW
+                            setResult(RESULT_OK, intent_FromNoteFrag);
+                            finish();
+                        }
+                    });
+                }
+                else {
+
+                    // 从 VMNOTE 打开的 修改
+                    if (isModify)
+                        // 修改数据库
+                        noteDao.updateNote(note);
+
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+
+                            Intent intent_FromVMNote = new Intent();
+
+                            intent_FromVMNote.putExtra("notedata", note);
+                            intent_FromVMNote.putExtra("flag", NOTE_UPDATE); // UPDATE
+                            intent_FromVMNote.putExtra("isModify", isModify);
+                            setResult(RESULT_OK, intent_FromVMNote);
+
+                            finish();
+                        }
+                    });
+                }
+
+            }
+        }).start();
+    }
+
+    /**
+     * 将笔记的图片上传并修改
+     * @param note 新笔记 用来上传图片
+     * @param motoNote 旧笔记 用来删除笔记
+     * @return
+     */
+    @WorkerThread
+    private String handleSaveImgToServer(String note, String motoNote) {
+
+        String ret = note;
+
+        // 切割块
+        List<String> motoTextList = StringUtil.cutStringByImgTag(motoNote); // 旧 删除用
+        List<String> textList = StringUtil.cutStringByImgTag(note); // 新 上传用
+
+        // 获取 服务器上原有的图片
+        ArrayList<String> NewUrls = new ArrayList<>();
+        for (String blocks : textList) {
+            if (blocks.contains("<img") && blocks.contains("src=")) {
+                String imagePath = StringUtil.getImgSrc(blocks);
+                if (imagePath.startsWith(ImgUtil.GetImgUrlHead)) {
+                    NewUrls.add(imagePath);
+                }
+            }
         }
-        else { // 从 VMNOTE 打开的
 
-            if (isModify)
-                // 修改数据库
-                noteDao.updateNote(note);
-            CommonUtil.closeSoftKeyInput(this);
-
-            Intent intent_fromvmnote = new Intent();
-
-            intent_fromvmnote.putExtra("notedata", note);
-            intent_fromvmnote.putExtra("flag", NOTE_UPDATE); // UPDATE
-            intent_fromvmnote.putExtra("isModify", isModify);
-            setResult(RESULT_OK, intent_fromvmnote);
-
-            finish();
+        ArrayList<String> DelUrls = new ArrayList<>();
+        for (String blocks : motoTextList) {
+            if (blocks.contains("<img") && blocks.contains("src=")) {
+                String imagePath = StringUtil.getImgSrc(blocks);
+                if (imagePath.startsWith(ImgUtil.GetImgUrlHead)) {
+                    if (NewUrls.indexOf(imagePath) == -1) // 不存在新内，删除
+                        DelUrls.add(imagePath);
+                }
+            }
         }
 
+        // 异步删除原有的图片
+        if (DelUrls.size() > 0)
+            ImgUtil.DeleteImgsAsync(DelUrls.toArray(new String[0]));
+
+
+        // 遍历本地图片
+        for (String blocks : textList) {
+            // 图片块
+            if (blocks.contains("<img") && blocks.contains("src=")) {
+                // 图片路径
+                String imagePath = StringUtil.getImgSrc(blocks);
+                // 本地路径，网络路径忽略
+                if (imagePath.startsWith(SDCardUtil.SDCardRoot)) { // /storage/emulated/0/
+                    try {
+                        UploadStatus uploadStatus = ImgUtil.uploadImg(imagePath);
+                        if (uploadStatus != null) {
+                            String newFileName = uploadStatus.getNewFileName();
+                            Log.e("", "handleSaveImgToServer: " + imagePath + " -> " + newFileName);
+                            ret = ret.replaceAll(imagePath, newFileName);
+                        }
+                    }
+                    catch (ServerErrorException ex) {
+                        ex.printStackTrace();
+                    }
+                }
+            }
+        }
+        return ret;
     }
 
     
@@ -696,28 +808,44 @@ public class ModifyNoteActivity extends AppCompatActivity implements View.OnClic
      * 显示分组设置
      */
     private void showGroupSetting() {
-        refreshGroupList();
 
-        AlertDialog GroupSettingDialog = new AlertDialog
-                .Builder(this)
-                .setTitle(R.string.MNoteActivity_GroupSetAlertTitle)
-                .setNegativeButton(R.string.MNoteActivity_GroupSetAlertNegativeButtonForCancel, new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        dialog.cancel();
-                    }
-                })
-                .setSingleChoiceItems(groupAdapter, 0, new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        selectedGropId = GroupList.get(which).getId();
-                        GroupNameTextView.setText(GroupList.get(which).getName());
-                        GroupNameTextView.setTextColor(GroupList.get(which).getIntColor());
-                        dialog.cancel();
-                    }
-                }).create();
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
 
-        GroupSettingDialog.show();
+                refreshGroupList();
+
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+
+                        AlertDialog GroupSettingDialog = new AlertDialog
+                                .Builder(ModifyNoteActivity.this)
+                                .setTitle(R.string.MNoteActivity_GroupSetAlertTitle)
+                                .setNegativeButton(R.string.MNoteActivity_GroupSetAlertNegativeButtonForCancel, new DialogInterface.OnClickListener() {
+                                    @Override
+                                    public void onClick(DialogInterface dialog, int which) {
+                                        dialog.cancel();
+                                    }
+                                })
+                                .setSingleChoiceItems(groupAdapter, 0, new DialogInterface.OnClickListener() {
+                                    @Override
+                                    public void onClick(DialogInterface dialog, int which) {
+                                        selectedGropId = GroupList.get(which).getId();
+                                        GroupNameTextView.setText(GroupList.get(which).getName());
+                                        GroupNameTextView.setTextColor(GroupList.get(which).getIntColor());
+                                        dialog.cancel();
+                                    }
+                                }).create();
+
+                        GroupSettingDialog.show();
+
+                    }
+                });
+            }
+        }).start();
+
+
     }
 
     // endregion 其他功能
@@ -755,7 +883,7 @@ public class ModifyNoteActivity extends AppCompatActivity implements View.OnClic
     //                 @Override
     //                 public void onClick(DialogInterface dialog, int which) {
     //
-    //                     Bitmap bitmap = BitmapUtils.getBitmapFromFile(imagePath);
+    //                     Bitmap bitmap = BitmapUtil.getBitmapFromFile(imagePath);
     //                     // 异步识别文字
     //                     idenWordsSync(bitmap);
     //                     dialog.dismiss();
@@ -925,7 +1053,8 @@ public class ModifyNoteActivity extends AppCompatActivity implements View.OnClic
         for (RichTextEditor.EditData itemData : editList) {
             if (itemData.inputStr != null) {
                 content.append(itemData.inputStr);
-            } else if (itemData.imagePath != null) {
+            }
+            else if (itemData.imagePath != null) {
                 content.append("<img src=\"").append(itemData.imagePath).append("\"/>");
             }
         }
@@ -957,14 +1086,13 @@ public class ModifyNoteActivity extends AppCompatActivity implements View.OnClic
             public void onRtImageClick(final String imagePath) {
                 if (!TextUtils.isEmpty(getEditData())) {
 
-                    ArrayList<String> imageList = StringUtils.getTextFromHtml(getEditData(), true);
+                    ArrayList<String> imageList = StringUtil.getTextFromHtml(getEditData(), true);
                     if (!TextUtils.isEmpty(imagePath)) {
                         int currentPosition = imageList.indexOf(imagePath);
-                        ShowLogE("dealWithContent", "点击图片："+currentPosition+"："+imagePath);
                         ShowClickImg(imageList, currentPosition);
                     }
 
-//                    List<String> imageList = StringUtils.getTextFromHtml(getEditData(), true);
+//                    List<String> imageList = StringUtil.getTextFromHtml(getEditData(), true);
 //                    if (!TextUtils.isEmpty(imagePath)) {
 //                        // int currentPosition = imageList.indexOf(imagePath);
 //                        // ShowdealWithContentForOCR(imagePath);
@@ -989,7 +1117,7 @@ public class ModifyNoteActivity extends AppCompatActivity implements View.OnClic
      */
     private void ShowClickImg(ArrayList<String> imageList, int currentPosition) {
         try {
-            String[] imgs = imageList.toArray(new String[imageList.size()]);
+            String[] imgs = imageList.toArray(new String[0]);
             ImagePopupDialog dialog = new ImagePopupDialog(this, imgs, currentPosition);
             dialog.setOnLongClickImageListener(new ImagePopupDialog.onLongClickImageListener() {
 
@@ -1050,7 +1178,7 @@ public class ModifyNoteActivity extends AppCompatActivity implements View.OnClic
                 if (ContentEditText != null) {
                     if (text.contains("<img") && text.contains("src=")) {
                         //imagePath可能是本地路径，也可能是网络地址
-                        String imagePath = StringUtils.getImgSrc(text);
+                        String imagePath = StringUtil.getImgSrc(text);
                         //插入空的EditText，以便在图片前后插入文字
                         ContentEditText.addEditTextAtIndex(ContentEditText.getLastIndex(), "");
                         ContentEditText.addImageViewAtIndex(ContentEditText.getLastIndex(), imagePath);
@@ -1069,7 +1197,7 @@ public class ModifyNoteActivity extends AppCompatActivity implements View.OnClic
      */
     protected void showEditData(ObservableEmitter<String> emitter, String html) {
         try {
-            List<String> textList = StringUtils.cutStringByImgTag(html);
+            List<String> textList = StringUtil.cutStringByImgTag(html);
             for (int i = 0; i < textList.size(); i++) {
                 String text = textList.get(i);
                 emitter.onNext(text);
@@ -1098,7 +1226,7 @@ public class ModifyNoteActivity extends AppCompatActivity implements View.OnClic
 
                     ShowLogE("insertImagesSync", "data: " + data); // _Edited
 
-                    Bitmap bitmap = ImageUtils.getSmallBitmap(data + "", screenWidth, screenHeight); // 压缩图片
+                    Bitmap bitmap = ImageUtil.getSmallBitmap(data + "", screenWidth, screenHeight); // 压缩图片
                     String smallImagePath = SDCardUtil.saveSmallImgToSdCard(bitmap);
 
                     ShowLogE("insertImagesSync", "imagePath: " + smallImagePath); // _Small
@@ -1109,8 +1237,11 @@ public class ModifyNoteActivity extends AppCompatActivity implements View.OnClic
                     emitter.onNext(smallImagePath);
 
                     // TODO 网络图片插入
-                    // 测试插入网络图片 http://p695w3yko.bkt.clouddn.com/18-5-5/44849367.jpg
-                    //subscriber.onNext("http://p695w3yko.bkt.clouddn.com/18-5-5/30271511.jpg");
+
+                    // <img src="https://www.baidu.com/img/bd_logo1.png"> <- `https://` 不可漏
+
+                    // 测试插入网络图片
+                    // emitter.onNext("https://raw.githubusercontent.com/Aoi-hosizora/Biji_Baibuti/a5bb15af4098296ace557e281843513b2f672e0f/assets/DB_Query.png");
 
                     emitter.onComplete();
                 } catch (Exception e) {

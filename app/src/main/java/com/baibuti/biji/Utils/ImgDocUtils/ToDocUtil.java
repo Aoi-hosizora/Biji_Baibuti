@@ -5,7 +5,7 @@ import android.graphics.BitmapFactory;
 import android.os.Environment;
 import android.util.Log;
 
-import com.baibuti.biji.Utils.StrSrchUtils.StringUtils;
+import com.baibuti.biji.Utils.StrSrchUtils.StringUtil;
 
 import org.apache.poi.xslf.usermodel.TextAlign;
 import org.apache.poi.xwpf.usermodel.UnderlinePatterns;
@@ -84,7 +84,8 @@ public class ToDocUtil {
 
         Log.e("1", width + ", " + height);
 
-        return new Size(height, width);
+        // if (motoSize.Height > motoSize.Width)
+        return new Size(width, height);
     }
 
     /**
@@ -117,7 +118,7 @@ public class ToDocUtil {
             else
                 return false;
         Log.e("TAG", "CreateDocxByNote: "+Path );
-        CustomXWPFDocument docx = new CustomXWPFDocument();
+        CustomXWPFDoc docx = new CustomXWPFDoc();
 
         XWPFParagraph para = docx.createParagraph();
         XWPFRun run = para.createRun();
@@ -142,37 +143,53 @@ public class ToDocUtil {
     /**
      * 处理用于 Docx 文件的 XWPFRun 插入文字与图片，CreateDocxByNote() 用
      *
-     * @param docx        CustomXWPFDocument
+     * @param docx        CustomXWPFDoc
      * @param NoteContent 笔记内容
      */
-    private static void HandleDocxRunForNoteContent(CustomXWPFDocument docx, String NoteContent) throws Exception {
+    private static void HandleDocxRunForNoteContent(CustomXWPFDoc docx, String NoteContent) throws Exception {
         XWPFRun run;
 
         ////////////////////////////////////////
-        List<String> textList = StringUtils.cutStringByImgTag(NoteContent);
+        List<String> textList = StringUtil.cutStringByImgTag(NoteContent);
 
         for (int i = 0; i < textList.size(); i++) {
             String text = textList.get(i);
             if (text.contains("<img") && text.contains("src=")) {
-                String imagePath = StringUtils.getImgSrc(text);
+                String imagePath = StringUtil.getImgSrc(text);
 
                 //////////
 
-                FileInputStream fis = new FileInputStream(imagePath);
+                if (imagePath.startsWith("http")) {
+                    // TODO
+                    XWPFParagraph para = docx.createParagraph();
+                    run = para.createRun();
+                    run.setText("!!!!!: " + text + " :!!!!!");
+                }
+                else {
+                    try {
+                        FileInputStream fis = new FileInputStream(imagePath);
 
-                // 图片信息
-                BitmapFactory.Options opt = new BitmapFactory.Options();
-                opt.inJustDecodeBounds = true;
-                BitmapFactory.decodeFile(imagePath, opt);
+                        // 图片信息
+                        BitmapFactory.Options opt = new BitmapFactory.Options();
+                        opt.inJustDecodeBounds = true;
+                        BitmapFactory.decodeFile(imagePath, opt);
 
-                // 后缀名
-                String ext = NoteContent.substring(NoteContent.lastIndexOf(".") + 1).toLowerCase();
+                        // 后缀名
+                        String ext = NoteContent.substring(NoteContent.lastIndexOf(".") + 1).toLowerCase();
 
-                // 图片尺寸
-                Size newSize = HandleImgSize(new Size(opt.outWidth, opt.outHeight));
+                        // 图片尺寸
+                        Size newSize = HandleImgSize(new Size(opt.outWidth, opt.outHeight));
 
-                String picId = docx.addPictureData(fis, getPictureType(ext));
-                docx.createPicture(picId, docx.getNextPicNameNumber(getPictureType(ext)), newSize.getWidth(), newSize.getHeight());
+                        String picId = docx.addPictureData(fis, getPictureType(ext));
+                        docx.createPicture(picId, docx.getNextPicNameNumber(getPictureType(ext)), newSize.getWidth(), newSize.getHeight());
+
+                    }
+                    catch (Exception ex) {
+                        XWPFParagraph para = docx.createParagraph();
+                        run = para.createRun();
+                        run.setText(text);
+                    }
+                }
 
             }
             else {
@@ -248,19 +265,32 @@ public class ToDocUtil {
      */
     private static void HandlePdfiTexForNoteContent(PdfItextUtil pdfItextUtil, String NoteContent) throws Exception {
 
-        List<String> textList = StringUtils.cutStringByImgTag(NoteContent);
+        List<String> textList = StringUtil.cutStringByImgTag(NoteContent);
 
         for (int i = 0; i < textList.size(); i++) {
             String text = textList.get(i);
             if (text.contains("<img") && text.contains("src=")) {
-                String imagePath = StringUtils.getImgSrc(text);
 
-                BitmapFactory.Options opt = new BitmapFactory.Options();
-                opt.inJustDecodeBounds = true;
-                BitmapFactory.decodeFile(imagePath, opt);
+                String imagePath = StringUtil.getImgSrc(text);
 
-                Size newSize = HandleImgSize(new Size(opt.outWidth, opt.outHeight));
-                pdfItextUtil.addImageToPdfCenterH(imagePath, newSize.getWidth(), newSize.getHeight());
+                if (imagePath.startsWith("http")) {
+                    // TODO
+                    pdfItextUtil.addTextToPdf("!!!!: " + text + " :!!!!");
+                }
+                else {
+                    try {
+
+                        BitmapFactory.Options opt = new BitmapFactory.Options();
+                        opt.inJustDecodeBounds = true;
+                        BitmapFactory.decodeFile(imagePath, opt);
+
+                        Size newSize = HandleImgSize(new Size(opt.outWidth, opt.outHeight));
+                        pdfItextUtil.addImageToPdfCenterH(imagePath, newSize.getWidth(), newSize.getHeight());
+                    }
+                    catch (Exception ex) {
+                        pdfItextUtil.addTextToPdf(text);
+                    }
+                }
             }
             else {
                 pdfItextUtil.addTextToPdf(text);

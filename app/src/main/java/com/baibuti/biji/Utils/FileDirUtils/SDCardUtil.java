@@ -20,9 +20,11 @@ import java.util.Date;
 import java.util.Locale;
 
 public class SDCardUtil {
+
     public static String SDCardRoot = Environment.getExternalStorageDirectory().getAbsolutePath() + File.separator;
     public static String APP_NAME = "Biji" + File.separator;
     public static String SAVE_FILETYPE = "NoteImage";
+    public static String OCRTmp = "OCRTmp";
 
     /**
      * 检查是否存在SDCard
@@ -52,6 +54,17 @@ public class SDCardUtil {
      */
     public static String getPictureDir() {
         String imageCacheUrl = SDCardRoot + APP_NAME + SAVE_FILETYPE + File.separator;
+        File file = new File(imageCacheUrl);
+        if(!file.exists())
+            file.mkdirs();  //如果不存在则创建
+        return imageCacheUrl;
+    }
+
+    /**
+     * 获取OCR的临时保存路径, /Biji/OCRTmp/
+     */
+    public static String getOCTTmpDir() {
+        String imageCacheUrl = SDCardRoot + APP_NAME + OCRTmp + File.separator;
         File file = new File(imageCacheUrl);
         if(!file.exists())
             file.mkdirs();  //如果不存在则创建
@@ -169,6 +182,7 @@ public class SDCardUtil {
             isOk = file.delete(); // 删除文件
         return isOk;
     }
+
     public static Uri getImageStreamFromExternal(String imageName) {
         File externalPubPath = Environment.getExternalStoragePublicDirectory(
                 Environment.DIRECTORY_PICTURES

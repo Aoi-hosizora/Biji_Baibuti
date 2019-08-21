@@ -8,6 +8,7 @@
 
     <color name="colorAccent">#009B95</color>
     <color name="colorHighLightAccent">@color/grey_250</color>
+    <color name="colorDarkHighLightAccent">@color/grey_800</color>
 
     <color name="color_shadow">#417F7F81</color>
     <color name="color_searchview">#E0E0E0</color>
@@ -29,6 +30,7 @@
     <color name="grey_500">#9E9E9E</color>
     <color name="grey_600">#757575</color>
     <color name="grey_700">#616161</color>
+    <color name="grey_800">#363636</color>
     <color name="grey_900">#212121</color>
 
     <!-- PopupMenu -->

@@ -12,16 +12,17 @@ import org.openxmlformats.schemas.drawingml.x2006.wordprocessingDrawing.CTInline
 import java.io.IOException;
 import java.io.InputStream;
 
-public class CustomXWPFDocument extends XWPFDocument {
-    public CustomXWPFDocument() {
+public class CustomXWPFDoc extends XWPFDocument {
+
+    public CustomXWPFDoc() {
         super();
     }
 
-    public CustomXWPFDocument(OPCPackage opcPackage) throws IOException {
+    public CustomXWPFDoc(OPCPackage opcPackage) throws IOException {
         super(opcPackage);
     }
 
-    public CustomXWPFDocument(InputStream in) throws IOException {
+    public CustomXWPFDoc(InputStream in) throws IOException {
         super(in);
     }
 
