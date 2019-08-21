@@ -2,43 +2,43 @@
 
 + SCUT Baibuti Project
 
-### Environment
+## Environment
 
-#### Tools
+### Tools
 + `AS` 3.4.1
 + `gradle` 3.3.2
 + `buildToolsVersion` 28.0.3
 
-#### Application
+### Application
 + `compileSdkVersion` 27
 + `targetSdkVersion` 27
 + `minSdkVersion` 21
 
-### BackEnd
+## BackEnd
 
 + Use `uwsgi` + `nginx` + `Flask` + `Blueprint`
 
-#### OCR (CTPN + CRNN)
+### OCR (CTPN + CRNN)
 
 + See [CTPN_CRNN_BackEnd](https://github.com/Aoi-hosizora/CTPN_CRNN_BackEnd)
 
-#### Auth & Note & Star & Schedule & File
+### Auth & Note & Star & Schedule & File
 
 + Continue...
 + See [Biji_BackEnd](https://github.com/Aoi-hosizora/Biji_BackEnd)
 
 ---
 
-### Ref Libs
+## Ref Libs
 
-#### Has modified
+### Has modified
 
 + See [libs/](https://github.com/Aoi-hosizora/Biji_Baibuti/tree/Module-Search/libs)
 + [xrichtext](https://github.com/sendtion/XRichText) (RichTextView.java - `addImageViewAtIndex()`)
 + [SearchDialog](https://github.com/wenwenwen888/SearchDialog) (SearchFragment.java - `search()`)
 + [image_lib](https://github.com/zhangphil/WeiXinPictureTool) (IMGEditActivity.java - `onDoneClick()`)
 
-#### Others
+### Others
 
 + [photoview](https://github.com/bm-x/PhotoView)
 + [jieba-android](https://github.com/452896915/jieba-android)

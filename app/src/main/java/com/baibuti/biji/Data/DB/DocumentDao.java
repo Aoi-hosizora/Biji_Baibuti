@@ -17,7 +17,7 @@ public class DocumentDao {
     private Context context;
 
     public DocumentDao(Context context) {
-        this(context, (!(AuthMgr.getInstance().getUserName().isEmpty())) ? AuthMgr.getInstance().getUserName() : "");
+        this(context, (AuthMgr.getInstance().isLogin()) ? AuthMgr.getInstance().getUserName() : "");
     }
 
     public DocumentDao(Context context, String Username) {

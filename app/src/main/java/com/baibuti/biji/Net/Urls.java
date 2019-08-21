@@ -48,6 +48,11 @@ public class Urls {
     public static final String GroupUrl = ServerIP + ":8001/group";
 
     /**
+     * 后端图片 URL
+     */
+    public static final String ImageUrl = ServerIP + ":8001/note/img";
+
+    /**
      * 后端收藏 URL
      */
     public static final String StarUrl = ServerIP + ":8001/star";

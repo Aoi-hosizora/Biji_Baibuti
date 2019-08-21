@@ -1,5 +1,7 @@
 package com.baibuti.biji.Net.Modules.Auth;
 
+import android.util.Log;
+
 import java.util.ArrayList;
 
 public class AuthMgr {
@@ -33,6 +35,7 @@ public class AuthMgr {
     }
 
     public void setToken(String token) {
+        Log.e("", "setToken: " + token );
         this.token = token;
     }
 
@@ -41,7 +44,7 @@ public class AuthMgr {
         void onLogout();
     }
 
-    private ArrayList<OnLoginChangeListener> onLoginChangeListeners;
+    private ArrayList<OnLoginChangeListener> onLoginChangeListeners = new ArrayList<>();
 
     public void addLoginChangeListener(OnLoginChangeListener onLoginChangeListener) {
         this.onLoginChangeListeners.add(onLoginChangeListener);
@@ -51,17 +54,32 @@ public class AuthMgr {
         this.token = "";
         this.userName = "";
 
-        if (onLoginChangeListeners != null)
-            for (OnLoginChangeListener onLoginChangeListener : onLoginChangeListeners)
-                onLoginChangeListener.onLogout();
+        try {
+            if (onLoginChangeListeners != null)
+                for (OnLoginChangeListener onLoginChangeListener : onLoginChangeListeners)
+                    onLoginChangeListener.onLogout();
+        }
+        catch (Exception ex) {
+            ex.printStackTrace();
+        }
     }
 
     public void login(String username, String token) {
         this.token = token;
         this.userName = username;
 
-        if (onLoginChangeListeners != null)
-            for (OnLoginChangeListener onLoginChangeListener : onLoginChangeListeners)
-                onLoginChangeListener.onLogin(userName);
+        try {
+            if (onLoginChangeListeners != null)
+                for (OnLoginChangeListener onLoginChangeListener : onLoginChangeListeners)
+                    onLoginChangeListener.onLogin(userName);
+        }
+        catch (Exception ex) {
+            ex.printStackTrace();
+        }
+    }
+
+    public boolean isLogin() {
+        return token != null && !(token.isEmpty()) &&
+                userName != null && !(userName.isEmpty());
     }
 }

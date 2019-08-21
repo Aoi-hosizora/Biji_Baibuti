@@ -1,5 +1,7 @@
 package com.baibuti.biji.Net.Models.ReqBody;
 
+import android.util.Log;
+
 import com.baibuti.biji.Data.Models.SearchItem;
 
 import org.json.JSONArray;
@@ -17,7 +19,7 @@ public class StarReqBody implements Serializable {
     public StarReqBody(String title, String url, String content) {
         this.title = title;
         this.url = url;
-        this.content = content;
+        this.content = content.replaceAll("[\n|\r]", " ");
     }
 
     public String getTitle() {
@@ -52,7 +54,7 @@ public class StarReqBody implements Serializable {
      */
     public SearchItem toSearchItem() {
         // TODO
-        return new SearchItem(title, url, content);
+        return new SearchItem(title, content, url);
     }
 
     /**
@@ -75,6 +77,33 @@ public class StarReqBody implements Serializable {
         for (int i = 0; i < starReqBodies.length; i++)
             rets[i] = starReqBodies[i].toSearchItem();
         return rets;
+    }
+
+    /**
+     * SearchItem[] -> StarReqBody[]
+     * @return
+     */
+    public static StarReqBody[] toStarReqBodies(SearchItem[] searchItems) {
+        if (searchItems == null)
+            return null;
+        StarReqBody[] rets = new StarReqBody[searchItems.length];
+        for (int i = 0; i < searchItems.length; i++)
+            rets[i] = toStarReqBody(searchItems[i]);
+        return rets;
+    }
+
+    /**
+     * StarReqBody[] -> Json str
+     * @return
+     */
+    public static String toStarReqBodiesJson(StarReqBody[] starReqBodies) {
+        if (starReqBodies == null)
+            return "";
+        JSONArray jsonArray = new JSONArray();
+        for (StarReqBody starReqBody : starReqBodies) {
+            jsonArray.put(starReqBody.toJson());
+        }
+        return jsonArray.toString();
     }
     
     // endregion SearchItem <-> StarReqBody
@@ -118,6 +147,8 @@ public class StarReqBody implements Serializable {
      */
     public static StarReqBody getStarRespFromJson(JSONObject obj) {
         try {
+            Log.e("", "getStarRespFromJson: " + obj.toString() );
+            Log.e("", "getStarRespFromJson: " + obj.getString("url"));
             return new StarReqBody(
                     obj.getString("title"),
                     obj.getString("url"),
@@ -137,8 +168,8 @@ public class StarReqBody implements Serializable {
      */
     public static StarReqBody[] getStarRespsFromJson(String json) {
         try {
-            JSONArray obj = new JSONArray(json);
-            return getStarRespsFromJson(obj);
+            JSONArray objs = new JSONArray(json);
+            return getStarRespsFromJson(objs);
         }
         catch (JSONException ex) {
             ex.printStackTrace();
@@ -154,8 +185,9 @@ public class StarReqBody implements Serializable {
     public static StarReqBody[] getStarRespsFromJson(JSONArray objs) {
         try {
             StarReqBody[] ret = new StarReqBody[objs.length()];
-            for (int i = 0; i < objs.length(); i++)
+            for (int i = 0; i < objs.length(); i++) {
                 ret[i] = getStarRespFromJson(objs.getJSONObject(i));
+            }
             return ret;
         }
         catch (JSONException ex) {

@@ -1,6 +1,9 @@
 package com.baibuti.biji.Net.Modules.Note;
 
+import android.support.annotation.NonNull;
+
 import com.baibuti.biji.Data.Models.Group;
+import com.baibuti.biji.Interface.IPushCallBack;
 import com.baibuti.biji.Net.Models.ReqBody.GroupReqBody;
 import com.baibuti.biji.Net.Models.RespBody.MessageResp;
 import com.baibuti.biji.Net.Models.RespObj.ServerErrorException;
@@ -9,7 +12,13 @@ import com.baibuti.biji.Net.Modules.Auth.AuthMgr;
 import com.baibuti.biji.Net.NetUtil;
 import com.baibuti.biji.Net.Urls;
 
+import java.io.IOException;
 import java.util.Locale;
+
+import okhttp3.Call;
+import okhttp3.Callback;
+import okhttp3.Response;
+import okhttp3.internal.annotations.EverythingIsNonNull;
 
 public class GroupUtil {
 
@@ -18,12 +27,17 @@ public class GroupUtil {
     private static final String UpdateGroupUrl = Urls.GroupUrl + "/update";
     private static final String InsertGroupUrl = Urls.GroupUrl + "/insert";
     private static final String DeleteGroupUrl = Urls.GroupUrl + "/delete";
+    private static final String PushGroupUrl = Urls.GroupUrl + "/push";
 
     public static Group[] getAllGroups() throws ServerErrorException {
         RespType resp = NetUtil.httpGetSync(AllGroupUrl, NetUtil.getOneHeader("Authorization", AuthMgr.getInstance().getToken()));
         try {
             int code = resp.getCode();
             if (code == 200) {
+                String newToken = resp.getHeaders().get("Authorization");
+                if (newToken != null && !(newToken.isEmpty()))
+                    AuthMgr.getInstance().setToken(newToken);
+
                 GroupReqBody[] rets = GroupReqBody.getGroupRespsFromJson(resp.getBody());
                 return GroupReqBody.toGroups(rets);
             }
@@ -44,6 +58,10 @@ public class GroupUtil {
         try {
             int code = resp.getCode();
             if (code == 200) {
+                String newToken = resp.getHeaders().get("Authorization");
+                if (newToken != null && !(newToken.isEmpty()))
+                    AuthMgr.getInstance().setToken(newToken);
+
                 GroupReqBody ret = GroupReqBody.getGroupRespFromJson(resp.getBody());
                 return ret.toGroup();
             }
@@ -68,6 +86,10 @@ public class GroupUtil {
         try {
             int code = resp.getCode();
             if (code == 200) {
+                String newToken = resp.getHeaders().get("Authorization");
+                if (newToken != null && !(newToken.isEmpty()))
+                    AuthMgr.getInstance().setToken(newToken);
+
                 GroupReqBody ret = GroupReqBody.getGroupRespFromJson(resp.getBody());
                 return ret.toGroup();
             }
@@ -92,6 +114,10 @@ public class GroupUtil {
         try {
             int code = resp.getCode();
             if (code == 200) {
+                String newToken = resp.getHeaders().get("Authorization");
+                if (newToken != null && !(newToken.isEmpty()))
+                    AuthMgr.getInstance().setToken(newToken);
+
                 GroupReqBody ret = GroupReqBody.getGroupRespFromJson(resp.getBody());
                 return ret.toGroup();
             }
@@ -116,6 +142,10 @@ public class GroupUtil {
         try {
             int code = resp.getCode();
             if (code == 200) {
+                String newToken = resp.getHeaders().get("Authorization");
+                if (newToken != null && !(newToken.isEmpty()))
+                    AuthMgr.getInstance().setToken(newToken);
+
                 GroupReqBody ret = GroupReqBody.getGroupRespFromJson(resp.getBody());
                 return ret.toGroup();
             }
@@ -128,5 +158,30 @@ public class GroupUtil {
             ex.printStackTrace();
             return null;
         }
+    }
+
+    public static void pushGroupsAsync(Group[] groups, @NonNull IPushCallBack pushCallBack) throws ServerErrorException {
+        NetUtil.httpPostPutDeleteAsync(
+            PushGroupUrl, NetUtil.POST,
+            GroupReqBody.getJsonFromGroupReqRodies(GroupReqBody.toGroupReqBodies(groups)),
+            NetUtil.getOneHeader("Authorization", AuthMgr.getInstance().getToken()),
+            new Callback() {
+                @Override
+                @EverythingIsNonNull
+                public void onFailure(Call call, IOException e) { }
+
+                @Override
+                @EverythingIsNonNull
+                public void onResponse(Call call, Response response) throws IOException {
+                    int code = response.code();
+                    if (code == 200) {
+                        String newToken = response.headers().get("Authorization");
+                        if (newToken != null && !(newToken.isEmpty()))
+                            AuthMgr.getInstance().setToken(newToken);
+                        pushCallBack.onCallBack();
+                    }
+                }
+            }
+        );
     }
 }

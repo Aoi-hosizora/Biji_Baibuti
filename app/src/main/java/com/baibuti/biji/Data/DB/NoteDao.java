@@ -14,11 +14,8 @@ import com.baibuti.biji.Data.Models.Note;
 import com.baibuti.biji.Net.Models.RespObj.ServerErrorException;
 import com.baibuti.biji.Net.Modules.Auth.AuthMgr;
 import com.baibuti.biji.Net.Modules.Note.NoteUtil;
-import com.baibuti.biji.Utils.OtherUtils.CommonUtil;
+import com.baibuti.biji.Utils.OtherUtils.DateColorUtil;
 
-import org.apache.poi.ss.formula.eval.NotImplementedException;
-
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -33,7 +30,7 @@ public class NoteDao {
     private Context context;
 
     public NoteDao(Context context) {
-        this(context, (!(AuthMgr.getInstance().getUserName().isEmpty())) ? AuthMgr.getInstance().getUserName() : "");
+        this(context, (AuthMgr.getInstance().isLogin()) ? AuthMgr.getInstance().getUserName() : "");
     }
 
     public NoteDao(Context context, String username) {
@@ -45,36 +42,77 @@ public class NoteDao {
     /**
      * 更新笔记日志
      */
-    void updateLog() {
+    private void updateLog() {
         UtLogDao utLogDao = new UtLogDao(context);
         utLogDao.updateLog(LogModule.Mod_Note);
     }
 
     /**
-     * 查询所有笔记
+     * 进行 push pull
      */
-    public List<Note> queryNotesAll(int groupId) { // ArrayList
+    private void pushpull() {
+        if (AuthMgr.getInstance().isLogin()) {
+            if (ServerDbUpdateHelper.isLocalNewer(context, LogModule.Mod_Note)) { // 本地新
+                // TODO 异步
+                ServerDbUpdateHelper.pushData(context, LogModule.Mod_Note);
+                ServerDbUpdateHelper.pushData(context, LogModule.Mod_Group);
+            }
+            else if (ServerDbUpdateHelper.isLocalOlder(context, LogModule.Mod_Note)) { // 服务器新
+                // TODO 同步
+                ServerDbUpdateHelper.pullData(context, LogModule.Mod_Group);
+                ServerDbUpdateHelper.pullData(context, LogModule.Mod_Note);
+            }
+        }
+    }
 
-//        if (ServerDbUpdateHelper.isLocalNewer(context, LogModule.Mod_Note)) {
-//            // 本地新
-//            // push
-//
-//        }
-//        else // 服务器新 pull
-//            updateNoteFromServer();
+     /**
+      * 查询所有笔记，同步
+      * @return
+      */
+     public List<Note> queryAllNotes() {
+         Log.e("", "queryAllNotes0" );
+         return queryAllNotesFromGroupId(-1, true);
+     }
 
+     /**
+      * 根据分组查询所有笔记，同步
+      * @param groupId
+      * @return
+      */
+     public List<Note> queryAllNotesFromGroupId(int groupId) {
+         Log.e("", "queryAllNotesFromGroupId: 1 " + groupId);
+         return queryAllNotesFromGroupId(groupId, true);
+     }
+
+    /**
+     * 根据分组查询所有笔记，同步？
+     * @param groupId -1 for all
+     * @param isLogCheck
+     * @return
+     */
+    List<Note> queryAllNotesFromGroupId(int groupId, boolean isLogCheck) { // ArrayList
+        Log.e("", "queryAllNotesFromGroupId: 2 " + groupId + isLogCheck);
+        if (isLogCheck) pushpull();
+
+        // TODO !!!
+        //  W/System.err: java.lang.NullPointerException:
+        //  Attempt to invoke virtual method '
+        //      android.database.sqlite.SQLiteDatabase android.content.Context.openOrCreateDatabase(
+        //          java.lang.String, int, android.database.sqlite.SQLiteDatabase$CursorFactory, android.database.DatabaseErrorHandler
+        //      )
+        //  ' on a null object reference
 
         SQLiteDatabase db = helper.getWritableDatabase();
 
         List<Note> noteList = new ArrayList<>();
-        Note note ;
+        Note note;
         String sql ;
         Cursor cursor = null;
         try {
             if (groupId >= 0){
                 sql = "select * from db_note where n_group_id = " + groupId;
             } else {
-                sql = "select * from db_note " ;
+                sql = "select * from db_note" ;
             }
 
 
@@ -95,11 +133,11 @@ public class NoteDao {
 
                 note.setGroupLabel(grouptmp, false);
 
-                note.setCreateTime(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").parse(
+                note.setCreateTime(DateColorUtil.Str2Date(
                         cursor.getString(cursor.getColumnIndex("n_create_time"))
                 ));
 
-                note.setUpdateTime(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").parse(
+                note.setUpdateTime(DateColorUtil.Str2Date(
                         cursor.getString(cursor.getColumnIndex("n_update_time"))
                 ));
 
@@ -117,20 +155,26 @@ public class NoteDao {
                 db.close();
             }
         }
-
-
-
         return noteList;
     }
 
-    public List<Note> queryNotesAll() { // ArrayList
-        List<Note> Re = queryNotesAll(-1);
-        if (Re.isEmpty())
-            Re.add(insertDefaultNote());
-        return Re;
+    public Note queryNoteById(int noteId) {
+        Log.e("", "queryNoteById: ");
+        return queryNoteById(noteId, true);
     }
 
-    public Note queryNoteById(int noteId) {
+    /**
+     * 查询 ID 笔记
+     * @param noteId
+     * @param isLogCheck
+     * @return
+     */
+    private Note queryNoteById(int noteId, boolean isLogCheck) {
+        Log.e("", "queryNoteById: ");
+        // always false
+
+        if (isLogCheck) pushpull();
+
         SQLiteDatabase db = helper.getWritableDatabase();
 
         Note note = null;
@@ -146,11 +190,11 @@ public class NoteDao {
                 if (grouptmp == null)
                     grouptmp = groupDao.queryDefaultGroup();
 
-                Date createTime = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").parse(
+                Date createTime = DateColorUtil.Str2Date(
                         cursor.getString(cursor.getColumnIndex("n_create_time"))
                 );
 
-                Date updateTime = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").parse(
+                Date updateTime = DateColorUtil.Str2Date(
                         cursor.getString(cursor.getColumnIndex("n_update_time"))
                 );
 
@@ -163,28 +207,29 @@ public class NoteDao {
             if (cursor != null && !cursor.isClosed()) {
                 cursor.close();
             }
-            if (db != null) {
-                db.close();
-            }
         }
         return note;
     }
 
 
-    public Note insertDefaultNote() {
-        Note dft = new Note(Note.GetDefaultNoteName, "");
-        dft.setGroupLabel(groupDao.queryDefaultGroup(), true);
-        long id = this.insertNote(dft);
-        return queryNoteById((int)id);
-    }
+    // public Note insertDefaultNote() {
+    //     Note dft = new Note(Note.GetDefaultNoteName, "默认内容");
+    //     dft.setGroupLabel(groupDao.queryDefaultGroup(), true);
+    //     long id = this.insertNote(dft);
+    //     return queryNoteById((int)id);
+    // }
 
     /**
-     * 插入笔记，更新编号，不查询
+     * 插入笔记，更新编号，不同步
      * @param note
      * @param idx
      * @return
      */
     long insertNote(Note note, int idx) {
+
+        Log.e("", "insertNote: ");
+        // if (isLogCheck) -> False
+
         SQLiteDatabase db = helper.getWritableDatabase();
         String sql;
         if (idx == -1)
@@ -200,23 +245,16 @@ public class NoteDao {
 
             stat.bindString(1, note.getTitle()); // title
             stat.bindString(2, note.getContent()); // content
-
-
-
             stat.bindLong(3, note.getGroupLabel().getId()); // groupid
-            // stat.bindString(4, note.getGroupLabel().getName()); // groupname
 
-            stat.bindString(4, CommonUtil.date2string((note.getCreateTime()==null)?new Date():note.getCreateTime())); // createtime
-            stat.bindString(5, CommonUtil.date2string((note.getUpdateTime()==null)?new Date():note.getUpdateTime())); // updatetime
+            stat.bindString(4, DateColorUtil.Date2Str((note.getCreateTime()==null)?new Date():note.getCreateTime())); // createtime
+            stat.bindString(5, DateColorUtil.Date2Str((note.getUpdateTime()==null)?new Date():note.getUpdateTime())); // updatetime
 
             if (idx != -1)
                 stat.bindLong(6, idx); // id
 
             ret = stat.executeInsert();
             db.setTransactionSuccessful();
-
-            updateLog();
-
         }
         catch (SQLException e) {
             e.printStackTrace();
@@ -229,31 +267,60 @@ public class NoteDao {
             db.close();
         }
         Log.e("insertNote", "insertNote: "+ ret);
+        updateLog();
+
+        // 不同步
+
         return ret;
     }
 
     /**
-     * 更新数据，插入笔记，自动编号
+     * 插入笔记，自动编号，同步
+     * @param note
+     * @return
      */
     public long insertNote(Note note) {
-//        updateNoteFromServer();
+
+        Log.e("", "insertNote: ");
+        pushpull();
+
         long ret = insertNote(note, -1);
 
-//        try {
-//            NoteUtil.insertNote(note);
-//        }
-//        catch (ServerErrorException ex) {
-//            ex.printStackTrace();
-//        }
+        // isLogCheck -> True
+        if (AuthMgr.getInstance().isLogin()) {
+            try {
+                if (NoteUtil.insertNote(note) != null)
+                    ServerDbUpdateHelper.pushLog(context, LogModule.Mod_Note);
+            }
+            catch (ServerErrorException ex) {
+                ex.printStackTrace();
+            }
+        }
 
         return ret;
     }
 
     /**
-     * 更新笔记
+     * 更新笔记，同步
      * @param note
      */
     public void updateNote(Note note) {
+        Log.e("", "updateNote: ");
+        updateNote(note, true);
+    }
+
+    /**
+     * 更新笔记，同步？
+     * @param note
+     */
+    void updateNote(Note note, boolean isLogCheck) {
+
+        Log.e("", "updateNote: ");
+
+        // TODO 提前被删除的处理
+
+        if (isLogCheck) pushpull();
+
         SQLiteDatabase db = helper.getWritableDatabase();
         ContentValues values = new ContentValues();
 
@@ -262,23 +329,51 @@ public class NoteDao {
 
         values.put("n_group_id", note.getGroupLabel().getId());
 
-        values.put("n_update_time", CommonUtil.date2string(note.getUpdateTime()));
+        values.put("n_update_time", DateColorUtil.Date2Str(note.getUpdateTime()));
 
         db.update("db_note", values, "n_id=?", new String[]{note.getId()+""});
-        updateLog();
         db.close();
+        updateLog();
+
+        if (AuthMgr.getInstance().isLogin()) {
+            try {
+                if (NoteUtil.updateNote(note) != null)
+                    ServerDbUpdateHelper.pushLog(context, LogModule.Mod_Note);
+            }
+            catch (ServerErrorException ex) {
+                ex.printStackTrace();
+            }
+        }
     }
 
     /**
-     * 删除笔记
+     * 删除笔记，同步
+     * @param noteId
+     * @return
      */
     public int deleteNote(int noteId) {
+        Log.e("", "deleteNote: " + noteId);
+        return deleteNote(noteId, true);
+    }
+
+    /**
+     * 删除笔记，同步？
+     * @param noteId
+     * @param isLogCheck
+     * @return
+     */
+    int deleteNote(int noteId, boolean isLogCheck) {
+        Log.e("", "deleteNote: " + isLogCheck);
+
+        Note note = queryNoteById(noteId, false);
+
+        if (isLogCheck) pushpull();
+
         SQLiteDatabase db = helper.getWritableDatabase();
         int ret = 0;
         try {
             ret = db.delete("db_note", "n_id=?", new String[]{noteId + ""});
 
-            updateLog();
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -287,42 +382,19 @@ public class NoteDao {
             if (db != null)
                 db.close();
         }
-        return ret;
-    }
+        updateLog();
 
-    /**
-     * 批量删除笔记
-     * @param mNotes
-     */
-    public int deleteNote(List<Note> mNotes) {
-        SQLiteDatabase db = helper.getWritableDatabase();
-        int ret = 0;
-        try {
-            if (mNotes != null && mNotes.size() > 0) {
-                db.beginTransaction();//开始事务
-                try {
-                    for (Note note : mNotes)
-                        ret += db.delete("db_note", "n_id=?", new String[]{note.getId() + ""});
-                    db.setTransactionSuccessful();
-
-                    updateLog();
-                }
-                catch (Exception e) {
-                    e.printStackTrace();
-                }
-                finally {
-                    db.endTransaction();
-                }
+        if (isLogCheck && AuthMgr.getInstance().isLogin()) {
+            try {
+                if (note != null)
+                    if (NoteUtil.deleteNote(note) != null)
+                        ServerDbUpdateHelper.pushLog(context, LogModule.Mod_Note);
+            }
+            catch (ServerErrorException ex) {
+                ex.printStackTrace();
             }
         }
-        catch (Exception e) {
-            e.printStackTrace();
-        }
-        finally {
-            if (db != null) {
-                db.close();
-            }
-        }
+
         return ret;
     }
 }

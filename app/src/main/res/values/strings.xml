@@ -12,7 +12,7 @@
 
     <!-- Tab Text -->
     <string name="notefragment_tab_text">笔记</string>
-    <string name="searchfragment_tab_text">搜题</string>
+    <string name="searchfragment_tab_text">搜索</string>
     <string name="classfragment_tab_text">课表</string>
     <string name="filefragment_tab_text">资料</string>
 

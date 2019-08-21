@@ -1,31 +1,30 @@
 package com.baibuti.biji.UI.Dialog;
 
+import android.app.Activity;
 import android.app.AlertDialog;
-import android.content.Context;
-import android.graphics.Color;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.view.View.OnClickListener;
 
 import com.baibuti.biji.Data.Models.Group;
-import com.baibuti.biji.Interface.IShowLog;
 import com.baibuti.biji.R;
 import com.baibuti.biji.Data.DB.GroupDao;
 import com.baibuti.biji.Data.DB.NoteDao;
 import com.baibuti.biji.Utils.OtherUtils.CommonUtil;
+import com.baibuti.biji.Utils.OtherUtils.DateColorUtil;
 import com.larswerkman.holocolorpicker.ColorPicker;
 
 import java.util.Locale;
 
-public class GroupAddDialog extends AlertDialog implements OnClickListener, IShowLog {
+public class GroupAddDialog extends AlertDialog implements OnClickListener {
     private OnUpdateGroupListener mListener; //接口
+
+    private Activity activity;
 
     private EditText editText;
     private TextView colorText;
@@ -54,8 +53,9 @@ public class GroupAddDialog extends AlertDialog implements OnClickListener, ISho
         void UpdateGroupFinished(); // 修改引发的事件
     }
 
-    public GroupAddDialog(Context context, Group inputGroup, OnUpdateGroupListener mListener) {
-        super(context);
+    public GroupAddDialog(Activity activity, Group inputGroup, OnUpdateGroupListener mListener) {
+        super(activity);
+        this.activity = activity;
         this.mListener = mListener;
         this.inputGroup = inputGroup;
     }
@@ -77,7 +77,7 @@ public class GroupAddDialog extends AlertDialog implements OnClickListener, ISho
             @Override
             public void onColorChanged(int color) {
                 colorText.setText(String.format(Locale.CHINA, "%s%s",
-                        getContext().getString(R.string.GroupDialog_AddAlertColorText), CommonUtil.ColorInt_HexEncoding(color)));
+                        getContext().getString(R.string.GroupDialog_AddAlertColorText), DateColorUtil.ColorInt_HexEncoding(color)));
             }
         });
 
@@ -85,7 +85,7 @@ public class GroupAddDialog extends AlertDialog implements OnClickListener, ISho
             @Override
             public void onColorSelected(int color) {
                 colorText.setText(String.format(Locale.CHINA, "%s%s",
-                        getContext().getString(R.string.GroupDialog_AddAlertColorText), CommonUtil.ColorInt_HexEncoding(color)));
+                        getContext().getString(R.string.GroupDialog_AddAlertColorText), DateColorUtil.ColorInt_HexEncoding(color)));
             }
         });
 
@@ -139,7 +139,6 @@ public class GroupAddDialog extends AlertDialog implements OnClickListener, ISho
      * @param FunctionName
      * @param Msg
      */
-    @Override
     public void ShowLogE(String FunctionName, String Msg) {
         String ClassName = "GroupAddDialog";
         Log.e(getContext().getString(R.string.IShowLog_LogE),
@@ -185,7 +184,7 @@ public class GroupAddDialog extends AlertDialog implements OnClickListener, ISho
             newGroupOrder = 0;
 
         // TODO
-        String newGroupColor = CommonUtil.ColorInt_HexEncoding(colorPalette.getColor());
+        String newGroupColor = DateColorUtil.ColorInt_HexEncoding(colorPalette.getColor());
         ShowLogE("UpdateGroup", "COLOR: " + newGroupColor);
 
         // 更改好的分组信息
@@ -207,13 +206,24 @@ public class GroupAddDialog extends AlertDialog implements OnClickListener, ISho
 
                 else {
                     // 新建分组不重复
-                    try {
-                        groupDao.insertGroup(newGroup);
-                        DismissAndReturn();
-                    }
-                    catch (Exception ex) {
-                        ex.printStackTrace();
-                    }
+                    new Thread(new Runnable() {
+                        @Override
+                        public void run() {
+
+                            try {
+                                groupDao.insertGroup(newGroup);
+                                activity.runOnUiThread(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        DismissAndReturn();
+                                    }
+                                });
+                            }
+                            catch (Exception ex) {
+                                ex.printStackTrace();
+                            }
+                        }
+                    }).start();
                 }
             }
             else {
@@ -236,13 +246,24 @@ public class GroupAddDialog extends AlertDialog implements OnClickListener, ISho
                             inputGroup.setName(newGroupName);
                             inputGroup.setColor(newGroupColor);
                             inputGroup.setOrder(newGroupOrder);
-                            try {
-                                groupDao.updateGroup(inputGroup);
-                            }
-                            catch (Exception ex) {
-                                ex.printStackTrace();
-                            }
-                            DismissAndReturn();
+                            new Thread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    try {
+                                        groupDao.updateGroup(inputGroup);
+                                    }
+                                    catch (Exception ex) {
+                                        ex.printStackTrace();
+                                    }
+
+                                    activity.runOnUiThread(new Runnable() {
+                                        @Override
+                                        public void run() {
+                                            DismissAndReturn();
+                                        }
+                                    });
+                                }
+                            }).start();
                         }
                     }
                 }
@@ -254,7 +275,7 @@ public class GroupAddDialog extends AlertDialog implements OnClickListener, ISho
      * 弹出删除判断
      */
     private void DeleteGroup() {
-        GroupDeleteDialog groupDeleteDialog = new GroupDeleteDialog(getContext(), inputGroup, new GroupDeleteDialog.OnDeleteGroupListener() {
+        GroupDeleteDialog groupDeleteDialog = new GroupDeleteDialog(activity, inputGroup, new GroupDeleteDialog.OnDeleteGroupListener() {
             @Override
             public void DeleteGroupFinished() { // 接口事件
                 DismissAndReturn();

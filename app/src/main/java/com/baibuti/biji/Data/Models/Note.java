@@ -3,6 +3,7 @@ package com.baibuti.biji.Data.Models;
 import android.support.annotation.NonNull;
 
 import com.baibuti.biji.Interface.ISearchEntity;
+import com.baibuti.biji.Utils.OtherUtils.DateColorUtil;
 
 import java.io.Serializable;
 import java.text.SimpleDateFormat;
@@ -126,26 +127,20 @@ public class Note implements Serializable, Comparable<Note>, ISearchEntity {
 
 
     public String getUpdateTime_FullString() {
-        SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.CHINA);
-
-        return df.format(this.UpdateTime);
+        return DateColorUtil.Date2Str(this.UpdateTime);
     }
 
     public String getCreateTime_FullString() {
-        SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.CHINA);
-
-        return df.format(this.CreateTime);
+        return DateColorUtil.Date2Str(this.CreateTime);
     }
 
     public String getUpdateTime_TimeString() {
         SimpleDateFormat df = new SimpleDateFormat("HH:mm", Locale.CHINA);
-
         return df.format(this.UpdateTime);
     }
 
     public String getUpdateTime_DateString() {
         SimpleDateFormat df = new SimpleDateFormat("MM-dd", Locale.CHINA);
-
         return df.format(this.UpdateTime);
     }
 

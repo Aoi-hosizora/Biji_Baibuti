@@ -37,6 +37,7 @@ import com.baibuti.biji.Data.Models.Document;
 import com.baibuti.biji.Data.Models.FileClass;
 import com.baibuti.biji.Data.Models.FileItem;
 import com.baibuti.biji.R;
+import com.baibuti.biji.UI.Activity.MainActivity;
 import com.baibuti.biji.UI.Dialog.FileImportDialog;
 import com.baibuti.biji.Utils.StringUtils.Define;
 
@@ -125,10 +126,10 @@ public class FileFragment extends Fragment {
 
         mToolBar.setNavigationIcon(R.drawable.tab_menu);
         mToolBar.setNavigationOnClickListener(new View.OnClickListener() {
+
             @Override
             public void onClick(View view) {
-                Toast.makeText(getContext(),"This is a menu",Toast.LENGTH_LONG).show();
-                //添加菜单逻辑
+                ((MainActivity) getActivity()).openNavMenu();
             }
         });
 

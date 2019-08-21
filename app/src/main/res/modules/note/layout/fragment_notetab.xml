@@ -19,19 +19,26 @@
             android:clipToPadding="true"
             android:fitsSystemWindows="true">
 
-            <android.support.v7.widget.Toolbar
-                android:id="@+id/NoteFrag_Toolbar"
-                android:layout_width="0dp"
+            <android.support.design.widget.AppBarLayout
+                android:id="@+id/NoteFrag_AppbarLayout"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:background="?attr/colorPrimary"
-                android:minHeight="?attr/actionBarSize"
-                android:theme="?attr/actionBarTheme"
 
                 app:contentInsetLeft="0dp"
                 app:contentInsetStart="0dp"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent" />
+                app:layout_constraintTop_toTopOf="parent">
+
+                <android.support.v7.widget.Toolbar
+                    android:id="@+id/NoteFrag_Toolbar"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="?attr/colorPrimary"
+                    android:minHeight="?attr/actionBarSize"
+                    android:theme="?attr/actionBarTheme" />
+
+            </android.support.design.widget.AppBarLayout>
 
             <!-- 空内容提醒，不能放在 SwipeRefreshLayout 内 -->
             <include
@@ -52,7 +59,7 @@
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintHorizontal_bias="1.0"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/NoteFrag_Toolbar"
+                app:layout_constraintTop_toBottomOf="@id/NoteFrag_AppbarLayout"
                 app:layout_constraintVertical_bias="1.0">
 
                 <com.baibuti.biji.UI.Widget.ListView.RecyclerViewEmptySupport
@@ -70,6 +77,13 @@
 
             </android.support.v4.widget.SwipeRefreshLayout>
 
+            <View
+                android:id="@+id/note_fabmenu_back"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:background="#00FFFFFF"
+
+                android:visibility="gone" />
 
             <com.getbase.floatingactionbutton.FloatingActionsMenu
                 android:id="@+id/note_fabmenu"
@@ -80,10 +94,14 @@
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
+
                 fab:fab_addButtonColorNormal="@color/colorPrimary"
                 fab:fab_addButtonColorPressed="@color/colorPrimaryDark"
                 fab:fab_addButtonPlusIconColor="@color/white"
-                fab:fab_labelStyle="@style/menu_labels_style">
+
+                fab:fab_labelStyle="@style/fab_menu_labels_style"
+                fab:fab_expandDirection="up"
+                fab:fab_labelsPosition="left">
 
                 <com.getbase.floatingactionbutton.FloatingActionButton
                     android:id="@+id/note_photo"
@@ -91,7 +109,8 @@
                     android:layout_height="wrap_content"
                     app:fab_icon="@drawable/note_photo"
                     fab:fab_colorNormal="@color/colorPrimaryLighter"
-                    fab:fab_colorPressed="@color/colorPrimaryLight" />
+                    fab:fab_colorPressed="@color/colorPrimaryLight"
+                    fab:fab_title="文字识别" />
 
                 <com.getbase.floatingactionbutton.FloatingActionButton
                     android:id="@+id/note_edit"
@@ -99,7 +118,8 @@
                     android:layout_height="wrap_content"
                     app:fab_icon="@drawable/note_edit"
                     fab:fab_colorNormal="@color/colorPrimaryLight"
-                    fab:fab_colorPressed="@color/colorPrimary" />
+                    fab:fab_colorPressed="@color/colorPrimary"
+                    fab:fab_title="新建笔记" />
 
             </com.getbase.floatingactionbutton.FloatingActionsMenu>
 

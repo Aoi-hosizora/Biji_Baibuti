@@ -14,6 +14,10 @@ public static String SAVE_FILETYPE = "...";
 + NoteImage
     + 笔记的默认图片保存目录
     + SDCardUtil
+   
++ OCRTmp
+    + 网络图片识别的临时保存
+    + OCRAct
 
 + ~~TessData~~
     + ~~文字识别的文件目录~~

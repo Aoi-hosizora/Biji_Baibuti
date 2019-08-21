@@ -18,7 +18,7 @@ import java.io.InputStream;
 /**
  * Created by sendtion on 2016/5/25.
  */
-public class ImageUtils {
+public class ImageUtil {
 
     /**
      * 图片压缩处理，size参数为压缩比，比如size为2，则压缩为1/4

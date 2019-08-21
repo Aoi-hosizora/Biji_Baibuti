@@ -15,9 +15,11 @@ import android.view.WindowManager;
 import android.view.inputmethod.InputMethodManager;
 
 import java.io.File;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 
 import static android.content.Context.INPUT_METHOD_SERVICE;
 
@@ -111,7 +113,8 @@ public class CommonUtil {
         Intent intent = new Intent(Intent.ACTION_SEND);
         if (imgPath == null || imgPath.equals("")) {
             intent.setType("text/plain"); // 纯文本
-        } else {
+        }
+        else {
             File f = new File(imgPath);
             if (f != null && f.exists() && f.isFile()) {
                 intent.setType("image/jpg");
@@ -149,48 +152,5 @@ public class CommonUtil {
         DisplayMetrics outMetrics = new DisplayMetrics();
         wm.getDefaultDisplay().getMetrics(outMetrics);
         return outMetrics.heightPixels;
-    }
-
-    /**
-     * Date -> String
-     * @param date
-     * @return
-     */
-    public static String date2string(Date date) {
-        String strDate = "";
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-        strDate = sdf.format(date);
-        return strDate;
-    }
-
-    /**
-     * 将十进制color转化成十六进制
-     * @param color
-     * @return
-     */
-    public static String ColorInt_HexEncoding(int color) {
-        String R, G, B;
-        StringBuffer sb = new StringBuffer();
-        R = Integer.toHexString(Color.red(color));
-        G = Integer.toHexString(Color.green(color));
-        B = Integer.toHexString(Color.blue(color));
-        //判断获取到的R,G,B值的长度 如果长度等于1 给R,G,B值的前边添0
-        R = R.length() == 1 ? "0" + R : R;
-        G = G.length() == 1 ? "0" + G : G;
-        B = B.length() == 1 ? "0" + B : B;
-        sb.append("#");
-        sb.append(R);
-        sb.append(G);
-        sb.append(B);
-        return sb.toString();
-    }
-
-    /**
-     * 将十六进制color转化成十进制
-     * @param color
-     * @return
-     */
-    public static int ColorHex_IntEncoding(String color) {
-        return Color.parseColor(color);
     }
 }

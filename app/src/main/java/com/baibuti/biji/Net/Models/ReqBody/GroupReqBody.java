@@ -74,6 +74,20 @@ public class GroupReqBody implements Serializable {
     }
 
     /**
+     * Group[] -> GroupReqBody[]
+     * @param groups
+     * @return
+     */
+    public static GroupReqBody[] toGroupReqBodies(Group[] groups) {
+        if (groups == null)
+            return null;
+        GroupReqBody[] rets = new GroupReqBody[groups.length];
+        for (int i = 0; i < groups.length; i++)
+            rets[i] = toGroupReqBody(groups[i]);
+        return rets;
+    }
+
+    /**
      * GroupReqBody[] -> Group[]
      * @return
      */
@@ -177,6 +191,17 @@ public class GroupReqBody implements Serializable {
             ex.printStackTrace();
             return null;
         }
+    }
+
+    /**
+     * GroupReqBody[] -> Json str
+     * @return
+     */
+    public static String getJsonFromGroupReqRodies(GroupReqBody[] groupReqBodies) {
+        JSONArray obj = new JSONArray();
+        for (GroupReqBody groupReqBody : groupReqBodies)
+            obj.put(groupReqBody.toJson());
+        return obj.toString();
     }
 
     // endregion GroupReqBody <-> Json
