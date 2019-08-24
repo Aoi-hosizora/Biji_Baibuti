@@ -24,8 +24,5 @@
     <!-- Filefragment Fileclass not selected Hint -->
     <string name="Filefragment_UnselectedText">未选择分组</string>
 
-    <!-- FileCloudActivity Strings-->
-    <string name="FileCloudActivity_Toolbar_Title">笔迹云</string>
-
     <string name="todo">TODO</string>
 </resources>

@@ -33,11 +33,12 @@ public class Document implements Serializable {
         this.documentClassName = documentClassName;
     }
 
-    public Document(int id, String documentType, String documentName, String documentPath){
+    public Document(int id, String documentType, String documentName, String documentPath, String documentClassName){
         this.id = id;
         this.documentType = documentType;
         this.documentName = documentName;
         this.documentPath = documentPath;
+        this.documentClassName = documentClassName;
     }
 
     public void setId(int id){

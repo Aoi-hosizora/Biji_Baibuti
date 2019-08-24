@@ -1,6 +1,7 @@
 package com.baibuti.biji.Net;
 
 import com.baibuti.biji.Net.Models.RespType;
+import com.baibuti.biji.Net.Modules.File.DocumentUtil;
 
 import java.io.File;
 import java.io.IOException;
@@ -201,6 +202,54 @@ public class NetUtil {
     }
 
     /////////////////////////////////////////////////////////////////////////////////////////////////
+    ////////////////////////////////////// HTTP Get File Sync //////////////////////////////////////
+    /////////////////////////////////////////////////////////////////////////////////////////////////
+
+    public static File httpGetFileSync(String url, String foldername, String filename, Map<String, String> headers) {
+        return httpGetFileSync(url, foldername, filename, headers, NO_TIME, NO_TIME);
+    }
+
+    public static File httpGetFileSync(String url, String foldername, String filename, Map<String, String> headers, int TIME_CONN_SEC, int TIME_READ_SEC){
+
+        OkHttpClient.Builder okHttpClientBuilder = new OkHttpClient.Builder();
+
+        if (TIME_CONN_SEC != NO_TIME)
+            okHttpClientBuilder.connectTimeout(TIME_CONN_SEC, TimeUnit.SECONDS);
+        if (TIME_READ_SEC != NO_TIME)
+            okHttpClientBuilder.readTimeout(TIME_READ_SEC, TimeUnit.SECONDS);
+
+        OkHttpClient okHttpClient = okHttpClientBuilder.build();
+
+        File file = null;
+
+        try {
+            // Req Builder
+            Request.Builder requestBuilder = new Request.Builder().url(url);
+
+            if (headers != null && !(headers.isEmpty()))
+                for (Map.Entry<String, String> header : headers.entrySet())
+                    requestBuilder.addHeader(header.getKey(), header.getValue());
+
+            // Req Resp
+            Request request = requestBuilder.build();
+            Response response = okHttpClient.newCall(request).execute();
+            byte[] bytes = response.body().bytes();
+            file = DocumentUtil.writeBytesToFile(bytes, foldername, filename);
+            response.close();
+        }
+        catch (IOException ex) {
+            ex.printStackTrace();
+        }
+        catch (NullPointerException ex) {
+            ex.printStackTrace();
+        }
+        catch (Exception ex) {
+            ex.printStackTrace();
+        }
+        return file;
+    }
+
+    /////////////////////////////////////////////////////////////////////////////////////////////////
     ////////////////////////////////////// HTTP Post File Sync //////////////////////////////////////
     /////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -246,6 +295,43 @@ public class NetUtil {
             ex.printStackTrace();
         }
         return Ret;
+    }
+
+    /////////////////////////////////////////////////////////////////////////////////////////////////
+    ////////////////////////////////////// HTTP Post File Async //////////////////////////////////////
+    /////////////////////////////////////////////////////////////////////////////////////////////////
+
+    public static void httpPostFileAsync(String url, String key, File file, Map<String, String> headers, Callback responseCallback){
+
+        OkHttpClient okHttpClient = new OkHttpClient();
+        try {
+            // File
+            MultipartBody.Builder requestBody = new MultipartBody.Builder().setType(MultipartBody.FORM);
+
+            if (key != null && !(key.isEmpty()) && file != null) {
+                RequestBody body = RequestBody.create(MediaType.parse("*"), file);
+                requestBody.addFormDataPart(key, file.getName(), body);
+            }
+            else
+                return;
+
+            // Req Resp
+            Request.Builder builder = new Request.Builder().url(url).post(requestBody.build());
+
+            if (headers != null && !(headers.isEmpty()))
+                for (Map.Entry<String, String> header : headers.entrySet())
+                    builder.addHeader(header.getKey(), header.getValue());
+
+            Request request = builder.build();
+
+            okHttpClient.newCall(request).enqueue(responseCallback);
+        }
+        catch (NullPointerException ex) {
+            ex.printStackTrace();
+        }
+        catch (Exception ex) {
+            ex.printStackTrace();
+        }
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////

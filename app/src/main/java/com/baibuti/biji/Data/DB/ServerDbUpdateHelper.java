@@ -3,6 +3,8 @@ package com.baibuti.biji.Data.DB;
 import android.content.Context;
 import android.util.Log;
 
+import com.baibuti.biji.Data.Models.Document;
+import com.baibuti.biji.Data.Models.FileClass;
 import com.baibuti.biji.Data.Models.Group;
 import com.baibuti.biji.Data.Models.LogModule;
 import com.baibuti.biji.Data.Models.Note;
@@ -11,6 +13,8 @@ import com.baibuti.biji.Data.Models.UtLog;
 import com.baibuti.biji.Interface.IPushCallBack;
 import com.baibuti.biji.Net.Models.RespObj.ServerErrorException;
 import com.baibuti.biji.Net.Modules.Auth.AuthMgr;
+import com.baibuti.biji.Net.Modules.File.DocumentUtil;
+import com.baibuti.biji.Net.Modules.File.FileClassUtil;
 import com.baibuti.biji.Net.Modules.Log.LogUtil;
 import com.baibuti.biji.Net.Modules.Note.GroupUtil;
 import com.baibuti.biji.Net.Modules.Note.NoteUtil;
@@ -153,9 +157,51 @@ class ServerDbUpdateHelper {
                 }
             }
             break;
-            case Mod_File: { }
+            case Mod_FileClass: {
+                // 先FileClass后Document
+                FileClassDao fileClassDao = new FileClassDao(context);
+                List<FileClass> fileClasses = fileClassDao.queryFileClassAll(false);
+                for (FileClass fileClass : fileClasses)
+                    try {
+                        // 不会抛出
+                        fileClassDao.deleteFileClass(fileClass.getId());
+                    }
+                    catch (EditDefaultFileClassException ex) {
+                        ex.printStackTrace();
+                    }
+
+                try {
+                    FileClass[] fileClasses1 = FileClassUtil.getAllFileClasses();
+                    if (fileClasses1 != null)
+                        for (FileClass fileClass : fileClasses1) {
+                            fileClassDao.insertFileClass(fileClass); // not check log
+                            pullLog(context, logModule);
+                        }
+                }
+                catch (ServerErrorException ex) {
+                    ex.printStackTrace();
+                }
+            }
             break;
-            case Mod_Schedule: { }
+            case Mod_Document: {
+                DocumentDao documentDao = new DocumentDao(context);
+                documentDao.deleteDocument();
+
+                try {
+                    Document[] documents = DocumentUtil.getAllFiles("");
+                    for(Document document: documents){
+                        documentDao.insertDocument(document, document.getId());
+                        pullLog(context, logModule);
+                    }
+                }
+                catch (ServerErrorException ex) {
+                    ex.printStackTrace();
+                }
+            }
+            break;
+            case Mod_Schedule: {
+
+            }
             break;
 
         }
@@ -242,9 +288,40 @@ class ServerDbUpdateHelper {
                 }
             }
             break;
-            case Mod_File: { }
+            case Mod_FileClass: {
+                FileClassDao fileClassDao = new FileClassDao(context);
+                List<FileClass> fileClasses = fileClassDao.queryFileClassAll(false);
+                try {
+                    FileClassUtil.pushFileClassAsync(fileClasses.toArray(new FileClass[0]), new IPushCallBack() {
+                        @Override
+                        public void onCallBack() {
+                            pushLog(context, logModule);
+                        }
+                    });
+                }
+                catch (ServerErrorException ex) {
+                    ex.printStackTrace();
+                }
+            }
             break;
-            case Mod_Schedule: { }
+            case Mod_Document: {
+                DocumentDao documentDao = new DocumentDao(context);
+                List<Document> documents = documentDao.queryDocumentAll();
+                try {
+                    DocumentUtil.pushDocumentsAsync(documents.toArray(new Document[0]), new IPushCallBack() {
+                        @Override
+                        public void onCallBack() {
+                            pushLog(context, logModule);
+                        }
+                    });
+                }
+                catch (ServerErrorException ex) {
+                    ex.printStackTrace();
+                }
+            }
+            case Mod_Schedule: {
+
+            }
             break;
         }
     }

@@ -8,14 +8,15 @@ public class UtLog implements Serializable {
     public final static String Log_Note = "Note";
     public final static String Log_Group = "Group";
     public final static String Log_Star = "Star";
-    public final static String Log_File = "File";
+    public final static String Log_FileClass = "FileClass";
+    public final static String Log_Document = "Document";
     public final static String Log_Schedule = "Schedule";
 
     /**
      * 所有模块集，只用在 UtLogDao
      */
     public final static String[] Log_Modules = {
-        Log_Note, Log_Group, Log_Star, Log_File, Log_Schedule
+        Log_Note, Log_Group, Log_Star, Log_FileClass, Log_Document, Log_Schedule
     };
 
     private String module;

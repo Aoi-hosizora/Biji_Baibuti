@@ -143,8 +143,11 @@ public class UtLogDao {
             case Mod_Star:
                 ret = queryOneModuleLog(UtLog.Log_Star);
                 break;
-            case Mod_File:
-                ret = queryOneModuleLog(UtLog.Log_File);
+            case Mod_FileClass:
+                ret = queryOneModuleLog(UtLog.Log_FileClass);
+                break;
+            case Mod_Document:
+                ret = queryOneModuleLog(UtLog.Log_Document);
                 break;
             case Mod_Schedule:
                 ret = queryOneModuleLog(UtLog.Log_Schedule);
@@ -169,8 +172,11 @@ public class UtLogDao {
             case Mod_Star:
                 updateOneModuleLog(UtLog.Log_Star, new Date());
                 break;
-            case Mod_File:
-                updateOneModuleLog(UtLog.Log_File, new Date());
+            case Mod_FileClass:
+                updateOneModuleLog(UtLog.Log_FileClass, new Date());
+                break;
+            case Mod_Document:
+                updateOneModuleLog(UtLog.Log_Document, new Date());
                 break;
             case Mod_Schedule:
                 updateOneModuleLog(UtLog.Log_Schedule, new Date());
@@ -193,8 +199,11 @@ public class UtLogDao {
             case UtLog.Log_Star:
                 updateOneModuleLog(UtLog.Log_Star, utLog.getUpdateTime());
                 break;
-            case UtLog.Log_File:
-                updateOneModuleLog(UtLog.Log_File, utLog.getUpdateTime());
+            case UtLog.Log_FileClass:
+                updateOneModuleLog(UtLog.Log_FileClass, utLog.getUpdateTime());
+                break;
+            case UtLog.Log_Document:
+                updateOneModuleLog(UtLog.Log_Document, utLog.getUpdateTime());
                 break;
             case UtLog.Log_Schedule:
                 updateOneModuleLog(UtLog.Log_Schedule, utLog.getUpdateTime());

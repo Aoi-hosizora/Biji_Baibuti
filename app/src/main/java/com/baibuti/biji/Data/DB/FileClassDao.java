@@ -9,7 +9,10 @@ import android.database.sqlite.SQLiteStatement;
 import android.util.Log;
 
 import com.baibuti.biji.Data.Models.FileClass;
+import com.baibuti.biji.Data.Models.LogModule;
+import com.baibuti.biji.Net.Models.RespObj.ServerErrorException;
 import com.baibuti.biji.Net.Modules.Auth.AuthMgr;
+import com.baibuti.biji.Net.Modules.File.FileClassUtil;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -31,11 +34,25 @@ public class FileClassDao {
     }
 
     /**
+     * 更新文件分类日志，可能存在冗杂
+     */
+    private void updateLog() {
+        UtLogDao utLogDao = new UtLogDao(context);
+        utLogDao.updateLog(LogModule.Mod_FileClass);
+    }
+
+    public List<FileClass> queryFileClassAll() {
+        return queryFileClassAll(true);
+    }
+
+    /**
      * 查询所有分类列表
      *
      * @return
      */
-    public List<FileClass> queryFileClassAll() { // ArrayList
+    public List<FileClass> queryFileClassAll(boolean isLogCheck) { // ArrayList
+
+        if (isLogCheck) pushpull();
 
         List<FileClass> fileClassList = selectAllClasses();
 
@@ -43,6 +60,20 @@ public class FileClassDao {
             fileClassList.add(insertDefaultClasses());
 
         return fileClassList;
+    }
+
+    public void pushpull() {
+        if (AuthMgr.getInstance().isLogin()) {
+            Log.e("", "run: queryFileClassAll");
+            if (ServerDbUpdateHelper.isLocalNewer(context, LogModule.Mod_FileClass)) { // 本地新
+                // TODO 异步
+                ServerDbUpdateHelper.pushData(context, LogModule.Mod_FileClass);
+            }
+            else if (ServerDbUpdateHelper.isLocalOlder(context, LogModule.Mod_FileClass)) { // 服务器新
+                // TODO 同步
+                ServerDbUpdateHelper.pullData(context, LogModule.Mod_FileClass);
+            }
+        }
     }
 
     // 内部 select
@@ -83,6 +114,13 @@ public class FileClassDao {
     }
 
     public FileClass queryFileClassByName(String fileClassName) {
+        return queryFileClassByName(fileClassName, true);
+    }
+
+    public FileClass queryFileClassByName(String fileClassName, boolean isLogCheck) {
+
+        if (isLogCheck) pushpull();
+
         SQLiteDatabase db = helper.getWritableDatabase();
 
         FileClass fileClass = null;
@@ -119,6 +157,13 @@ public class FileClassDao {
     }
 
     public FileClass queryFileClassById(int fileClassId) {
+        return queryFileClassById(fileClassId, true);
+    }
+
+    public FileClass queryFileClassById(int fileClassId, boolean isLogCheck) {
+
+        if (isLogCheck) pushpull();
+
         SQLiteDatabase db = helper.getWritableDatabase();
 
         FileClass fileClass = null;
@@ -158,7 +203,7 @@ public class FileClassDao {
     public FileClass queryDefaultFileClass() {
         FileClass fileClass = null;
 
-        fileClass = this.queryFileClassByName(FileClass.GetDefaultFileClassName);
+        fileClass = this.queryFileClassByName(FileClass.GetDefaultFileClassName, false);
         if (fileClass != null)
             return fileClass;
 
@@ -170,9 +215,9 @@ public class FileClassDao {
         def.setOrder(0);
         def.setFileClassName(FileClass.GetDefaultFileClassName);
 
-        this.insertFileClass(def);
+        this.insertFileClass(def, def.getId());
 
-        return this.queryFileClassByName(FileClass.GetDefaultFileClassName);
+        return this.queryFileClassByName(FileClass.GetDefaultFileClassName, false);
     }
 
     /**
@@ -200,14 +245,39 @@ public class FileClassDao {
         return fileClass;
     }
 
+    public long insertFileClass(FileClass fileClass){
+        pushpull();
+
+        long ret = insertFileClass(fileClass, -1);
+
+
+        if (AuthMgr.getInstance().isLogin()) {
+            try {
+                if (FileClassUtil.insertFileClass(fileClass) != null)
+                    ServerDbUpdateHelper.pushLog(context, LogModule.Mod_FileClass);
+            }
+            catch (ServerErrorException ex) {
+                ex.printStackTrace();
+            }
+        }
+
+        return ret;
+    }
+
     /**
      * 添加一个分类
      */
-    public long insertFileClass(FileClass fileClass) {
+    public long insertFileClass(FileClass fileClass, int id) {
         HandleDuplicate(fileClass, null);
 
         SQLiteDatabase db = helper.getWritableDatabase();
-        String sql = "insert into db_file_class(f_name,f_order) values(?,?)";
+        String sql;
+
+        if (id == -1)
+            sql = "insert into db_file_class(f_name,f_order) values(?,?)";
+        else
+            sql = "insert into db_file_class(f_name,f_order,f_id) values(?,?,?)";
+
         long ret = 0;
 
         SQLiteStatement stat = db.compileStatement(sql);
@@ -216,6 +286,9 @@ public class FileClassDao {
 
             stat.bindString(1, fileClass.getFileClassName());
             stat.bindLong(2, fileClass.getOrder());
+
+            if (id != -1)
+                stat.bindLong(3, id); // id
 
             ret = stat.executeInsert();
             db.setTransactionSuccessful();
@@ -227,15 +300,21 @@ public class FileClassDao {
             db.endTransaction();
             db.close();
         }
+        updateLog();
+
         return ret;
+    }
+
+    public void updateFileClass(FileClass fileClass){
+        updateFileClass(fileClass, true);
     }
 
     /**
      * 更新一个分类
      */
-    public void updateFileClass(FileClass fileClass) {
+    public void updateFileClass(FileClass fileClass, boolean isLogCheck) {
 
-        FileClass oldFileClass = queryFileClassById(fileClass.getId());
+        FileClass oldFileClass = queryFileClassById(fileClass.getId(), isLogCheck);
 
         HandleDuplicate(fileClass, oldFileClass);
 
@@ -259,6 +338,18 @@ public class FileClassDao {
                 db.close();
             }
         }
+
+        if (isLogCheck && AuthMgr.getInstance().isLogin()) {
+            try {
+                if (FileClassUtil.updateFileClass(fileClass) != null)
+                    ServerDbUpdateHelper.pushLog(context, LogModule.Mod_FileClass);
+            }
+            catch (ServerErrorException ex) {
+                ex.printStackTrace();
+            }
+        }
+
+        updateLog();
     }
 
     /**
@@ -275,10 +366,20 @@ public class FileClassDao {
         return false;
     }
 
+    public int deleteFileClass(int fileClassId) throws EditDefaultFileClassException {
+        return deleteFileClass(fileClassId, true);
+    }
+
     /**
      * 删除一个分类
      */
-    public int deleteFileClass(int fileClassId) throws EditDefaultFileClassException {
+    public int deleteFileClass(int fileClassId, boolean isLogCheck) throws EditDefaultFileClassException {
+
+        FileClass f = queryFileClassById(fileClassId, false);
+
+        if (isLogCheck)
+            if (checkDefaultFileClass(queryFileClassById(fileClassId)))
+                throw new EditDefaultFileClassException();
 
         //////////////////////////////////////////////////
 
@@ -299,11 +400,19 @@ public class FileClassDao {
         if (selectAllClasses().isEmpty())
             queryDefaultFileClass();
 
-        return ret;
-    }
+        updateLog();
 
-    public String getDBPath(){
-        return helper.getDBPath();
+        if (isLogCheck && AuthMgr.getInstance().isLogin()) {
+            try {
+                if (FileClassUtil.updateFileClass(f) != null)
+                    ServerDbUpdateHelper.pushLog(context, LogModule.Mod_FileClass);
+            }
+            catch (ServerErrorException ex) {
+                ex.printStackTrace();
+            }
+        }
+
+        return ret;
     }
 }
 

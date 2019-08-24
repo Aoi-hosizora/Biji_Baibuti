@@ -8,6 +8,8 @@ public class RespType {
     private Headers headers;
     private int code;
 
+    public RespType(){}
+
     public RespType(int code, Headers headers, String body) {
         this.body = body;
         this.headers = headers;

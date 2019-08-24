@@ -18,7 +18,7 @@ public class Urls {
     /**
      * 临时设置的本地局域网 (调试记得设置)
      */
-    public static final String tmpLAN = "http://192.168.1.122";
+    public static final String tmpLAN = "http://110.64.87.48";
 
     public static final String ServerIP = tmpLAN;
 
@@ -61,5 +61,20 @@ public class Urls {
      * 后端日志 URL
      */
     public static final String LogUrl = ServerIP + ":8001/log";
+
+    /**
+     * 后端文件分类 URL
+     */
+    public static final String FileClassUrl = ServerIP + ":8001/fileclass";
+
+    /**
+     * 后端文件 URL
+     */
+    public static final String FileUrl = ServerIP + ":8001/file";
+
+    /**
+     * 后端课表 URL
+     */
+    public static final String Schedule = ServerIP + ":8001/schedule";
 
 }

@@ -36,8 +36,8 @@ import com.baibuti.biji.Data.DB.FileClassDao;
 import com.baibuti.biji.Data.Models.Document;
 import com.baibuti.biji.Data.Models.FileClass;
 import com.baibuti.biji.Data.Models.FileItem;
+import com.baibuti.biji.Net.Modules.Auth.AuthMgr;
 import com.baibuti.biji.R;
-import com.baibuti.biji.UI.Activity.FileCloudActivity;
 import com.baibuti.biji.UI.Activity.MainActivity;
 import com.baibuti.biji.UI.Dialog.FileImportDialog;
 import com.baibuti.biji.Utils.StringUtils.Define;
@@ -106,7 +106,6 @@ public class FileFragment extends Fragment {
 
             closeDSL = true;
         }
-        Log.e("db_path", "onCreateView: "+ fileClassDao.getDBPath());
         return view;
     }
 
@@ -125,9 +124,8 @@ public class FileFragment extends Fragment {
         Toolbar mToolBar = view.findViewById(R.id.tab_file_toolbar);
         mToolBar.setTitle(R.string.FileFrag_Header);
 
-        mToolBar.setNavigationIcon(R.drawable.ic_cloud_upload_black_24dp);
+        mToolBar.setNavigationIcon(R.drawable.tab_menu);
         mToolBar.setNavigationOnClickListener(new View.OnClickListener() {
-
             @Override
             public void onClick(View view) {
                 ((MainActivity) getActivity()).openNavMenu();
@@ -177,7 +175,7 @@ public class FileFragment extends Fragment {
                         try {
                             fileClassAdapter.isDeleting = true;
                             fileClassDao.deleteFileClass(fileClassListItems.get(lastPositionClicked).getId());
-                            documentDao.deleteDocumentByClass(fileClassListItems.get(lastPositionClicked).getFileClassName());
+                            documentDao.deleteDocumentByClass(fileClassListItems.get(lastPositionClicked).getFileClassName(), true);
                             fileClassListItems.remove(lastPositionClicked);
                             documentListItems.clear();
                             documentListsByClass.remove(lastPositionClicked);
@@ -676,7 +674,7 @@ public class FileFragment extends Fragment {
     private void deleteDocumentFromList(int position){
         try {
             String path = documentListItems.get(position).getDocumentPath();
-            documentDao.deleteDocumentByPath(path);
+            documentDao.deleteDocumentByPath(path, true);
             documentListItems.remove(position);
             documentListsByClass.get(lastPositionClicked).remove(position);
             documentAdapter.notifyDataSetChanged();

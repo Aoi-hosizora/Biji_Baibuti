@@ -15,7 +15,6 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
         tools:ignore="GoogleAppIndexingWarning">
-        <activity android:name=".UI.Activity.FileCloudActivity"></activity>
         <!-- Main Activity -->
         <activity
             android:name=".UI.Activity.MainActivity"
@@ -53,13 +52,9 @@
 
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
-<<<<<<< HEAD
-        </activity> <!-- StarSearchItemActivity Activity -->
-=======
         </activity>
 
         <!-- StarSearchItem Activity -->
->>>>>>> master
         <activity
             android:name=".UI.Activity.StarSearchItemActivity"
             android:screenOrientation="portrait">
@@ -68,13 +63,9 @@
 
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
-<<<<<<< HEAD
-        </activity> <!-- StarSearchItemActivity Activity -->
-=======
         </activity>
 
         <!-- OCR Activity -->
->>>>>>> master
         <activity
             android:name=".UI.Activity.OCRActivity"
             android:screenOrientation="portrait">
@@ -83,9 +74,6 @@
 
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
-<<<<<<< HEAD
-        </activity> <!-- PreLoaded Font -->
-=======
         </activity>
 
         <!-- RegLog Activity -->
@@ -99,7 +87,6 @@
         </activity>
 
         <!-- PreLoaded Font -->
->>>>>>> master
         <meta-data
             android:name="preloaded_fonts"
             android:resource="@array/preloaded_fonts" /> <!-- File Provider -->

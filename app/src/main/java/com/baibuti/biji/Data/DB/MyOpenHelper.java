@@ -70,7 +70,7 @@ public class MyOpenHelper extends SQLiteOpenHelper {
     }
 
     private void Create_Db_document(SQLiteDatabase db) {
-        db.execSQL("create table db_document(" +
+        db.execSQL("create table if not exists db_document(" +
                 "doc_id integer primary key autoincrement, " +
                 "doc_path varchar, " +
                 "doc_class_name varchar )");
@@ -160,9 +160,5 @@ public class MyOpenHelper extends SQLiteOpenHelper {
                 return true;
 
         return false;
-    }
-
-    public String getDBPath(){
-        return mContext.getDatabasePath(DB_NAME).getPath();
     }
 }
