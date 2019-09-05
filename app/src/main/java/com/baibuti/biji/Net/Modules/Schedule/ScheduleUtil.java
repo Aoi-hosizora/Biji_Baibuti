@@ -1,10 +1,8 @@
-package com.baibuti.biji.Net.Modules.File;
+package com.baibuti.biji.Net.Modules.Schedule;
 
-import android.support.annotation.NonNull;
+import android.util.Log;
 
-import com.baibuti.biji.Data.Models.FileClass;
 import com.baibuti.biji.Interface.IPushCallBack;
-import com.baibuti.biji.Net.Models.ReqBody.FileClassReqBody;
 import com.baibuti.biji.Net.Models.RespBody.MessageResp;
 import com.baibuti.biji.Net.Models.RespObj.ServerErrorException;
 import com.baibuti.biji.Net.Models.RespType;
@@ -12,50 +10,26 @@ import com.baibuti.biji.Net.Modules.Auth.AuthMgr;
 import com.baibuti.biji.Net.NetUtil;
 import com.baibuti.biji.Net.Urls;
 
-import java.io.File;
 import java.io.IOException;
 
+import io.reactivex.annotations.NonNull;
 import okhttp3.Call;
 import okhttp3.Callback;
 import okhttp3.Response;
 import okhttp3.internal.annotations.EverythingIsNonNull;
 
-public class FileClassUtil {
+public class ScheduleUtil {
 
-    private static final String AllFileClassUrl = Urls.FileClassUrl + "/all";
-    private static final String UpdateFileClassUrl = Urls.FileClassUrl + "/update";
-    private static final String InsertFileClassUrl = Urls.FileClassUrl + "/insert";
-    private static final String DeleteFileClassUrl = Urls.FileClassUrl + "/delete";
-    private static final String PushFileClassUrl = Urls.FileClassUrl + "/push";
-    private static final String GetShareCodeUrl = Urls.FileClassUrl + "/share";
+    private static final String InsertScheduleUrl = Urls.Schedule + "/upload";
+    private static final String DeleteScheduleUrl = Urls.Schedule + "/delete";
+    private static final String UpdateScheduleUrl = Urls.Schedule + "/update";
+    private static final String GetScheduleUrl = Urls.Schedule + "/download";
+    private static final String PushScheduleUrl = Urls.Schedule + "/push";
 
-    public static FileClass[] getAllFileClasses() throws ServerErrorException {
-        RespType resp = NetUtil.httpGetSync(AllFileClassUrl, NetUtil.getOneHeader("Authorization", AuthMgr.getInstance().getToken()));
-        try {
-            int code = resp.getCode();
-            if (code == 200) {
-                String newToken = resp.getHeaders().get("Authorization");
-                if (newToken != null && !(newToken.isEmpty()))
-                    AuthMgr.getInstance().setToken(newToken);
-
-                FileClassReqBody[] rets = FileClassReqBody.getFileClassRespsFromJson(resp.getBody());
-                return FileClassReqBody.toFileClasses(rets);
-            }
-            else {
-                MessageResp msg = MessageResp.getMsgRespFromJson(resp.getBody());
-                throw new ServerErrorException(msg.getMessage(), msg.getDetail(), code);
-            }
-        }
-        catch (NullPointerException ex) {
-            ex.printStackTrace();
-            return null;
-        }
-    }
-
-    public static FileClass updateFileClass(FileClass fileClass) throws ServerErrorException {
+    public static boolean insertSchedule(String scheduleJson) throws ServerErrorException {
         RespType resp = NetUtil.httpPostPutDeleteSync(
-                UpdateFileClassUrl, NetUtil.PUT,
-                FileClassReqBody.toFileClassReqBody(fileClass).toJson(),
+                InsertScheduleUrl, NetUtil.POST,
+                "{\"schedulejson\":" + scheduleJson + "}",
                 NetUtil.getOneHeader("Authorization", AuthMgr.getInstance().getToken())
         );
 
@@ -66,8 +40,7 @@ public class FileClassUtil {
                 if (newToken != null && !(newToken.isEmpty()))
                     AuthMgr.getInstance().setToken(newToken);
 
-                FileClassReqBody ret = FileClassReqBody.getFileClassRespFromJson(resp.getBody());
-                return ret.toFileClass();
+                return true;
             }
             else {
                 MessageResp msg = MessageResp.getMsgRespFromJson(resp.getBody());
@@ -76,14 +49,40 @@ public class FileClassUtil {
         }
         catch (NullPointerException ex) {
             ex.printStackTrace();
-            return null;
+            return false;
         }
     }
 
-    public static FileClass insertFileClass(FileClass fileClass) throws ServerErrorException {
+    public static boolean deleteSchedule() throws ServerErrorException {
         RespType resp = NetUtil.httpPostPutDeleteSync(
-                InsertFileClassUrl, NetUtil.POST,
-                FileClassReqBody.toFileClassReqBody(fileClass).toJson(),
+                DeleteScheduleUrl, NetUtil.DELETE,
+                "{}",
+                NetUtil.getOneHeader("Authorization", AuthMgr.getInstance().getToken())
+        );
+        try {
+            int code = resp.getCode();
+            if (code == 200) {
+                String newToken = resp.getHeaders().get("Authorization");
+                if (newToken != null && !(newToken.isEmpty()))
+                    AuthMgr.getInstance().setToken(newToken);
+
+                return true;
+            }
+            else {
+                MessageResp msg = MessageResp.getMsgRespFromJson(resp.getBody());
+                throw new ServerErrorException(msg.getMessage(), msg.getDetail(), code);
+            }
+        }
+        catch (NullPointerException ex) {
+            ex.printStackTrace();
+            return false;
+        }
+    }
+
+    public static boolean updateSchedule(String scheduleJson) throws ServerErrorException {
+        RespType resp = NetUtil.httpPostPutDeleteSync(
+                UpdateScheduleUrl, NetUtil.PUT,
+                "{\"schedulejson\":" + scheduleJson + "}",
                 NetUtil.getOneHeader("Authorization", AuthMgr.getInstance().getToken())
         );
 
@@ -94,8 +93,7 @@ public class FileClassUtil {
                 if (newToken != null && !(newToken.isEmpty()))
                     AuthMgr.getInstance().setToken(newToken);
 
-                FileClassReqBody ret = FileClassReqBody.getFileClassRespFromJson(resp.getBody());
-                return ret.toFileClass();
+                return true;
             }
             else {
                 MessageResp msg = MessageResp.getMsgRespFromJson(resp.getBody());
@@ -104,17 +102,12 @@ public class FileClassUtil {
         }
         catch (NullPointerException ex) {
             ex.printStackTrace();
-            return null;
+            return false;
         }
     }
 
-    public static FileClass deleteFileClass(FileClass fileClass) throws ServerErrorException {
-        RespType resp = NetUtil.httpPostPutDeleteSync(
-                DeleteFileClassUrl, NetUtil.DELETE,
-                FileClassReqBody.toFileClassReqBody(fileClass).toJson(),
-                NetUtil.getOneHeader("Authorization", AuthMgr.getInstance().getToken())
-        );
-
+    public static String getSchedule() throws ServerErrorException {
+        RespType resp = NetUtil.httpGetSync(GetScheduleUrl, NetUtil.getOneHeader("Authorization", AuthMgr.getInstance().getToken()));
         try {
             int code = resp.getCode();
             if (code == 200) {
@@ -122,8 +115,8 @@ public class FileClassUtil {
                 if (newToken != null && !(newToken.isEmpty()))
                     AuthMgr.getInstance().setToken(newToken);
 
-                FileClassReqBody ret = FileClassReqBody.getFileClassRespFromJson(resp.getBody());
-                return ret.toFileClass();
+                Log.e("测试", "getSchedule from backend: " + resp.getBody());
+                return resp.getBody();
             }
             else {
                 MessageResp msg = MessageResp.getMsgRespFromJson(resp.getBody());
@@ -136,10 +129,10 @@ public class FileClassUtil {
         }
     }
 
-    public static void pushFileClassAsync(FileClass[] fileClasses, @NonNull IPushCallBack pushCallBack) throws ServerErrorException {
+    public static void pushSchedule(String scheduleJson, @NonNull IPushCallBack pushCallBack) throws ServerErrorException {
         NetUtil.httpPostPutDeleteAsync(
-                PushFileClassUrl, NetUtil.POST,
-                FileClassReqBody.getJsonFromFileClassReqRodies(FileClassReqBody.toFileClassReqBodies(fileClasses)),
+                PushScheduleUrl, NetUtil.POST,
+                "{\"schedulejson\":" + scheduleJson + "}",
                 NetUtil.getOneHeader("Authorization", AuthMgr.getInstance().getToken()),
                 new Callback() {
                     @Override
@@ -161,13 +154,6 @@ public class FileClassUtil {
         );
     }
 
-    public static File getShareCode(String fileClassName){
 
-        return NetUtil.httpGetFileSync(
-                GetShareCodeUrl + "?foldername=" + fileClassName,
-                "Share",
-                fileClassName + ".png",
-                NetUtil.getOneHeader("Authorization", AuthMgr.getInstance().getToken())
-        );
-    }
+
 }

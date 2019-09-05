@@ -301,7 +301,7 @@ public class NetUtil {
     ////////////////////////////////////// HTTP Post File Async //////////////////////////////////////
     /////////////////////////////////////////////////////////////////////////////////////////////////
 
-    public static void httpPostFileAsync(String url, String key, File file, Map<String, String> headers, Callback responseCallback){
+    public static void httpPostFileAsync(String url, Map<String, String> k_v, String key, File file, Map<String, String> headers, Callback responseCallback){
 
         OkHttpClient okHttpClient = new OkHttpClient();
         try {
@@ -310,6 +310,8 @@ public class NetUtil {
 
             if (key != null && !(key.isEmpty()) && file != null) {
                 RequestBody body = RequestBody.create(MediaType.parse("*"), file);
+                requestBody.addFormDataPart("id", k_v.get("id"));
+                requestBody.addFormDataPart("foldername", k_v.get("foldername"));
                 requestBody.addFormDataPart(key, file.getName(), body);
             }
             else

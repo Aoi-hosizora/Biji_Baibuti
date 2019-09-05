@@ -18,6 +18,7 @@ import com.baibuti.biji.Net.Modules.File.FileClassUtil;
 import com.baibuti.biji.Net.Modules.Log.LogUtil;
 import com.baibuti.biji.Net.Modules.Note.GroupUtil;
 import com.baibuti.biji.Net.Modules.Note.NoteUtil;
+import com.baibuti.biji.Net.Modules.Schedule.ScheduleUtil;
 import com.baibuti.biji.Net.Modules.Star.StarUtil;
 
 import java.util.Date;
@@ -40,7 +41,7 @@ class ServerDbUpdateHelper {
         try {
             Date server = LogUtil.getOneLog(logModule).getUpdateTime();
 
-            Log.e("", "isLocalNewer: " + local + server + ", after " + local.after(server) + ", before" + local.before(server));
+            Log.e("测试", "isLocalNewer: " + local + server + ", after " + local.after(server) + ", before" + local.before(server));
             return local.after(server);
         }
         catch (ServerErrorException ex) {
@@ -67,6 +68,7 @@ class ServerDbUpdateHelper {
         Date local = utLogDao.getLog(logModule).getUpdateTime();
         try {
             Date server = LogUtil.getOneLog(logModule).getUpdateTime();
+            Log.e("测试", "isLocalOlder: " + local + server + ", after " + local.after(server) + ", before" + local.before(server));
             return local.before(server);
         }
         catch (ServerErrorException ex) {
@@ -90,7 +92,7 @@ class ServerDbUpdateHelper {
         if (!(AuthMgr.getInstance().isLogin()))
             return;
 
-        Log.e("", "pullData: " + logModule.toString());
+        Log.e("测试", "pullData: " + logModule.toString());
 
         // 更新数据
         switch (logModule) {
@@ -164,7 +166,7 @@ class ServerDbUpdateHelper {
                 for (FileClass fileClass : fileClasses)
                     try {
                         // 不会抛出
-                        fileClassDao.deleteFileClass(fileClass.getId());
+                        fileClassDao.deleteFileClass(fileClass.getId(), false);
                     }
                     catch (EditDefaultFileClassException ex) {
                         ex.printStackTrace();
@@ -172,11 +174,12 @@ class ServerDbUpdateHelper {
 
                 try {
                     FileClass[] fileClasses1 = FileClassUtil.getAllFileClasses();
-                    if (fileClasses1 != null)
+                    if (fileClasses1 != null) {
                         for (FileClass fileClass : fileClasses1) {
-                            fileClassDao.insertFileClass(fileClass); // not check log
-                            pullLog(context, logModule);
+                            fileClassDao.insertFileClass(fileClass, fileClass.getId()); // not check log
                         }
+                        pullLog(context, logModule);
+                    }
                 }
                 catch (ServerErrorException ex) {
                     ex.printStackTrace();
@@ -190,9 +193,12 @@ class ServerDbUpdateHelper {
                 try {
                     Document[] documents = DocumentUtil.getAllFiles("");
                     for(Document document: documents){
+                        Log.e("测试", "pull: " + document.getId() + ' ' +
+                                document.getDocumentName() + ' ' +
+                                document.getDocumentClassName() + '\n');
                         documentDao.insertDocument(document, document.getId());
-                        pullLog(context, logModule);
                     }
+                    pullLog(context, logModule);
                 }
                 catch (ServerErrorException ex) {
                     ex.printStackTrace();
@@ -200,7 +206,15 @@ class ServerDbUpdateHelper {
             }
             break;
             case Mod_Schedule: {
-
+                ScheduleDao scheduleDao = new ScheduleDao(context);
+                scheduleDao.deleteScheduleJson(false);
+                try {
+                    String scheduleJson = ScheduleUtil.getSchedule();
+                    scheduleDao.insertScheduleJson(scheduleJson, false);
+                    pullLog(context, logModule);
+                } catch (ServerErrorException ex) {
+                    ex.printStackTrace();
+                }
             }
             break;
 
@@ -237,7 +251,7 @@ class ServerDbUpdateHelper {
         if (!(AuthMgr.getInstance().isLogin()))
             return;
 
-        Log.e("", "pushData: " + logModule.toString());
+        Log.e("测试", "pushData: " + logModule.toString());
 
         switch (logModule) {
             case Mod_Note: {
@@ -320,7 +334,19 @@ class ServerDbUpdateHelper {
                 }
             }
             case Mod_Schedule: {
-
+                ScheduleDao scheduleDao = new ScheduleDao(context);
+                String scheduleJson = scheduleDao.queryScheduleJson(false);
+                try {
+                    ScheduleUtil.pushSchedule(scheduleJson, new IPushCallBack() {
+                        @Override
+                        public void onCallBack() {
+                            pushLog(context, logModule);
+                        }
+                    });
+                }
+                catch (ServerErrorException ex) {
+                    ex.printStackTrace();
+                }
             }
             break;
         }

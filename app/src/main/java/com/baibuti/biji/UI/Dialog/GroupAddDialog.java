@@ -11,7 +11,10 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.view.View.OnClickListener;
 
+import com.baibuti.biji.Data.DB.UtLogDao;
 import com.baibuti.biji.Data.Models.Group;
+import com.baibuti.biji.Data.Models.LogModule;
+import com.baibuti.biji.Data.Models.UtLog;
 import com.baibuti.biji.R;
 import com.baibuti.biji.Data.DB.GroupDao;
 import com.baibuti.biji.Data.DB.NoteDao;
@@ -212,6 +215,9 @@ public class GroupAddDialog extends AlertDialog implements OnClickListener {
 
                             try {
                                 groupDao.insertGroup(newGroup);
+
+                                Log.e("测试", "GroupAddDialog.UpdateGroup" + new UtLogDao(getContext()).getLog(LogModule.Mod_Group).getUpdateTime().toString());
+
                                 activity.runOnUiThread(new Runnable() {
                                     @Override
                                     public void run() {

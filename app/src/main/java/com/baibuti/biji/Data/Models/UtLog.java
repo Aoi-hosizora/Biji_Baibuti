@@ -9,7 +9,7 @@ public class UtLog implements Serializable {
     public final static String Log_Group = "Group";
     public final static String Log_Star = "Star";
     public final static String Log_FileClass = "FileClass";
-    public final static String Log_Document = "Document";
+    public final static String Log_Document = "File";
     public final static String Log_Schedule = "Schedule";
 
     /**

@@ -46,7 +46,7 @@ public class DocumentAdapter extends RecyclerView.Adapter<DocumentAdapter.ViewHo
             public void onClick(View v) {
                 int position = holder.getAdapterPosition();
                 if(null != onDocumentClickListener)
-                    onDocumentClickListener.OnDocumentClick(mDocuments.get(position).getDocumentPath());
+                    onDocumentClickListener.OnDocumentClick(mDocuments.get(position));
             }
         });
         view.setOnLongClickListener(new View.OnLongClickListener() {
@@ -107,7 +107,7 @@ public class DocumentAdapter extends RecyclerView.Adapter<DocumentAdapter.ViewHo
     }
 
     public interface OnDocumentClickListener{
-        public void OnDocumentClick(String path);
+        public void OnDocumentClick(Document document);
     }
 
     public interface OnDocumentLongClickListener{

@@ -14,4 +14,13 @@
         android:title="@string/Filefragment_Item_Import_Title"
         app:showAsAction="never"/>
 
+    <item android:id="@+id/action_share_documents"
+        android:title="@string/Filefragment_Item_Share_Title"
+        app:showAsAction="never"/>
+
+    <item android:id="@+id/action_scan_share_code"
+        android:title="@string/Filefragment_Item_Scan_Title"
+        android:icon="@drawable/ic_scan_share_code"
+        app:showAsAction="always" />
+
 </menu>

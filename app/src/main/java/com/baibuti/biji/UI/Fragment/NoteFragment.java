@@ -129,6 +129,11 @@ public class NoteFragment extends Fragment implements View.OnClickListener {
      */
     private final int ScrollShowHideInterpolator = 1;
 
+    /**
+     * 标记登录时是否刷新过
+     */
+    private boolean HasRefreshed = false;
+
     // endregion 声明: 一些等待的秒数
 
     // region 创建界面 菜单栏 浮动菜单 等待框 搜索框 右划菜单 onCreateView initToolbar initFabMenu setupProgressAndSR initSearchFrag ShowLogE onClick initRightMenu
@@ -1362,13 +1367,35 @@ public class NoteFragment extends Fragment implements View.OnClickListener {
 
             // TODO
             public void onLogin(String UserName) {
-                SearchGroupBack();
+                if(getUserVisibleHint()) {
+                    SearchGroupBack();
+                    HasRefreshed = true;
+                }
+                else
+                    HasRefreshed = false;
             }
 
             @Override
             public void onLogout() {
-                SearchGroupBack();
+                if(getUserVisibleHint()) {
+                    SearchGroupBack();
+                    HasRefreshed = true;
+                }
+                else
+                    HasRefreshed = false;
             }
         });
+    }
+
+    /**
+     * 对用户可见时，判断是否需要刷新
+     */
+    @Override
+    public void onResume() {
+        super.onResume();
+        if(!HasRefreshed){
+            SearchGroupBack();
+            HasRefreshed = true;
+        }
     }
 }

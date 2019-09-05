@@ -11,7 +11,7 @@ import java.util.Locale;
 
 public class MyOpenHelper extends SQLiteOpenHelper {
 
-    private final static String DEF_DB_NAME = "note.db";
+    private final static String DEF_DB_NAME = "biji.db";
     private final static String DB_USR_NAME = "biji_%s.db";
 
     /**
@@ -33,9 +33,11 @@ public class MyOpenHelper extends SQLiteOpenHelper {
      * 5:
      * create table db_log
      *
+     * 6:
+     * create table db_schedule
      */
 
-    private final static int DB_VERSION = 5;// 数据库版本
+    private final static int DB_VERSION = 6;// 数据库版本
 
     public MyOpenHelper(Context context, String UsrName) {
         super(context, (UsrName == null || UsrName.isEmpty()) ?
@@ -73,7 +75,8 @@ public class MyOpenHelper extends SQLiteOpenHelper {
         db.execSQL("create table if not exists db_document(" +
                 "doc_id integer primary key autoincrement, " +
                 "doc_path varchar, " +
-                "doc_class_name varchar )");
+                "doc_class_name varchar, " +
+                "doc_name varchar)");
     }
 
     private void Create_Db_searchItemStar(SQLiteDatabase db) {
@@ -87,6 +90,11 @@ public class MyOpenHelper extends SQLiteOpenHelper {
         db.execSQL("create table if not exists db_log (" +
                 "log_module varchar primary key, " +
                 "log_ut datetime)");
+    }
+
+    private void Create_Db_schedule(SQLiteDatabase db) {
+        db.execSQL("create table if not exists db_schedule (" +
+                "schedule_json varchar primary key)");
     }
 
     @Override
@@ -108,6 +116,9 @@ public class MyOpenHelper extends SQLiteOpenHelper {
 
         // 创建日志表
         Create_Db_log(db);
+
+        // 创建课表json表
+        Create_Db_schedule(db);
     }
 
     @Override
@@ -143,6 +154,11 @@ public class MyOpenHelper extends SQLiteOpenHelper {
         if (version == 4) {
             Create_Db_log(db);
             version = 5;
+        }
+
+        if (version == 5) {
+            Create_Db_schedule(db);
+            version = 6;
         }
     }
 

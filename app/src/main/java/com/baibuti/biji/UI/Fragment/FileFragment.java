@@ -2,13 +2,16 @@ package com.baibuti.biji.UI.Fragment;
 
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.provider.MediaStore;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.FileProvider;
@@ -16,13 +19,17 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.Window;
+import android.view.WindowManager;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.SearchView;
@@ -33,21 +40,33 @@ import com.baibuti.biji.Data.Adapters.DocumentAdapter;
 import com.baibuti.biji.Data.Adapters.FileClassAdapter;
 import com.baibuti.biji.Data.DB.DocumentDao;
 import com.baibuti.biji.Data.DB.FileClassDao;
+import com.baibuti.biji.Data.DB.UtLogDao;
 import com.baibuti.biji.Data.Models.Document;
 import com.baibuti.biji.Data.Models.FileClass;
 import com.baibuti.biji.Data.Models.FileItem;
+import com.baibuti.biji.Data.Models.LogModule;
+import com.baibuti.biji.Net.Models.RespObj.ServerErrorException;
 import com.baibuti.biji.Net.Modules.Auth.AuthMgr;
+import com.baibuti.biji.Net.Modules.File.DocumentUtil;
+import com.baibuti.biji.Net.Modules.File.FileClassUtil;
 import com.baibuti.biji.R;
 import com.baibuti.biji.UI.Activity.MainActivity;
+import com.baibuti.biji.UI.Activity.QrCodeActivity;
 import com.baibuti.biji.UI.Dialog.FileImportDialog;
 import com.baibuti.biji.Utils.StringUtils.Define;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.io.File;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import butterknife.OnClick;
 
 public class FileFragment extends Fragment {
 
@@ -76,35 +95,47 @@ public class FileFragment extends Fragment {
     private List<FileItem> importedDocuments = new ArrayList<>();
 
     //标记导入的文件是否被选择
-    final private static int UNCHECKED = 0;
     final private static int CHECKED = 1;
 
     private LinearLayout searchResultLayout;
     private RecyclerView searchResultList;
     private List<Document> searchResults = new ArrayList<>();
     private DocumentAdapter searchResultAdapter;
+    private ProgressDialog loadingDialog;
 
+    //标记是否需要关闭搜索结果页面
     private boolean closeDSL = false;
+    /**
+     * 标记登录时是否刷新过
+     */
+    private boolean HasRefreshed = false;
+    /**
+     * 标记是否已经初始化界面
+     */
+    private boolean HasInitedView = false;
+
+    private static final int REQUEST_CODE_FOR_QA = 100;
+    private static final int RESULT_CODE_FOR_QA = 101;
 
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         if (null != view) {
-            Log.e("test_filefragment", "有缓存: 执行");
             ViewGroup parent = (ViewGroup) view.getParent();
             if (null != parent)
                 parent.removeView(view);
         }
         else {
-            Log.e("test_filefragment", "没有缓存: 执行");
             view = inflater.inflate(R.layout.fragment_filetab, container, false);
+
+            loadingDialog = new ProgressDialog(getContext());
+            loadingDialog.setMessage(getResources().getString(R.string.NoteFrag_LoadingData));
+            loadingDialog.setCanceledOnTouchOutside(false);
 
             initToolBar(view);
             initSearchResultLayout(view);
-            initFileClassList(view);
-            initDocumentLayout(view);
-
-            closeDSL = true;
+            initData();
+            registerAuthActions();
         }
         return view;
     }
@@ -141,80 +172,19 @@ public class FileFragment extends Fragment {
 
                 switch (item.getItemId()){
                     case R.id.action_rename_fileclass:
-                        //重命名分组
-                        String currentFileClassName = documentHeader.getText().toString();
-                        final FileClass currentFileClass = fileClassDao.queryFileClassByName(currentFileClassName);
-
-                        final EditText edit = new EditText(getContext());
-                        AlertDialog.Builder editDialog = new AlertDialog.Builder(getContext());
-                        editDialog.setTitle(getString(R.string.FileclassDialog_Renameclass));
-                        editDialog.setIcon(R.drawable.ic_rename);
-                        edit.setHint("资料分类名...");
-                        //设置dialog布局
-                        editDialog.setView(edit);
-
-                        //设置按钮
-                        editDialog.setPositiveButton(getString(R.string.FileClassDialog_ConfirmBtn)
-                                , new DialogInterface.OnClickListener() {
-                                    @Override
-                                    public void onClick(DialogInterface dialog, int which) {
-
-                                        if(!isLegalName(edit.getText().toString().trim()))
-                                            HandleIllegalName();
-                                        else
-                                            updateFileClassList(edit.getText().toString().trim(), TAG_RENAME, currentFileClass, lastPositionClicked);
-
-                                        dialog.dismiss();
-                                    }
-                                });
-
-                        editDialog.create().show();
+                        renameFileclass();
                         break;
                     case R.id.action_delete_fileclass:
-                        //删除分类
-                        try {
-                            fileClassAdapter.isDeleting = true;
-                            fileClassDao.deleteFileClass(fileClassListItems.get(lastPositionClicked).getId());
-                            documentDao.deleteDocumentByClass(fileClassListItems.get(lastPositionClicked).getFileClassName(), true);
-                            fileClassListItems.remove(lastPositionClicked);
-                            documentListItems.clear();
-                            documentListsByClass.remove(lastPositionClicked);
-                            fileClassAdapter.notifyDataSetChanged();
-                            documentAdapter.notifyDataSetChanged();
-                            documentHeader.setText("");
-                            unSelectedText.setVisibility(View.VISIBLE);
-                        }catch (Exception e){
-                            e.printStackTrace();
-                            Toast.makeText(getContext(), "删除失败", Toast.LENGTH_LONG).show();
-                        }
-                        //fileClassAdapter.isDeleting = false;
+                        deleteFileclass();
                         break;
                     case R.id.action_import_documents:
-                        //导入资料
-                        if(!documentHeader.getText().toString().equals("")) {
-                            FileImportDialog cdd = new FileImportDialog(getActivity(), importedDocuments);
-                            cdd.setOnFinishScanListener(new FileImportDialog.OnFinishScanListener() {
-                                @Override
-                                public void OnFinish() {
-                                    Toast.makeText(getContext(), importedDocuments.size() + "", Toast.LENGTH_LONG).show();
-                                    for (FileItem f : importedDocuments) {
-                                        if (f.getTag() == CHECKED) {
-                                            Document newDocument = new Document(f.getFileType(), f.getFileName(), f.getFilePath(), documentHeader.getText().toString());
-                                            documentListItems.add(newDocument);
-                                            documentDao.insertDocument(newDocument);
-                                        }
-                                    }
-
-                                    documentAdapter.notifyDataSetChanged();
-
-                                    documentListsByClass.remove(lastPositionClicked);
-                                    documentListsByClass.add(lastPositionClicked, new ArrayList<>(documentListItems));
-
-                                    importedDocuments.clear();
-                                }
-                            });
-                            cdd.show();
-                        }
+                        importFileclass();
+                        break;
+                    case R.id.action_share_documents:
+                        shareDocuments();
+                        break;
+                    case R.id.action_scan_share_code:
+                        scanShareCode();
                         break;
                 }
                 return true;
@@ -279,6 +249,291 @@ public class FileFragment extends Fragment {
 
     }
 
+    private void renameFileclass(){
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                //重命名分组
+                String currentFileClassName = documentHeader.getText().toString();
+                final FileClass currentFileClass = fileClassDao.queryFileClassByName(currentFileClassName, false);
+
+                activity.runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        final EditText edit = new EditText(getContext());
+                        AlertDialog.Builder editDialog = new AlertDialog.Builder(getContext());
+                        editDialog.setTitle(getString(R.string.FileclassDialog_Renameclass));
+                        editDialog.setIcon(R.drawable.ic_rename);
+                        edit.setHint("资料分类名...");
+                        //设置dialog布局
+                        editDialog.setView(edit);
+
+                        //设置按钮
+                        editDialog.setPositiveButton(getString(R.string.FileClassDialog_ConfirmBtn)
+                                , new DialogInterface.OnClickListener() {
+                                    @Override
+                                    public void onClick(DialogInterface dialog, int which) {
+
+                                        if(!isLegalName(edit.getText().toString().trim()))
+                                            HandleIllegalName();
+                                        else
+                                            updateFileClassList(edit.getText().toString().trim(), TAG_RENAME, currentFileClass, lastPositionClicked);
+
+                                        dialog.dismiss();
+                                    }
+                                });
+
+                        editDialog.create().show();
+                    }
+                });
+            }
+        }).start();
+
+    }
+
+    private void deleteFileclass(){
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                //删除分类
+                try {
+                    activity.runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            fileClassAdapter.isDeleting = true;
+                        }
+                    });
+
+                    activity.runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            showLoadingDialog("删除中...");
+                        }
+                    });
+
+                    Log.e("测试", "run: " + lastPositionClicked);
+                    fileClassDao.deleteFileClass(fileClassListItems.get(lastPositionClicked).getId());
+                    documentDao.deleteDocumentByClass(fileClassListItems.get(lastPositionClicked).getFileClassName(), true);
+                    activity.runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            fileClassListItems.remove(lastPositionClicked);
+                            documentListItems.clear();
+                            documentListsByClass.remove(lastPositionClicked);
+                            fileClassAdapter.lastButton = null;
+                            fileClassAdapter.notifyDataSetChanged();
+                            documentAdapter.notifyDataSetChanged();
+                            documentHeader.setText("");
+                            unSelectedText.setVisibility(View.VISIBLE);
+                        }
+                    });
+                }catch (Exception e){
+                    e.printStackTrace();
+                    activity.runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            Toast.makeText(getContext(), "删除失败", Toast.LENGTH_LONG).show();
+                        }
+                    });
+                }
+
+                activity.runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        cancelLoadingDialog();
+                    }
+                });
+            }
+        }).start();
+
+    }
+
+    private void importFileclass(){
+        //导入资料
+        if(!documentHeader.getText().toString().equals("")) {
+            FileImportDialog cdd = new FileImportDialog(getActivity(), importedDocuments);
+            cdd.setOnFinishScanListener(new FileImportDialog.OnFinishScanListener() {
+                @Override
+                public void OnFinish() {
+                    Toast.makeText(getContext(), importedDocuments.size() + "", Toast.LENGTH_LONG).show();
+
+                    new Thread(new Runnable() {
+                        @Override
+                        public void run() {
+
+                            activity.runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    showLoadingDialog("上传中...");
+                                }
+                            });
+
+                            for(int i = 0; i < importedDocuments.size(); i++){
+
+                                FileItem f = importedDocuments.get(i);
+                                if (f.getTag() == CHECKED) {
+                                    Document newDocument = new Document(f.getFileType(), f.getFileName(), f.getFilePath(), documentHeader.getText().toString());
+                                    activity.runOnUiThread(new Runnable() {
+                                        @Override
+                                        public void run() {
+                                            documentListItems.add(newDocument);
+                                        }
+                                    });
+                                    documentDao.insertDocument(newDocument);
+                                }
+                            }
+                            activity.runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    documentAdapter.notifyDataSetChanged();
+                                    documentListsByClass.remove(lastPositionClicked);
+                                    documentListsByClass.add(lastPositionClicked, new ArrayList<>(documentListItems));
+                                    importedDocuments.clear();
+
+                                    cancelLoadingDialog();
+                                }
+                            });
+                        }
+                    }).start();
+                }
+            });
+            cdd.show();
+        }
+    }
+
+    private void shareDocuments(){
+
+        if(documentHeader.getText().toString().equals(""))
+            Toast.makeText(getContext(), "未选择分类", Toast.LENGTH_SHORT).show();
+
+        showLoadingDialog("生成共享码...");
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                if(!AuthMgr.getInstance().isLogin()){
+                    activity.runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            Toast.makeText(getContext(), "未登录，无法共享", Toast.LENGTH_SHORT).show();
+                            cancelLoadingDialog();
+                        }
+                    });
+                    return;
+                }
+                File file = FileClassUtil.getShareCode(documentHeader.getText().toString());
+                if(null != file){
+                    activity.runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            cancelLoadingDialog();
+
+                            AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
+                            LayoutInflater inflater = getLayoutInflater();
+                            View dialoglayout = inflater.inflate(R.layout.documents_share_code, null);
+                            AlertDialog dia = builder.create();
+                            dia.show();
+                            Window window = dia.getWindow();
+                            WindowManager.LayoutParams lp = window.getAttributes();
+                            lp.width = 800;
+                            lp.height = 800;
+                            window.setGravity(Gravity.CENTER);
+                            window.setAttributes(lp);
+                            window.setContentView(dialoglayout);
+                            ((ImageView) dialoglayout.findViewById(R.id.documents_share_code_iv)).setImageBitmap(file2drawable(file));
+                        }
+                    });
+                }
+                else{
+                    activity.runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            Toast.makeText(getContext(), "获取共享码失败", Toast.LENGTH_SHORT).show();
+                            cancelLoadingDialog();
+                        }
+                    });
+                }
+            }
+        }).start();
+    }
+
+    private Bitmap file2drawable(File file){
+        try {
+            Uri uri = Uri.fromFile(file);
+            return MediaStore.Images.Media.getBitmap(getContext().getContentResolver(), uri);
+        }catch(Exception e){
+            e.printStackTrace();
+            Toast.makeText(getContext(), "未找到图片", Toast.LENGTH_SHORT).show();
+        }
+        return null;
+    }
+
+    private void scanShareCode(){
+        if(!AuthMgr.getInstance().isLogin()){
+            Toast.makeText(getContext(), "未登录", Toast.LENGTH_SHORT).show();
+            return;
+        }
+        Intent intent = new Intent(getActivity(), QrCodeActivity.class);
+        startActivityForResult(intent, REQUEST_CODE_FOR_QA);
+    }
+
+    /**
+     * 共享码扫描结果处理
+     */
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        if(requestCode == REQUEST_CODE_FOR_QA && resultCode == RESULT_CODE_FOR_QA){
+            final String shareCode = data.getStringExtra("resultJson");
+            AlertDialog alertDialog = new AlertDialog.Builder(getContext())
+                    .setIcon(R.drawable.ic_help_outline_black_24dp)
+                    .setTitle("扫描结果")
+                    .setMessage("添加共享文件？")
+                    .setPositiveButton("确认", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            getSharedDocuments(shareCode);
+                        }
+                    })
+                    .setNegativeButton("取消", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            dialog.dismiss();
+                        }
+                    })
+                    .create();
+            alertDialog.show();
+        }
+    }
+
+    private void getSharedDocuments(final String shareCode){
+        Log.e("测试", "shareCode: "+shareCode);
+        try {
+            JSONObject jsonObject = new JSONObject(shareCode);
+            final String username = jsonObject.getString("usr");
+            final String foldername = jsonObject.getString("folder");
+            new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    try {
+                        DocumentUtil.getSharedFiles("?username=" + username + "&foldername="+foldername);
+                        activity.runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                refresh();
+                            }
+                        });
+                    }catch(ServerErrorException e){
+                        e.printStackTrace();
+                    }
+                }
+            }).start();
+        }catch(JSONException e){
+            e.printStackTrace();
+        }
+
+    }
+
     /**
      * 搜索结果页
      * @param s
@@ -307,8 +562,8 @@ public class FileFragment extends Fragment {
         searchResultAdapter = new DocumentAdapter(searchResults);
         searchResultAdapter.setOnDocumentClickListener(new DocumentAdapter.OnDocumentClickListener() {
             @Override
-            public void OnDocumentClick(String path) {
-                openDocument(path);
+            public void OnDocumentClick(Document document) {
+                openDocument(document);
             }
         });
         searchResultList.setAdapter(searchResultAdapter);
@@ -323,41 +578,67 @@ public class FileFragment extends Fragment {
     }
 
     /**
-     * 初始化分类列表
-     * @param view
+     * 初始化分类列表和文件列表
      */
-    private void initFileClassList(View view){
-        //初始化 fileclasslistitem
-        initData();
-        fileClassAdapter = new FileClassAdapter(getContext(), fileClassListItems);
-        fileClassList = (ListView) view.findViewById(R.id.filefragment_fileclasses);
-        fileClassList.setAdapter(fileClassAdapter);
-        fileClassList.setVerticalScrollBarEnabled(false);
-        fileClassList.setDivider(null);
-        fileClassList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+    public void initData() {
+        new Thread(new Runnable() {
             @Override
-            public void onItemClick(AdapterView<?> adapterView, View view, int position, long id) {
-                fileClassAdapter.isDeleting = false;
-                if(unSelectedText.getVisibility() == View.VISIBLE)
-                    unSelectedText.setVisibility(View.GONE);
-                if(position != fileClassList.getCount() - 1) {
-                    lastPositionClicked = position;
-                    FileClass currentFileClass = (FileClass) fileClassListItems.get(position);
-                    //更改文件列表标题
-                    documentHeader.setText(currentFileClass.getFileClassName());
-                    //获取分类下的文件
-                    updateDocumentRecyclerview(position);
-                }
-                else
-                    addNewFileClass(position);//添加新类别
-            }
-        });
+            public void run() {
+                if (fileClassDao == null)
+                    fileClassDao = new FileClassDao(activity);
 
-        if(!fileClassListItems.get(fileClassListItems.size() - 1).getFileClassName().equals("+")) {
-            FileClass temp = new FileClass("+", 0);
-            fileClassListItems.add(fileClassAdapter.getCount(), temp);
-            fileClassAdapter.notifyDataSetChanged();
-        }
+                if(documentDao == null)
+                    documentDao = new DocumentDao(activity);
+                fileClassListItems = fileClassDao.queryFileClassAll();
+                documentDao.pushpull();
+                for(FileClass f: fileClassListItems){
+                    if(!f.getFileClassName().equals("+")) {
+                        List<Document> l = documentDao.queryDocumentAll(f.getFileClassName(), false);
+                        documentListsByClass.add(l);
+                    }
+                }
+
+                activity.runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        fileClassAdapter = new FileClassAdapter(getContext(), fileClassListItems);
+                        fileClassList = (ListView) view.findViewById(R.id.filefragment_fileclasses);
+                        fileClassList.setAdapter(fileClassAdapter);
+                        fileClassList.setVerticalScrollBarEnabled(false);
+                        fileClassList.setDivider(null);
+                        fileClassList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+                            @Override
+                            public void onItemClick(AdapterView<?> adapterView, View view, int position, long id) {
+                                fileClassAdapter.isDeleting = false;
+                                if(unSelectedText.getVisibility() == View.VISIBLE)
+                                    unSelectedText.setVisibility(View.GONE);
+                                if(position != fileClassList.getCount() - 1) {
+                                    lastPositionClicked = position;
+                                    FileClass currentFileClass = (FileClass) fileClassListItems.get(position);
+                                    //更改文件列表标题
+                                    documentHeader.setText(currentFileClass.getFileClassName());
+                                    //获取分类下的文件
+                                    updateDocumentRecyclerview(position);
+                                }
+                                else
+                                    addNewFileClass(position);//添加新类别
+                            }
+                        });
+
+                        if(!fileClassListItems.get(fileClassListItems.size() - 1).getFileClassName().equals("+")) {
+                            FileClass temp = new FileClass("+", 0);
+                            fileClassListItems.add(fileClassAdapter.getCount(), temp);
+                            fileClassAdapter.notifyDataSetChanged();
+                        }
+
+                        Log.e("测试", "filefrg.run: 执行");
+
+                        initDocumentLayout(view);
+                    }
+                });
+            }
+        }).start();
+
     }
 
     /**
@@ -377,8 +658,8 @@ public class FileFragment extends Fragment {
         documentAdapter = new DocumentAdapter(documentListItems);
         documentAdapter.setOnDocumentClickListener(new DocumentAdapter.OnDocumentClickListener() {
             @Override
-            public void OnDocumentClick(String path) {
-                openDocument(path);
+            public void OnDocumentClick(Document document) {
+                openDocument(document);
             }
         });
         documentAdapter.setOnDocumentLongClickListener(new DocumentAdapter.OnDocumentLongClickListener() {
@@ -388,26 +669,9 @@ public class FileFragment extends Fragment {
             }
         });
         documentRecyclerView.setAdapter(documentAdapter);
-    }
 
-    /**
-     * 初始化 Dao 和 List 数据
-     */
-    public void initData() {
-
-        if (fileClassDao == null)
-            fileClassDao = new FileClassDao(this.getContext());
-
-        if(documentDao == null)
-            documentDao = new DocumentDao(this.getContext());
-
-        fileClassListItems = fileClassDao.queryFileClassAll();
-        for(FileClass f: fileClassListItems){
-            if(!f.getFileClassName().equals("+")) {
-                List<Document> l = documentDao.queryDocumentAll(f.getFileClassName());
-                documentListsByClass.add(l);
-            }
-        }
+        closeDSL = true;
+        HasInitedView = true;
     }
 
     /**
@@ -475,21 +739,69 @@ public class FileFragment extends Fragment {
                 // 分组不重复
                 try {
                     if(tag == TAG_NEW) {
-                        fileClassDao.insertFileClass(newFileClass);
-                        fileClassListItems.add(fileClassAdapter.getCount() - 1, newFileClass);
-                        List<Document> l = documentDao.queryDocumentAll(newFileClass.getFileClassName());
-                        documentListsByClass.add(position, l);
+                        new Thread(new Runnable() {
+                            @Override
+                            public void run() {
+
+                                activity.runOnUiThread(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        showLoadingDialog("添加新分类..");
+                                    }
+                                });
+
+                                long ret = fileClassDao.insertFileClass(newFileClass);
+                                newFileClass.setId((int)ret);
+                                activity.runOnUiThread(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        fileClassListItems.add(fileClassAdapter.getCount() - 1, newFileClass);
+                                    }
+                                });
+                                List<Document> l = documentDao.queryDocumentAll(newFileClass.getFileClassName());
+                                activity.runOnUiThread(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        documentListsByClass.add(position, l);
+                                        fileClassAdapter.notifyDataSetChanged();
+                                        Log.e("测试", "更新本地记录："
+                                                + new UtLogDao(getContext()).getLog(LogModule.Mod_FileClass).getUpdateTime().toString());
+
+                                        cancelLoadingDialog();
+                                    }
+                                });
+                            }
+                        }).start();
                     }
                     else if(tag == TAG_RENAME){
-                        currentFileClass.setFileClassName(newFileClassName);
-                        fileClassDao.updateFileClass(currentFileClass);
-                        fileClassListItems.remove(position);
-                        fileClassListItems.add(position, currentFileClass);
-                        documentHeader.setText(newFileClassName);
+                        new Thread(new Runnable() {
+                            @Override
+                            public void run() {
+
+                                activity.runOnUiThread(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        showLoadingDialog("重命名...");
+                                    }
+                                });
+
+                                currentFileClass.setFileClassName(newFileClassName);
+                                fileClassDao.updateFileClass(currentFileClass);
+                                activity.runOnUiThread(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        fileClassListItems.remove(position);
+                                        fileClassListItems.add(position, currentFileClass);
+                                        documentHeader.setText(newFileClassName);
+                                        fileClassAdapter.notifyDataSetChanged();
+
+                                        cancelLoadingDialog();
+
+                                    }
+                                });
+                            }
+                        }).start();
                     }
-
-                    fileClassAdapter.notifyDataSetChanged();
-
                 }
                 catch (Exception ex) {
                     ex.printStackTrace();
@@ -573,28 +885,15 @@ public class FileFragment extends Fragment {
     private void dealWithDocuments(){
 
         File file;
+        String name;
         for(List<Document> l: documentListsByClass){
             for(Document d: l){
-                file = new File(d.getDocumentPath());
-                String name = file.getName();
-                String type;
-                if (name.endsWith(".doc") || name.endsWith(".docx")) {
-                    type="doc";
-                }else if(name.endsWith(".ppt") || name.endsWith(".pptx")){
-                    type="ppt";
-                }else if(name.endsWith(".xls") || name.endsWith(".xlsx")){
-                    type="xls";
-                }else if(name.endsWith(".pdf")){
-                    type="pdf";
-                }else if(name.endsWith(".txt")){
-                    type="txt";
-                }else if(name.endsWith(".zip")){
-                    type="zip";
-                }else{
-                    type="unknown";
+                if(!d.getDocumentPath().equals("")) {
+                    file = new File(d.getDocumentPath());
+                    name = file.getName();
+                    d.setDocumentName(name);
                 }
-                d.setDocumentName(name);
-                d.setDocumentType(type);
+                d.setDocumentType(DocumentUtil.getFileType(d.getDocumentName()));
             }
         }
     }
@@ -607,7 +906,6 @@ public class FileFragment extends Fragment {
         documentListItems.clear();
         documentListItems.addAll(documentListsByClass.get(position));
         documentAdapter.notifyDataSetChanged();
-        Log.i("test", "updateDocumentRecyclerview: "+documentListsByClass.get(position).size());
     }
 
     /**
@@ -623,44 +921,73 @@ public class FileFragment extends Fragment {
 
     /**
      * 调用wps打开文档
-     * @param path
+     * @param document
      */
-    private void openDocument(String path){
+    private void openDocument(Document document){
 
         try {
-            File file = new File(path);
-            Log.e("test", "openDocument: 打开文件");
-            Intent intent = activity.getPackageManager().getLaunchIntentForPackage("cn.wps.moffice_eng");
-            Log.e("test", "openDocument: 获得Intent");
-            Bundle bundle = new Bundle();
-            //打开模式
-            bundle.putString(Define.OPEN_MODE, Define.NORMAL);
-            bundle.putBoolean(Define.ENTER_REVISE_MODE, true);//以修订模式打开
-            //bundle.putString(Define.OPEN_MODE, Define.READ_ONLY);
-            bundle.putBoolean(Define.SEND_SAVE_BROAD, true);
-            bundle.putBoolean(Define.SEND_CLOSE_BROAD, true);
-            bundle.putBoolean(Define.HOME_KEY_DOWN, true);
-            bundle.putBoolean(Define.BACK_KEY_DOWN, true);
-            bundle.putBoolean(Define.ENTER_REVISE_MODE, true);
-            bundle.putBoolean(Define.IS_SHOW_VIEW, false);
-            bundle.putBoolean(Define.AUTO_JUMP, true);
-            //设置广播
-            bundle.putString(Define.THIRD_PACKAGE, activity.getPackageName());
-            intent.setAction(Intent.ACTION_VIEW);
-            Log.e("test", "openDocument: 设置action");
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-                Uri contentUri = FileProvider.getUriForFile(activity,
-                        "com.baibuti.biji.FileProvider", file);
-                intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
-                intent.addFlags(Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
-                intent.setDataAndType(contentUri, "*/*");
-            } else {
-                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                intent.setDataAndType(Uri.fromFile(file), "*/*");
-            }
-            Log.e("test", "openDocument: 即将发送");
-            intent.putExtras(bundle);
-            activity.startActivity(intent);
+            new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    File file = new File(document.getDocumentPath());
+                    if(!file.exists()){
+                        activity.runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                showLoadingDialog("下载中...");
+                            }
+                        });
+                        try {
+                            if(!DocumentUtil.downloadFile(document)){
+                                activity.runOnUiThread(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        cancelLoadingDialog();
+                                        Toast.makeText(getContext(), "下载失败", Toast.LENGTH_SHORT).show();
+                                    }
+                                });
+                                return;
+                            }
+                            documentDao.updateDocumentPath(document);
+                            cancelLoadingDialog();
+                        }catch (ServerErrorException e){
+                            e.printStackTrace();
+                        }
+                    }
+                    //下载完成并更新路径，打开
+                    Intent intent = activity.getPackageManager().getLaunchIntentForPackage("cn.wps.moffice_eng");
+                    Bundle bundle = new Bundle();
+                    //打开模式
+                    bundle.putString(Define.OPEN_MODE, Define.NORMAL);
+                    bundle.putBoolean(Define.ENTER_REVISE_MODE, true);//以修订模式打开
+                    //bundle.putString(Define.OPEN_MODE, Define.READ_ONLY);
+                    bundle.putBoolean(Define.SEND_SAVE_BROAD, true);
+                    bundle.putBoolean(Define.SEND_CLOSE_BROAD, true);
+                    bundle.putBoolean(Define.HOME_KEY_DOWN, true);
+                    bundle.putBoolean(Define.BACK_KEY_DOWN, true);
+                    bundle.putBoolean(Define.ENTER_REVISE_MODE, true);
+                    bundle.putBoolean(Define.IS_SHOW_VIEW, false);
+                    bundle.putBoolean(Define.AUTO_JUMP, true);
+                    //设置广播
+                    bundle.putString(Define.THIRD_PACKAGE, activity.getPackageName());
+                    intent.setAction(Intent.ACTION_VIEW);
+                    Log.e("test", "openDocument: 设置action");
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                        Uri contentUri = FileProvider.getUriForFile(activity,
+                                "com.baibuti.biji.FileProvider", file);
+                        intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+                        intent.addFlags(Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
+                        intent.setDataAndType(contentUri, "*/*");
+                    } else {
+                        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                        intent.setDataAndType(Uri.fromFile(file), "*/*");
+                    }
+                    Log.e("test", "openDocument: 即将发送");
+                    intent.putExtras(bundle);
+                    activity.startActivity(intent);
+                }
+            }).start();
+
         }catch(Exception e){
             e.printStackTrace();
         }
@@ -672,15 +999,143 @@ public class FileFragment extends Fragment {
      * @param position
      */
     private void deleteDocumentFromList(int position){
-        try {
-            String path = documentListItems.get(position).getDocumentPath();
-            documentDao.deleteDocumentByPath(path, true);
-            documentListItems.remove(position);
-            documentListsByClass.get(lastPositionClicked).remove(position);
-            documentAdapter.notifyDataSetChanged();
-        }catch (Exception e){
-            e.printStackTrace();
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    activity.runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            showLoadingDialog("删除中...");
+                        }
+                    });
+                    String name = documentListItems.get(position).getDocumentName();
+                    String path = documentListItems.get(position).getDocumentPath();
+                    documentDao.deleteDocumentByPath(name, path, true);
+                    documentListItems.remove(position);
+                    documentListsByClass.get(lastPositionClicked).remove(position);
+                    activity.runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            documentAdapter.notifyDataSetChanged();
+                            cancelLoadingDialog();
+                        }
+                    });
+                }catch (Exception e){
+                    e.printStackTrace();
+                }
+            }
+        }).start();
+    }
+
+    /**
+     * 订阅登录注销事件
+     */
+    private void registerAuthActions() {
+        AuthMgr.getInstance().addLoginChangeListener(new AuthMgr.OnLoginChangeListener() {
+
+            // TODO
+            public void onLogin(String UserName) {
+                if(getUserVisibleHint()) {
+                    Log.e("测试", "FileFragment.onLogin: 调用");
+                    refresh();
+                    HasRefreshed = true;
+                }
+                else
+                    HasRefreshed = false;
+            }
+
+            @Override
+            public void onLogout() {
+                if(getUserVisibleHint()) {
+                    refresh();
+                    HasRefreshed = true;
+                }
+                else
+                    HasRefreshed = false;
+            }
+        });
+    }
+
+    /**
+     * 登录时刷新
+     */
+    private void refresh(){
+
+        showLoadingDialog("加载中...");
+
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+
+                while(!HasInitedView);
+                //清除旧数据
+                fileClassListItems.clear();
+                documentListItems.clear();
+                documentListsByClass.clear();
+
+                fileClassDao = new FileClassDao(activity);
+                documentDao = new DocumentDao(activity);
+
+                fileClassListItems.addAll(fileClassDao.queryFileClassAll());
+                documentDao.pushpull();
+                for(FileClass f: fileClassListItems){
+                    if(!f.getFileClassName().equals("+")) {
+                        List<Document> l = documentDao.queryDocumentAll(f.getFileClassName(), false);
+                        if(null != l && l.size() != 0) {
+                            for (Document document : l)
+                                Log.e("测试", "refresh: " + document.getId() + ' ' +
+                                        document.getDocumentName() + ' ' +
+                                        document.getDocumentClassName() + '\n');
+                        }
+                        documentListsByClass.add(l);
+                    }
+                }
+
+                if(!fileClassListItems.get(fileClassListItems.size() - 1).getFileClassName().equals("+")) {
+                    FileClass temp = new FileClass("+", 0);
+                    fileClassListItems.add(fileClassAdapter.getCount(), temp);
+                }
+
+                activity.runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        fileClassAdapter.notifyDataSetChanged();
+                        dealWithDocuments();
+                        documentHeader.setText("");
+                        unSelectedText.setVisibility(View.VISIBLE);
+                        documentListItems.clear();
+
+                        cancelLoadingDialog();
+                    }
+                });
+            }
+        }).start();
+    }
+
+    /**
+     * 对用户可见时，判断是否需要刷新
+     */
+    @Override
+    public void onResume() {
+        super.onResume();
+        if(getUserVisibleHint() && !HasRefreshed){
+            refresh();
+            HasRefreshed = true;
+        }
+        if(getUserVisibleHint())
+            searchResultLayout.setVisibility(View.GONE);
+    }
+
+    private void showLoadingDialog(String message){
+        if(!loadingDialog.isShowing()) {
+            loadingDialog.setMessage(message);
+            loadingDialog.show();
         }
     }
 
+    private void cancelLoadingDialog(){
+        if(loadingDialog.isShowing())
+            loadingDialog.cancel();
+    }
 }

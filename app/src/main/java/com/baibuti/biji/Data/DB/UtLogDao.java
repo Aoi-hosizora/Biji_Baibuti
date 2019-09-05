@@ -81,9 +81,8 @@ public class UtLogDao {
         UtLog utLog = null;
         Cursor cursor = null;
         try {
-            String sql = "select * from " + TBL_NAME + " where " + COL_MODULE + " = \"" + module + "\"";
+            String sql = "select * from " + TBL_NAME + " where " + COL_MODULE + "=\"" + module + "\"";
             cursor = db.rawQuery(sql, null);
-
             if (cursor.moveToFirst()) {
                 Date ut = DateColorUtil.Str2Date(cursor.getString(cursor.getColumnIndex(COL_UT)));
                 utLog = new UtLog(module, ut);
@@ -161,7 +160,7 @@ public class UtLogDao {
      * @param logModule
      */
     public void updateLog(LogModule logModule) {
-        Log.e("", "updateLog: " + logModule.toString());
+        Log.e("测试", "updateLog: " + logModule.toString());
         switch (logModule) {
             case Mod_Note:
                 updateOneModuleLog(UtLog.Log_Note, new Date());

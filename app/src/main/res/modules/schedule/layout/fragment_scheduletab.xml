@@ -7,7 +7,7 @@
     android:background="@color/background">
 
     <android.support.v7.widget.Toolbar
-        android:id="@+id/ClassFrag_Toolbar"
+        android:id="@+id/ScheduleFrag_Toolbar"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:background="?attr/colorPrimary"
@@ -25,7 +25,7 @@
         android:background="@color/background"
         fab:layout_constraintEnd_toEndOf="parent"
         fab:layout_constraintStart_toStartOf="parent"
-        fab:layout_constraintTop_toBottomOf="@id/ClassFrag_Toolbar" />
+        fab:layout_constraintTop_toBottomOf="@id/ScheduleFrag_Toolbar" />
 
     <com.zhuangfei.timetable.TimetableView
         android:id="@+id/schedulefragment_timetableView"

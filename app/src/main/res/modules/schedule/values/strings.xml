@@ -1,4 +1,9 @@
 <resources>
     <!-- Title -->
-    <string name="ClassFrag_Header">课程表</string>
+    <string name="ScheduleFrag_Header">课程表</string>
+
+    <!-- Schedulefragment Menu Item Title -->
+    <string name="Schedulefragment_Item_Import">导入课表</string>
+    <string name="Schedulefragment_Item_Refresh">刷新</string>
+
 </resources>

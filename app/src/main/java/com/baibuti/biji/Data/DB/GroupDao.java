@@ -50,6 +50,7 @@ public class GroupDao {
         // TODO 需要处理分组
 
         if (AuthMgr.getInstance().isLogin()) {
+            Log.e("测试", "GroupDao.pushpull: "+new UtLogDao(context).getLog(LogModule.Mod_Group).getUpdateTime().toString());
             if (ServerDbUpdateHelper.isLocalNewer(context, LogModule.Mod_Group)) { // 本地新
                 // TODO 异步
                 ServerDbUpdateHelper.pushData(context, LogModule.Mod_Group);

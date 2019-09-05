@@ -9,6 +9,7 @@ import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.Button;
 import android.widget.ListView;
+import android.widget.Toast;
 
 import com.baibuti.biji.Data.Models.FileClass;
 import com.baibuti.biji.R;
@@ -21,7 +22,7 @@ public class FileClassAdapter extends BaseAdapter {
     LayoutInflater inflater;
     Context context;
     private boolean firstStart = true;
-    private Button lastButton;
+    public Button lastButton;
     private int lastPosition;
 
     public boolean isDeleting = false;
@@ -58,7 +59,7 @@ public class FileClassAdapter extends BaseAdapter {
     @Override
     public View getView(final int position, View convertView, final ViewGroup viewGroup) {
 
-        Log.d("test", "getView: enter");
+        Toast.makeText(context, "调用getview", Toast.LENGTH_LONG).show();
 
         FileClassAdapter.ViewHolder holder = null;
         if(null == convertView) {
@@ -88,10 +89,12 @@ public class FileClassAdapter extends BaseAdapter {
                     transition.startTransition(200);
                     //上一个按下的按钮恢复颜色
                     try{
-                        if (lastPosition >= ((ListView) viewGroup).getFirstVisiblePosition()
-                        &&lastPosition <= ((ListView) viewGroup).getLastVisiblePosition()
-                        &&lastButton != (Button) view) {
+                        if (lastButton != null
+                                && lastPosition >= ((ListView) viewGroup).getFirstVisiblePosition()
+                                &&lastPosition <= ((ListView) viewGroup).getLastVisiblePosition()
+                                &&lastButton != (Button) view) {
                             if(!lastButton.getText().toString().equals("+")) {
+                                Log.e("测试", "onClick: 进入");
                                 TransitionDrawable lastButtonTransition = (TransitionDrawable) lastButton.getBackground();
                                 lastButtonTransition.reverseTransition(0);
                             }

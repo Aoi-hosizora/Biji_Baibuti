@@ -1,5 +1,6 @@
 package com.baibuti.biji.Data.DB;
 
+import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.SQLException;
@@ -14,6 +15,7 @@ import com.baibuti.biji.Net.Models.RespObj.ServerErrorException;
 import com.baibuti.biji.Net.Modules.Auth.AuthMgr;
 import com.baibuti.biji.Net.Modules.File.DocumentUtil;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -68,7 +70,7 @@ public class DocumentDao {
         return document;
     }
 
-    private Document queryDocumentByDocumentPath(String documentPath, boolean isLogCheck) {
+    private Document queryDocumentByDocumentPath(String documentName, String documentPath, boolean isLogCheck) {
 
         if (isLogCheck) pushpull();
 
@@ -89,6 +91,7 @@ public class DocumentDao {
                 document.setId(documentId);
                 document.setDocumentPath(documentPath1);
                 document.setDocumentClassName(documentClassName);
+                document.setDocumentName(documentName);
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -122,12 +125,14 @@ public class DocumentDao {
                 int documentId = cursor.getInt(cursor.getColumnIndex("doc_id"));
                 String documentPath = cursor.getString(cursor.getColumnIndex("doc_path"));
                 String documentClassName = cursor.getString(cursor.getColumnIndex("doc_class_name"));
+                String documentName = cursor.getString(cursor.getColumnIndex("doc_name"));
 
                 //生成一个文件列表子项
                 document = new Document();
                 document.setId(documentId);
                 document.setDocumentPath(documentPath);
                 document.setDocumentClassName(documentClassName);
+                document.setDocumentName(documentName);
                 documentList.add(document);
             }
         } catch (Exception e) {
@@ -146,16 +151,14 @@ public class DocumentDao {
     /**
      * 进行 push pull
      */
-    private void pushpull() {
+    public void pushpull() {
         if (AuthMgr.getInstance().isLogin()) {
             if (ServerDbUpdateHelper.isLocalNewer(context, LogModule.Mod_Document)) { // 本地新
                 // TODO 异步
                 ServerDbUpdateHelper.pushData(context, LogModule.Mod_Document);
-                ServerDbUpdateHelper.pushData(context, LogModule.Mod_FileClass);
             }
             else if (ServerDbUpdateHelper.isLocalOlder(context, LogModule.Mod_Document)) { // 服务器新
                 // TODO 同步
-                ServerDbUpdateHelper.pullData(context, LogModule.Mod_FileClass);
                 ServerDbUpdateHelper.pullData(context, LogModule.Mod_Document);
             }
         }
@@ -188,16 +191,19 @@ public class DocumentDao {
 
                 int documentId = cursor.getInt(cursor.getColumnIndex("doc_id"));
                 String documentPath = cursor.getString(cursor.getColumnIndex("doc_path"));
+                String documentName = cursor.getString(cursor.getColumnIndex("doc_name"));
 
                 //生成一个文件列表子项
                 document = new Document();
                 document.setId(documentId);
                 document.setDocumentPath(documentPath);
                 document.setDocumentClassName(documentClassName);
+                document.setDocumentName(documentName);
                 documentList.add(document);
             }
         } catch (Exception e) {
             e.printStackTrace();
+            Log.e("测试", "selectAllDocuments: "+e.toString());
         } finally {
             if (cursor != null && !cursor.isClosed()) {
                 cursor.close();
@@ -216,6 +222,8 @@ public class DocumentDao {
 
         pushpull();
         long ret = insertDocument(document, -1);
+
+        document.setId((int)ret);
 
         if (AuthMgr.getInstance().isLogin()) {
             try {
@@ -239,30 +247,25 @@ public class DocumentDao {
      */
     public long insertDocument(Document document, int id) {
 
-        //列表中已存在该文件
-        List<Document> tmp = selectAllDocuments(document.getDocumentClassName());
-        for (Document f : tmp)
-            if (f.getDocumentPath().equals(document.getDocumentPath()))
-                return 0;
-
         //新文件
         SQLiteDatabase db = helper.getWritableDatabase();
         String sql;
         if(id == -1)
-            sql = "insert into db_document(doc_path, doc_class_name) values(?, ?)";
+            sql = "insert into db_document(doc_path, doc_class_name, doc_name) values(?, ?, ?)";
         else
-            sql = "insert into db_document(doc_path, doc_class_name, doc_id) values(?, ?, ?)";
+            sql = "insert into db_document(doc_path, doc_class_name, doc_name, doc_id) values(?, ?, ?, ?)";
         long ret = 0;
 
         SQLiteStatement stat = db.compileStatement(sql);
         db.beginTransaction();
         try {
 
-            stat.bindString(1, document.getDocumentPath());
+            stat.bindString(1, document.getDocumentPath()==null?"":document.getDocumentPath());
             stat.bindString(2, document.getDocumentClassName());
+            stat.bindString(3, document.getDocumentName());
 
             if(id != -1)
-                stat.bindLong(3, document.getId());
+                stat.bindLong(4, document.getId());
 
             ret = stat.executeInsert();
             db.setTransactionSuccessful();
@@ -275,6 +278,22 @@ public class DocumentDao {
             db.close();
         }
         return ret;
+    }
+
+    /**
+     * 下载文件时，更新本地路径为下载后的路径
+     * @param document
+     */
+    public void updateDocumentPath(Document document){
+
+        SQLiteDatabase db = helper.getWritableDatabase();
+        ContentValues values = new ContentValues();
+
+        values.put("doc_path", document.getDocumentPath());
+
+        db.update("db_document", values, "doc_id=?", new String[]{document.getId()+""});
+        db.close();
+        updateLog();
     }
 
     /**
@@ -303,9 +322,9 @@ public class DocumentDao {
     /**
      * 删除资料
      */
-    public int deleteDocumentByPath(String documentPath, boolean isLogCheck) {
+    public int deleteDocumentByPath(String documentName, String documentPath, boolean isLogCheck) {
 
-        Document document = queryDocumentByDocumentPath(documentPath, false);
+        Document document = queryDocumentByDocumentPath(documentName, documentPath, false);
 
         if (isLogCheck) pushpull();
 

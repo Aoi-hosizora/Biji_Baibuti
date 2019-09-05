@@ -90,8 +90,6 @@ public class LogUtil {
      * @throws ServerErrorException
      */
     public static void updateModuleLogAsync(UtLog utLog, @NonNull IPushCallBack pushCallBack) throws ServerErrorException {
-        Log.e("", "updateModuleLog: " + utLog.getModule());
-        Log.e("", "updateModuleLog: " + LogResp.toLogResp(utLog).toJson() );
         NetUtil.httpPostPutDeleteAsync(
             UpdateLogUrl, NetUtil.POST,
             LogResp.toLogResp(utLog).toJson(),

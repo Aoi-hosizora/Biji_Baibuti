@@ -64,13 +64,15 @@ public class FileClassDao {
 
     public void pushpull() {
         if (AuthMgr.getInstance().isLogin()) {
-            Log.e("", "run: queryFileClassAll");
+
             if (ServerDbUpdateHelper.isLocalNewer(context, LogModule.Mod_FileClass)) { // 本地新
                 // TODO 异步
+                Log.e("测试", "fileclass本地新");
                 ServerDbUpdateHelper.pushData(context, LogModule.Mod_FileClass);
             }
             else if (ServerDbUpdateHelper.isLocalOlder(context, LogModule.Mod_FileClass)) { // 服务器新
                 // TODO 同步
+                Log.e("测试", "fileclass服务器新");
                 ServerDbUpdateHelper.pullData(context, LogModule.Mod_FileClass);
             }
         }
@@ -176,7 +178,7 @@ public class FileClassDao {
                 String fileClassName = cursor.getString(cursor.getColumnIndex("f_name"));
 
 
-                //生成一个订单
+                //生成一个文件分类
 
                 fileClass = new FileClass();
 
@@ -246,10 +248,19 @@ public class FileClassDao {
     }
 
     public long insertFileClass(FileClass fileClass){
+
+        Log.e("测试", "insertFileClass: " + fileClass.getId());
+
         pushpull();
 
         long ret = insertFileClass(fileClass, -1);
 
+        fileClass.setId((int)ret);
+
+        List<FileClass> fileClasses = queryFileClassAll();
+        for(FileClass fileClass1: fileClasses){
+            Log.e("测试", "insertFileClass: " +fileClass1.getId() + " " + fileClass1.getFileClassName());
+        }
 
         if (AuthMgr.getInstance().isLogin()) {
             try {
@@ -300,6 +311,9 @@ public class FileClassDao {
             db.endTransaction();
             db.close();
         }
+
+        Log.e("测试", "insertFileClass: 调用");
+
         updateLog();
 
         return ret;
@@ -404,7 +418,7 @@ public class FileClassDao {
 
         if (isLogCheck && AuthMgr.getInstance().isLogin()) {
             try {
-                if (FileClassUtil.updateFileClass(f) != null)
+                if (FileClassUtil.deleteFileClass(f) != null)
                     ServerDbUpdateHelper.pushLog(context, LogModule.Mod_FileClass);
             }
             catch (ServerErrorException ex) {

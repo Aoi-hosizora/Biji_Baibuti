@@ -1,8 +1,11 @@
 package com.baibuti.biji.UI.Fragment;
 
+import android.app.Activity;
 import android.app.AlertDialog;
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.content.res.AssetManager;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
@@ -11,14 +14,21 @@ import android.support.v4.app.Fragment;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.alibaba.fastjson.JSON;
+import com.baibuti.biji.Data.DB.ScheduleDao;
 import com.baibuti.biji.Data.Models.MySubject;
+import com.baibuti.biji.Net.Modules.Auth.AuthMgr;
+import com.baibuti.biji.Net.Modules.File.DocumentUtil;
 import com.baibuti.biji.R;
 import com.baibuti.biji.UI.Activity.MainActivity;
+import com.baibuti.biji.UI.Activity.WebviewActivity;
 import com.zhuangfei.timetable.TimetableView;
 import com.zhuangfei.timetable.listener.ISchedule;
 import com.zhuangfei.timetable.listener.IWeekView;
@@ -31,9 +41,12 @@ import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
 import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.regex.Matcher;
@@ -41,6 +54,7 @@ import java.util.regex.Pattern;
 
 public class ScheduleFragment extends Fragment {
 
+    private Activity activity;
     private View view;
     private Toolbar m_toolbar;
 
@@ -49,11 +63,21 @@ public class ScheduleFragment extends Fragment {
     private TextView titleTextView;
     private ConstraintLayout mLayout;
     private List<MySubject> mySubjects = new ArrayList<>();
+    private ProgressDialog loadingDialog;
+
+    private ScheduleDao scheduleDao;
 
     //记录切换的周次，不一定是当前周
     int target = -1;
 
     private HashMap<String, Integer> text_day = new HashMap<String, Integer>(){};
+
+    /**
+     * 标记登录时是否刷新过
+     */
+    private boolean HasRefreshed = false;
+
+    private static final int REQUEST_CODE_FOR_WEBAC = 100;
 
     @Nullable
     @Override
@@ -66,6 +90,11 @@ public class ScheduleFragment extends Fragment {
         else {
             view = inflater.inflate(R.layout.fragment_scheduletab, container, false);
 
+            scheduleDao = new ScheduleDao(getContext());
+            loadingDialog = new ProgressDialog(getContext());
+            loadingDialog.setMessage(getResources().getString(R.string.NoteFrag_LoadingData));
+            loadingDialog.setCanceledOnTouchOutside(false);
+
             text_day.put("星期一", 1);
             text_day.put("星期二", 2);
             text_day.put("星期三", 3);
@@ -74,21 +103,42 @@ public class ScheduleFragment extends Fragment {
             text_day.put("星期六", 6);
             text_day.put("星期日", 7);
 
-            initView();
+            initView(view);
             initTimetableView(view);
-            getSchedule();
+
+            registerAuthActions();
         }
         return view;
     }
 
-    private void initView() {
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+
+        activity = getActivity();
+    }
+
+    private void initView(View view) {
         initToolbar(view);
+    }
+
+    /**
+     * 从WebviewActivity返回html数据
+     */
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        if(requestCode == REQUEST_CODE_FOR_WEBAC && resultCode == 101){
+            String html = data.getStringExtra("html");
+            getSchedule(html);
+        }
     }
 
     private void initToolbar(View view) {
         setHasOptionsMenu(true);
 
-        m_toolbar = view.findViewById(R.id.ClassFrag_Toolbar);
+        m_toolbar = view.findViewById(R.id.ScheduleFrag_Toolbar);
         m_toolbar.setNavigationIcon(R.drawable.tab_menu);
         m_toolbar.setNavigationOnClickListener(new View.OnClickListener() {
             @Override
@@ -96,17 +146,70 @@ public class ScheduleFragment extends Fragment {
                 ((MainActivity) getActivity()).openNavMenu();
             }
         });
-        m_toolbar.setTitle(R.string.ClassFrag_Header);
+        m_toolbar.setTitle(R.string.ScheduleFrag_Header);
+
+        m_toolbar.setPopupTheme(R.style.popup_theme);
+
+        m_toolbar.inflateMenu(R.menu.schedulefragment_menu);
+        m_toolbar.setOnMenuItemClickListener(new Toolbar.OnMenuItemClickListener() {
+            @Override
+            public boolean onMenuItemClick(MenuItem item) {
+
+                switch (item.getItemId()){
+                    case R.id.action_import_schedule:
+                        Intent intent = new Intent(getContext(), WebviewActivity.class);
+                        startActivityForResult(intent, REQUEST_CODE_FOR_WEBAC);
+                        break;
+                    case R.id.action_refresh_schedule:
+                        getScheduleFromBackEnd();
+                        break;
+                }
+                return true;
+            }
+        });
     }
 
-    private void getSchedule(){
+    private void getScheduleFromBackEnd(){
+        if(!AuthMgr.getInstance().isLogin()){
+            Toast.makeText(getContext(), "未登录", Toast.LENGTH_SHORT).show();
+            return;
+        }
+        mySubjects.clear();
+        showLoadingDialog("加载中...");
+        //Toast.makeText(getContext(), "待完成", Toast.LENGTH_SHORT).show();
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                final String scheduleJson = scheduleDao.queryScheduleJson();
+                if(scheduleJson.equals(""))
+                    return;
+                activity.runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        mySubjects.addAll(JSON.parseArray(scheduleJson, MySubject.class));
 
+                        //展示课表
+                        mWeekView.source(mySubjects).showView();
+                        mTimetableView.source(mySubjects).updateView();
+                        cancelLoadingDialog();
+                    }
+                });
+            }
+        }).start();
+    }
+
+    private void getSchedule(String html){
+
+        mySubjects.clear();
         //解析课表并装载数据
         try{
             //Document scheduleHtml = Jsoup.connect("url");
-            Document scheduleHtml = Jsoup.parse(getHtmlString(getContext(), "schedule.html"));
+            Document scheduleHtml = Jsoup.parse(html);
+            FileOutputStream fileOutputStream = new FileOutputStream(new File(DocumentUtil.getFilePath("Html")+"html.txt"));
+            fileOutputStream.write(html.getBytes());
+            fileOutputStream.close();
             Element schedule = scheduleHtml.select("#ylkbTable").get(0);//课表元素
-            Element scheduleTable = schedule.getElementById("table2");//第一种课表
+            Element scheduleTable = schedule.getElementById("table2");//第二种课表
             Elements scheduleContents = scheduleTable.select(".timetable_con");//所有课程元素
             int countId = 0;
             for(Element scheduleContent: scheduleContents){//对于每一个课程元素
@@ -127,27 +230,61 @@ public class ScheduleFragment extends Fragment {
                 temp.setDay(text_day.get(scheduleContent.parent().parent().parent().child(0).text()));
                 temp.setTeacher(teacherChild.text());
                 temp.setTime(classHourChild.text());
-                List<Integer> l = getNumber(timeChild.text());
                 List<Integer> weekList = new ArrayList<>();
-                for(int i = l.get(0); i <= l.get(1); i++)
-                    weekList.add(i);
+                //处理周数字符串，格式："周数：14周" 或 "周数：1-4周,7-12周"
+                List<Integer> tempList;
+                List<String> weekPeriods = getWeekPeriod(timeChild.text());
+                for(String weekPeriod: weekPeriods){
+                    tempList = getNumber(weekPeriod);
+                    if(tempList.size() != 0){
+                        for(int i = tempList.get(0); i <= tempList.get(1); i++)
+                            weekList.add(i);
+                    }
+                }
+
                 temp.setWeekList(weekList);
                 temp.setId(countId);
-                l = getNumber(scheduleContent.parent().previousElementSibling().text());
-                temp.setStart(l.get(0));
-                temp.setStep(l.get(1)-l.get(0)+1);
+
+                tempList = getNumber(scheduleContent.parent().previousElementSibling().text());
+                temp.setStart(tempList.get(0));
+                temp.setStep(tempList.get(1)-tempList.get(0)+1);
                 countId++;
                 mySubjects.add(temp);
             }
-        }catch(Exception e){
+        }catch(Exception e) {
             e.printStackTrace();
             Log.e("test", "getSchedule: 解析课表出错");
         }
 
+        final String subjectsJsonStr = JSON.toJSONString(mySubjects);
+        Log.e("测试", "getSchedule: "  + subjectsJsonStr);
+
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                if(scheduleDao.queryScheduleJson(false).equals(""))
+                    scheduleDao.insertScheduleJson(subjectsJsonStr);
+                else {
+                    scheduleDao.deleteScheduleJson(false);
+                    scheduleDao.insertScheduleJson(subjectsJsonStr);
+                }
+            }
+        }).start();
+
         //展示课表
         mWeekView.source(mySubjects).showView();
-        mTimetableView.source(mySubjects).showView();
+        mTimetableView.source(mySubjects).updateView();
 
+    }
+
+    /**
+     * 根据','分割周数字符串
+     * @param weekString
+     * @return
+     */
+    private List<String> getWeekPeriod(String weekString){
+        String[] ss = weekString.split(",");
+        return new ArrayList<>(Arrays.asList(ss));
     }
 
     /**
@@ -159,15 +296,24 @@ public class ScheduleFragment extends Fragment {
         String regEx = "[^0-9]";
         Pattern p = Pattern.compile(regEx);
         String[] ss = s.split("-");
-        Matcher m_start = p.matcher(ss[0]);
-        Matcher m_stop = p.matcher(ss[1]);
-        String s_start = m_start.replaceAll("").trim();
-        String s_stop = m_stop.replaceAll("").trim();
-        int start = Integer.parseInt(s_start);
-        int stop = Integer.parseInt(s_stop);
         List<Integer> temp = new ArrayList<>();
-        temp.add(start);
-        temp.add(stop);
+        if(ss.length == 2) {
+            Matcher m_start = p.matcher(ss[0]);
+            Matcher m_stop = p.matcher(ss[1]);
+            String s_start = m_start.replaceAll("").trim();
+            String s_stop = m_stop.replaceAll("").trim();
+            int start = Integer.parseInt(s_start);
+            int stop = Integer.parseInt(s_stop);
+            temp.add(start);
+            temp.add(stop);
+        }
+        else if(ss.length == 1){
+            Matcher m_start = p.matcher(ss[0]);
+            String s_start = m_start.replaceAll("").trim();
+            int start = Integer.parseInt(s_start);
+            temp.add(start);
+            temp.add(start);
+        }
         return temp;
     }
 
@@ -260,6 +406,9 @@ public class ScheduleFragment extends Fragment {
                     }
                 })
                 .showView();
+        //展示课表
+        mWeekView.source(mySubjects).showView();
+        mTimetableView.source(mySubjects).showView();
     }
 
     /**
@@ -333,6 +482,86 @@ public class ScheduleFragment extends Fragment {
     public void showWeekView(){
         mWeekView.isShow(true);
         titleTextView.setTextColor(getResources().getColor(R.color.app_red));
+    }
+
+    private void refresh(){
+        mySubjects.clear();
+        showLoadingDialog("加载中...");
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                String scheduleJson = scheduleDao.queryScheduleJson();
+                activity.runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        if(!scheduleJson.equals("")){
+                            mySubjects.addAll(JSON.parseArray(scheduleJson, MySubject.class));
+                        }
+                        //展示课表
+                        mWeekView.source(mySubjects).showView();
+                        mTimetableView.source(mySubjects).showView();
+                        cancelLoadingDialog();
+                    }
+                });
+            }
+        }).start();
+
+    }
+
+    /**
+     * 订阅登录注销事件
+     */
+    private void registerAuthActions() {
+        AuthMgr.getInstance().addLoginChangeListener(new AuthMgr.OnLoginChangeListener() {
+
+            // TODO
+            public void onLogin(String UserName) {
+                if(getUserVisibleHint()) {
+                    Log.e("测试", "ScheduleFragment.onLogin: 调用");
+                    scheduleDao = new ScheduleDao(getContext());
+                    refresh();
+                    HasRefreshed = true;
+                }
+                else
+                    HasRefreshed = false;
+            }
+
+            @Override
+            public void onLogout() {
+                if(getUserVisibleHint()) {
+                    scheduleDao = new ScheduleDao(getContext());
+                    refresh();
+                    HasRefreshed = true;
+                }
+                else
+                    HasRefreshed = false;
+            }
+        });
+    }
+
+    /**
+     * 对用户可见时，判断是否需要刷新
+     */
+    @Override
+    public void onResume() {
+        super.onResume();
+        if(getUserVisibleHint() && !HasRefreshed){
+            scheduleDao = new ScheduleDao(getContext());
+            refresh();
+            HasRefreshed = true;
+        }
+    }
+
+    private void showLoadingDialog(String message){
+        if(!loadingDialog.isShowing()) {
+            loadingDialog.setMessage(message);
+            loadingDialog.show();
+        }
+    }
+
+    private void cancelLoadingDialog(){
+        if(loadingDialog.isShowing())
+            loadingDialog.cancel();
     }
 
 }

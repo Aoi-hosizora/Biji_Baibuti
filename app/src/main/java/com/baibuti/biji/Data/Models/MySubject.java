@@ -1,5 +1,6 @@
 package com.baibuti.biji.Data.Models;
 
+import com.alibaba.fastjson.annotation.JSONField;
 import com.zhuangfei.timetable.model.Schedule;
 import com.zhuangfei.timetable.model.ScheduleEnable;
 
@@ -14,53 +15,67 @@ public class MySubject implements ScheduleEnable {
 
     public static final String EXTRAS_ID="extras_id";
 
+    @JSONField(name="id")
     private int id=0;
 
     /**
      * 课程名
      */
+    @JSONField(name="name")
     private String name;
 
-    //无用数据
+    /**
+     * 周学时
+     */
+    @JSONField(name="time")
     private String time;
 
     /**
      * 教室
      */
+    @JSONField(name="room")
     private String room;
 
     /**
      * 教师
      */
+    @JSONField(name="teacher")
     private String teacher;
 
     /**
      * 第几周至第几周上
      */
+    @JSONField(name="weekList")
     private List<Integer> weekList;
 
     /**
      * 开始上课的节次
      */
+    @JSONField(name="start")
     private int start;
 
     /**
      * 上课节数
      */
+    @JSONField(name="step")
     private int step;
 
     /**
      * 周几上
      */
+    @JSONField(name="day")
     private int day;
 
+    @JSONField(serialize = false, deserialize = false)
     private String term;
 
     /**
      *  一个随机数，用于对应课程的颜色
      */
+    @JSONField(serialize = false, deserialize = false)
     private int colorRandom = 0;
 
+    @JSONField(serialize = false, deserialize = false)
     private String url;
 
     public void setUrl(String url) {
@@ -170,6 +185,7 @@ public class MySubject implements ScheduleEnable {
     }
 
     @Override
+    @JSONField(serialize = false, deserialize = false)
     public Schedule getSchedule() {
         Schedule schedule=new Schedule();
         schedule.setDay(getDay());

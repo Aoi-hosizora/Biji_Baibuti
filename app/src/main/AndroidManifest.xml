@@ -3,19 +3,14 @@
     xmlns:tools="http://schemas.android.com/tools"
     package="com.baibuti.biji">
 
-    <uses-permission android:name="android.permission.CAMERA" />
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
-    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
-    <uses-permission android:name="android.permission.INTERNET" />
-    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
-
     <application
         android:allowBackup="true"
         android:icon="@mipmap/icons8_copybook_96"
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
         tools:ignore="GoogleAppIndexingWarning">
-        <!-- Main Activity -->
+        <activity android:name=".UI.Activity.WebviewActivity"></activity>
+        <activity android:name=".UI.Activity.QrCodeActivity" /> <!-- Main Activity -->
         <activity
             android:name=".UI.Activity.MainActivity"
             android:screenOrientation="portrait"
@@ -52,9 +47,7 @@
 
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
-        </activity>
-
-        <!-- StarSearchItem Activity -->
+        </activity> <!-- StarSearchItem Activity -->
         <activity
             android:name=".UI.Activity.StarSearchItemActivity"
             android:screenOrientation="portrait">
@@ -63,9 +56,7 @@
 
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
-        </activity>
-
-        <!-- OCR Activity -->
+        </activity> <!-- OCR Activity -->
         <activity
             android:name=".UI.Activity.OCRActivity"
             android:screenOrientation="portrait">
@@ -74,19 +65,16 @@
 
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
-        </activity>
-
-        <!-- RegLog Activity -->
+        </activity> <!-- RegLog Activity -->
         <activity
             android:name=".UI.Activity.RegLogActivity"
             android:screenOrientation="portrait">
             <intent-filter>
                 <action android:name="activitytest.example.com.activitytest.RegLogActivity" />
+
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
-        </activity>
-
-        <!-- PreLoaded Font -->
+        </activity> <!-- PreLoaded Font -->
         <meta-data
             android:name="preloaded_fonts"
             android:resource="@array/preloaded_fonts" /> <!-- File Provider -->
@@ -102,5 +90,12 @@
                 tools:replace="android:resource" />
         </provider>
     </application>
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.VIBRATE" />
+    <uses-permission android:name="android.permission.CAMERA" />
+
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
 
 </manifest>
