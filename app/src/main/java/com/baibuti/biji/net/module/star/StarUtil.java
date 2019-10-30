@@ -25,7 +25,6 @@ public class StarUtil {
     private static final String AllStarUrl = Urls.StarUrl + "/all";
     private static final String InsertStarUrl = Urls.StarUrl + "/insert";
     private static final String DeleteStarUrl = Urls.StarUrl + "/delete";
-    private static final String PushStarUrl = Urls.StarUrl + "/push";
 
     public static SearchItem[] getAllStars() throws ServerErrorException {
         RespType resp = NetUtil.httpGetSync(AllStarUrl, NetUtil.getOneHeader("Authorization", AuthMgr.getInstance().getToken()));
@@ -105,31 +104,5 @@ public class StarUtil {
             ex.printStackTrace();
             return null;
         }
-    }
-
-    @Deprecated
-    public static void pushStarAsync(SearchItem[] searchItems, @NonNull IPushCallBack pushCallBack) throws ServerErrorException {
-        NetUtil.httpPostPutDeleteAsync(
-            PushStarUrl, NetUtil.POST,
-            StarReqBody.toStarReqBodiesJson(StarReqBody.toStarReqBodies(searchItems)),
-            NetUtil.getOneHeader("Authorization", AuthMgr.getInstance().getToken()),
-            new Callback() {
-                @Override
-                @EverythingIsNonNull
-                public void onFailure(Call call, IOException e) { }
-
-                @Override
-                @EverythingIsNonNull
-                public void onResponse(Call call, Response response) throws IOException {
-                    int code = response.code();
-                    if (code == 200) {
-                        String newToken = response.headers().get("Authorization");
-                        if (newToken != null && !(newToken.isEmpty()))
-                            AuthMgr.getInstance().setToken(newToken);
-                        pushCallBack.onCallBack();
-                    }
-                }
-            }
-        );
     }
 }

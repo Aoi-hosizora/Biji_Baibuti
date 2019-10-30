@@ -7,15 +7,15 @@ import java.util.List;
 public interface INoteDao {
 
     // 查
-    default List<Note> queryAllNotes() throws Exception {
+    default List<Note> queryAllNotes() {
         return queryNotesByGroupId(-1);
     }
 
-    List<Note> queryNotesByGroupId(int id) throws Exception;
-    Note queryNoteById(int id) throws Exception;
+    List<Note> queryNotesByGroupId(int id);
+    Note queryNoteById(int id);
 
     // 增删改
-    long insertNote(Note note) throws Exception;
-    boolean updateNote(Note note) throws Exception;
-    boolean deleteNote(int id) throws Exception;
+    long insertNote(Note note);
+    boolean updateNote(Note note);
+    boolean deleteNote(int id);
 }

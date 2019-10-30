@@ -296,7 +296,7 @@ public class StarSearchItemActivity extends AppCompatActivity implements View.On
         new Thread(new Runnable() {
             @Override
             public void run() {
-                searchItemList = searchItemDao.queryAllStarSearchItems();
+                searchItemList = searchItemDao.queryAllSearchItems();
 
                 runOnUiThread(new Runnable() {
                     @Override
@@ -343,7 +343,7 @@ public class StarSearchItemActivity extends AppCompatActivity implements View.On
         new Thread(new Runnable() {
             @Override
             public void run() {
-                if (searchItemDao.deleteStarSearchItem(searchItem) != -1)
+                if (searchItemDao.deleteSearchItem(searchItem.getUrl()) != -1)
                     runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
@@ -386,7 +386,7 @@ public class StarSearchItemActivity extends AppCompatActivity implements View.On
                     new Thread(new Runnable() {
                         @Override
                         public void run() {
-                            ArrayList<SearchItem> s = searchItemDao.queryAllStarSearchItems();
+                            ArrayList<SearchItem> s = searchItemDao.queryAllSearchItems();
                             if (searchItemDao.deleteStarSearchItems(s) != -1) {
                                 runOnUiThread(new Runnable() {
                                     @Override
@@ -489,7 +489,7 @@ public class StarSearchItemActivity extends AppCompatActivity implements View.On
         new Thread(new Runnable() {
             @Override
             public void run() {
-                ArrayList<SearchItem> AllSearchItems = searchItemDao.queryAllStarSearchItems();
+                ArrayList<SearchItem> AllSearchItems = searchItemDao.queryAllSearchItems();
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
@@ -517,7 +517,7 @@ public class StarSearchItemActivity extends AppCompatActivity implements View.On
     //         public void run() {
     //             try {
     //                 SearchItemDao searchItemDao = new SearchItemDao(StarSearchItemActivity.this);
-    //                 List<SearchItem> searchItems = searchItemDao.queryAllStarSearchItems();
+    //                 List<SearchItem> searchItems = searchItemDao.queryAllSearchItems();
     //                 for (SearchItem searchItem: searchItems)
     //                     StarUtil.insertStar(searchItem);
     //             }

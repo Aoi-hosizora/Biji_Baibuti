@@ -14,6 +14,7 @@ import com.baibuti.biji.data.model.Note;
 import com.baibuti.biji.util.otherUtil.DateColorUtil;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 public class NoteDao implements INoteDao {
@@ -60,36 +61,30 @@ public class NoteDao implements INoteDao {
         String sql = "select * from " + TBL_NAME + ((groupId < 0) ? "" : " where " + COL_GROUP_ID + " = " + groupId);
 
         List<Note> noteList = new ArrayList<>();
-        Note note;
-
         try {
             cursor = db.rawQuery(sql, null);
 
             while (cursor.moveToNext()) {
 
-                note = new Note();
-                note.setId(cursor.getInt(cursor.getColumnIndex(COL_ID)));
-                note.setTitle(cursor.getString(cursor.getColumnIndex(COL_TITLE)));
-                note.setContent(cursor.getString(cursor.getColumnIndex(COL_CONTENT)));
+                int id = cursor.getInt(cursor.getColumnIndex(COL_ID));
+                String title = cursor.getString(cursor.getColumnIndex(COL_TITLE));
+                String content = cursor.getString(cursor.getColumnIndex(COL_CONTENT));
 
                 Group group = groupDao.queryGroupById(cursor.getInt(cursor.getColumnIndex(COL_GROUP_ID)));
                 if (group == null)
                     group = groupDao.queryDefaultGroup();
 
-                note.setGroup(group, false);
-                note.setCreateTime(DateColorUtil.Str2Date(cursor.getString(cursor.getColumnIndex(COL_CREATE_TIME))));
-                note.setUpdateTime(DateColorUtil.Str2Date(cursor.getString(cursor.getColumnIndex(COL_UPDATE_TIME))));
+                Date ct = DateColorUtil.Str2Date(cursor.getString(cursor.getColumnIndex(COL_CREATE_TIME)));
+                Date ut = DateColorUtil.Str2Date(cursor.getString(cursor.getColumnIndex(COL_UPDATE_TIME)));
 
-                noteList.add(note);
+                noteList.add(new Note(id, title, content, group, ct, ut));
             }
 
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
-            if (cursor != null && !cursor.isClosed())
-                cursor.close();
-            if (db != null && db.isOpen())
-                db.close();
+            if (cursor != null && !cursor.isClosed()) cursor.close();
+            if (db != null && db.isOpen()) db.close();
         }
 
         return noteList;
@@ -112,27 +107,25 @@ public class NoteDao implements INoteDao {
 
             while (cursor.moveToNext()) {
 
-                note = new Note();
-                note.setId(cursor.getInt(cursor.getColumnIndex(COL_ID)));
-                note.setTitle(cursor.getString(cursor.getColumnIndex(COL_TITLE)));
-                note.setContent(cursor.getString(cursor.getColumnIndex(COL_CONTENT)));
+                int id = cursor.getInt(cursor.getColumnIndex(COL_ID));
+                String title = cursor.getString(cursor.getColumnIndex(COL_TITLE));
+                String content = cursor.getString(cursor.getColumnIndex(COL_CONTENT));
 
                 Group group = groupDao.queryGroupById(cursor.getInt(cursor.getColumnIndex(COL_GROUP_ID)));
                 if (group == null)
                     group = groupDao.queryDefaultGroup();
 
-                note.setGroup(group, false);
-                note.setCreateTime(DateColorUtil.Str2Date(cursor.getString(cursor.getColumnIndex(COL_CREATE_TIME))));
-                note.setUpdateTime(DateColorUtil.Str2Date(cursor.getString(cursor.getColumnIndex(COL_UPDATE_TIME))));
+                Date ct = DateColorUtil.Str2Date(cursor.getString(cursor.getColumnIndex(COL_CREATE_TIME)));
+                Date ut = DateColorUtil.Str2Date(cursor.getString(cursor.getColumnIndex(COL_UPDATE_TIME)));
+
+                note = new Note(id, title, content, group, ct, ut);
             }
 
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
-            if (cursor != null && !cursor.isClosed())
-                cursor.close();
-            if (db != null && db.isOpen())
-                db.close();
+            if (cursor != null && !cursor.isClosed()) cursor.close();
+            if (db != null && db.isOpen()) db.close();
         }
         return note;
     }
@@ -152,7 +145,7 @@ public class NoteDao implements INoteDao {
         SQLiteStatement stat = db.compileStatement(sql);
         db.beginTransaction();
 
-        long ret_id = -1;
+        long ret_id = 0;
         try {
             stat.bindString(1, note.getTitle()); // COL_TITLE
             stat.bindString(2, note.getContent()); // COL_TITLE
@@ -214,8 +207,7 @@ public class NoteDao implements INoteDao {
             e.printStackTrace();
         }
         finally {
-            if (db != null && db.isOpen())
-                db.close();
+            if (db != null && db.isOpen()) db.close();
         }
 
         return ret == 1;

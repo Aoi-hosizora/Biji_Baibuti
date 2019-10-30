@@ -2,6 +2,7 @@ package com.baibuti.biji.data.strategy;
 
 import android.content.Context;
 
+import com.baibuti.biji.data.dao.daoInterface.*;
 import com.baibuti.biji.data.dao.db.*;
 
 public class DaoStrategyHelper {
@@ -17,15 +18,15 @@ public class DaoStrategyHelper {
         return Instance;
     }
 
-    public NoteDao getNoteDao(Context context) {
+    public INoteDao getNoteDao(Context context) {
         return new NoteDao(context);
     }
 
-    public GroupDao getGroupDao(Context context) {
+    public IGroupDao getGroupDao(Context context) {
         return new GroupDao(context);
     }
 
-    public SearchItemDao getSearchDao(Context context) {
+    public ISearchItemDao getSearchDao(Context context) {
         return new SearchItemDao(context);
     }
 }

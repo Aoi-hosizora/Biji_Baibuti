@@ -34,7 +34,7 @@ public class GroupDao implements IGroupDao {
             insertGroup(Group.DEF_GROUP);
 
         // 预处理顺序
-        preProcessOrder();
+        precessOrder();
     }
 
     // queryGroupAll queryGroupById queryDefaultGroup insertGroup updateGroup deleteGroup
@@ -52,28 +52,24 @@ public class GroupDao implements IGroupDao {
         String sql = "select * from " + TBL_NAME;
 
         List<Group> groupList = new ArrayList<>();
-        Group group;
         try {
             cursor = db.rawQuery(sql, null);
 
             while (cursor.moveToNext()) {
 
-                group = new Group();
-                group.setId(cursor.getInt(cursor.getColumnIndex(COL_ID)));
-                group.setName(cursor.getString(cursor.getColumnIndex(COL_NAME)));
-                group.setOrder(cursor.getInt(cursor.getColumnIndex(COL_ORDER)));
-                group.setColor(cursor.getString(cursor.getColumnIndex(COL_COLOR)));
+                int id = cursor.getInt(cursor.getColumnIndex(COL_ID));
+                String name = cursor.getString(cursor.getColumnIndex(COL_NAME));
+                int order = cursor.getInt(cursor.getColumnIndex(COL_ORDER));
+                String color = cursor.getString(cursor.getColumnIndex(COL_COLOR));
 
-                groupList.add(group);
+                groupList.add(new Group(id, name, order, color));
             }
 
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
-            if (cursor != null && !cursor.isClosed())
-                cursor.close();
-            if (db != null && db.isOpen())
-                db.close();
+            if (cursor != null && !cursor.isClosed()) cursor.close();
+            if (db != null && db.isOpen()) db.close();
         }
 
         return groupList;
@@ -97,20 +93,19 @@ public class GroupDao implements IGroupDao {
 
             while (cursor.moveToNext()) {
 
-                group = new Group();
-                group.setId(cursor.getInt(cursor.getColumnIndex(COL_ID)));
-                group.setName(cursor.getString(cursor.getColumnIndex(COL_NAME)));
-                group.setOrder(cursor.getInt(cursor.getColumnIndex(COL_ORDER)));
-                group.setColor(cursor.getString(cursor.getColumnIndex(COL_COLOR)));
+                int id = cursor.getInt(cursor.getColumnIndex(COL_ID));
+                String name = cursor.getString(cursor.getColumnIndex(COL_NAME));
+                int order = cursor.getInt(cursor.getColumnIndex(COL_ORDER));
+                String color = cursor.getString(cursor.getColumnIndex(COL_COLOR));
+
+                group = new Group(id, name, order, color);
             }
 
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
-            if (cursor != null && !cursor.isClosed())
-                cursor.close();
-            if (db != null && db.isOpen())
-                db.close();
+            if (cursor != null && !cursor.isClosed()) cursor.close();
+            if (db != null && db.isOpen()) db.close();
         }
 
         return group;
@@ -125,7 +120,7 @@ public class GroupDao implements IGroupDao {
 
         SQLiteDatabase db = helper.getWritableDatabase();
         Cursor cursor = null;
-        String sql = "select * from " + TBL_NAME + " where " + COL_NAME + " = " + Group.DEF_GROUP.getName();
+        String sql = "select * from " + TBL_NAME + " where " + COL_NAME + " = \"" + Group.DEF_GROUP.getName() + "\"";
 
         Group group = null;
         try {
@@ -143,17 +138,15 @@ public class GroupDao implements IGroupDao {
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
-            if (cursor != null && !cursor.isClosed())
-                cursor.close();
-            if (db != null && db.isOpen())
-                db.close();
+            if (cursor != null && !cursor.isClosed()) cursor.close();
+            if (db != null && db.isOpen()) db.close();
         }
 
         return group;
     }
 
     /**
-     * 添加分组
+     * 添加分组 (没必要刷新 Order)
      * @param group 新分组，自动编码
      * @return 分组 id
      */
@@ -171,9 +164,9 @@ public class GroupDao implements IGroupDao {
         try {
             group.setOrder(queryGroupAll().size()); // 每次都到插入最后
 
-            stat.bindString(1, group.getName());
-            stat.bindLong(2, group.getOrder());
-            stat.bindString(3, group.getColor());
+            stat.bindString(1, group.getName()); // COL_NAME
+            stat.bindLong(2, group.getOrder()); // COL_ORDER
+            stat.bindString(3, group.getColor()); // COL_COLOR
 
             ret_id = stat.executeInsert();
             db.setTransactionSuccessful();
@@ -190,7 +183,7 @@ public class GroupDao implements IGroupDao {
     }
 
     /**
-     * 更新分组
+     * 更新分组 (没必要刷新 Order)
      * @param group 覆盖更新笔记
      * @return 是否成功更新 (更新非 0 项)
      */
@@ -217,7 +210,7 @@ public class GroupDao implements IGroupDao {
 
 
     /**
-     * 删除分组
+     * 删除分组 (刷新 Order)
      * @param groupId 删除的分组 id
      * @return 是否成功删除 (删除 1 项)
      */
@@ -242,18 +235,20 @@ public class GroupDao implements IGroupDao {
                 db.close();
         }
 
+        // 删除后刷新 Order
+        precessOrder();
         return ret == 1;
     }
 
     // endregion
 
-    // preProcessOrder
+    // precessOrder
     // region 内部处理
 
     /**
-     * 在操作之前预处理顺序
+     * 处理顺序 (所有操作前 以及 删除操作后)
      */
-    private void preProcessOrder() {
+    private void precessOrder() {
         List<Group> groups = queryGroupAll();
         Collections.sort(groups);
 

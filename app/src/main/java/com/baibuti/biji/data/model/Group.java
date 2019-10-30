@@ -14,6 +14,7 @@ public class Group implements Serializable, Comparable<Group> {
 
     private static String DEF_GROUP_NAME = "默认分组";
     private static String DEF_GROUP_COLOR = "#F0F0F0";
+
     /**
      * 默认分组
      */

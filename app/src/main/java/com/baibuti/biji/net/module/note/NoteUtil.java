@@ -27,7 +27,6 @@ public class NoteUtil {
     private static final String UpdateNoteUrl = Urls.NoteUrl + "/update";
     private static final String InsertNoteUrl = Urls.NoteUrl + "/insert";
     private static final String DeleteNoteUrl = Urls.NoteUrl + "/delete";
-    private static final String PushNoteUrl = Urls.NoteUrl + "/push";
 
     public static Note[] getAllNotes() throws ServerErrorException {
         RespType resp = NetUtil.httpGetSync(AllNoteUrl, NetUtil.getOneHeader("Authorization", AuthMgr.getInstance().getToken()));
@@ -158,31 +157,5 @@ public class NoteUtil {
             ex.printStackTrace();
             return null;
         }
-    }
-
-    @Deprecated
-    public static void pushNotesAsync(Note[] notes, @NonNull IPushCallBack pushCallBack) throws ServerErrorException {
-        NetUtil.httpPostPutDeleteAsync(
-            PushNoteUrl, NetUtil.POST,
-            NoteReqBody.getJsonFromNoteRodies(NoteReqBody.toNoteReqBodies(notes)),
-            NetUtil.getOneHeader("Authorization", AuthMgr.getInstance().getToken()),
-            new Callback() {
-                @Override
-                @EverythingIsNonNull
-                public void onFailure(Call call, IOException e) { }
-
-                @Override
-                @EverythingIsNonNull
-                public void onResponse(Call call, Response response) throws IOException {
-                    int code = response.code();
-                    if (code == 200) {
-                        String newToken = response.headers().get("Authorization");
-                        if (newToken != null && !(newToken.isEmpty()))
-                            AuthMgr.getInstance().setToken(newToken);
-                        pushCallBack.onCallBack();
-                    }
-                }
-            }
-        );
     }
 }

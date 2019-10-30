@@ -27,7 +27,6 @@ public class GroupUtil {
     private static final String UpdateGroupUrl = Urls.GroupUrl + "/update";
     private static final String InsertGroupUrl = Urls.GroupUrl + "/insert";
     private static final String DeleteGroupUrl = Urls.GroupUrl + "/delete";
-    private static final String PushGroupUrl = Urls.GroupUrl + "/push";
 
     public static Group[] getAllGroups() throws ServerErrorException {
         RespType resp = NetUtil.httpGetSync(AllGroupUrl, NetUtil.getOneHeader("Authorization", AuthMgr.getInstance().getToken()));
@@ -158,31 +157,5 @@ public class GroupUtil {
             ex.printStackTrace();
             return null;
         }
-    }
-
-    @Deprecated
-    public static void pushGroupsAsync(Group[] groups, @NonNull IPushCallBack pushCallBack) throws ServerErrorException {
-        NetUtil.httpPostPutDeleteAsync(
-            PushGroupUrl, NetUtil.POST,
-            GroupReqBody.getJsonFromGroupReqRodies(GroupReqBody.toGroupReqBodies(groups)),
-            NetUtil.getOneHeader("Authorization", AuthMgr.getInstance().getToken()),
-            new Callback() {
-                @Override
-                @EverythingIsNonNull
-                public void onFailure(Call call, IOException e) { }
-
-                @Override
-                @EverythingIsNonNull
-                public void onResponse(Call call, Response response) throws IOException {
-                    int code = response.code();
-                    if (code == 200) {
-                        String newToken = response.headers().get("Authorization");
-                        if (newToken != null && !(newToken.isEmpty()))
-                            AuthMgr.getInstance().setToken(newToken);
-                        pushCallBack.onCallBack();
-                    }
-                }
-            }
-        );
     }
 }

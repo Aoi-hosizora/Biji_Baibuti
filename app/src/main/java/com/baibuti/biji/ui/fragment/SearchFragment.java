@@ -291,7 +291,7 @@ public class SearchFragment extends Fragment implements View.OnClickListener {
 
         SearchItemDao searchItemDao = new SearchItemDao(getContext());
 
-        if (searchItemDao.hasStaredSearchItem(searchItem)) // 已收藏
+        if (searchItemDao.querySearchItemByUrl(searchItem.getUrl()) != null) // 已收藏
             ((Button) root.findViewById(R.id.id_SearchFrag_PopupMenu_Star)).setText(R.string.SearchFrag_PopupMenu_CancelStar);
         else // 未收藏
             ((Button) root.findViewById(R.id.id_SearchFrag_PopupMenu_Star)).setText(R.string.SearchFrag_PopupMenu_Star);
@@ -447,7 +447,7 @@ public class SearchFragment extends Fragment implements View.OnClickListener {
      */
     private void SearchItem_StarClick(SearchItem searchItem) {
         SearchItemDao searchItemDao = new SearchItemDao(getContext());
-        if (!searchItemDao.hasStaredSearchItem(searchItem)) {
+        if (searchItemDao.querySearchItemByUrl(searchItem.getUrl()) == null) {
             // 未收藏
             new Thread(new Runnable() {
                 @Override
@@ -476,7 +476,7 @@ public class SearchFragment extends Fragment implements View.OnClickListener {
             new Thread(new Runnable() {
                 @Override
                 public void run() {
-                    if (searchItemDao.deleteStarSearchItem(searchItem) != -1)
+                    if (searchItemDao.deleteSearchItem(searchItem.getUrl()) != -1)
                         getActivity().runOnUiThread(new Runnable() {
                             @Override
                             public void run() {

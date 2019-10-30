@@ -149,12 +149,12 @@ class ServerDbUpdateHelper {
             break;
             case Mod_Star: {
                 SearchItemDao searchItemDao = new SearchItemDao(context);
-                searchItemDao.deleteStarSearchItems(searchItemDao.queryAllStarSearchItems(false), false);
+                searchItemDao.deleteSearchItems(searchItemDao.queryAllSearchItems(false), false);
                 try {
                     SearchItem[] searchItems = StarUtil.getAllStars();
                     for (SearchItem searchItem : searchItems) {
                         Log.e("", "pullData: " + searchItem.getUrl() );
-                        searchItemDao.insertStarSearchItem(searchItem, false);
+                        searchItemDao.insertSearchItem(searchItem, false);
 
                         pullLog(context, logModule);
                     }
@@ -294,7 +294,7 @@ class ServerDbUpdateHelper {
             break;
             case Mod_Star: {
                 SearchItemDao searchItemDao = new SearchItemDao(context);
-                List<SearchItem> searchItems = searchItemDao.queryAllStarSearchItems(false);
+                List<SearchItem> searchItems = searchItemDao.queryAllSearchItems(false);
                 try {
                     StarUtil.pushStarAsync(searchItems.toArray(new SearchItem[0]), new IPushCallBack() {
                         @Override

@@ -34,7 +34,6 @@ public class ImgUtil {
     private static final String GetImgUrl = GetImgUrlHead + "%s/%s";
     private static final String DeleteImgUrl = Urls.ImageUrl + "/delete";
 
-
     public static UploadStatus uploadImg(String path) throws ServerErrorException {
         Log.e("", "uploadImg: " + ImgUploadUrl );
         File img = new File(path);
