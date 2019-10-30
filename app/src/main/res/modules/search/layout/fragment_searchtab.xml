@@ -85,7 +85,7 @@
             android:visibility="gone"/>
 
         <!--<com.baibuti.biji.UI.Widget.ListView.SlideRecyclerViewEmptySupport-->
-        <com.baibuti.biji.UI.Widget.ListView.RecyclerViewEmptySupport
+        <com.baibuti.biji.ui.widget.listView.RecyclerViewEmptySupport
             android:id="@+id/id_SearchFrag_SearchRetList"
             android:layout_width="match_parent"
             android:layout_height="match_parent"

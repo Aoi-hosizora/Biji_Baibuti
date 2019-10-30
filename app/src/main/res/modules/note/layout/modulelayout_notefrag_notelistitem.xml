@@ -20,7 +20,7 @@
             android:layout_height="wrap_content"
             android:id="@+id/tv_list_titletime">
 
-            <com.baibuti.biji.UI.Widget.OtherView.EllipsizeTextView
+            <com.baibuti.biji.ui.widget.otherView.EllipsizeTextView
                 android:id="@+id/tv_list_title"
                 android:layout_width="0dp"
                 android:layout_weight="1"

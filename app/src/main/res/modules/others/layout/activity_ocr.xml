@@ -5,10 +5,10 @@
     android:orientation="vertical"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".UI.Activity.OCRActivity"
+    tools:context=".ui.activity.OCRActivity"
     android:background="@color/black">
 
-    <com.baibuti.biji.UI.Widget.OCRView.OCRRegionGroupLayout
+    <com.baibuti.biji.ui.widget.ocrView.OCRRegionGroupLayout
         android:id="@+id/id_OCRActivity_OCRRegionGroupLayout"
         android:layout_width="match_parent"
         android:layout_height="0dp"
@@ -20,7 +20,7 @@
         ocrlayout:uncheckedOpacity="45"
         ocrlayout:checkedOpacity="150">
 
-    </com.baibuti.biji.UI.Widget.OCRView.OCRRegionGroupLayout>
+    </com.baibuti.biji.ui.widget.ocrView.OCRRegionGroupLayout>
 
     <TextView
         android:id="@+id/id_OCRActivity_OCRResultLabelTextView"

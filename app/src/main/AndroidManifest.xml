@@ -3,16 +3,25 @@
     xmlns:tools="http://schemas.android.com/tools"
     package="com.baibuti.biji">
 
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+
+    <uses-permission android:name="android.permission.VIBRATE" />
+    <uses-permission android:name="android.permission.CAMERA" />
+
     <application
         android:allowBackup="true"
         android:icon="@mipmap/icons8_copybook_96"
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
         tools:ignore="GoogleAppIndexingWarning">
-        <activity android:name=".UI.Activity.WebviewActivity"></activity>
-        <activity android:name=".UI.Activity.QrCodeActivity" /> <!-- Main Activity -->
+        <activity android:name=".ui.activity.WebviewActivity" />
+        <activity android:name=".ui.activity.QrCodeActivity" /> <!-- Main Activity -->
         <activity
-            android:name=".UI.Activity.MainActivity"
+            android:name=".ui.activity.MainActivity"
             android:screenOrientation="portrait"
             android:windowSoftInputMode="adjustPan">
             <intent-filter>
@@ -22,7 +31,7 @@
             </intent-filter>
         </activity> <!-- MNote Activity -->
         <activity
-            android:name=".UI.Activity.ModifyNoteActivity"
+            android:name=".ui.activity.ModifyNoteActivity"
             android:screenOrientation="portrait">
             <intent-filter>
                 <action android:name="activitytest.example.com.activitytest.ModifyNoteActivity" />
@@ -31,7 +40,7 @@
             </intent-filter>
         </activity> <!-- VMNote Activity -->
         <activity
-            android:name=".UI.Activity.ViewModifyNoteActivity"
+            android:name=".ui.activity.ViewModifyNoteActivity"
             android:screenOrientation="portrait">
             <intent-filter>
                 <action android:name="activitytest.example.com.activitytest.ViewModifyNoteActivity" />
@@ -40,7 +49,7 @@
             </intent-filter>
         </activity> <!-- OpenSaveFile Activity -->
         <activity
-            android:name=".UI.Activity.OpenSaveFileActivity"
+            android:name=".ui.activity.OpenSaveFileActivity"
             android:screenOrientation="portrait">
             <intent-filter>
                 <action android:name="activitytest.example.com.activitytest.OpenSaveFileActivity" />
@@ -49,7 +58,7 @@
             </intent-filter>
         </activity> <!-- StarSearchItem Activity -->
         <activity
-            android:name=".UI.Activity.StarSearchItemActivity"
+            android:name=".ui.activity.StarSearchItemActivity"
             android:screenOrientation="portrait">
             <intent-filter>
                 <action android:name="activitytest.example.com.activitytest.StarSearchItemActivity" />
@@ -58,7 +67,7 @@
             </intent-filter>
         </activity> <!-- OCR Activity -->
         <activity
-            android:name=".UI.Activity.OCRActivity"
+            android:name=".ui.activity.OCRActivity"
             android:screenOrientation="portrait">
             <intent-filter>
                 <action android:name="activitytest.example.com.activitytest.OCRActivity" />
@@ -67,7 +76,7 @@
             </intent-filter>
         </activity> <!-- RegLog Activity -->
         <activity
-            android:name=".UI.Activity.RegLogActivity"
+            android:name=".ui.activity.RegLogActivity"
             android:screenOrientation="portrait">
             <intent-filter>
                 <action android:name="activitytest.example.com.activitytest.RegLogActivity" />
@@ -90,12 +99,5 @@
                 tools:replace="android:resource" />
         </provider>
     </application>
-    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
-    <uses-permission android:name="android.permission.INTERNET" />
-    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
-    <uses-permission android:name="android.permission.VIBRATE" />
-    <uses-permission android:name="android.permission.CAMERA" />
-
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
 
 </manifest>
