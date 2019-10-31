@@ -13,7 +13,6 @@ import android.view.View.OnClickListener;
 
 import com.baibuti.biji.data.dao.db.UtLogDao;
 import com.baibuti.biji.data.model.Group;
-import com.baibuti.biji.data.model.LogModule;
 import com.baibuti.biji.R;
 import com.baibuti.biji.data.dao.db.GroupDao;
 import com.baibuti.biji.data.dao.db.NoteDao;

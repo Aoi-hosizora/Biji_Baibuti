@@ -11,7 +11,7 @@ import com.baibuti.biji.net.model.respObj.ServerErrorException;
 import com.baibuti.biji.net.model.respObj.UploadStatus;
 import com.baibuti.biji.net.model.RespType;
 import com.baibuti.biji.net.module.auth.AuthMgr;
-import com.baibuti.biji.net.NetUtil;
+import com.baibuti.biji.net.NetHelper;
 import com.baibuti.biji.net.Urls;
 
 import java.io.File;
@@ -37,9 +37,9 @@ public class ImgUtil {
     public static UploadStatus uploadImg(String path) throws ServerErrorException {
         Log.e("", "uploadImg: " + ImgUploadUrl );
         File img = new File(path);
-        RespType resp = NetUtil.httpPostFileSync(ImgUploadUrl,
+        RespType resp = NetHelper.httpPostFileSync(ImgUploadUrl,
             ImgUploadKey, img,
-            NetUtil.getOneHeader("Authorization", AuthMgr.getInstance().getToken()));
+            NetHelper.getOneHeader("Authorization", AuthMgr.getInstance().getToken()));
         try {
             int code = resp.getCode();
             if (code == 200) {
@@ -102,10 +102,10 @@ public class ImgUtil {
     }
 
     public static void DeleteImgsAsync(String[] urls) {
-        NetUtil.httpPostPutDeleteAsync(
-            DeleteImgUrl, NetUtil.DELETE,
+        NetHelper.httpPostPutDeleteAsync(
+            DeleteImgUrl, NetHelper.DELETE,
             DelImgReqBody.toJsons(DelImgReqBody.toReqBodiesFromUrls(urls)),
-            NetUtil.getOneHeader("Authorization", AuthMgr.getInstance().getToken()),
+            NetHelper.getOneHeader("Authorization", AuthMgr.getInstance().getToken()),
             new Callback() {
                 @Override
                 @EverythingIsNonNull

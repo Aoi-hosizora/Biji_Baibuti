@@ -8,7 +8,7 @@ public interface ISearchItemDao {
 
     // 查
     List<SearchItem> queryAllSearchItems();
-    SearchItem querySearchItemByUrl(String Url);
+    SearchItem querySearchItemByUrl(String url);
 
     // 增删改
     long insertSearchItem(SearchItem searchItem);

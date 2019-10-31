@@ -98,3 +98,6 @@ lint/tmp/
 
 # docs
 my_docs/
+
+# Editor
+.ionide/

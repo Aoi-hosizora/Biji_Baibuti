@@ -7,7 +7,7 @@ import java.util.List;
 public interface IGroupDao {
 
     // 查
-    List<Group> queryGroupAll();
+    List<Group> queryAllGroups();
     Group queryGroupById(int groupId);
     Group queryDefaultGroup();
 

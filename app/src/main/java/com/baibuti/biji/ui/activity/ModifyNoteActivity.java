@@ -33,7 +33,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.baibuti.biji.data.model.Group;
-import com.baibuti.biji.data.adapter.GroupAdapter;
+import com.baibuti.biji.ui.adapter.GroupAdapter;
 import com.baibuti.biji.data.model.Note;
 import com.baibuti.biji.net.model.respObj.ServerErrorException;
 import com.baibuti.biji.net.model.respObj.UploadStatus;
@@ -163,7 +163,7 @@ public class ModifyNoteActivity extends AppCompatActivity implements View.OnClic
             @Override
             public void run() {
 
-                GroupList = groupDao.queryGroupAll();
+                GroupList = groupDao.queryAllGroups();
                 groupAdapter = new GroupAdapter(ModifyNoteActivity.this, GroupList);
 
                 runOnUiThread(new Runnable() {
@@ -739,7 +739,7 @@ public class ModifyNoteActivity extends AppCompatActivity implements View.OnClic
      */
     private void refreshGroupList() {
         groupDao = new GroupDao(this);
-        GroupList = groupDao.queryGroupAll();
+        GroupList = groupDao.queryAllGroups();
         Collections.sort(GroupList);
         groupAdapter = new GroupAdapter(this, GroupList); // 必要
         groupAdapter.notifyDataSetChanged();

@@ -4,9 +4,9 @@
 
 + 本地存储 <-> 服务器存储
 
-![DB_Query](./../../../../../../../../../assets/DB_Query.png)
+![DB_Query](../../../../../../../../assets/DB_Query.png)
 
-![DB_Insert](./../../../../../../../../../assets/DB_Insert.png)
+![DB_Insert](../../../../../../../../assets/DB_Insert.png)
 
 ## 服务器连接代码说明
 
@@ -52,7 +52,7 @@
     + 头处理
     ```java
     /**
-     * SearchItem[] -> StarReqBody[]
+     *SearchItemNetDao
      * @return
      */
     public static StarReqBody[] toStarReqBodies(SearchItem[] searchItems) {
@@ -65,7 +65,7 @@
     }
 
     /**
-     * StarReqBody[] -> Json str
+     *SearchItemNetDao
      * @return
      */
     public static String toStarReqBodiesJson(StarReqBody[] starReqBodies) {

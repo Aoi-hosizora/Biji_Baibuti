@@ -9,7 +9,7 @@ import com.baibuti.biji.net.model.respBody.MessageResp;
 import com.baibuti.biji.net.model.respObj.ServerErrorException;
 import com.baibuti.biji.net.model.RespType;
 import com.baibuti.biji.net.module.auth.AuthMgr;
-import com.baibuti.biji.net.NetUtil;
+import com.baibuti.biji.net.NetHelper;
 import com.baibuti.biji.net.Urls;
 
 import java.io.File;
@@ -30,7 +30,7 @@ public class FileClassUtil {
     private static final String GetShareCodeUrl = Urls.FileClassUrl + "/share";
 
     public static FileClass[] getAllFileClasses() throws ServerErrorException {
-        RespType resp = NetUtil.httpGetSync(AllFileClassUrl, NetUtil.getOneHeader("Authorization", AuthMgr.getInstance().getToken()));
+        RespType resp = NetHelper.httpGetSync(AllFileClassUrl, NetHelper.getOneHeader("Authorization", AuthMgr.getInstance().getToken()));
         try {
             int code = resp.getCode();
             if (code == 200) {
@@ -53,10 +53,10 @@ public class FileClassUtil {
     }
 
     public static FileClass updateFileClass(FileClass fileClass) throws ServerErrorException {
-        RespType resp = NetUtil.httpPostPutDeleteSync(
-                UpdateFileClassUrl, NetUtil.PUT,
+        RespType resp = NetHelper.httpPostPutDeleteSync(
+                UpdateFileClassUrl, NetHelper.PUT,
                 FileClassReqBody.toFileClassReqBody(fileClass).toJson(),
-                NetUtil.getOneHeader("Authorization", AuthMgr.getInstance().getToken())
+                NetHelper.getOneHeader("Authorization", AuthMgr.getInstance().getToken())
         );
 
         try {
@@ -81,10 +81,10 @@ public class FileClassUtil {
     }
 
     public static FileClass insertFileClass(FileClass fileClass) throws ServerErrorException {
-        RespType resp = NetUtil.httpPostPutDeleteSync(
-                InsertFileClassUrl, NetUtil.POST,
+        RespType resp = NetHelper.httpPostPutDeleteSync(
+                InsertFileClassUrl, NetHelper.POST,
                 FileClassReqBody.toFileClassReqBody(fileClass).toJson(),
-                NetUtil.getOneHeader("Authorization", AuthMgr.getInstance().getToken())
+                NetHelper.getOneHeader("Authorization", AuthMgr.getInstance().getToken())
         );
 
         try {
@@ -109,10 +109,10 @@ public class FileClassUtil {
     }
 
     public static FileClass deleteFileClass(FileClass fileClass) throws ServerErrorException {
-        RespType resp = NetUtil.httpPostPutDeleteSync(
-                DeleteFileClassUrl, NetUtil.DELETE,
+        RespType resp = NetHelper.httpPostPutDeleteSync(
+                DeleteFileClassUrl, NetHelper.DELETE,
                 FileClassReqBody.toFileClassReqBody(fileClass).toJson(),
-                NetUtil.getOneHeader("Authorization", AuthMgr.getInstance().getToken())
+                NetHelper.getOneHeader("Authorization", AuthMgr.getInstance().getToken())
         );
 
         try {
@@ -138,10 +138,10 @@ public class FileClassUtil {
 
     @Deprecated
     public static void pushFileClassAsync(FileClass[] fileClasses, @NonNull IPushCallBack pushCallBack) throws ServerErrorException {
-        NetUtil.httpPostPutDeleteAsync(
-                PushFileClassUrl, NetUtil.POST,
+        NetHelper.httpPostPutDeleteAsync(
+                PushFileClassUrl, NetHelper.POST,
                 FileClassReqBody.getJsonFromFileClassReqRodies(FileClassReqBody.toFileClassReqBodies(fileClasses)),
-                NetUtil.getOneHeader("Authorization", AuthMgr.getInstance().getToken()),
+                NetHelper.getOneHeader("Authorization", AuthMgr.getInstance().getToken()),
                 new Callback() {
                     @Override
                     @EverythingIsNonNull
@@ -164,11 +164,11 @@ public class FileClassUtil {
 
     public static File getShareCode(String fileClassName){
 
-        return NetUtil.httpGetFileSync(
+        return NetHelper.httpGetFileSync(
                 GetShareCodeUrl + "?foldername=" + fileClassName,
                 "Share",
                 fileClassName + ".png",
-                NetUtil.getOneHeader("Authorization", AuthMgr.getInstance().getToken())
+                NetHelper.getOneHeader("Authorization", AuthMgr.getInstance().getToken())
         );
     }
 }

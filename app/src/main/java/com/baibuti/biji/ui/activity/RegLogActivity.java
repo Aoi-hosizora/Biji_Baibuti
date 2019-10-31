@@ -8,7 +8,7 @@ import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.view.MenuItem;
 
-import com.baibuti.biji.data.adapter.RegLogPageAdapter;
+import com.baibuti.biji.ui.adapter.RegLogPageAdapter;
 import com.baibuti.biji.R;
 
 import java.util.Locale;

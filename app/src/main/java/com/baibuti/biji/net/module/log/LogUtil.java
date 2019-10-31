@@ -2,15 +2,13 @@ package com.baibuti.biji.net.module.log;
 
 import android.support.annotation.NonNull;
 
-import com.baibuti.biji.data.model.LogModule;
-import com.baibuti.biji.data.model.UtLog;
 import com.baibuti.biji.iGlobal.IPushCallBack;
 import com.baibuti.biji.net.model.respBody.LogResp;
 import com.baibuti.biji.net.model.respBody.MessageResp;
 import com.baibuti.biji.net.model.respObj.ServerErrorException;
 import com.baibuti.biji.net.model.RespType;
 import com.baibuti.biji.net.module.auth.AuthMgr;
-import com.baibuti.biji.net.NetUtil;
+import com.baibuti.biji.net.NetHelper;
 import com.baibuti.biji.net.Urls;
 
 import java.io.IOException;
@@ -30,7 +28,7 @@ public class LogUtil {
 
     @Deprecated
     public static UtLog[] getAllLogs() throws ServerErrorException {
-        RespType resp = NetUtil.httpGetSync(AllLogUrl, NetUtil.getOneHeader("Authorization", AuthMgr.getInstance().getToken()));
+        RespType resp = NetHelper.httpGetSync(AllLogUrl, NetHelper.getOneHeader("Authorization", AuthMgr.getInstance().getToken()));
         try {
             int code = resp.getCode();
             if (code == 200) {
@@ -63,7 +61,7 @@ public class LogUtil {
         String module = logModule.toString();
 
         String url = String.format(Locale.CHINA, OneLogUrl, module);
-        RespType resp = NetUtil.httpGetSync(url, NetUtil.getOneHeader("Authorization", AuthMgr.getInstance().getToken()));
+        RespType resp = NetHelper.httpGetSync(url, NetHelper.getOneHeader("Authorization", AuthMgr.getInstance().getToken()));
         try {
             int code = resp.getCode();
             if (code == 200) {
@@ -93,10 +91,10 @@ public class LogUtil {
      */
     @Deprecated
     public static void updateModuleLogAsync(UtLog utLog, @NonNull IPushCallBack pushCallBack) throws ServerErrorException {
-        NetUtil.httpPostPutDeleteAsync(
-            UpdateLogUrl, NetUtil.POST,
+        NetHelper.httpPostPutDeleteAsync(
+            UpdateLogUrl, NetHelper.POST,
             LogResp.toLogResp(utLog).toJson(),
-            NetUtil.getOneHeader("Authorization", AuthMgr.getInstance().getToken()),
+            NetHelper.getOneHeader("Authorization", AuthMgr.getInstance().getToken()),
             new Callback() {
                 @Override
                 @EverythingIsNonNull

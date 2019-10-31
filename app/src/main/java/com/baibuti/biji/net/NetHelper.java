@@ -19,7 +19,7 @@ import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.Response;
 
-public class NetUtil {
+public class NetHelper {
 
     /**
      * UA 头
@@ -31,32 +31,18 @@ public class NetUtil {
     /**
      * 不设置时间
      */
-    public static int NO_TIME = 0;
+    private static int NO_TIME = 0;
 
     public final static String POST = "POST";
     public final static String PUT = "PUT";
     public final static String DELETE = "DELETE";
 
-    public static Map<String, String> getOneHeader(String key, String value) {
-        Map<String, String> header = new HashMap<>();
-        header.put(key, value);
-        return header;
-    }
-
     ///////////////////////////////////////////////////////////////////////////////////////////
     ////////////////////////////////////// HTTP GET Sync //////////////////////////////////////
     ///////////////////////////////////////////////////////////////////////////////////////////
 
-    public static RespType httpGetSync(String url) {
-        return httpGetSync(url, null, NO_TIME, NO_TIME);
-    }
-
     public static RespType httpGetSync(String url, Map<String, String> headers) {
         return httpGetSync(url, headers, NO_TIME, NO_TIME);
-    }
-
-    public static RespType httpGetSync(String url, int TIME_CONN_SEC, int TIME_READ_SEC) {
-        return httpGetSync(url, null, TIME_CONN_SEC, TIME_READ_SEC);
     }
 
     public static RespType httpGetSync(String url, Map<String, String> headers, int TIME_CONN_SEC, int TIME_READ_SEC) {
@@ -87,12 +73,6 @@ public class NetUtil {
             response.close();
         }
         catch (IOException ex) {
-            ex.printStackTrace();
-        }
-        catch (NullPointerException ex) {
-            ex.printStackTrace();
-        }
-        catch (Exception ex) {
             ex.printStackTrace();
         }
         return Ret;

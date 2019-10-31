@@ -7,7 +7,7 @@ import com.baibuti.biji.net.model.respBody.MessageResp;
 import com.baibuti.biji.net.model.respObj.ServerErrorException;
 import com.baibuti.biji.net.model.RespType;
 import com.baibuti.biji.net.module.auth.AuthMgr;
-import com.baibuti.biji.net.NetUtil;
+import com.baibuti.biji.net.NetHelper;
 import com.baibuti.biji.net.Urls;
 
 import java.io.IOException;
@@ -27,10 +27,10 @@ public class ScheduleUtil {
     private static final String PushScheduleUrl = Urls.Schedule + "/push";
 
     public static boolean insertSchedule(String scheduleJson) throws ServerErrorException {
-        RespType resp = NetUtil.httpPostPutDeleteSync(
-                InsertScheduleUrl, NetUtil.POST,
+        RespType resp = NetHelper.httpPostPutDeleteSync(
+                InsertScheduleUrl, NetHelper.POST,
                 "{\"schedulejson\":" + scheduleJson + "}",
-                NetUtil.getOneHeader("Authorization", AuthMgr.getInstance().getToken())
+                NetHelper.getOneHeader("Authorization", AuthMgr.getInstance().getToken())
         );
 
         try {
@@ -54,10 +54,10 @@ public class ScheduleUtil {
     }
 
     public static boolean deleteSchedule() throws ServerErrorException {
-        RespType resp = NetUtil.httpPostPutDeleteSync(
-                DeleteScheduleUrl, NetUtil.DELETE,
+        RespType resp = NetHelper.httpPostPutDeleteSync(
+                DeleteScheduleUrl, NetHelper.DELETE,
                 "{}",
-                NetUtil.getOneHeader("Authorization", AuthMgr.getInstance().getToken())
+                NetHelper.getOneHeader("Authorization", AuthMgr.getInstance().getToken())
         );
         try {
             int code = resp.getCode();
@@ -80,10 +80,10 @@ public class ScheduleUtil {
     }
 
     public static boolean updateSchedule(String scheduleJson) throws ServerErrorException {
-        RespType resp = NetUtil.httpPostPutDeleteSync(
-                UpdateScheduleUrl, NetUtil.PUT,
+        RespType resp = NetHelper.httpPostPutDeleteSync(
+                UpdateScheduleUrl, NetHelper.PUT,
                 "{\"schedulejson\":" + scheduleJson + "}",
-                NetUtil.getOneHeader("Authorization", AuthMgr.getInstance().getToken())
+                NetHelper.getOneHeader("Authorization", AuthMgr.getInstance().getToken())
         );
 
         try {
@@ -107,7 +107,7 @@ public class ScheduleUtil {
     }
 
     public static String getSchedule() throws ServerErrorException {
-        RespType resp = NetUtil.httpGetSync(GetScheduleUrl, NetUtil.getOneHeader("Authorization", AuthMgr.getInstance().getToken()));
+        RespType resp = NetHelper.httpGetSync(GetScheduleUrl, NetHelper.getOneHeader("Authorization", AuthMgr.getInstance().getToken()));
         try {
             int code = resp.getCode();
             if (code == 200) {
@@ -131,10 +131,10 @@ public class ScheduleUtil {
 
     @Deprecated
     public static void pushSchedule(String scheduleJson, @NonNull IPushCallBack pushCallBack) throws ServerErrorException {
-        NetUtil.httpPostPutDeleteAsync(
-                PushScheduleUrl, NetUtil.POST,
+        NetHelper.httpPostPutDeleteAsync(
+                PushScheduleUrl, NetHelper.POST,
                 "{\"schedulejson\":" + scheduleJson + "}",
-                NetUtil.getOneHeader("Authorization", AuthMgr.getInstance().getToken()),
+                NetHelper.getOneHeader("Authorization", AuthMgr.getInstance().getToken()),
                 new Callback() {
                     @Override
                     @EverythingIsNonNull

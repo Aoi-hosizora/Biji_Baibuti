@@ -7,7 +7,7 @@ import com.baibuti.biji.net.model.respObj.AuthStatus;
 import com.baibuti.biji.net.model.respBody.MessageResp;
 import com.baibuti.biji.net.model.respObj.ServerErrorException;
 import com.baibuti.biji.net.model.RespType;
-import com.baibuti.biji.net.NetUtil;
+import com.baibuti.biji.net.NetHelper;
 import com.baibuti.biji.net.Urls;
 
 
@@ -24,7 +24,7 @@ public class AuthUtil {
     public static AuthStatus login(String username, String password, int expiration) {
         LoginReqBody header = new LoginReqBody(username, password, expiration);
 
-        RespType resp = NetUtil.httpPostSync(LoginUrl, header.toJson());
+        RespType resp = NetHelper.httpPostSync(LoginUrl, header.toJson());
         try {
             int code = resp.getCode();
             if (code == 200) {
@@ -45,9 +45,9 @@ public class AuthUtil {
     }
 
     public static boolean logout() throws ServerErrorException {
-        RespType resp = NetUtil.httpPostPutDeleteSync(
-                LogoutUrl, NetUtil.POST,"{}",
-                NetUtil.getOneHeader("Authorization", AuthMgr.getInstance().getToken())
+        RespType resp = NetHelper.httpPostPutDeleteSync(
+                LogoutUrl, NetHelper.POST,"{}",
+                NetHelper.getOneHeader("Authorization", AuthMgr.getInstance().getToken())
         );
 
         try {
@@ -72,7 +72,7 @@ public class AuthUtil {
     public static AuthStatus register(String username, String password) {
         RegisterReqBody header = new RegisterReqBody(username, password);
 
-        RespType resp = NetUtil.httpPostSync(RegisterUrl, header.toJson());
+        RespType resp = NetHelper.httpPostSync(RegisterUrl, header.toJson());
         try {
             int code = resp.getCode();
             if (code == 200) {

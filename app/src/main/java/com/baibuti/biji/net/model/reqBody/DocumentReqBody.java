@@ -50,7 +50,7 @@ public class DocumentReqBody implements Serializable {
     // region Document <-> DocumentReqBody
 
     /**
-     * StarReqBody -> SearchItem
+     * SearchItemNetDao -> SearchItem
      * @return
      */
     public Document toDocument() {

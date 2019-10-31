@@ -39,16 +39,16 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.baibuti.biji.data.adapter.GroupRadioAdapter;
+import com.baibuti.biji.ui.adapter.GroupRadioAdapter;
 import com.baibuti.biji.net.module.auth.AuthMgr;
 import com.baibuti.biji.ui.activity.MainActivity;
 import com.baibuti.biji.ui.activity.ModifyNoteActivity;
 import com.baibuti.biji.ui.activity.OCRActivity;
 import com.baibuti.biji.ui.activity.ViewModifyNoteActivity;
 import com.baibuti.biji.data.model.Group;
-import com.baibuti.biji.data.adapter.GroupAdapter;
+import com.baibuti.biji.ui.adapter.GroupAdapter;
 import com.baibuti.biji.data.model.Note;
-import com.baibuti.biji.data.adapter.NoteAdapter;
+import com.baibuti.biji.ui.adapter.NoteAdapter;
 import com.baibuti.biji.ui.dialog.GroupDialog;
 import com.baibuti.biji.R;
 import com.baibuti.biji.ui.widget.listView.RecyclerListScrollHelper;
@@ -601,7 +601,7 @@ public class NoteFragment extends Fragment implements View.OnClickListener {
         GroupDao groupDao = new GroupDao(this.getContext());
 
         NoteList = noteDao.queryAllNotes();
-        GroupList = groupDao.queryGroupAll();
+        GroupList = groupDao.queryAllGroups();
     }
 
     /**
@@ -633,7 +633,7 @@ public class NoteFragment extends Fragment implements View.OnClickListener {
     public void refreshGroupList() {
         GroupDao groupDao = new GroupDao(getContext());
         groupDao = new GroupDao(getContext());
-        GroupList = groupDao.queryGroupAll();
+        GroupList = groupDao.queryAllGroups();
         Collections.sort(GroupList);
         groupAdapter = new GroupAdapter(getContext(), GroupList); // 必要
         groupAdapter.notifyDataSetChanged();
@@ -741,7 +741,7 @@ public class NoteFragment extends Fragment implements View.OnClickListener {
             @Override
             public void run() {
 
-                List<Group> groups = groupDao.queryGroupAll();
+                List<Group> groups = groupDao.queryAllGroups();
 
                 getActivity().runOnUiThread(new Runnable() {
                     @Override

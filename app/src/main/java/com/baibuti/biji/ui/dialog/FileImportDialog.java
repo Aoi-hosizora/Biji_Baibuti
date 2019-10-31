@@ -11,7 +11,7 @@ import android.view.Window;
 import android.widget.ImageButton;
 import android.widget.TextView;
 
-import com.baibuti.biji.data.adapter.FileAdapter;
+import com.baibuti.biji.ui.adapter.FileAdapter;
 import com.baibuti.biji.data.model.FileItem;
 import com.baibuti.biji.R;
 

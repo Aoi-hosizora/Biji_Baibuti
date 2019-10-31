@@ -10,7 +10,6 @@ import android.util.Log;
 
 import com.baibuti.biji.data.dao.DbOpenHelper;
 import com.baibuti.biji.data.model.Document;
-import com.baibuti.biji.data.model.LogModule;
 import com.baibuti.biji.iGlobal.IPushCallBack;
 import com.baibuti.biji.net.model.respObj.ServerErrorException;
 import com.baibuti.biji.net.module.auth.AuthMgr;

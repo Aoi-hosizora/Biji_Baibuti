@@ -3,7 +3,7 @@ package com.baibuti.biji.net.module.ocr;
 import android.util.Log;
 
 import com.baibuti.biji.net.model.respObj.Region;
-import com.baibuti.biji.net.NetUtil;
+import com.baibuti.biji.net.NetHelper;
 import com.baibuti.biji.net.Urls;
 
 import org.json.JSONArray;
@@ -23,7 +23,7 @@ public class OCRRetUtil {
         File img = new File(imgPath);
         String resp;
         try {
-            resp = NetUtil.httpPostFileSync(Urls.OCRServerUrl, "img", img).getBody();
+            resp = NetHelper.httpPostFileSync(Urls.OCRServerUrl, "img", img).getBody();
         }
         catch (Exception ex) {
             ex.printStackTrace();

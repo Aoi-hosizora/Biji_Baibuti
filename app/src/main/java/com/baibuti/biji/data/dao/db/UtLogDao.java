@@ -8,8 +8,6 @@ import android.database.sqlite.SQLiteStatement;
 import android.util.Log;
 
 import com.baibuti.biji.data.dao.DbOpenHelper;
-import com.baibuti.biji.data.model.LogModule;
-import com.baibuti.biji.data.model.UtLog;
 import com.baibuti.biji.net.module.auth.AuthMgr;
 import com.baibuti.biji.util.otherUtil.DateColorUtil;
 

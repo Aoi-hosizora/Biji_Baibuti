@@ -1,6 +1,5 @@
 package com.baibuti.biji.net.model.respBody;
 
-import com.baibuti.biji.data.model.UtLog;
 import com.baibuti.biji.util.otherUtil.DateColorUtil;
 
 import org.json.JSONArray;

@@ -36,15 +36,14 @@ import android.widget.SearchView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.baibuti.biji.data.adapter.DocumentAdapter;
-import com.baibuti.biji.data.adapter.FileClassAdapter;
+import com.baibuti.biji.ui.adapter.DocumentAdapter;
+import com.baibuti.biji.ui.adapter.FileClassAdapter;
 import com.baibuti.biji.data.dao.db.DocumentDao;
 import com.baibuti.biji.data.dao.db.FileClassDao;
 import com.baibuti.biji.data.dao.db.UtLogDao;
 import com.baibuti.biji.data.model.Document;
 import com.baibuti.biji.data.model.FileClass;
 import com.baibuti.biji.data.model.FileItem;
-import com.baibuti.biji.data.model.LogModule;
 import com.baibuti.biji.net.model.respObj.ServerErrorException;
 import com.baibuti.biji.net.module.auth.AuthMgr;
 import com.baibuti.biji.net.module.file.DocumentUtil;

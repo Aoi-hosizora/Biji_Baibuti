@@ -30,14 +30,14 @@ public class GroupDao implements IGroupDao {
         helper = new DbOpenHelper(context);
 
         // 处理默认
-        if (queryGroupAll().isEmpty())
+        if (queryAllGroups().isEmpty())
             insertGroup(Group.DEF_GROUP);
 
         // 预处理顺序
         precessOrder();
     }
 
-    // queryGroupAll queryGroupById queryDefaultGroup insertGroup updateGroup deleteGroup
+    // queryAllGroups queryGroupById queryDefaultGroup insertGroup updateGroup deleteGroup
     // region 常规操作 增删改查
 
     /**
@@ -45,7 +45,7 @@ public class GroupDao implements IGroupDao {
      * @return 分组列表
      */
     @Override
-    public List<Group> queryGroupAll() {
+    public List<Group> queryAllGroups() {
 
         SQLiteDatabase db = helper.getWritableDatabase();
         Cursor cursor = null;
@@ -162,7 +162,7 @@ public class GroupDao implements IGroupDao {
 
         long ret_id = 0;
         try {
-            group.setOrder(queryGroupAll().size()); // 每次都到插入最后
+            group.setOrder(queryAllGroups().size()); // 每次都到插入最后
 
             stat.bindString(1, group.getName()); // COL_NAME
             stat.bindLong(2, group.getOrder()); // COL_ORDER
@@ -249,7 +249,7 @@ public class GroupDao implements IGroupDao {
      * 处理顺序 (所有操作前 以及 删除操作后)
      */
     private void precessOrder() {
-        List<Group> groups = queryGroupAll();
+        List<Group> groups = queryAllGroups();
         Collections.sort(groups);
 
         for (int i = 0; i < groups.size(); i++) {

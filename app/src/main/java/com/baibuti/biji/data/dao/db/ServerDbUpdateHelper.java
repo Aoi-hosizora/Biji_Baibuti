@@ -6,18 +6,14 @@ import android.util.Log;
 import com.baibuti.biji.data.model.Document;
 import com.baibuti.biji.data.model.FileClass;
 import com.baibuti.biji.data.model.Group;
-import com.baibuti.biji.data.model.LogModule;
 import com.baibuti.biji.data.model.Note;
 import com.baibuti.biji.data.model.SearchItem;
-import com.baibuti.biji.data.model.UtLog;
 import com.baibuti.biji.iGlobal.IPushCallBack;
 import com.baibuti.biji.net.model.respObj.ServerErrorException;
 import com.baibuti.biji.net.module.auth.AuthMgr;
 import com.baibuti.biji.net.module.file.DocumentUtil;
 import com.baibuti.biji.net.module.file.FileClassUtil;
 import com.baibuti.biji.net.module.log.LogUtil;
-import com.baibuti.biji.net.module.note.GroupUtil;
-import com.baibuti.biji.net.module.note.NoteUtil;
 import com.baibuti.biji.net.module.schedule.ScheduleUtil;
 import com.baibuti.biji.net.module.star.StarUtil;
 
@@ -124,7 +120,7 @@ class ServerDbUpdateHelper {
             case Mod_Group: {
                 // 先Group后Note
                 GroupDao groupDao = new GroupDao(context);
-                List<Group> groups = groupDao.queryGroupAll(false);
+                List<Group> groups = groupDao.queryAllGroups(false);
                 for (Group group : groups)
                     try {
                         // 不会抛出
@@ -278,7 +274,7 @@ class ServerDbUpdateHelper {
             break;
             case Mod_Group: {
                 GroupDao groupDao = new GroupDao(context);
-                List<Group> groups = groupDao.queryGroupAll(false);
+                List<Group> groups = groupDao.queryAllGroups(false);
                 try {
                     GroupUtil.pushGroupsAsync(groups.toArray(new Group[0]), new IPushCallBack() {
                         @Override

@@ -11,7 +11,7 @@ import android.widget.EditText;
 import android.widget.ListView;
 
 import com.baibuti.biji.data.model.Group;
-import com.baibuti.biji.data.adapter.GroupRadioAdapter;
+import com.baibuti.biji.ui.adapter.GroupRadioAdapter;
 import com.baibuti.biji.R;
 import com.baibuti.biji.data.dao.db.GroupDao;
 import com.baibuti.biji.data.dao.db.NoteDao;
@@ -131,7 +131,7 @@ public class GroupDialog extends AlertDialog implements OnClickListener {
      */
     private void refreshGroupList(boolean isLogCheck) {
 
-        GroupList = groupDao.queryGroupAll(isLogCheck);
+        GroupList = groupDao.queryAllGroups(isLogCheck);
 
         activity.runOnUiThread(new Runnable() {
             @Override
@@ -368,7 +368,7 @@ public class GroupDialog extends AlertDialog implements OnClickListener {
     }
 
     private void handleOrder() {
-        groupDao.handleOrderDuplicate(groupDao.queryGroupAll());
+        groupDao.handleOrderDuplicate(groupDao.queryAllGroups());
         groupDao.handleOrderGap();
     }
 

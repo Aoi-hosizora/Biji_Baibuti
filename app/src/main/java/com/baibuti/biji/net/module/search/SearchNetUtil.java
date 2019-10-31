@@ -4,7 +4,7 @@ import android.util.Log;
 
 import com.baibuti.biji.data.model.SearchItem;
 import com.baibuti.biji.net.model.RespType;
-import com.baibuti.biji.net.NetUtil;
+import com.baibuti.biji.net.NetHelper;
 import com.baibuti.biji.net.Urls;
 
 import org.jsoup.Jsoup;
@@ -41,7 +41,7 @@ public class SearchNetUtil {
      */
     public static ArrayList<SearchItem> getSearchBaiduRet(String KeyWord, int page) {
         String url = String.format(Locale.CHINA, Urls.BaiduUrl, KeyWord, page - 1);
-        RespType resp = NetUtil.httpGetSync(url, NetUtil.getOneHeader("User-Agent", NetUtil.DEF_UserAgent), TIME_CONN_1SEC, TIME_READ_1SEC);
+        RespType resp = NetHelper.httpGetSync(url, NetHelper.getOneHeader("User-Agent", NetHelper.DEF_UserAgent), TIME_CONN_1SEC, TIME_READ_1SEC);
         if (resp == null)
             return new ArrayList<>();
         return getParseBaiduRet(resp.getBody());
@@ -130,7 +130,7 @@ public class SearchNetUtil {
         try {
             Request request = new Request.Builder()
                     .url(baiduUrl)
-                    .addHeader("User-Agent", NetUtil.DEF_UserAgent)
+                    .addHeader("User-Agent", NetHelper.DEF_UserAgent)
                     .build()
                     ;
 

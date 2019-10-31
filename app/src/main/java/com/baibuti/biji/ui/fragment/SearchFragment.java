@@ -26,7 +26,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 
-import com.baibuti.biji.data.adapter.SearchItemAdapter;
+import com.baibuti.biji.ui.adapter.SearchItemAdapter;
 import com.baibuti.biji.data.dao.db.SearchItemDao;
 import com.baibuti.biji.data.model.SearchItem;
 import com.baibuti.biji.R;

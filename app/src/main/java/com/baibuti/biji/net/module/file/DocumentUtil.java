@@ -11,7 +11,7 @@ import com.baibuti.biji.net.model.respBody.MessageResp;
 import com.baibuti.biji.net.model.respObj.ServerErrorException;
 import com.baibuti.biji.net.model.RespType;
 import com.baibuti.biji.net.module.auth.AuthMgr;
-import com.baibuti.biji.net.NetUtil;
+import com.baibuti.biji.net.NetHelper;
 import com.baibuti.biji.net.Urls;
 
 import org.json.JSONException;
@@ -57,7 +57,7 @@ public class DocumentUtil {
     }
 
     public static Document[] getAllFiles(String params) throws ServerErrorException {
-        RespType resp = NetUtil.httpGetSync(AllFileUrl + params, NetUtil.getOneHeader("Authorization", AuthMgr.getInstance().getToken()));
+        RespType resp = NetHelper.httpGetSync(AllFileUrl + params, NetHelper.getOneHeader("Authorization", AuthMgr.getInstance().getToken()));
         try {
             int code = resp.getCode();
             if (code == 200) {
@@ -83,10 +83,10 @@ public class DocumentUtil {
         Map<String, String> k_v = new HashMap<>();
         k_v.put("id", document.getId()+"");
         k_v.put("foldername", document.getDocumentClassName());
-        NetUtil.httpPostFileAsync(
+        NetHelper.httpPostFileAsync(
                 PostFileUrl, k_v,
                 "file", new File(document.getDocumentPath()),
-                NetUtil.getOneHeader("Authorization", AuthMgr.getInstance().getToken()),
+                NetHelper.getOneHeader("Authorization", AuthMgr.getInstance().getToken()),
                 new Callback() {
                     @Override
                     @EverythingIsNonNull
@@ -111,10 +111,10 @@ public class DocumentUtil {
 
         Log.e("测试", "deleteFile: " + DocumentReqBody.toFileReqBody(document).toJson());
 
-        RespType resp = NetUtil.httpPostPutDeleteSync(
-                DeleteFileUrl, NetUtil.DELETE,
+        RespType resp = NetHelper.httpPostPutDeleteSync(
+                DeleteFileUrl, NetHelper.DELETE,
                 DocumentReqBody.toFileReqBody(document).toJson(),
-                NetUtil.getOneHeader("Authorization", AuthMgr.getInstance().getToken())
+                NetHelper.getOneHeader("Authorization", AuthMgr.getInstance().getToken())
         );
         Log.e("", "deleteFile: " + document.getDocumentClassName() + " , " + document.getDocumentName());
         try {
@@ -139,10 +139,10 @@ public class DocumentUtil {
     public static boolean deleteFiles(String fileClassName) throws ServerErrorException {
         RespType resp;
         try {
-            resp = NetUtil.httpPostPutDeleteSync(
-                    DeleteFileByClassUrl, NetUtil.DELETE,
+            resp = NetHelper.httpPostPutDeleteSync(
+                    DeleteFileByClassUrl, NetHelper.DELETE,
                     new JSONObject().put("foldername", fileClassName).toString(),
-                    NetUtil.getOneHeader("Authorization", AuthMgr.getInstance().getToken())
+                    NetHelper.getOneHeader("Authorization", AuthMgr.getInstance().getToken())
             );
         }catch(JSONException e){
             e.printStackTrace();
@@ -169,13 +169,13 @@ public class DocumentUtil {
     }
 
     public static boolean downloadFile(Document document) throws ServerErrorException {
-        File file = NetUtil.httpGetFileSync(
+        File file = NetHelper.httpGetFileSync(
                 DownloadFileUrl + "?foldername=" + document.getDocumentClassName() +
                 "&&filename=" + document.getDocumentName() +
                 "&&id=" + document.getId(),
                 document.getDocumentClassName(),
                 document.getDocumentName(),
-                NetUtil.getOneHeader("Authorization", AuthMgr.getInstance().getToken())
+                NetHelper.getOneHeader("Authorization", AuthMgr.getInstance().getToken())
         );
         if(null != file) {
             document.setDocumentPath(file.getPath());
@@ -189,10 +189,10 @@ public class DocumentUtil {
             Log.e("测试", "pushDocumentsAsync: \n"
             + document.getId() + ' ' + document.getDocumentName() + ' ' + document.getDocumentClassName() + '\n');
         }
-        NetUtil.httpPostPutDeleteAsync(
-                PushFileUrl, NetUtil.POST,
+        NetHelper.httpPostPutDeleteAsync(
+                PushFileUrl, NetHelper.POST,
                 DocumentReqBody.getJsonFromDocumentBodies(DocumentReqBody.toFileReqBodies(documents)),
-                NetUtil.getOneHeader("Authorization", AuthMgr.getInstance().getToken()),
+                NetHelper.getOneHeader("Authorization", AuthMgr.getInstance().getToken()),
                 new Callback() {
                     @Override
                     @EverythingIsNonNull
@@ -215,8 +215,8 @@ public class DocumentUtil {
     }
 
     public static boolean getSharedFiles(String params) throws ServerErrorException {
-        RespType resp = NetUtil.httpGetSync(GetSharedDocuments + params,
-                NetUtil.getOneHeader("Authorization", AuthMgr.getInstance().getToken()));
+        RespType resp = NetHelper.httpGetSync(GetSharedDocuments + params,
+                NetHelper.getOneHeader("Authorization", AuthMgr.getInstance().getToken()));
         try {
             int code = resp.getCode();
             if (code == 200) {
