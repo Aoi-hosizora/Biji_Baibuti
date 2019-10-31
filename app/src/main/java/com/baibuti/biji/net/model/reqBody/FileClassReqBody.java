@@ -92,7 +92,7 @@ public class FileClassReqBody implements Serializable {
         JSONObject obj = new JSONObject();
         try {
             obj.put("id", id);
-            obj.put("name", name);
+            obj.put("docName", name);
         }
         catch (JSONException ex) {
             ex.printStackTrace();
@@ -126,7 +126,7 @@ public class FileClassReqBody implements Serializable {
         try {
             return new FileClassReqBody(
                 obj.getInt("id"),
-                obj.getString("name")
+                obj.getString("docName")
             );
         }
         catch (JSONException ex) {

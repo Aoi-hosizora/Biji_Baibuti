@@ -1,4 +1,4 @@
-package com.baibuti.biji.service.retrofit;
+package com.baibuti.biji.model.dao;
 
 import com.baibuti.biji.model.dto.ResponseDTO;
 import com.baibuti.biji.service.auth.dto.AuthRespDTO;

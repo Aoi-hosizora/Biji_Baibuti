@@ -58,7 +58,7 @@ public class CustomXWPFDoc extends XWPFDocument {
                 "   <a:graphicData uri=\"http://schemas.openxmlformats.org/drawingml/2006/picture\">" +
                 "      <pic:pic xmlns:pic=\"http://schemas.openxmlformats.org/drawingml/2006/picture\">" +
                 "         <pic:nvPicPr>" +
-                "            <pic:cNvPr id=\"" + id + "\" name=\"Generated\"/>" +
+                "            <pic:cNvPr id=\"" + id + "\" docName=\"Generated\"/>" +
                 "            <pic:cNvPicPr/>" +
                 "         </pic:nvPicPr>" +
                 "         <pic:blipFill>" +

@@ -64,7 +64,7 @@ public class DocumentReqBody implements Serializable {
      * @return
      */
     public static DocumentReqBody toFileReqBody(Document document) {
-        return new DocumentReqBody(document.getId(), document.getDocumentClassName(), document.getDocumentName());
+        return new DocumentReqBody(document.getId(), document.getClassName(), document.getDocName());
     }
 
     /**

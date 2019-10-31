@@ -100,7 +100,7 @@ public class Define {
 
 	public static final String JSON_DATA =
 			"[" +
-					"{ \"name\" : \"cn.wps.moffice.client.OfficeServiceClient\"," +
+					"{ \"docName\" : \"cn.wps.moffice.client.OfficeServiceClient\"," +
 					" \"type\" : \"Package-ID\",\"id\" : \"cn.wps.moffice.client\", " +
 					"\"Security-Level\" : \"Full-access\", \"Authorization\"  : \"abxxdsewrwsds3232ss\" }," +
 					"]";

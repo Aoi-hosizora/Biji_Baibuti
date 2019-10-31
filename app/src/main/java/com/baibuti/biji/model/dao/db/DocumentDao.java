@@ -20,267 +20,157 @@ import java.util.List;
 
 public class DocumentDao {
 
+    private final static String TBL_NAME = "db_document";
+
+    private final static String COL_ID = "doc_id";
+    private final static String COL_PATH = "doc_path";
+    private final static String COL_CLASS_NAME = "doc_class_name";
+    private final static String COL_NAME = "doc_name";
+
     private DbOpenHelper helper;
-    private Context context;
 
     public DocumentDao(Context context) {
-        this(context, (AuthManager.getInstance().isLogin()) ? AuthManager.getInstance().getUserName() : "");
-    }
-
-    @Deprecated
-    public DocumentDao(Context context, String Username) {
-        helper = new DbOpenHelper(context, Username);
-        this.context = context;
-    }
-
-    /**
-     * 根据id查询
-     * @param id
-     * @param isLogCheck
-     * @return
-     */
-    @Deprecated
-    private Document queryDocumentById(int id, boolean isLogCheck) {
-
-        if (isLogCheck) pushpull();
-
-        SQLiteDatabase db = helper.getWritableDatabase();
-
-        Document document = null;
-        Cursor cursor = null;
-        try {
-            cursor = db.query("db_document", null, "doc_id=?", new String[]{id + ""}, null, null, null);
-            while (cursor.moveToNext()) {
-
-                int documentId = cursor.getInt(cursor.getColumnIndex("doc_id"));
-                String documentPath = cursor.getString(cursor.getColumnIndex("doc_path"));
-                String documentClassName = cursor.getString(cursor.getColumnIndex("doc_class_name"));
-
-                //生成一个文件列表子项
-                document = new Document();
-                document.setId(documentId);
-                document.setDocumentPath(documentPath);
-                document.setDocumentClassName(documentClassName);
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        } finally {
-            if (cursor != null && !cursor.isClosed()) {
-                cursor.close();
-            }
-        }
-        return document;
-    }
-
-    private Document queryDocumentByDocumentPath(String documentName, String documentPath, boolean isLogCheck) {
-
-        if (isLogCheck) pushpull();
-
-        SQLiteDatabase db = helper.getWritableDatabase();
-
-        Document document = null;
-        Cursor cursor = null;
-        try {
-            cursor = db.query("db_document", null, "doc_path=?", new String[]{documentPath}, null, null, null);
-            while (cursor.moveToNext()) {
-
-                int documentId = cursor.getInt(cursor.getColumnIndex("doc_id"));
-                String documentPath1 = cursor.getString(cursor.getColumnIndex("doc_path"));
-                String documentClassName = cursor.getString(cursor.getColumnIndex("doc_class_name"));
-
-                //生成一个文件列表子项
-                document = new Document();
-                document.setId(documentId);
-                document.setDocumentPath(documentPath1);
-                document.setDocumentClassName(documentClassName);
-                document.setDocumentName(documentName);
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        } finally {
-            if (cursor != null && !cursor.isClosed()) {
-                cursor.close();
-            }
-        }
-        return document;
+        helper = new DbOpenHelper(context);
     }
 
     /**
      * 查询所有文件
-     * @return
+     * @return 文件列表
      */
-    public List<Document> queryDocumentAll() { // ArrayList
-        return selectAllDocuments();
+    public List<Document> queryAllDocuments() {
+        return queryDocumentsByClassName(null);
     }
 
-    // 内部 select
-    private List<Document> selectAllDocuments() {
-        SQLiteDatabase db = helper.getWritableDatabase();
-        List<Document> documentList = new ArrayList<Document>();
+    /**
+     * 根据 ClassName 查询所有文件
+     * @param className 分类，null for all
+     * @return 文件分类列表
+     */
+    public List<Document> queryDocumentsByClassName(String className) {
 
-        Document document ;
+        SQLiteDatabase db = helper.getWritableDatabase();
         Cursor cursor = null;
+        String sql = "select * from " + TBL_NAME +
+            ((className == null) ? "" : " where " + COL_CLASS_NAME + " = " + className);
+
+        List<Document> documentList = new ArrayList<>();
         try {
-            cursor = db.query("db_document", null, null, null, null, null, "null");
+            cursor = db.rawQuery(sql, null);
+
             while (cursor.moveToNext()) {
 
-                int documentId = cursor.getInt(cursor.getColumnIndex("doc_id"));
-                String documentPath = cursor.getString(cursor.getColumnIndex("doc_path"));
-                String documentClassName = cursor.getString(cursor.getColumnIndex("doc_class_name"));
-                String documentName = cursor.getString(cursor.getColumnIndex("doc_name"));
+                int id = cursor.getInt(cursor.getColumnIndex(COL_ID));
+                String path = cursor.getString(cursor.getColumnIndex(COL_PATH));
+                String queryClassName = cursor.getString(cursor.getColumnIndex(COL_CLASS_NAME));
+                String docName = cursor.getString(cursor.getColumnIndex(COL_NAME));
 
-                //生成一个文件列表子项
-                document = new Document();
-                document.setId(documentId);
-                document.setDocumentPath(documentPath);
-                document.setDocumentClassName(documentClassName);
-                document.setDocumentName(documentName);
-                documentList.add(document);
+                documentList.add(new Document(id, path, queryClassName, docName));
             }
+
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
-            if (cursor != null && !cursor.isClosed()) {
-                cursor.close();
-            }
-            if (db != null) {
-                db.close();
-            }
+            if (cursor != null && !cursor.isClosed()) cursor.close();
+            if (db != null && db.isOpen()) db.close();
         }
         return documentList;
     }
 
     /**
-     * 进行 push pull
+     * 根据 id 查询文件
+     * @param id 归档文件 id
+     * @return 一个文档
      */
-    public void pushpull() {
-        if (AuthManager.getInstance().isLogin()) {
-            if (ServerDbUpdateHelper.isLocalNewer(context, LogModule.Mod_Document)) { // 本地新
-                // TODO 异步
-                ServerDbUpdateHelper.pushData(context, LogModule.Mod_Document);
+    public Document queryDocumentById(int id) {
+
+        SQLiteDatabase db = helper.getWritableDatabase();
+        Cursor cursor = null;
+        String sql = "select * from " + TBL_NAME + " where " + COL_ID + " = " + id;
+
+        Document document = null;
+        try {
+            cursor = db.rawQuery(sql, null);
+
+            while (cursor.moveToNext()) {
+
+                String path = cursor.getString(cursor.getColumnIndex(COL_PATH));
+                String className = cursor.getString(cursor.getColumnIndex(COL_CLASS_NAME));
+                String docName = cursor.getString(cursor.getColumnIndex(COL_NAME));
+
+                document = new Document(id, path, className, docName);
             }
-            else if (ServerDbUpdateHelper.isLocalOlder(context, LogModule.Mod_Document)) { // 服务器新
-                // TODO 同步
-                ServerDbUpdateHelper.pullData(context, LogModule.Mod_Document);
-            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            if (cursor != null && !cursor.isClosed()) cursor.close();
+            if (db != null && db.isOpen()) db.close();
         }
+        return document;
     }
 
     /**
-     * 查询所有分类列表
-     *
-     * @return
+     * 根据 path 查询文件
+     * @param path 归档文件 id
+     * @return 一个文档
      */
-    public List<Document> queryDocumentAll(String documentClassName) { // ArrayList
-         return queryDocumentAll(documentClassName, true);
-    }
+    private Document queryDocumentByDocumentPath(String path) {
 
-    @Deprecated
-    public List<Document> queryDocumentAll(String documentClassName, boolean isLogCheck) { // ArrayList
-        if (isLogCheck) pushpull();
-        return selectAllDocuments(documentClassName);
-    }
-
-    // 内部 select
-    private List<Document> selectAllDocuments(String documentClassName) {
         SQLiteDatabase db = helper.getWritableDatabase();
-        List<Document> documentList = new ArrayList<Document>();
-
-        Document document ;
         Cursor cursor = null;
+        String sql = "select * from " + TBL_NAME + " where " + COL_PATH + " = " + path;
+
+        Document document = null;
         try {
-            cursor = db.query("db_document", null, "doc_class_name=?", new String[]{documentClassName}, null, null, "null");
+            cursor = db.rawQuery(sql, null);
             while (cursor.moveToNext()) {
 
-                int documentId = cursor.getInt(cursor.getColumnIndex("doc_id"));
-                String documentPath = cursor.getString(cursor.getColumnIndex("doc_path"));
-                String documentName = cursor.getString(cursor.getColumnIndex("doc_name"));
+                int id = cursor.getInt(cursor.getColumnIndex(COL_ID));
+                String className = cursor.getString(cursor.getColumnIndex(COL_CLASS_NAME));
+                String docName = cursor.getString(cursor.getColumnIndex(COL_NAME));
 
-                //生成一个文件列表子项
-                document = new Document();
-                document.setId(documentId);
-                document.setDocumentPath(documentPath);
-                document.setDocumentClassName(documentClassName);
-                document.setDocumentName(documentName);
-                documentList.add(document);
+                document = new Document(id, path, className, docName);
             }
         } catch (Exception e) {
             e.printStackTrace();
-            Log.e("测试", "selectAllDocuments: "+e.toString());
         } finally {
-            if (cursor != null && !cursor.isClosed()) {
-                cursor.close();
-            }
-            if (db != null) {
-                db.close();
-            }
+            if (cursor != null && !cursor.isClosed()) cursor.close();
+            if (db != null && db.isOpen()) db.close();
         }
-        return documentList;
+        return document;
     }
 
     /**
-     * 添加一个文件
+     * 插入归档文件
+     * @param document 新归档，自动编号
+     * @return 归档 id
      */
     public long insertDocument(Document document) {
 
-        pushpull();
-        long ret = insertDocument(document, -1);
-
-        document.setId((int)ret);
-
-        if (AuthManager.getInstance().isLogin()) {
-            try {
-                DocumentUtil.postFile(document, new IPushCallBack() {
-                    @Override
-                    public void onCallBack() {
-                        ServerDbUpdateHelper.pushLog(context, LogModule.Mod_Document);
-                    }
-                });
-            }
-            catch (ServerErrorException ex) {
-                ex.printStackTrace();
-            }
-        }
-
-        return ret;
-    }
-
-    /**
-     * 添加一个文件, 带id
-     */
-    public long insertDocument(Document document, int id) {
-
-        //新文件
         SQLiteDatabase db = helper.getWritableDatabase();
-        String sql;
-        if(id == -1)
-            sql = "insert into db_document(doc_path, doc_class_name, doc_name) values(?, ?, ?)";
-        else
-            sql = "insert into db_document(doc_path, doc_class_name, doc_name, doc_id) values(?, ?, ?, ?)";
-        long ret = 0;
-
+        String sql =
+            "insert into " + TBL_NAME +
+            "(" + COL_PATH + ", " + COL_CLASS_NAME + ", " + COL_NAME + ") " +
+            "values (?, ?, ?)";
         SQLiteStatement stat = db.compileStatement(sql);
         db.beginTransaction();
+
+        long ret_id = 0;
         try {
+            stat.bindString(1, document.getPath() == null ? "" : document.getPath()); // COL_PATH
+            stat.bindString(2, document.getClassName()); // COL_CLASS_NAME
+            stat.bindString(3, document.getDocName()); // COL_NAME
 
-            stat.bindString(1, document.getDocumentPath()==null?"":document.getDocumentPath());
-            stat.bindString(2, document.getDocumentClassName());
-            stat.bindString(3, document.getDocumentName());
-
-            if(id != -1)
-                stat.bindLong(4, document.getId());
-
-            ret = stat.executeInsert();
+            ret_id = stat.executeInsert();
             db.setTransactionSuccessful();
         } catch (SQLException e) {
             e.printStackTrace();
-        } catch (Exception e) {
-            e.printStackTrace();
-        } finally {
+        }  finally {
             db.endTransaction();
             db.close();
         }
-        return ret;
+
+        return ret_id;
     }
 
     /**
@@ -292,7 +182,7 @@ public class DocumentDao {
         SQLiteDatabase db = helper.getWritableDatabase();
         ContentValues values = new ContentValues();
 
-        values.put("doc_path", document.getDocumentPath());
+        values.put("doc_path", document.getPath());
 
         db.update("db_document", values, "doc_id=?", new String[]{document.getId()+""});
         db.close();

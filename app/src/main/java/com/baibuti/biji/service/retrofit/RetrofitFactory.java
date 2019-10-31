@@ -1,5 +1,6 @@
 package com.baibuti.biji.service.retrofit;
 
+import com.baibuti.biji.model.dao.ServerApi;
 import com.baibuti.biji.service.Urls;
 
 import java.util.HashMap;

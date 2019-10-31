@@ -21,7 +21,7 @@ public class MySubject implements ScheduleEnable {
     /**
      * 课程名
      */
-    @JSONField(name="name")
+    @JSONField(name="docName")
     private String name;
 
     /**

@@ -10,6 +10,7 @@ import android.widget.TextView;
 
 import com.baibuti.biji.model.po.Document;
 import com.baibuti.biji.R;
+import com.baibuti.biji.net.module.file.DocumentUtil;
 
 import java.util.List;
 
@@ -63,32 +64,32 @@ public class DocumentAdapter extends RecyclerView.Adapter<DocumentAdapter.ViewHo
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         Document document = mDocuments.get(position);
-        if(document.getDocumentType() != null) {
-            switch (document.getDocumentType()) {
-                case "pdf":
-                    holder.imageView.setImageResource(R.drawable.pdf);
-                    break;
-                case "ppt":
-                    holder.imageView.setImageResource(R.drawable.ppt);
-                    break;
-                case "doc":
-                    holder.imageView.setImageResource(R.drawable.doc);
-                    break;
-                case "xls":
-                    holder.imageView.setImageResource(R.drawable.xls);
-                    break;
-                case "txt":
-                    holder.imageView.setImageResource(R.drawable.txt);
-                    break;
-                case "zip":
-                    holder.imageView.setImageResource(R.drawable.zip);
-                    break;
-                default:
-                    holder.imageView.setImageResource(R.drawable.unknown);
-                    break;
-            }
+
+        switch (DocumentUtil.getFileType(document.getDocName())) {
+            case "pdf":
+                holder.imageView.setImageResource(R.drawable.pdf);
+                break;
+            case "ppt":
+                holder.imageView.setImageResource(R.drawable.ppt);
+                break;
+            case "doc":
+                holder.imageView.setImageResource(R.drawable.doc);
+                break;
+            case "xls":
+                holder.imageView.setImageResource(R.drawable.xls);
+                break;
+            case "txt":
+                holder.imageView.setImageResource(R.drawable.txt);
+                break;
+            case "zip":
+                holder.imageView.setImageResource(R.drawable.zip);
+                break;
+            default:
+                holder.imageView.setImageResource(R.drawable.unknown);
+                break;
         }
-        holder.textView.setText(document.getDocumentName());
+
+        holder.textView.setText(document.getDocName());
     }
 
     @Override

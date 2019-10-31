@@ -82,10 +82,10 @@ public class DocumentUtil {
     public static void postFile(Document document, @NonNull IPushCallBack pushCallBack) throws ServerErrorException{
         Map<String, String> k_v = new HashMap<>();
         k_v.put("id", document.getId()+"");
-        k_v.put("foldername", document.getDocumentClassName());
+        k_v.put("foldername", document.getClassName());
         NetHelper.httpPostFileAsync(
                 PostFileUrl, k_v,
-                "file", new File(document.getDocumentPath()),
+                "file", new File(document.getPath()),
                 NetHelper.getOneHeader("Authorization", AuthManager.getInstance().getToken()),
                 new Callback() {
                     @Override
@@ -116,7 +116,7 @@ public class DocumentUtil {
                 DocumentReqBody.toFileReqBody(document).toJson(),
                 NetHelper.getOneHeader("Authorization", AuthManager.getInstance().getToken())
         );
-        Log.e("", "deleteFile: " + document.getDocumentClassName() + " , " + document.getDocumentName());
+        Log.e("", "deleteFile: " + document.getClassName() + " , " + document.getDocName());
         try {
             int code = resp.getCode();
             if (code == 200) {
@@ -170,15 +170,15 @@ public class DocumentUtil {
 
     public static boolean downloadFile(Document document) throws ServerErrorException {
         File file = NetHelper.httpGetFileSync(
-                DownloadFileUrl + "?foldername=" + document.getDocumentClassName() +
-                "&&filename=" + document.getDocumentName() +
+                DownloadFileUrl + "?foldername=" + document.getClassName() +
+                "&&filename=" + document.getDocName() +
                 "&&id=" + document.getId(),
-                document.getDocumentClassName(),
-                document.getDocumentName(),
+                document.getClassName(),
+                document.getDocName(),
                 NetHelper.getOneHeader("Authorization", AuthManager.getInstance().getToken())
         );
         if(null != file) {
-            document.setDocumentPath(file.getPath());
+            document.setPath(file.getPath());
             return true;
         }
         return false;
@@ -187,7 +187,7 @@ public class DocumentUtil {
     public static void pushDocumentsAsync(Document[] documents, @NonNull IPushCallBack pushCallBack) throws ServerErrorException {
         for(Document document: documents){
             Log.e("测试", "pushDocumentsAsync: \n"
-            + document.getId() + ' ' + document.getDocumentName() + ' ' + document.getDocumentClassName() + '\n');
+            + document.getId() + ' ' + document.getDocName() + ' ' + document.getClassName() + '\n');
         }
         NetHelper.httpPostPutDeleteAsync(
                 PushFileUrl, NetHelper.POST,

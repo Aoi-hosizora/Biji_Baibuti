@@ -537,7 +537,7 @@ public class FileFragment extends Fragment {
         if(!s.equals("")) {
             for (List<Document> l : documentListsByClass) {
                 for (Document d : l) {
-                    if (d.getDocumentName().contains(s)) {
+                    if (d.getDocName().contains(s)) {
                         searchResults.add(d);
                     }
                 }
@@ -588,7 +588,7 @@ public class FileFragment extends Fragment {
                 documentDao.pushpull();
                 for(FileClass f: fileClassListItems){
                     if(!f.getFileClassName().equals("+")) {
-                        List<Document> l = documentDao.queryDocumentAll(f.getFileClassName(), false);
+                        List<Document> l = documentDao.queryDocumentsByClassName(f.getFileClassName(), false);
                         documentListsByClass.add(l);
                     }
                 }
@@ -753,7 +753,7 @@ public class FileFragment extends Fragment {
                                         fileClassListItems.add(fileClassAdapter.getCount() - 1, newFileClass);
                                     }
                                 });
-                                List<Document> l = documentDao.queryDocumentAll(newFileClass.getFileClassName());
+                                List<Document> l = documentDao.queryDocumentsByClassName(newFileClass.getFileClassName());
                                 activity.runOnUiThread(new Runnable() {
                                     @Override
                                     public void run() {
@@ -883,12 +883,11 @@ public class FileFragment extends Fragment {
         String name;
         for(List<Document> l: documentListsByClass){
             for(Document d: l){
-                if(!d.getDocumentPath().equals("")) {
-                    file = new File(d.getDocumentPath());
+                if(!d.getPath().equals("")) {
+                    file = new File(d.getPath());
                     name = file.getName();
-                    d.setDocumentName(name);
+                    d.setDocName(name);
                 }
-                d.setDocumentType(DocumentUtil.getFileType(d.getDocumentName()));
             }
         }
     }
@@ -924,7 +923,7 @@ public class FileFragment extends Fragment {
             new Thread(new Runnable() {
                 @Override
                 public void run() {
-                    File file = new File(document.getDocumentPath());
+                    File file = new File(document.getPath());
                     if(!file.exists()){
                         activity.runOnUiThread(new Runnable() {
                             @Override
@@ -1004,8 +1003,8 @@ public class FileFragment extends Fragment {
                             showLoadingDialog("删除中...");
                         }
                     });
-                    String name = documentListItems.get(position).getDocumentName();
-                    String path = documentListItems.get(position).getDocumentPath();
+                    String name = documentListItems.get(position).getDocName();
+                    String path = documentListItems.get(position).getPath();
                     documentDao.deleteDocumentByPath(name, path, true);
                     documentListItems.remove(position);
                     documentListsByClass.get(lastPositionClicked).remove(position);
@@ -1076,12 +1075,12 @@ public class FileFragment extends Fragment {
                 documentDao.pushpull();
                 for(FileClass f: fileClassListItems){
                     if(!f.getFileClassName().equals("+")) {
-                        List<Document> l = documentDao.queryDocumentAll(f.getFileClassName(), false);
+                        List<Document> l = documentDao.queryDocumentsByClassName(f.getFileClassName(), false);
                         if(null != l && l.size() != 0) {
                             for (Document document : l)
                                 Log.e("测试", "refresh: " + document.getId() + ' ' +
-                                        document.getDocumentName() + ' ' +
-                                        document.getDocumentClassName() + '\n');
+                                        document.getDocName() + ' ' +
+                                        document.getClassName() + '\n');
                         }
                         documentListsByClass.add(l);
                     }
