@@ -1,4 +1,4 @@
-package com.baibuti.biji.model.dao.db;
+package com.baibuti.biji.model.dao.local;
 
 import android.content.ContentValues;
 import android.content.Context;

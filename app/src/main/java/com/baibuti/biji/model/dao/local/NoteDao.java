@@ -1,4 +1,4 @@
-package com.baibuti.biji.model.dao.db;
+package com.baibuti.biji.model.dao.local;
 
 import android.content.ContentValues;
 import android.content.Context;
@@ -101,11 +101,10 @@ public class NoteDao implements INoteDao {
         Cursor cursor = null;
         String sql = "select * from " + TBL_NAME + " where " + COL_ID + " = " + noteId;
 
-        Note note = null;
         try {
             cursor = db.rawQuery(sql, null);
 
-            while (cursor.moveToNext()) {
+            if (cursor.moveToFirst()) {
 
                 int id = cursor.getInt(cursor.getColumnIndex(COL_ID));
                 String title = cursor.getString(cursor.getColumnIndex(COL_TITLE));
@@ -118,7 +117,7 @@ public class NoteDao implements INoteDao {
                 Date ct = DateColorUtil.Str2Date(cursor.getString(cursor.getColumnIndex(COL_CREATE_TIME)));
                 Date ut = DateColorUtil.Str2Date(cursor.getString(cursor.getColumnIndex(COL_UPDATE_TIME)));
 
-                note = new Note(id, title, content, group, ct, ut);
+                return new Note(id, title, content, group, ct, ut);
             }
 
         } catch (Exception e) {
@@ -127,7 +126,7 @@ public class NoteDao implements INoteDao {
             if (cursor != null && !cursor.isClosed()) cursor.close();
             if (db != null && db.isOpen()) db.close();
         }
-        return note;
+        return null;
     }
 
     /**

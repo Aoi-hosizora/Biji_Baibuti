@@ -1,4 +1,4 @@
-package com.baibuti.biji.model.dao.db;
+package com.baibuti.biji.model.dao.local;
 
 import android.content.Context;
 import android.database.Cursor;
@@ -37,7 +37,7 @@ public class SearchItemDao implements ISearchItemDao {
         String sql = "select * from " + TBL_NAME;
         Cursor cursor = null;
 
-        ArrayList<SearchItem> searchItems = new ArrayList<>();
+        List<SearchItem> searchItems = new ArrayList<>();
         try {
             cursor = db.rawQuery(sql, null);
 
@@ -70,7 +70,6 @@ public class SearchItemDao implements ISearchItemDao {
         String sql = "select * from " + TBL_NAME + " where " + COL_URL + " = \"" + Url + "\"";
         Cursor cursor = null;
 
-        SearchItem searchItem = null;
         try {
             cursor = db.rawQuery(sql, null);
 
@@ -79,7 +78,7 @@ public class SearchItemDao implements ISearchItemDao {
                 String title = cursor.getString(cursor.getColumnIndex(COL_TITLE));
                 String content = cursor.getString(cursor.getColumnIndex(COL_CONTENT));
 
-                searchItem = new SearchItem(title, content, url);
+                return new SearchItem(title, content, url);
             }
         }
         catch (Exception ex) {
@@ -89,7 +88,8 @@ public class SearchItemDao implements ISearchItemDao {
             if (cursor != null && !cursor.isClosed()) cursor.close();
             if (db != null && db.isOpen()) db.close();
         }
-        return searchItem;
+
+        return null;
     }
 
     /**

@@ -1,7 +1,6 @@
 package com.baibuti.biji.util.strSrchUtil;
 
 import android.content.Context;
-import android.util.Log;
 
 import com.baibuti.biji.model.po.ISearchEntity;
 
@@ -14,54 +13,48 @@ public class SearchUtil {
 
     /**
      * 初始化结巴分词
-     * @param context
      */
     public static void initJieba(Context context) {
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                JiebaSegmenter.init(context);
-            }
-        }).start();
+        new Thread(() -> JiebaSegmenter.init(context)).start();
     }
 
     /**
      * 进行结巴分词
-     * @param str
-     * @return
+     * @param str 长句
+     * @return 切出来的词组
      */
-    public static List<String> jieba(String str) {
+    private static List<String> jieba(String str) {
         return JiebaSegmenter.getJiebaSegmenterSingleton().getDividedString(str);
     }
 
-
     /**
      * 从实现了 ISearchEntity 的元素列表中利用分词搜索包含关键词的子列表
-     * @param listItems
-     * @param keyword
-     * @return
+     * @param listItems 多个搜索项
+     * @param keyword 搜索关键词
+     * @return 符合关键词的搜索项
      */
-    public static <T> ArrayList<T> getSearchItems(T[] listItems, String keyword) {
+    public static <T> List<T> getSearchItems(T[] listItems, String keyword) {
         if (listItems == null || !(listItems[0] instanceof ISearchEntity))
             return null;
 
-        ArrayList<T> ret = new ArrayList<>();
+        // 返回的词组
+        List<T> words = new ArrayList<>();
 
+        // 符合的搜索项
         List<String> jiebaList = jieba(keyword);
 
-        Log.e("getSearchItems“", "getSearchItems: " + jiebaList);
-
-        // forList:
         for (T item : listItems) {
             String content = ((ISearchEntity)item).getSearchContent();
-            boolean flag = true; // 是否全部包含
-            for (String token : jiebaList) {
-                if (!content.toLowerCase().contains(token.toLowerCase())) {
+            boolean flag = true;
+
+            // 是否不包含关键词
+            for (String token : jiebaList)
+                if (!content.toLowerCase().contains(token.toLowerCase()))
                     flag = false;
-                }
-            }
-            if (flag) ret.add(item); // 满足所有切词
+
+            if (flag)
+                words.add(item);
         }
-        return ret;
+        return words;
     }
 }

@@ -1,4 +1,4 @@
-package com.baibuti.biji.model.dao.db;
+package com.baibuti.biji.model.dao.local;
 
 import android.content.ContentValues;
 import android.content.Context;
@@ -87,18 +87,17 @@ public class GroupDao implements IGroupDao {
         Cursor cursor = null;
         String sql = "select * from " + TBL_NAME + " where " + COL_ID + " = " + groupId;
 
-        Group group = null;
         try {
             cursor = db.rawQuery(sql, null);
 
-            while (cursor.moveToNext()) {
+            if (cursor.moveToFirst()) {
 
                 int id = cursor.getInt(cursor.getColumnIndex(COL_ID));
                 String name = cursor.getString(cursor.getColumnIndex(COL_NAME));
                 int order = cursor.getInt(cursor.getColumnIndex(COL_ORDER));
                 String color = cursor.getString(cursor.getColumnIndex(COL_COLOR));
 
-                group = new Group(id, name, order, color);
+                return new Group(id, name, order, color);
             }
 
         } catch (Exception e) {
@@ -108,7 +107,7 @@ public class GroupDao implements IGroupDao {
             if (db != null && db.isOpen()) db.close();
         }
 
-        return group;
+        return null;
     }
 
     /**
@@ -126,7 +125,7 @@ public class GroupDao implements IGroupDao {
         try {
             cursor = db.rawQuery(sql, null);
 
-            while (cursor.moveToNext()) {
+            if (cursor.moveToFirst()) {
 
                 group = new Group();
                 group.setId(cursor.getInt(cursor.getColumnIndex(COL_ID)));

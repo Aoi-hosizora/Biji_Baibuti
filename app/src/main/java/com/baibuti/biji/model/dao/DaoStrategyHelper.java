@@ -3,7 +3,7 @@ package com.baibuti.biji.model.dao;
 import android.content.Context;
 
 import com.baibuti.biji.model.dao.daoInterface.*;
-import com.baibuti.biji.model.dao.db.*;
+import com.baibuti.biji.model.dao.local.*;
 import com.baibuti.biji.model.dao.net.GroupNetDao;
 import com.baibuti.biji.model.dao.net.NoteNetDao;
 import com.baibuti.biji.model.dao.net.SearchItemNetDao;

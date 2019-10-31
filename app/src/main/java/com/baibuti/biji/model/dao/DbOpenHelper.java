@@ -1,13 +1,11 @@
 package com.baibuti.biji.model.dao;
 
-
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 
 import java.util.Locale;
-
 
 public class DbOpenHelper extends SQLiteOpenHelper {
 
@@ -35,13 +33,16 @@ public class DbOpenHelper extends SQLiteOpenHelper {
      *
      * 6:
      * create table db_schedule
+     *
+     * 7:
+     * drop table db_schedule
+     * drop table db_log
      */
 
     private final static int DB_VERSION = 6;// 数据库版本
 
     /**
      * 本地数据库访问
-     * @param context
      */
     public DbOpenHelper(Context context) {
         super(context, DB_NAME, null, DB_VERSION);
@@ -55,7 +56,7 @@ public class DbOpenHelper extends SQLiteOpenHelper {
         );
     }
 
-    private void CreateNoteDb(SQLiteDatabase db) {
+    private void CreateNoteTbl(SQLiteDatabase db) {
         db.execSQL("create table if not exists db_note(" +
             "n_id integer primary key autoincrement, " +
             "n_title varchar, " +
@@ -65,7 +66,7 @@ public class DbOpenHelper extends SQLiteOpenHelper {
             "n_update_time datetime )");
     }
 
-    private void CreateGroupDb(SQLiteDatabase db) {
+    private void CreateGroupTbl(SQLiteDatabase db) {
         db.execSQL("create table if not exists db_group(" +
             "g_id integer primary key autoincrement, " +
             "g_name varchar not null, " +
@@ -73,14 +74,14 @@ public class DbOpenHelper extends SQLiteOpenHelper {
             "g_color varchar)");
     }
 
-    private void CreateFileClassDb(SQLiteDatabase db) {
+    private void CreateFileClassTbl(SQLiteDatabase db) {
         db.execSQL("create table if not exists db_file_class(" +
             "f_id integer primary key autoincrement, " +
             "f_name varchar, " +
             "f_order integer )");
     }
 
-    private void CreateDocumentDb(SQLiteDatabase db) {
+    private void CreateDocumentTbl(SQLiteDatabase db) {
         db.execSQL("create table if not exists db_document(" +
             "doc_id integer primary key autoincrement, " +
             "doc_path varchar, " +
@@ -88,47 +89,55 @@ public class DbOpenHelper extends SQLiteOpenHelper {
             "doc_name varchar)");
     }
 
-    private void CreateSearchItemStarDb(SQLiteDatabase db) {
+    private void CreateSearchItemTbl(SQLiteDatabase db) {
         db.execSQL("create table if not exists db_search_item_star (" +
             "sis_url varchar primary key, " +
             "sis_title varchar, " +
             "sis_content varchar)");
     }
 
-    private void CreateScheduleDb(SQLiteDatabase db) {
+    private void CreateScheduleTbl(SQLiteDatabase db) {
         db.execSQL("create table if not exists db_schedule (" +
             "schedule_json varchar primary key)");
     }
 
     @Deprecated
-    private void CreateLogDb(SQLiteDatabase db) {
+    private void CreateLogTbl(SQLiteDatabase db) {
         db.execSQL("create table if not exists db_log (" +
             "log_module varchar primary key, " +
             "log_ut datetime)");
     }
 
+    private void DropScheduleTbl(SQLiteDatabase db) {
+        db.execSQL("drop table if exists db_schedule");
+    }
+
+    private void DropLogTbl(SQLiteDatabase db) {
+        db.execSQL("drop table if exists db_log");
+    }
+
     @Override
     public void onCreate(SQLiteDatabase db) {
         // 创建分组表
-        CreateGroupDb(db);
+        CreateGroupTbl(db);
 
         // 创建笔记表
-        CreateNoteDb(db);
+        CreateNoteTbl(db);
 
         // 创建文件分类表
-        CreateFileClassDb(db);
+        CreateFileClassTbl(db);
 
         // 创建文件列表
-        CreateDocumentDb(db);
+        CreateDocumentTbl(db);
 
         // 创建搜索收藏表
-        CreateSearchItemStarDb(db);
+        CreateSearchItemTbl(db);
 
-        // 创建课表json表
-        CreateScheduleDb(db);
+        // // 创建课表json表
+        // CreateScheduleTbl(db);
 
-        // 创建日志表
-        CreateLogDb(db);
+        // // 创建日志表
+        // CreateLogTbl(db);
     }
 
     @Override
@@ -138,37 +147,23 @@ public class DbOpenHelper extends SQLiteOpenHelper {
             return;
 
         // 相邻版本间数据库的更新
-        int version = oldVersion;
-
-        if (version == 0) {
-            CreateNoteDb(db);
-            CreateGroupDb(db);
-            version = 1;
-        }
-
-        if (version == 1) {
-            CreateFileClassDb(db);
-            version = 2;
-        }
-
-        if (version == 2) {
-            CreateDocumentDb(db);
-            version = 3;
-        }
-
-        if (version == 3) {
-            CreateSearchItemStarDb(db);
-            version = 4;
-        }
-
-        if (version == 4) {
-            CreateLogDb(db);
-            version = 5;
-        }
-
-        if (version == 5) {
-            CreateScheduleDb(db);
-            version = 6;
+        switch (oldVersion) {
+            case 0:
+                CreateNoteTbl(db);
+                CreateGroupTbl(db);
+            case 1:
+                CreateFileClassTbl(db);
+            case 2:
+                CreateDocumentTbl(db);
+            case 3:
+                CreateSearchItemTbl(db);
+            case 4:
+                CreateLogTbl(db);
+            case 5:
+                CreateScheduleTbl(db);
+            case 6:
+                DropScheduleTbl(db);
+                DropLogTbl(db);
         }
     }
 

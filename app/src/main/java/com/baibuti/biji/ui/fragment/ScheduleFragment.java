@@ -21,7 +21,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.alibaba.fastjson.JSON;
-import com.baibuti.biji.model.dao.db.ScheduleDao;
+import com.baibuti.biji.model.dao.local.ScheduleDao;
 import com.baibuti.biji.model.po.MySubject;
 import com.baibuti.biji.service.auth.AuthManager;
 import com.baibuti.biji.net.module.file.DocumentUtil;
@@ -179,7 +179,7 @@ public class ScheduleFragment extends Fragment {
         new Thread(new Runnable() {
             @Override
             public void run() {
-                final String scheduleJson = scheduleDao.queryScheduleJson();
+                final String scheduleJson = scheduleDao.querySchedule();
                 if(scheduleJson.equals(""))
                     return;
                 activity.runOnUiThread(new Runnable() {
@@ -261,11 +261,11 @@ public class ScheduleFragment extends Fragment {
         new Thread(new Runnable() {
             @Override
             public void run() {
-                if(scheduleDao.queryScheduleJson(false).equals(""))
-                    scheduleDao.insertScheduleJson(subjectsJsonStr);
+                if(scheduleDao.querySchedule(false).equals(""))
+                    scheduleDao.newSchedule(subjectsJsonStr);
                 else {
-                    scheduleDao.deleteScheduleJson(false);
-                    scheduleDao.insertScheduleJson(subjectsJsonStr);
+                    scheduleDao.deleteSchedule(false);
+                    scheduleDao.newSchedule(subjectsJsonStr);
                 }
             }
         }).start();
@@ -489,7 +489,7 @@ public class ScheduleFragment extends Fragment {
         new Thread(new Runnable() {
             @Override
             public void run() {
-                String scheduleJson = scheduleDao.queryScheduleJson();
+                String scheduleJson = scheduleDao.querySchedule();
                 activity.runOnUiThread(new Runnable() {
                     @Override
                     public void run() {

@@ -16,7 +16,6 @@ import java.util.regex.Pattern;
  */
 public class StringUtil {
 
-
     /**
      * @param targetStr 要处理的字符串
      * @description 切割字符串，将文本和img标签碎片化，如"ab<img>cd"转换为"ab"、"<img>"、"cd"

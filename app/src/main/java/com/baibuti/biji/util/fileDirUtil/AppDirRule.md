@@ -18,6 +18,10 @@ public static String SAVE_FILETYPE = "...";
 + OCRTmp
     + 网络图片识别的临时保存
     + OCRAct
+    
++ Schedule / UserId.json (local.json)
+    + 课表 Json
+    + ScheduleDao
 
 + ~~TessData~~
     + ~~文字识别的文件目录~~
