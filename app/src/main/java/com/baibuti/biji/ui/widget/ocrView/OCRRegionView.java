@@ -10,7 +10,7 @@ import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 
-import com.baibuti.biji.net.model.respObj.Region;
+import com.baibuti.biji.service.ocr.dto.OCRFrame;
 import com.baibuti.biji.R;
 
 public class OCRRegionView extends View {
@@ -38,16 +38,16 @@ public class OCRRegionView extends View {
 
     private boolean isChecked = false;
 
-    private Region.Frame frame;
+    private OCRFrame frame;
 
     private Paint mPaint = new Paint();
     private PaintFlagsDrawFilter mPaintFlagsDrawFilter = new PaintFlagsDrawFilter(0, Paint.ANTI_ALIAS_FLAG | Paint.FILTER_BITMAP_FLAG);
 
-    public Region.Frame getFrame() {
+    public OCRFrame getFrame() {
         return frame;
     }
 
-    public void setFrame(Region.Frame frame) {
+    public void setFrame(OCRFrame frame) {
         this.frame = frame;
         refreshLayoutBG(false);
     }
@@ -57,13 +57,13 @@ public class OCRRegionView extends View {
          * 点击区域后取消选中时的事件
          * @param frame
          */
-        void onClickAfterUp(Region.Frame frame);
+        void onClickAfterUp(OCRFrame frame);
 
         /**
          * 点击区域后选中时的事件
          * @param frame
          */
-        void onClickAfterDown(Region.Frame frame);
+        void onClickAfterDown(OCRFrame frame);
     }
 
     public void ShowLogE(String FunctionName, String Msg) {

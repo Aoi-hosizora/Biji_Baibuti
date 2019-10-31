@@ -2,7 +2,7 @@ package com.baibuti.biji.net.module.file;
 
 import android.support.annotation.NonNull;
 
-import com.baibuti.biji.data.po.FileClass;
+import com.baibuti.biji.model.po.FileClass;
 import com.baibuti.biji.iGlobal.IPushCallBack;
 import com.baibuti.biji.net.model.reqBody.FileClassReqBody;
 import com.baibuti.biji.net.model.respBody.MessageResp;

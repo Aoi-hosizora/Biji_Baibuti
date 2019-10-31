@@ -21,43 +21,46 @@ public class Urls {
     private static final String tmpLAN = "http://110.64.87.48";
 
     /**
-     * 服务器后端 API 地址
+     * !!! 服务器后端 API 地址
      */
-    public static final String ServerHost = tmpLAN;
+    public static final String BaseServerEndPoint = tmpLAN;
 
     /**
-     * OCR 服务器的 POST ocr/upload/
+     * !!! OCR 服务器的 POST ocr/upload/
      */
-    public static final String OCRServerUrl = ServerHost + ":1627/ocr/upload/";
+    public static final String OCRServerEndPoint = BaseServerEndPoint + ":1627/ocr/upload/";
 
-    /**
-     * 后端登录注册 URL
-     */
-    public static final String AuthUrl = ServerHost + ":8001/auth";
+    //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     /**
      * 后端图片 URL
      */
-    public static final String ImageUrl = ServerHost + ":8001/note/img";
+    @Deprecated
+    public static final String ImageUrl = BaseServerEndPoint + ":8001/note/img";
 
     /**
      * 后端日志 URL
      */
-    public static final String LogUrl = ServerHost + ":8001/log";
+    @Deprecated
+    public static final String LogUrl = BaseServerEndPoint + ":8001/log";
 
     /**
      * 后端文件分类 URL
      */
-    public static final String FileClassUrl = ServerHost + ":8001/fileclass";
+    @Deprecated
+    public static final String FileClassUrl = BaseServerEndPoint + ":8001/fileclass";
 
     /**
      * 后端文件 URL
      */
-    public static final String FileUrl = ServerHost + ":8001/file";
+    @Deprecated
+    public static final String FileUrl = BaseServerEndPoint + ":8001/file";
 
     /**
      * 后端课表 URL
      */
-    public static final String Schedule = ServerHost + ":8001/schedule";
+    @Deprecated
+    public static final String Schedule = BaseServerEndPoint + ":8001/schedule";
 
 }

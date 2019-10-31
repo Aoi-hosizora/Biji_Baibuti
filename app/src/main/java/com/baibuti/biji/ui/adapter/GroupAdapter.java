@@ -9,7 +9,7 @@ import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import com.baibuti.biji.data.po.Group;
+import com.baibuti.biji.model.po.Group;
 import com.baibuti.biji.R;
 
 import java.util.List;

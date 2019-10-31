@@ -12,7 +12,7 @@ import android.widget.ImageButton;
 import android.widget.TextView;
 
 import com.baibuti.biji.ui.adapter.FileAdapter;
-import com.baibuti.biji.data.po.FileItem;
+import com.baibuti.biji.model.po.FileItem;
 import com.baibuti.biji.R;
 
 import java.io.File;

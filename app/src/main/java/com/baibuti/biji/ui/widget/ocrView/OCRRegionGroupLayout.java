@@ -10,9 +10,11 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 
-import com.baibuti.biji.net.model.respObj.Region;
+import com.baibuti.biji.service.ocr.dto.OCRFrame;
+import com.baibuti.biji.service.ocr.dto.OCRPoint;
+import com.baibuti.biji.service.ocr.dto.OCRRegion;
 import com.baibuti.biji.R;
-import com.baibuti.biji.util.layoutUtil.OCRRegionUtil;
+import com.baibuti.biji.service.ocr.OCRRegionUtil;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -20,7 +22,7 @@ import java.util.List;
 
 public class OCRRegionGroupLayout extends ViewGroup {
 
-    private Region region;
+    private OCRRegion region;
     private Bitmap imgBG;
     private onClickFramesListener m_onClickFramesListener;
 
@@ -38,7 +40,7 @@ public class OCRRegionGroupLayout extends ViewGroup {
     // ocrlayout:checkedOpacity="150"
 
     public interface onClickFramesListener {
-        void onClickFrames(Region.Frame[] frames);
+        void onClickFrames(OCRFrame[] frames);
     }
 
     public OCRRegionGroupLayout(Context context) {
@@ -121,7 +123,7 @@ public class OCRRegionGroupLayout extends ViewGroup {
         for (int i = 0; i < getChildCount(); i++) {
             View child = getChildAt(i);
 
-            if (child instanceof OCRRegionView) { // Region
+            if (child instanceof OCRRegionView) { // OCRRegion
                 OCRRegionView regionView = (OCRRegionView) child;
                 if (regionView.getFrame() == null)
                     continue;
@@ -132,7 +134,7 @@ public class OCRRegionGroupLayout extends ViewGroup {
                     imgBG.eraseColor(Color.parseColor("#FFFFFF"));
                 }
 
-                Region.Point[] point4 = OCRRegionUtil.parsePnts(
+                OCRPoint[] point4 = OCRRegionUtil.parsePoints(
                     regionView.getFrame().getPoints(),
                     getWidth(), getHeight(),
                     imgBG.getWidth(), imgBG.getHeight()
@@ -152,7 +154,7 @@ public class OCRRegionGroupLayout extends ViewGroup {
      * @param child
      * @param point4
      */
-    private void setRotationAndLayoutOfOCRRegion(OCRRegionView child, Region.Point[] point4) {
+    private void setRotationAndLayoutOfOCRRegion(OCRRegionView child, OCRPoint[] point4) {
 
         // 获得三点
         int pnt1X = point4[0].getX();
@@ -200,7 +202,7 @@ public class OCRRegionGroupLayout extends ViewGroup {
         super.onViewRemoved(child);
     }
 
-    public Region getRegion() {
+    public OCRRegion getRegion() {
         return region;
     }
 
@@ -208,7 +210,7 @@ public class OCRRegionGroupLayout extends ViewGroup {
      * 设置区域数据
      * @param region
      */
-    public void setRegion(Region region) {
+    public void setRegion(OCRRegion region) {
         this.region = region;
         setupRegion();
     }
@@ -220,9 +222,9 @@ public class OCRRegionGroupLayout extends ViewGroup {
         if (region == null)
             return;
 
-        Region.Frame[] frames = region.getFrames();
+        OCRFrame[] frames = region.getFrames();
 
-        for (Region.Frame frame : frames) {
+        for (OCRFrame frame : frames) {
             OCRRegionView regionView = new OCRRegionView(getContext());
 
             // attr
@@ -238,13 +240,13 @@ public class OCRRegionGroupLayout extends ViewGroup {
             regionView.setOnClickRegionListener(new OCRRegionView.onClickRegionListener() {
 
                 @Override
-                public void onClickAfterUp(Region.Frame frame) {
+                public void onClickAfterUp(OCRFrame frame) {
                     ShowLogE("onClickAfterDown", "Up: " + frame.getOcr());
                     onChangeChecked();
                 }
 
                 @Override
-                public void onClickAfterDown(Region.Frame frame) {
+                public void onClickAfterDown(OCRFrame frame) {
                     ShowLogE("onClickAfterDown", "Down: " + frame.getOcr());
                     onChangeChecked();
                 }
@@ -264,15 +266,15 @@ public class OCRRegionGroupLayout extends ViewGroup {
      */
     private void onChangeChecked() {
         if (m_onClickFramesListener != null) {
-            List<Region.Frame> frames = new ArrayList<>();
+            List<OCRFrame> frames = new ArrayList<>();
             for (int i = 0; i < getChildCount(); i++) {
                 View child = getChildAt(i);
-                if (child instanceof OCRRegionView) { // Region
+                if (child instanceof OCRRegionView) { // OCRRegion
                     if (((OCRRegionView) child).isChecked())
                         frames.add(((OCRRegionView) child).getFrame());
                 }
             }
-            m_onClickFramesListener.onClickFrames(frames.toArray(new Region.Frame[0]));
+            m_onClickFramesListener.onClickFrames(frames.toArray(new OCRFrame[0]));
         }
     }
 
@@ -306,7 +308,7 @@ public class OCRRegionGroupLayout extends ViewGroup {
     public void setAllFramesChecked(boolean isSelect) {
         for (int i = 0; i < getChildCount(); i++) {
             View child = getChildAt(i);
-            if (child instanceof OCRRegionView) // Region
+            if (child instanceof OCRRegionView) // OCRRegion
                 ((OCRRegionView) child).setChecked(isSelect);
         }
         onChangeChecked();

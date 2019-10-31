@@ -1,6 +1,6 @@
 package com.baibuti.biji.service.auth;
 
-import com.baibuti.biji.data.dto.ResponseDTO;
+import com.baibuti.biji.model.dto.ResponseDTO;
 import com.baibuti.biji.service.auth.dto.LoginDTO;
 import com.baibuti.biji.service.auth.dto.AuthRespDTO;
 import com.baibuti.biji.service.auth.dto.RegisterDTO;

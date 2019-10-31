@@ -3,7 +3,7 @@ package com.baibuti.biji.util.strSrchUtil;
 import android.content.Context;
 import android.util.Log;
 
-import com.baibuti.biji.data.po.ISearchEntity;
+import com.baibuti.biji.model.po.ISearchEntity;
 
 import java.util.ArrayList;
 import java.util.List;

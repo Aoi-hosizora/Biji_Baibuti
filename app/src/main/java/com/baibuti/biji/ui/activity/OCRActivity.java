@@ -19,14 +19,15 @@ import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.baibuti.biji.net.model.respObj.Region;
+import com.baibuti.biji.service.ocr.OCRService;
+import com.baibuti.biji.service.ocr.dto.OCRFrame;
+import com.baibuti.biji.service.ocr.dto.OCRPoint;
+import com.baibuti.biji.service.ocr.dto.OCRRegion;
 import com.baibuti.biji.net.module.note.ImgUtil;
-import com.baibuti.biji.net.module.ocr.OCRRetUtil;
 import com.baibuti.biji.R;
 import com.baibuti.biji.ui.widget.ocrView.OCRRegionGroupLayout;
 import com.baibuti.biji.util.fileDirUtil.SDCardUtil;
 import com.baibuti.biji.util.imgDocUtil.BitmapUtil;
-import com.baibuti.biji.util.layoutUtil.OCRRegionUtil;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -61,7 +62,7 @@ public class OCRActivity extends AppCompatActivity implements View.OnClickListen
      */
     private boolean isCanceled = false;
 
-    private Region m_region;
+    private OCRRegion m_region;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -217,16 +218,16 @@ public class OCRActivity extends AppCompatActivity implements View.OnClickListen
         // 1.Label Cnt
         setRetLabelText(0, m_region.getFrames().length);
 
-        // 2.Region
+        // 2.OCRRegion
         m_ocrRegionGroupLayout.setRegion(m_region);
 
         // 3.Click
         m_ocrRegionGroupLayout.setOnClickRegionsListener(new OCRRegionGroupLayout.onClickFramesListener() {
 
             @Override
-            public void onClickFrames(Region.Frame[] frames) {
+            public void onClickFrames(OCRFrame[] frames) {
                 // 文字更新
-                m_ocrResultTextView.setText(OCRRegionUtil.getStrFromFrames(frames));
+                m_ocrResultTextView.setText(OCRFrame.getStrFromFrames(frames));
 
                 // 数目更新
                 int cnt = frames.length;
@@ -311,15 +312,15 @@ public class OCRActivity extends AppCompatActivity implements View.OnClickListen
             if (SDCardUtil.deleteFile(localDir))
                 Log.e("", "run: delete OCRtmp" + localDir );
 
-        Region ret = new Region(
-            new Region.Point(600, 400),
+        OCRRegion ret = new OCRRegion(
+            new OCRPoint(600, 400),
             3,
-            new Region.Frame[] {
-                new Region.Frame(342, 150, 664, 115, 679, 270, 358, 305, 0.9, "Half"),
-                new Region.Frame(878, 653, 1021, 653, 1021, 672, 879, 673,0.9, "pm0336-1683hy"),
-                new Region.Frame(0, 651, 251, 652, 251, 682, 0, 671,0.9,"全景网www.quanjing.com"),
-                new Region.Frame(167, 430, 843, 366, 854, 496, 179, 560, 0.9, "Weschubiahnten"),
-                new Region.Frame(426, 308, 556, 303, 559, 381, 430, 388, 0.9, "执待")
+            new OCRFrame[] {
+                new OCRFrame(342, 150, 664, 115, 679, 270, 358, 305, 0.9, "Half"),
+                new OCRFrame(878, 653, 1021, 653, 1021, 672, 879, 673,0.9, "pm0336-1683hy"),
+                new OCRFrame(0, 651, 251, 652, 251, 682, 0, 671,0.9,"全景网www.quanjing.com"),
+                new OCRFrame(167, 430, 843, 366, 854, 496, 179, 560, 0.9, "Weschubiahnten"),
+                new OCRFrame(426, 308, 556, 303, 559, 381, 430, 388, 0.9, "执待")
             }
         );
 
@@ -342,7 +343,7 @@ public class OCRActivity extends AppCompatActivity implements View.OnClickListen
         new Thread(new Runnable() {
             @Override
             public void run() {
-                Region ret = OCRRetUtil.getOCRRet(localDir);
+                OCRRegion ret = OCRService.getOCRRet(localDir);
 
                 // OCR 临时存储
                 if (localDir.contains(SDCardUtil.getOCTTmpDir()))

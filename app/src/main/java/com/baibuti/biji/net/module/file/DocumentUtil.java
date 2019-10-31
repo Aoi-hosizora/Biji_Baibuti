@@ -4,7 +4,7 @@ import android.os.Environment;
 import android.support.annotation.NonNull;
 import android.util.Log;
 
-import com.baibuti.biji.data.po.Document;
+import com.baibuti.biji.model.po.Document;
 import com.baibuti.biji.iGlobal.IPushCallBack;
 import com.baibuti.biji.net.model.reqBody.DocumentReqBody;
 import com.baibuti.biji.net.model.respBody.MessageResp;

@@ -21,8 +21,8 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.alibaba.fastjson.JSON;
-import com.baibuti.biji.data.dao.db.ScheduleDao;
-import com.baibuti.biji.data.po.MySubject;
+import com.baibuti.biji.model.dao.db.ScheduleDao;
+import com.baibuti.biji.model.po.MySubject;
 import com.baibuti.biji.service.auth.AuthManager;
 import com.baibuti.biji.net.module.file.DocumentUtil;
 import com.baibuti.biji.R;

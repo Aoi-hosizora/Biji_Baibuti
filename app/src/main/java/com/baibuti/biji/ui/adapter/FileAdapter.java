@@ -12,7 +12,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.baibuti.biji.data.po.FileItem;
+import com.baibuti.biji.model.po.FileItem;
 import com.baibuti.biji.R;
 
 import java.util.List;

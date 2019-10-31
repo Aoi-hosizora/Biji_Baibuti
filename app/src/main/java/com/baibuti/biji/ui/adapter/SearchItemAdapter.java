@@ -11,8 +11,8 @@ import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
-import com.baibuti.biji.data.dao.db.SearchItemDao;
-import com.baibuti.biji.data.po.SearchItem;
+import com.baibuti.biji.model.dao.db.SearchItemDao;
+import com.baibuti.biji.model.po.SearchItem;
 import com.baibuti.biji.R;
 import com.baibuti.biji.ui.widget.otherView.EllipsizeTextView;
 import com.baibuti.biji.ui.widget.listView.RecyclerViewEmptySupport;

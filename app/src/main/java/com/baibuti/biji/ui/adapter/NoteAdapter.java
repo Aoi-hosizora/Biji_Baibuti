@@ -7,7 +7,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
-import com.baibuti.biji.data.po.Note;
+import com.baibuti.biji.model.po.Note;
 import com.baibuti.biji.R;
 import com.baibuti.biji.ui.widget.listView.RecyclerViewEmptySupport;
 import com.baibuti.biji.util.otherUtil.DateColorUtil;

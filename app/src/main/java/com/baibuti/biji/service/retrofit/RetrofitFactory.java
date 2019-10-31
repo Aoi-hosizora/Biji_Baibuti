@@ -39,31 +39,23 @@ public class RetrofitFactory {
     }
 
     /**
-     * 公开接口，与 RetrofitInterface 接口连接
+     * 重载 EndPoint，使用默认 API 地址，与 ServerApi 接口连接
      * @param kv 委托设置请求头
      * @return Retrofit 实例
      */
-    public synchronized RetrofitInterface createRequest(Map<String, String> kv) {
-        return getRetrofit(kv).create(RetrofitInterface.class);
+    public synchronized ServerApi createRequest(Map<String, String> kv) {
+        return createRequest(kv, Urls.BaseServerEndPoint, ServerApi.class);
     }
 
     /**
-     * 设置请求头
-     * @param kv 请求头
-     * @return OkHttpClient.Builder().build()
+     * 公开接口，与 ServerApi 接口连接
+     * @param kv 委托设置请求头
+     * @param endPoint 接口地址
+     * @param tClass 接口 Class
+     * @return Retrofit 实例
      */
-    private synchronized OkHttpClient getOkHttpClient(Map<String, String> kv) {
-        return new OkHttpClient.Builder()
-            .addInterceptor((Interceptor.Chain chain) -> {
-                Request original = chain.request();
-                Request.Builder requestBuilder = original.newBuilder();
-                if (kv != null && !(kv.isEmpty()))
-                    for (Map.Entry<String, String> header : kv.entrySet())
-                        requestBuilder.addHeader(header.getKey(), header.getValue());
-                Request request = requestBuilder.build();
-                return chain.proceed(request);
-            })
-            .build();
+    public synchronized <T> T createRequest(Map<String, String> kv, String endPoint, Class<T> tClass) {
+        return getRetrofit(kv, endPoint).create(tClass);
     }
 
     /**
@@ -71,12 +63,33 @@ public class RetrofitFactory {
      * @param kv 委托设置请求头
      * @return Retrofit.Builder().build()
      */
-    private synchronized Retrofit getRetrofit(Map<String, String> kv) {
+    private synchronized Retrofit getRetrofit(Map<String, String> kv, String endPoint) {
         return new Retrofit.Builder()
-            .baseUrl(Urls.ServerHost)
+            .baseUrl(endPoint)
             .client(getOkHttpClient(kv))
             .addConverterFactory(GsonConverterFactory.create())
             .addCallAdapterFactory(RxJavaCallAdapterFactory.create())
+            .build();
+    }
+
+    /**
+     * 设置请求头和 OkHttpClient 配置
+     * @param kv 请求头
+     * @return OkHttpClient.Builder().build()
+     */
+    private synchronized OkHttpClient getOkHttpClient(Map<String, String> kv) {
+        return new OkHttpClient.Builder()
+            .addInterceptor((Interceptor.Chain chain) -> {
+                Request original = chain.request();
+
+                Request.Builder requestBuilder = original.newBuilder();
+                if (kv != null && !(kv.isEmpty()))
+                    for (Map.Entry<String, String> header : kv.entrySet())
+                        requestBuilder.addHeader(header.getKey(), header.getValue());
+                Request request = requestBuilder.build();
+
+                return chain.proceed(request);
+            })
             .build();
     }
 }

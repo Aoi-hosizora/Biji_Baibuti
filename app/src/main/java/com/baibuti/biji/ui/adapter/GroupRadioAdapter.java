@@ -10,7 +10,7 @@ import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.RadioButton;
 
-import com.baibuti.biji.data.po.Group;
+import com.baibuti.biji.model.po.Group;
 import com.baibuti.biji.R;
 
 import java.util.HashMap;

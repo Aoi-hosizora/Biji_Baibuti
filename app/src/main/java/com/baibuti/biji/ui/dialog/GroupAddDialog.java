@@ -11,10 +11,10 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.view.View.OnClickListener;
 
-import com.baibuti.biji.data.po.Group;
+import com.baibuti.biji.model.po.Group;
 import com.baibuti.biji.R;
-import com.baibuti.biji.data.dao.db.GroupDao;
-import com.baibuti.biji.data.dao.db.NoteDao;
+import com.baibuti.biji.model.dao.db.GroupDao;
+import com.baibuti.biji.model.dao.db.NoteDao;
 import com.baibuti.biji.util.otherUtil.DateColorUtil;
 import com.larswerkman.holocolorpicker.ColorPicker;
 

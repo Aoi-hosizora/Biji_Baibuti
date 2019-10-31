@@ -10,11 +10,11 @@ import android.view.View.OnClickListener;
 import android.widget.EditText;
 import android.widget.ListView;
 
-import com.baibuti.biji.data.po.Group;
+import com.baibuti.biji.model.po.Group;
 import com.baibuti.biji.ui.adapter.GroupRadioAdapter;
 import com.baibuti.biji.R;
-import com.baibuti.biji.data.dao.db.GroupDao;
-import com.baibuti.biji.data.dao.db.NoteDao;
+import com.baibuti.biji.model.dao.db.GroupDao;
+import com.baibuti.biji.model.dao.db.NoteDao;
 
 import java.util.Collections;
 import java.util.List;
