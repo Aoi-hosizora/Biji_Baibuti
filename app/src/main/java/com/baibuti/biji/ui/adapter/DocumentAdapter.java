@@ -8,7 +8,7 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import com.baibuti.biji.data.model.Document;
+import com.baibuti.biji.data.po.Document;
 import com.baibuti.biji.R;
 
 import java.util.List;

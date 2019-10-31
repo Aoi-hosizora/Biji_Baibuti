@@ -1,9 +1,12 @@
 package com.baibuti.biji.data.dao.net;
 
-import com.baibuti.biji.data.dao.RetrofitFactory;
+import com.baibuti.biji.data.dto.ResponseDTO;
+import com.baibuti.biji.service.auth.AuthManager;
+import com.baibuti.biji.service.retrofit.RetrofitFactory;
 import com.baibuti.biji.data.dao.daoInterface.IGroupDao;
 import com.baibuti.biji.data.dto.GroupDTO;
-import com.baibuti.biji.data.model.Group;
+import com.baibuti.biji.data.po.Group;
+import com.baibuti.biji.service.retrofit.ServerErrorHandle;
 
 import java.util.Arrays;
 import java.util.List;
@@ -16,117 +19,127 @@ import io.reactivex.schedulers.Schedulers;
 public class GroupNetDao implements IGroupDao {
 
     @Override
-    public List<Group> queryAllGroups() {
-        Observable<Group[]> observable = RetrofitFactory.getInstance()
-            .createRequest(RetrofitFactory.getHeader("", ""))
+    public List<Group> queryAllGroups() throws Exception {
+        Observable<ResponseDTO<GroupDTO[]>> observable = RetrofitFactory.getInstance()
+            .createRequest(AuthManager.getInstance().getAuthorizationHead())
             .getAllGroups()
             .subscribeOn(Schedulers.io())
-            .map(GroupDTO::toGroups)
             .observeOn(AndroidSchedulers.mainThread());
 
         try {
-            return Arrays.asList(observable.toFuture().get());
+            ResponseDTO<GroupDTO[]> response = observable.toFuture().get();
+            if (response.getCode() != 200)
+                throw ServerErrorHandle.parseErrorMessage(response);
+
+            return Arrays.asList(GroupDTO.toGroups(response.getData()));
         }
         catch (InterruptedException | ExecutionException ex) {
             ex.printStackTrace();
-            return null;
+            throw ex;
         }
     }
 
     @Override
-    public Group queryGroupById(int groupId) {
-        Observable<Group> observable = RetrofitFactory.getInstance()
-            .createRequest(RetrofitFactory.getHeader("", ""))
-            .getGroupById(groupId)
+    public Group queryGroupById(int id) throws Exception {
+        Observable<ResponseDTO<GroupDTO>> observable = RetrofitFactory.getInstance()
+            .createRequest(AuthManager.getInstance().getAuthorizationHead())
+            .getGroupById(id)
             .subscribeOn(Schedulers.io())
-            .map(GroupDTO::toGroup)
             .observeOn(AndroidSchedulers.mainThread());
 
         try {
-            return observable.toFuture().get();
+            ResponseDTO<GroupDTO> response = observable.toFuture().get();
+            if (response.getCode() != 200)
+                throw ServerErrorHandle.parseErrorMessage(response);
+
+            return response.getData().toGroup();
         }
         catch (InterruptedException | ExecutionException ex) {
             ex.printStackTrace();
-            return null;
+            throw ex;
         }
     }
 
     @Override
-    public Group queryDefaultGroup() {
-        Observable<Group[]> observable = RetrofitFactory.getInstance()
-            .createRequest(RetrofitFactory.getHeader("", ""))
-            .getAllGroups()
+    public Group queryDefaultGroup() throws Exception {
+        Observable<ResponseDTO<GroupDTO>> observable = RetrofitFactory.getInstance()
+            .createRequest(AuthManager.getInstance().getAuthorizationHead())
+            .getDefaultGroup()
             .subscribeOn(Schedulers.io())
-            .map(GroupDTO::toGroups)
             .observeOn(AndroidSchedulers.mainThread());
 
         try {
-            Group[] groups = observable.toFuture().get();
-            for (Group group : groups) {
-                if (group.getName().equals(Group.DEF_GROUP.getName()))
-                    return group;
-            }
+            ResponseDTO<GroupDTO> response = observable.toFuture().get();
+            if (response.getCode() != 200)
+                throw ServerErrorHandle.parseErrorMessage(response);
+
+            return response.getData().toGroup();
         }
         catch (InterruptedException | ExecutionException ex) {
             ex.printStackTrace();
+            throw ex;
         }
-        return null;
     }
 
     @Override
-    public long insertGroup(Group group) {
-        Observable<Group> observable = RetrofitFactory.getInstance()
-            .createRequest(RetrofitFactory.getHeader("", ""))
+    public long insertGroup(Group group) throws Exception {
+        Observable<ResponseDTO<GroupDTO>> observable = RetrofitFactory.getInstance()
+            .createRequest(AuthManager.getInstance().getAuthorizationHead())
             .insertGroup(GroupDTO.toGroupDTO(group))
             .subscribeOn(Schedulers.io())
-            .map(GroupDTO::toGroup)
             .observeOn(AndroidSchedulers.mainThread());
 
         try {
-            Group new_group = observable.toFuture().get();
-            return new_group.getId();
+            ResponseDTO<GroupDTO> response = observable.toFuture().get();
+            if (response.getCode() != 200)
+                throw ServerErrorHandle.parseErrorMessage(response);
+
+            return response.getData().getId();
         }
         catch (InterruptedException | ExecutionException ex) {
             ex.printStackTrace();
-            return 0;
+            throw ex;
         }
     }
 
     @Override
-    public boolean updateGroup(Group group) {
-        Observable<Group> observable = RetrofitFactory.getInstance()
-            .createRequest(RetrofitFactory.getHeader("", ""))
+    public boolean updateGroup(Group group) throws Exception {
+        Observable<ResponseDTO<GroupDTO>> observable = RetrofitFactory.getInstance()
+            .createRequest(AuthManager.getInstance().getAuthorizationHead())
             .updateGroup(GroupDTO.toGroupDTO(group))
             .subscribeOn(Schedulers.io())
-            .map(GroupDTO::toGroup)
             .observeOn(AndroidSchedulers.mainThread());
 
         try {
-            observable.toFuture().get();
+            ResponseDTO<GroupDTO> response = observable.toFuture().get();
+            if (response.getCode() != 200)
+                throw ServerErrorHandle.parseErrorMessage(response);
+
             return true;
         }
         catch (InterruptedException | ExecutionException ex) {
             ex.printStackTrace();
-            return false;
+            throw ex;
         }
     }
 
     @Override
-    public boolean deleteGroup(int id) {
-        Observable<Group> observable = RetrofitFactory.getInstance()
-            .createRequest(RetrofitFactory.getHeader("", ""))
+    public boolean deleteGroup(int id) throws Exception {
+        Observable<ResponseDTO<GroupDTO>> observable = RetrofitFactory.getInstance()
+            .createRequest(AuthManager.getInstance().getAuthorizationHead())
             .deleteGroup(id)
             .subscribeOn(Schedulers.io())
-            .map(GroupDTO::toGroup)
             .observeOn(AndroidSchedulers.mainThread());
 
         try {
-            observable.toFuture().get();
+            ResponseDTO<GroupDTO> response = observable.toFuture().get();
+            if (response.getCode() != 200)
+                throw ServerErrorHandle.parseErrorMessage(response);
+
             return true;
-        }
-        catch (InterruptedException | ExecutionException ex) {
+        } catch (InterruptedException | ExecutionException ex) {
             ex.printStackTrace();
-            return false;
+            throw ex;
         }
     }
 }

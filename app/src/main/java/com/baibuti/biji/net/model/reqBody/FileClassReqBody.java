@@ -1,6 +1,6 @@
 package com.baibuti.biji.net.model.reqBody;
 
-import com.baibuti.biji.data.model.FileClass;
+import com.baibuti.biji.data.po.FileClass;
 
 import org.json.JSONArray;
 import org.json.JSONException;

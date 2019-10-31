@@ -10,9 +10,9 @@ import com.baibuti.biji.net.model.respBody.MessageResp;
 import com.baibuti.biji.net.model.respObj.ServerErrorException;
 import com.baibuti.biji.net.model.respObj.UploadStatus;
 import com.baibuti.biji.net.model.RespType;
-import com.baibuti.biji.net.module.auth.AuthMgr;
+import com.baibuti.biji.service.auth.AuthManager;
 import com.baibuti.biji.net.NetHelper;
-import com.baibuti.biji.net.Urls;
+import com.baibuti.biji.service.Urls;
 
 import java.io.File;
 import java.io.IOException;
@@ -39,13 +39,13 @@ public class ImgUtil {
         File img = new File(path);
         RespType resp = NetHelper.httpPostFileSync(ImgUploadUrl,
             ImgUploadKey, img,
-            NetHelper.getOneHeader("Authorization", AuthMgr.getInstance().getToken()));
+            NetHelper.getOneHeader("Authorization", AuthManager.getInstance().getToken()));
         try {
             int code = resp.getCode();
             if (code == 200) {
                 String newToken = resp.getHeaders().get("Authorization");
                 if (newToken != null && !(newToken.isEmpty()))
-                    AuthMgr.getInstance().setToken(newToken);
+                    AuthManager.getInstance().setToken(newToken);
 
                 MessageResp msg = MessageResp.getMsgRespFromJson(resp.getBody());
 
@@ -105,7 +105,7 @@ public class ImgUtil {
         NetHelper.httpPostPutDeleteAsync(
             DeleteImgUrl, NetHelper.DELETE,
             DelImgReqBody.toJsons(DelImgReqBody.toReqBodiesFromUrls(urls)),
-            NetHelper.getOneHeader("Authorization", AuthMgr.getInstance().getToken()),
+            NetHelper.getOneHeader("Authorization", AuthManager.getInstance().getToken()),
             new Callback() {
                 @Override
                 @EverythingIsNonNull
@@ -118,7 +118,7 @@ public class ImgUtil {
                     if (code == 200) {
                         String newToken = response.headers().get("Authorization");
                         if (newToken != null && !(newToken.isEmpty()))
-                            AuthMgr.getInstance().setToken(newToken);
+                            AuthManager.getInstance().setToken(newToken);
                     }
                 }
             }

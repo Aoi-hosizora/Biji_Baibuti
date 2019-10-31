@@ -7,9 +7,9 @@ import com.baibuti.biji.net.model.respBody.LogResp;
 import com.baibuti.biji.net.model.respBody.MessageResp;
 import com.baibuti.biji.net.model.respObj.ServerErrorException;
 import com.baibuti.biji.net.model.RespType;
-import com.baibuti.biji.net.module.auth.AuthMgr;
+import com.baibuti.biji.service.auth.AuthManager;
 import com.baibuti.biji.net.NetHelper;
-import com.baibuti.biji.net.Urls;
+import com.baibuti.biji.service.Urls;
 
 import java.io.IOException;
 import java.util.Locale;
@@ -28,13 +28,13 @@ public class LogUtil {
 
     @Deprecated
     public static UtLog[] getAllLogs() throws ServerErrorException {
-        RespType resp = NetHelper.httpGetSync(AllLogUrl, NetHelper.getOneHeader("Authorization", AuthMgr.getInstance().getToken()));
+        RespType resp = NetHelper.httpGetSync(AllLogUrl, NetHelper.getOneHeader("Authorization", AuthManager.getInstance().getToken()));
         try {
             int code = resp.getCode();
             if (code == 200) {
                 String newToken = resp.getHeaders().get("Authorization");
                 if (newToken != null && !(newToken.isEmpty()))
-                    AuthMgr.getInstance().setToken(newToken);
+                    AuthManager.getInstance().setToken(newToken);
 
                 LogResp[] rets = LogResp.toLogRespsFromJson(resp.getBody());
                 return LogResp.toUtLogs(rets);
@@ -61,13 +61,13 @@ public class LogUtil {
         String module = logModule.toString();
 
         String url = String.format(Locale.CHINA, OneLogUrl, module);
-        RespType resp = NetHelper.httpGetSync(url, NetHelper.getOneHeader("Authorization", AuthMgr.getInstance().getToken()));
+        RespType resp = NetHelper.httpGetSync(url, NetHelper.getOneHeader("Authorization", AuthManager.getInstance().getToken()));
         try {
             int code = resp.getCode();
             if (code == 200) {
                 String newToken = resp.getHeaders().get("Authorization");
                 if (newToken != null && !(newToken.isEmpty()))
-                    AuthMgr.getInstance().setToken(newToken);
+                    AuthManager.getInstance().setToken(newToken);
 
                 LogResp ret = LogResp.toLogRespFromJson(resp.getBody());
                 return ret.toUtLog();
@@ -94,7 +94,7 @@ public class LogUtil {
         NetHelper.httpPostPutDeleteAsync(
             UpdateLogUrl, NetHelper.POST,
             LogResp.toLogResp(utLog).toJson(),
-            NetHelper.getOneHeader("Authorization", AuthMgr.getInstance().getToken()),
+            NetHelper.getOneHeader("Authorization", AuthManager.getInstance().getToken()),
             new Callback() {
                 @Override
                 @EverythingIsNonNull
@@ -108,7 +108,7 @@ public class LogUtil {
                     if (code == 200) {
                         String newToken = response.headers().get("Authorization");
                         if (newToken != null && !(newToken.isEmpty()))
-                            AuthMgr.getInstance().setToken(newToken);
+                            AuthManager.getInstance().setToken(newToken);
                         pushCallBack.onCallBack();
                     }
                 }

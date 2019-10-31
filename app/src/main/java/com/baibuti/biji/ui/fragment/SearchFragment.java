@@ -28,7 +28,7 @@ import android.widget.Toast;
 
 import com.baibuti.biji.ui.adapter.SearchItemAdapter;
 import com.baibuti.biji.data.dao.db.SearchItemDao;
-import com.baibuti.biji.data.model.SearchItem;
+import com.baibuti.biji.data.po.SearchItem;
 import com.baibuti.biji.R;
 import com.baibuti.biji.ui.activity.MainActivity;
 import com.baibuti.biji.ui.activity.StarSearchItemActivity;
@@ -36,7 +36,7 @@ import com.baibuti.biji.ui.widget.listView.SpacesItemDecoration;
 import com.baibuti.biji.ui.widget.listView.RecyclerViewEmptySupport;
 import com.baibuti.biji.util.otherUtil.CommonUtil;
 import com.baibuti.biji.util.layoutUtil.PopupMenuUtil;
-import com.baibuti.biji.net.module.search.SearchNetUtil;
+import com.baibuti.biji.util.netUtil.SearchNetUtil;
 
 import java.util.ArrayList;
 import java.util.Locale;
@@ -369,7 +369,7 @@ public class SearchFragment extends Fragment implements View.OnClickListener {
             public void run() {
 
                 // 搜索并处理，访问网络
-                searchItems = SearchNetUtil.getSearchBaiduRet(Question, 1);
+                searchItems = SearchNetUtil.getBaiduSearchResult(Question, 1);
 
                 // 获取结果，更新数据
                 Message message = new Message();
@@ -397,7 +397,7 @@ public class SearchFragment extends Fragment implements View.OnClickListener {
             @Override
             public void run() {
 
-                ArrayList<SearchItem> newSearchItems = SearchNetUtil.getSearchBaiduRet(Question, SearchPageCnt + 1);
+                ArrayList<SearchItem> newSearchItems = SearchNetUtil.getBaiduSearchResult(Question, SearchPageCnt + 1);
                 searchItems.addAll(newSearchItems);
 
                 // 获取结果，更新数据

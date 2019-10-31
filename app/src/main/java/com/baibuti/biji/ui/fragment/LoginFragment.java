@@ -17,9 +17,8 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.Toast;
 
-import com.baibuti.biji.net.module.auth.AuthMgr;
-import com.baibuti.biji.net.module.auth.AuthUtil;
-import com.baibuti.biji.net.model.respObj.AuthStatus;
+import com.baibuti.biji.service.auth.AuthManager;
+import com.baibuti.biji.service.auth.AuthService;
 import com.baibuti.biji.R;
 import com.baibuti.biji.ui.activity.RegLogActivity;
 
@@ -72,8 +71,8 @@ public class LoginFragment extends Fragment implements View.OnClickListener {
         m_logining = new ProgressDialog(getContext());
         m_logining.setCancelable(false);
 
-        if (AuthMgr.getInstance().isLogin())
-            m_LoginEditText.setText(AuthMgr.getInstance().getUserName());
+        if (AuthManager.getInstance().isLogin())
+            m_LoginEditText.setText(AuthManager.getInstance().getUserName());
     }
 
     @Override
@@ -112,7 +111,7 @@ public class LoginFragment extends Fragment implements View.OnClickListener {
         new Thread(new Runnable() {
             @Override
             public void run() {
-                AuthStatus status = AuthUtil.login(username, password);
+                AuthStatus status = AuthService.login(username, password);
 
                 getActivity().runOnUiThread(new Runnable() {
                     @Override
@@ -122,9 +121,9 @@ public class LoginFragment extends Fragment implements View.OnClickListener {
                         if (status.isSuccess()) {
                             Toast.makeText(getActivity(),
                                 String.format(Locale.CHINA, "用户 \"%s\" 登录成功", status.getUsername()), Toast.LENGTH_SHORT).show();
-                            AuthMgr.getInstance().login(status.getUsername(), status.getToken());
+                            AuthManager.getInstance().login(status.getUsername(), status.getToken());
 
-                            Log.e("", "usr: " + AuthMgr.getInstance().getUserName() + ", token: " + AuthMgr.getInstance().getToken() );
+                            Log.e("", "usr: " + AuthManager.getInstance().getUserName() + ", token: " + AuthManager.getInstance().getToken() );
                             getActivity().setResult(Activity.RESULT_OK, new Intent());
                             getActivity().finish();
                         }

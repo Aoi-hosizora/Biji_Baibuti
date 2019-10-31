@@ -32,12 +32,12 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.baibuti.biji.data.model.Group;
+import com.baibuti.biji.data.po.Group;
 import com.baibuti.biji.ui.adapter.GroupAdapter;
-import com.baibuti.biji.data.model.Note;
+import com.baibuti.biji.data.po.Note;
 import com.baibuti.biji.net.model.respObj.ServerErrorException;
 import com.baibuti.biji.net.model.respObj.UploadStatus;
-import com.baibuti.biji.net.module.auth.AuthMgr;
+import com.baibuti.biji.service.auth.AuthManager;
 import com.baibuti.biji.net.module.note.ImgUtil;
 import com.baibuti.biji.R;
 import com.baibuti.biji.data.dao.db.GroupDao;
@@ -502,7 +502,7 @@ public class ModifyNoteActivity extends AppCompatActivity implements View.OnClic
                 });
 
                 // 处理图片
-                if (AuthMgr.getInstance().isLogin()) {
+                if (AuthManager.getInstance().isLogin()) {
                     note.setContent(handleSaveImgToServer(note.getContent(), motoNote));
                 }
 

@@ -6,9 +6,9 @@ import com.baibuti.biji.iGlobal.IPushCallBack;
 import com.baibuti.biji.net.model.respBody.MessageResp;
 import com.baibuti.biji.net.model.respObj.ServerErrorException;
 import com.baibuti.biji.net.model.RespType;
-import com.baibuti.biji.net.module.auth.AuthMgr;
+import com.baibuti.biji.service.auth.AuthManager;
 import com.baibuti.biji.net.NetHelper;
-import com.baibuti.biji.net.Urls;
+import com.baibuti.biji.service.Urls;
 
 import java.io.IOException;
 
@@ -30,7 +30,7 @@ public class ScheduleUtil {
         RespType resp = NetHelper.httpPostPutDeleteSync(
                 InsertScheduleUrl, NetHelper.POST,
                 "{\"schedulejson\":" + scheduleJson + "}",
-                NetHelper.getOneHeader("Authorization", AuthMgr.getInstance().getToken())
+                NetHelper.getOneHeader("Authorization", AuthManager.getInstance().getToken())
         );
 
         try {
@@ -38,7 +38,7 @@ public class ScheduleUtil {
             if (code == 200) {
                 String newToken = resp.getHeaders().get("Authorization");
                 if (newToken != null && !(newToken.isEmpty()))
-                    AuthMgr.getInstance().setToken(newToken);
+                    AuthManager.getInstance().setToken(newToken);
 
                 return true;
             }
@@ -57,14 +57,14 @@ public class ScheduleUtil {
         RespType resp = NetHelper.httpPostPutDeleteSync(
                 DeleteScheduleUrl, NetHelper.DELETE,
                 "{}",
-                NetHelper.getOneHeader("Authorization", AuthMgr.getInstance().getToken())
+                NetHelper.getOneHeader("Authorization", AuthManager.getInstance().getToken())
         );
         try {
             int code = resp.getCode();
             if (code == 200) {
                 String newToken = resp.getHeaders().get("Authorization");
                 if (newToken != null && !(newToken.isEmpty()))
-                    AuthMgr.getInstance().setToken(newToken);
+                    AuthManager.getInstance().setToken(newToken);
 
                 return true;
             }
@@ -83,7 +83,7 @@ public class ScheduleUtil {
         RespType resp = NetHelper.httpPostPutDeleteSync(
                 UpdateScheduleUrl, NetHelper.PUT,
                 "{\"schedulejson\":" + scheduleJson + "}",
-                NetHelper.getOneHeader("Authorization", AuthMgr.getInstance().getToken())
+                NetHelper.getOneHeader("Authorization", AuthManager.getInstance().getToken())
         );
 
         try {
@@ -91,7 +91,7 @@ public class ScheduleUtil {
             if (code == 200) {
                 String newToken = resp.getHeaders().get("Authorization");
                 if (newToken != null && !(newToken.isEmpty()))
-                    AuthMgr.getInstance().setToken(newToken);
+                    AuthManager.getInstance().setToken(newToken);
 
                 return true;
             }
@@ -107,13 +107,13 @@ public class ScheduleUtil {
     }
 
     public static String getSchedule() throws ServerErrorException {
-        RespType resp = NetHelper.httpGetSync(GetScheduleUrl, NetHelper.getOneHeader("Authorization", AuthMgr.getInstance().getToken()));
+        RespType resp = NetHelper.httpGetSync(GetScheduleUrl, NetHelper.getOneHeader("Authorization", AuthManager.getInstance().getToken()));
         try {
             int code = resp.getCode();
             if (code == 200) {
                 String newToken = resp.getHeaders().get("Authorization");
                 if (newToken != null && !(newToken.isEmpty()))
-                    AuthMgr.getInstance().setToken(newToken);
+                    AuthManager.getInstance().setToken(newToken);
 
                 Log.e("测试", "getSchedule from backend: " + resp.getBody());
                 return resp.getBody();
@@ -134,7 +134,7 @@ public class ScheduleUtil {
         NetHelper.httpPostPutDeleteAsync(
                 PushScheduleUrl, NetHelper.POST,
                 "{\"schedulejson\":" + scheduleJson + "}",
-                NetHelper.getOneHeader("Authorization", AuthMgr.getInstance().getToken()),
+                NetHelper.getOneHeader("Authorization", AuthManager.getInstance().getToken()),
                 new Callback() {
                     @Override
                     @EverythingIsNonNull
@@ -147,7 +147,7 @@ public class ScheduleUtil {
                         if (code == 200) {
                             String newToken = response.headers().get("Authorization");
                             if (newToken != null && !(newToken.isEmpty()))
-                                AuthMgr.getInstance().setToken(newToken);
+                                AuthManager.getInstance().setToken(newToken);
                             pushCallBack.onCallBack();
                         }
                     }

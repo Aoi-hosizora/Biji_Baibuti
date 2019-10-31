@@ -9,9 +9,9 @@ import android.database.sqlite.SQLiteStatement;
 import android.util.Log;
 
 import com.baibuti.biji.data.dao.DbOpenHelper;
-import com.baibuti.biji.data.model.FileClass;
+import com.baibuti.biji.data.po.FileClass;
 import com.baibuti.biji.net.model.respObj.ServerErrorException;
-import com.baibuti.biji.net.module.auth.AuthMgr;
+import com.baibuti.biji.service.auth.AuthManager;
 import com.baibuti.biji.net.module.file.FileClassUtil;
 
 import java.util.ArrayList;
@@ -25,7 +25,7 @@ public class FileClassDao {
     private Context context;
 
     public FileClassDao(Context context) {
-        this(context, (AuthMgr.getInstance().isLogin()) ? AuthMgr.getInstance().getUserName() : "");
+        this(context, (AuthManager.getInstance().isLogin()) ? AuthManager.getInstance().getUserName() : "");
     }
 
     @Deprecated
@@ -64,7 +64,7 @@ public class FileClassDao {
     }
 
     public void pushpull() {
-        if (AuthMgr.getInstance().isLogin()) {
+        if (AuthManager.getInstance().isLogin()) {
 
             if (ServerDbUpdateHelper.isLocalNewer(context, LogModule.Mod_FileClass)) { // 本地新
                 // TODO 异步
@@ -265,7 +265,7 @@ public class FileClassDao {
             Log.e("测试", "insertFileClass: " +fileClass1.getId() + " " + fileClass1.getFileClassName());
         }
 
-        if (AuthMgr.getInstance().isLogin()) {
+        if (AuthManager.getInstance().isLogin()) {
             try {
                 if (FileClassUtil.insertFileClass(fileClass) != null)
                     ServerDbUpdateHelper.pushLog(context, LogModule.Mod_FileClass);
@@ -357,7 +357,7 @@ public class FileClassDao {
             }
         }
 
-        if (isLogCheck && AuthMgr.getInstance().isLogin()) {
+        if (isLogCheck && AuthManager.getInstance().isLogin()) {
             try {
                 if (FileClassUtil.updateFileClass(fileClass) != null)
                     ServerDbUpdateHelper.pushLog(context, LogModule.Mod_FileClass);
@@ -421,7 +421,7 @@ public class FileClassDao {
 
         updateLog();
 
-        if (isLogCheck && AuthMgr.getInstance().isLogin()) {
+        if (isLogCheck && AuthManager.getInstance().isLogin()) {
             try {
                 if (FileClassUtil.deleteFileClass(f) != null)
                     ServerDbUpdateHelper.pushLog(context, LogModule.Mod_FileClass);

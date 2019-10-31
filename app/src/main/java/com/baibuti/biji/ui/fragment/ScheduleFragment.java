@@ -22,8 +22,8 @@ import android.widget.Toast;
 
 import com.alibaba.fastjson.JSON;
 import com.baibuti.biji.data.dao.db.ScheduleDao;
-import com.baibuti.biji.data.model.MySubject;
-import com.baibuti.biji.net.module.auth.AuthMgr;
+import com.baibuti.biji.data.po.MySubject;
+import com.baibuti.biji.service.auth.AuthManager;
 import com.baibuti.biji.net.module.file.DocumentUtil;
 import com.baibuti.biji.R;
 import com.baibuti.biji.ui.activity.MainActivity;
@@ -169,7 +169,7 @@ public class ScheduleFragment extends Fragment {
     }
 
     private void getScheduleFromBackEnd(){
-        if(!AuthMgr.getInstance().isLogin()){
+        if(!AuthManager.getInstance().isLogin()){
             Toast.makeText(getContext(), "未登录", Toast.LENGTH_SHORT).show();
             return;
         }
@@ -511,7 +511,7 @@ public class ScheduleFragment extends Fragment {
      * 订阅登录注销事件
      */
     private void registerAuthActions() {
-        AuthMgr.getInstance().addLoginChangeListener(new AuthMgr.OnLoginChangeListener() {
+        AuthManager.getInstance().addLoginChangeListener(new AuthManager.OnLoginChangeListener() {
 
             // TODO
             public void onLogin(String UserName) {

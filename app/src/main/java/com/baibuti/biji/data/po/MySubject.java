@@ -1,4 +1,4 @@
-package com.baibuti.biji.data.model;
+package com.baibuti.biji.data.po;
 
 import com.alibaba.fastjson.annotation.JSONField;
 import com.zhuangfei.timetable.model.Schedule;

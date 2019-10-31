@@ -1,6 +1,6 @@
 package com.baibuti.biji.data.dto;
 
-import com.baibuti.biji.data.model.Group;
+import com.baibuti.biji.data.po.Group;
 
 import java.io.Serializable;
 

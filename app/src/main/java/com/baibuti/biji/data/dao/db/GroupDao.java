@@ -9,7 +9,7 @@ import android.database.sqlite.SQLiteStatement;
 
 import com.baibuti.biji.data.dao.DbOpenHelper;
 import com.baibuti.biji.data.dao.daoInterface.IGroupDao;
-import com.baibuti.biji.data.model.Group;
+import com.baibuti.biji.data.po.Group;
 
 import java.util.ArrayList;
 import java.util.Collections;

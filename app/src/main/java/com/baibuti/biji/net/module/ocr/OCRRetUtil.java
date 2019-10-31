@@ -4,7 +4,7 @@ import android.util.Log;
 
 import com.baibuti.biji.net.model.respObj.Region;
 import com.baibuti.biji.net.NetHelper;
-import com.baibuti.biji.net.Urls;
+import com.baibuti.biji.service.Urls;
 
 import org.json.JSONArray;
 import org.json.JSONException;

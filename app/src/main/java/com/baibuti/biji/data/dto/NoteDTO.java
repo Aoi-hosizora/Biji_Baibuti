@@ -1,7 +1,7 @@
 package com.baibuti.biji.data.dto;
 
-import com.baibuti.biji.data.model.Group;
-import com.baibuti.biji.data.model.Note;
+import com.baibuti.biji.data.po.Group;
+import com.baibuti.biji.data.po.Note;
 
 import java.io.Serializable;
 import java.util.Date;

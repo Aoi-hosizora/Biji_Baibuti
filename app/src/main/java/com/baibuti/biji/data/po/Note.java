@@ -1,4 +1,4 @@
-package com.baibuti.biji.data.model;
+package com.baibuti.biji.data.po;
 
 import android.support.annotation.NonNull;
 

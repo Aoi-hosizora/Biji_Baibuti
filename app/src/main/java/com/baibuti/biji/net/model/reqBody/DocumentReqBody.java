@@ -2,7 +2,7 @@ package com.baibuti.biji.net.model.reqBody;
 
 import android.util.Log;
 
-import com.baibuti.biji.data.model.Document;
+import com.baibuti.biji.data.po.Document;
 import com.baibuti.biji.net.module.file.DocumentUtil;
 
 import org.json.JSONArray;

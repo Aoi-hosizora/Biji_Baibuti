@@ -18,7 +18,7 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.baibuti.biji.data.model.Note;
+import com.baibuti.biji.data.po.Note;
 import com.baibuti.biji.ui.dialog.ImagePopupDialog;
 import com.baibuti.biji.R;
 import com.baibuti.biji.util.otherUtil.CommonUtil;

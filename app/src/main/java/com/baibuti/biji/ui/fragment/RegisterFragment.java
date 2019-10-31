@@ -13,8 +13,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 
-import com.baibuti.biji.net.module.auth.AuthUtil;
-import com.baibuti.biji.net.model.respObj.AuthStatus;
+import com.baibuti.biji.service.auth.AuthService;
 import com.baibuti.biji.R;
 import com.baibuti.biji.ui.activity.RegLogActivity;
 
@@ -104,7 +103,7 @@ public class RegisterFragment extends Fragment implements View.OnClickListener {
         new Thread(new Runnable() {
             @Override
             public void run() {
-                AuthStatus status = AuthUtil.register(username, password);
+                AuthStatus status = AuthService.register(username, password);
 
                 getActivity().runOnUiThread(new Runnable() {
                     @Override

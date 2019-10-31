@@ -1,11 +1,13 @@
 package com.baibuti.biji.data.dao.net;
 
 import com.baibuti.biji.data.dao.daoInterface.INoteDao;
-import com.baibuti.biji.data.model.Note;
-import com.baibuti.biji.data.dao.RetrofitFactory;
+import com.baibuti.biji.data.dto.ResponseDTO;
+import com.baibuti.biji.data.po.Note;
+import com.baibuti.biji.service.auth.AuthManager;
+import com.baibuti.biji.service.retrofit.RetrofitFactory;
 import com.baibuti.biji.data.dto.NoteDTO;
+import com.baibuti.biji.service.retrofit.ServerErrorHandle;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
@@ -17,109 +19,131 @@ import io.reactivex.schedulers.Schedulers;
 public class NoteNetDao implements INoteDao {
 
     @Override
-    public List<Note> queryAllNotes() {
-        Observable<Note[]> observable = RetrofitFactory.getInstance()
-            .createRequest(RetrofitFactory.getHeader("", ""))
+    public List<Note> queryAllNotes() throws Exception {
+        Observable<ResponseDTO<NoteDTO[]>> observable = RetrofitFactory.getInstance()
+            .createRequest(AuthManager.getInstance().getAuthorizationHead())
             .getAllNotes()
             .subscribeOn(Schedulers.io())
-            .map(NoteDTO::toNotes)
             .observeOn(AndroidSchedulers.mainThread());
 
         try {
-            return Arrays.asList(observable.toFuture().get());
+            ResponseDTO<NoteDTO[]> response = observable.toFuture().get();
+            if (response.getCode() != 200)
+                throw ServerErrorHandle.parseErrorMessage(response);
+
+            return Arrays.asList(NoteDTO.toNotes(response.getData()));
         }
         catch (InterruptedException | ExecutionException ex) {
             ex.printStackTrace();
-            return null;
+            throw ex;
         }
     }
 
     @Override
-    public List<Note> queryNotesByGroupId(int id) {
-        List<Note> notes = queryAllNotes();
-        List<Note> groupNotes = new ArrayList<>();
-        for (Note note : notes)
-            if (note.getGroup().getId() == id)
-                groupNotes.add(note);
+    public List<Note> queryNotesByGroupId(int id) throws Exception {
+        Observable<ResponseDTO<NoteDTO[]>> observable = RetrofitFactory.getInstance()
+            .createRequest(AuthManager.getInstance().getAuthorizationHead())
+            .getNotesByGroupId(id)
+            .subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread());
 
-        return groupNotes;
+        try {
+            ResponseDTO<NoteDTO[]> response = observable.toFuture().get();
+            if (response.getCode() != 200)
+                throw ServerErrorHandle.parseErrorMessage(response);
+
+            return Arrays.asList(NoteDTO.toNotes(response.getData()));
+        }
+        catch (InterruptedException | ExecutionException ex) {
+            ex.printStackTrace();
+            throw ex;
+        }
     }
 
     @Override
-    public Note queryNoteById(int id) {
-        Observable<Note> observable = RetrofitFactory.getInstance()
-            .createRequest(RetrofitFactory.getHeader("", ""))
+    public Note queryNoteById(int id) throws Exception {
+        Observable<ResponseDTO<NoteDTO>> observable = RetrofitFactory.getInstance()
+            .createRequest(AuthManager.getInstance().getAuthorizationHead())
             .getNoteById(id)
             .subscribeOn(Schedulers.io())
-            .map(NoteDTO::toNote)
             .observeOn(AndroidSchedulers.mainThread());
 
         try {
-            return observable.toFuture().get();
+            ResponseDTO<NoteDTO> response = observable.toFuture().get();
+            if (response.getCode() != 200)
+                throw ServerErrorHandle.parseErrorMessage(response);
+
+            return response.getData().toNote();
         }
         catch (InterruptedException | ExecutionException ex) {
             ex.printStackTrace();
-            return null;
+            throw ex;
         }
     }
 
     @Override
-    public long insertNote(Note note) {
+    public long insertNote(Note note) throws Exception {
         // TODO 同时上传图片
-        Observable<Note> observable = RetrofitFactory.getInstance()
-            .createRequest(RetrofitFactory.getHeader("", ""))
+        Observable<ResponseDTO<NoteDTO>> observable = RetrofitFactory.getInstance()
+            .createRequest(AuthManager.getInstance().getAuthorizationHead())
             .insertNote(NoteDTO.toNoteDTO(note))
             .subscribeOn(Schedulers.io())
-            .map(NoteDTO::toNote)
             .observeOn(AndroidSchedulers.mainThread());
 
         try {
-            Note new_note = observable.toFuture().get();
-            return new_note.getId();
+            ResponseDTO<NoteDTO> response = observable.toFuture().get();
+            if (response.getCode() != 200)
+                throw ServerErrorHandle.parseErrorMessage(response);
+
+            return response.getData().getId();
         }
         catch (InterruptedException | ExecutionException ex) {
             ex.printStackTrace();
-            return 0;
+            throw ex;
         }
     }
 
     @Override
-    public boolean updateNote(Note note) {
+    public boolean updateNote(Note note) throws Exception {
         // TODO 同时上传图片
-        Observable<Note> observable = RetrofitFactory.getInstance()
-            .createRequest(RetrofitFactory.getHeader("", ""))
+        Observable<ResponseDTO<NoteDTO>> observable = RetrofitFactory.getInstance()
+            .createRequest(AuthManager.getInstance().getAuthorizationHead())
             .updateNote(NoteDTO.toNoteDTO(note))
             .subscribeOn(Schedulers.io())
-            .map(NoteDTO::toNote)
             .observeOn(AndroidSchedulers.mainThread());
 
         try {
-            observable.toFuture().get();
+            ResponseDTO<NoteDTO> response = observable.toFuture().get();
+            if (response.getCode() != 200)
+                throw ServerErrorHandle.parseErrorMessage(response);
+
             return true;
         }
         catch (InterruptedException | ExecutionException ex) {
             ex.printStackTrace();
-            return false;
+            throw ex;
         }
     }
 
     @Override
-    public boolean deleteNote(int id) {
+    public boolean deleteNote(int id) throws Exception {
         // TODO 同时判断，删除图片
-        Observable<Note> observable = RetrofitFactory.getInstance()
-            .createRequest(RetrofitFactory.getHeader("", ""))
+        Observable<ResponseDTO<NoteDTO>> observable = RetrofitFactory.getInstance()
+            .createRequest(AuthManager.getInstance().getAuthorizationHead())
             .deleteNote(id)
             .subscribeOn(Schedulers.io())
-            .map(NoteDTO::toNote)
             .observeOn(AndroidSchedulers.mainThread());
 
         try {
-            observable.toFuture().get();
+            ResponseDTO<NoteDTO> response = observable.toFuture().get();
+            if (response.getCode() != 200)
+                throw ServerErrorHandle.parseErrorMessage(response);
+
             return true;
         }
         catch (InterruptedException | ExecutionException ex) {
             ex.printStackTrace();
-            return false;
+            throw ex;
         }
     }
 }

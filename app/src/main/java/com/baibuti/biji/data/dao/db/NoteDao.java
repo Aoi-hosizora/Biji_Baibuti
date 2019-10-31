@@ -9,8 +9,8 @@ import android.database.sqlite.SQLiteStatement;
 
 import com.baibuti.biji.data.dao.DbOpenHelper;
 import com.baibuti.biji.data.dao.daoInterface.INoteDao;
-import com.baibuti.biji.data.model.Group;
-import com.baibuti.biji.data.model.Note;
+import com.baibuti.biji.data.po.Group;
+import com.baibuti.biji.data.po.Note;
 import com.baibuti.biji.util.otherUtil.DateColorUtil;
 
 import java.util.ArrayList;

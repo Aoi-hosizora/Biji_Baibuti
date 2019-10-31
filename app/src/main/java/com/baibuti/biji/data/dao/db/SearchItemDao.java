@@ -7,7 +7,7 @@ import android.database.sqlite.SQLiteStatement;
 
 import com.baibuti.biji.data.dao.DbOpenHelper;
 import com.baibuti.biji.data.dao.daoInterface.ISearchItemDao;
-import com.baibuti.biji.data.model.SearchItem;
+import com.baibuti.biji.data.po.SearchItem;
 
 import java.util.ArrayList;
 import java.util.List;

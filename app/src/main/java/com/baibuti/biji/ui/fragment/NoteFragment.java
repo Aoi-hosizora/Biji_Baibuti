@@ -39,15 +39,15 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.baibuti.biji.service.auth.AuthManager;
 import com.baibuti.biji.ui.adapter.GroupRadioAdapter;
-import com.baibuti.biji.net.module.auth.AuthMgr;
 import com.baibuti.biji.ui.activity.MainActivity;
 import com.baibuti.biji.ui.activity.ModifyNoteActivity;
 import com.baibuti.biji.ui.activity.OCRActivity;
 import com.baibuti.biji.ui.activity.ViewModifyNoteActivity;
-import com.baibuti.biji.data.model.Group;
+import com.baibuti.biji.data.po.Group;
 import com.baibuti.biji.ui.adapter.GroupAdapter;
-import com.baibuti.biji.data.model.Note;
+import com.baibuti.biji.data.po.Note;
 import com.baibuti.biji.ui.adapter.NoteAdapter;
 import com.baibuti.biji.ui.dialog.GroupDialog;
 import com.baibuti.biji.R;
@@ -1361,7 +1361,7 @@ public class NoteFragment extends Fragment implements View.OnClickListener {
      * 订阅登录注销事件
      */
     private void registerAuthActions() {
-        AuthMgr.getInstance().addLoginChangeListener(new AuthMgr.OnLoginChangeListener() {
+        AuthManager.getInstance().addLoginChangeListener(new AuthManager.OnLoginChangeListener() {
 
             // TODO
             public void onLogin(String UserName) {

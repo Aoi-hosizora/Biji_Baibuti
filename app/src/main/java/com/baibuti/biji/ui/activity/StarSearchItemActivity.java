@@ -22,7 +22,7 @@ import android.widget.Toast;
 
 import com.baibuti.biji.ui.adapter.SearchItemAdapter;
 import com.baibuti.biji.data.dao.db.SearchItemDao;
-import com.baibuti.biji.data.model.SearchItem;
+import com.baibuti.biji.data.po.SearchItem;
 import com.baibuti.biji.R;
 import com.baibuti.biji.ui.widget.listView.SpacesItemDecoration;
 import com.baibuti.biji.ui.widget.listView.RecyclerViewEmptySupport;

@@ -2,15 +2,15 @@ package com.baibuti.biji.net.module.file;
 
 import android.support.annotation.NonNull;
 
-import com.baibuti.biji.data.model.FileClass;
+import com.baibuti.biji.data.po.FileClass;
 import com.baibuti.biji.iGlobal.IPushCallBack;
 import com.baibuti.biji.net.model.reqBody.FileClassReqBody;
 import com.baibuti.biji.net.model.respBody.MessageResp;
 import com.baibuti.biji.net.model.respObj.ServerErrorException;
 import com.baibuti.biji.net.model.RespType;
-import com.baibuti.biji.net.module.auth.AuthMgr;
+import com.baibuti.biji.service.auth.AuthManager;
 import com.baibuti.biji.net.NetHelper;
-import com.baibuti.biji.net.Urls;
+import com.baibuti.biji.service.Urls;
 
 import java.io.File;
 import java.io.IOException;
@@ -30,13 +30,13 @@ public class FileClassUtil {
     private static final String GetShareCodeUrl = Urls.FileClassUrl + "/share";
 
     public static FileClass[] getAllFileClasses() throws ServerErrorException {
-        RespType resp = NetHelper.httpGetSync(AllFileClassUrl, NetHelper.getOneHeader("Authorization", AuthMgr.getInstance().getToken()));
+        RespType resp = NetHelper.httpGetSync(AllFileClassUrl, NetHelper.getOneHeader("Authorization", AuthManager.getInstance().getToken()));
         try {
             int code = resp.getCode();
             if (code == 200) {
                 String newToken = resp.getHeaders().get("Authorization");
                 if (newToken != null && !(newToken.isEmpty()))
-                    AuthMgr.getInstance().setToken(newToken);
+                    AuthManager.getInstance().setToken(newToken);
 
                 FileClassReqBody[] rets = FileClassReqBody.getFileClassRespsFromJson(resp.getBody());
                 return FileClassReqBody.toFileClasses(rets);
@@ -56,7 +56,7 @@ public class FileClassUtil {
         RespType resp = NetHelper.httpPostPutDeleteSync(
                 UpdateFileClassUrl, NetHelper.PUT,
                 FileClassReqBody.toFileClassReqBody(fileClass).toJson(),
-                NetHelper.getOneHeader("Authorization", AuthMgr.getInstance().getToken())
+                NetHelper.getOneHeader("Authorization", AuthManager.getInstance().getToken())
         );
 
         try {
@@ -64,7 +64,7 @@ public class FileClassUtil {
             if (code == 200) {
                 String newToken = resp.getHeaders().get("Authorization");
                 if (newToken != null && !(newToken.isEmpty()))
-                    AuthMgr.getInstance().setToken(newToken);
+                    AuthManager.getInstance().setToken(newToken);
 
                 FileClassReqBody ret = FileClassReqBody.getFileClassRespFromJson(resp.getBody());
                 return ret.toFileClass();
@@ -84,7 +84,7 @@ public class FileClassUtil {
         RespType resp = NetHelper.httpPostPutDeleteSync(
                 InsertFileClassUrl, NetHelper.POST,
                 FileClassReqBody.toFileClassReqBody(fileClass).toJson(),
-                NetHelper.getOneHeader("Authorization", AuthMgr.getInstance().getToken())
+                NetHelper.getOneHeader("Authorization", AuthManager.getInstance().getToken())
         );
 
         try {
@@ -92,7 +92,7 @@ public class FileClassUtil {
             if (code == 200) {
                 String newToken = resp.getHeaders().get("Authorization");
                 if (newToken != null && !(newToken.isEmpty()))
-                    AuthMgr.getInstance().setToken(newToken);
+                    AuthManager.getInstance().setToken(newToken);
 
                 FileClassReqBody ret = FileClassReqBody.getFileClassRespFromJson(resp.getBody());
                 return ret.toFileClass();
@@ -112,7 +112,7 @@ public class FileClassUtil {
         RespType resp = NetHelper.httpPostPutDeleteSync(
                 DeleteFileClassUrl, NetHelper.DELETE,
                 FileClassReqBody.toFileClassReqBody(fileClass).toJson(),
-                NetHelper.getOneHeader("Authorization", AuthMgr.getInstance().getToken())
+                NetHelper.getOneHeader("Authorization", AuthManager.getInstance().getToken())
         );
 
         try {
@@ -120,7 +120,7 @@ public class FileClassUtil {
             if (code == 200) {
                 String newToken = resp.getHeaders().get("Authorization");
                 if (newToken != null && !(newToken.isEmpty()))
-                    AuthMgr.getInstance().setToken(newToken);
+                    AuthManager.getInstance().setToken(newToken);
 
                 FileClassReqBody ret = FileClassReqBody.getFileClassRespFromJson(resp.getBody());
                 return ret.toFileClass();
@@ -141,7 +141,7 @@ public class FileClassUtil {
         NetHelper.httpPostPutDeleteAsync(
                 PushFileClassUrl, NetHelper.POST,
                 FileClassReqBody.getJsonFromFileClassReqRodies(FileClassReqBody.toFileClassReqBodies(fileClasses)),
-                NetHelper.getOneHeader("Authorization", AuthMgr.getInstance().getToken()),
+                NetHelper.getOneHeader("Authorization", AuthManager.getInstance().getToken()),
                 new Callback() {
                     @Override
                     @EverythingIsNonNull
@@ -154,7 +154,7 @@ public class FileClassUtil {
                         if (code == 200) {
                             String newToken = response.headers().get("Authorization");
                             if (newToken != null && !(newToken.isEmpty()))
-                                AuthMgr.getInstance().setToken(newToken);
+                                AuthManager.getInstance().setToken(newToken);
                             pushCallBack.onCallBack();
                         }
                     }
@@ -168,7 +168,7 @@ public class FileClassUtil {
                 GetShareCodeUrl + "?foldername=" + fileClassName,
                 "Share",
                 fileClassName + ".png",
-                NetHelper.getOneHeader("Authorization", AuthMgr.getInstance().getToken())
+                NetHelper.getOneHeader("Authorization", AuthManager.getInstance().getToken())
         );
     }
 }

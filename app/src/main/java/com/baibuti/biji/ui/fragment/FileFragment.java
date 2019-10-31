@@ -36,16 +36,15 @@ import android.widget.SearchView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.baibuti.biji.service.auth.AuthManager;
 import com.baibuti.biji.ui.adapter.DocumentAdapter;
 import com.baibuti.biji.ui.adapter.FileClassAdapter;
 import com.baibuti.biji.data.dao.db.DocumentDao;
 import com.baibuti.biji.data.dao.db.FileClassDao;
-import com.baibuti.biji.data.dao.db.UtLogDao;
-import com.baibuti.biji.data.model.Document;
-import com.baibuti.biji.data.model.FileClass;
-import com.baibuti.biji.data.model.FileItem;
+import com.baibuti.biji.data.po.Document;
+import com.baibuti.biji.data.po.FileClass;
+import com.baibuti.biji.data.po.FileItem;
 import com.baibuti.biji.net.model.respObj.ServerErrorException;
-import com.baibuti.biji.net.module.auth.AuthMgr;
 import com.baibuti.biji.net.module.file.DocumentUtil;
 import com.baibuti.biji.net.module.file.FileClassUtil;
 import com.baibuti.biji.R;
@@ -406,7 +405,7 @@ public class FileFragment extends Fragment {
         new Thread(new Runnable() {
             @Override
             public void run() {
-                if(!AuthMgr.getInstance().isLogin()){
+                if(!AuthManager.getInstance().isLogin()){
                     activity.runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
@@ -464,7 +463,7 @@ public class FileFragment extends Fragment {
     }
 
     private void scanShareCode(){
-        if(!AuthMgr.getInstance().isLogin()){
+        if(!AuthManager.getInstance().isLogin()){
             Toast.makeText(getContext(), "未登录", Toast.LENGTH_SHORT).show();
             return;
         }
@@ -1028,7 +1027,7 @@ public class FileFragment extends Fragment {
      * 订阅登录注销事件
      */
     private void registerAuthActions() {
-        AuthMgr.getInstance().addLoginChangeListener(new AuthMgr.OnLoginChangeListener() {
+        AuthManager.getInstance().addLoginChangeListener(new AuthManager.OnLoginChangeListener() {
 
             // TODO
             public void onLogin(String UserName) {

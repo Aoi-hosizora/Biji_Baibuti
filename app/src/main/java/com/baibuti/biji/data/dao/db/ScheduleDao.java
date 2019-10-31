@@ -9,7 +9,7 @@ import android.util.Log;
 
 import com.baibuti.biji.data.dao.DbOpenHelper;
 import com.baibuti.biji.net.model.respObj.ServerErrorException;
-import com.baibuti.biji.net.module.auth.AuthMgr;
+import com.baibuti.biji.service.auth.AuthManager;
 import com.baibuti.biji.net.module.schedule.ScheduleUtil;
 
 public class ScheduleDao {
@@ -22,7 +22,7 @@ public class ScheduleDao {
     private final static String COL_JSON = "schedule_json";
 
     public ScheduleDao(Context context) {
-        this(context, (!(AuthMgr.getInstance().getUserName().isEmpty())) ? AuthMgr.getInstance().getUserName() : "");
+        this(context, (!(AuthManager.getInstance().getUserName().isEmpty())) ? AuthManager.getInstance().getUserName() : "");
     }
 
     @Deprecated
@@ -43,7 +43,7 @@ public class ScheduleDao {
      * 进行 push pull
      */
     private void pushpull() {
-        if (AuthMgr.getInstance().isLogin()) {
+        if (AuthManager.getInstance().isLogin()) {
             if (ServerDbUpdateHelper.isLocalNewer(context, LogModule.Mod_Schedule)) { // 本地新
                 // TODO 异步
                 ServerDbUpdateHelper.pushData(context, LogModule.Mod_Schedule);
@@ -129,7 +129,7 @@ public class ScheduleDao {
         }
         updateLog();
 
-        if (isLogCheck && AuthMgr.getInstance().isLogin()) {
+        if (isLogCheck && AuthManager.getInstance().isLogin()) {
             try {
                 if (ScheduleUtil.insertSchedule(scheduleJson))
                     ServerDbUpdateHelper.pushLog(context, LogModule.Mod_Schedule);
@@ -175,7 +175,7 @@ public class ScheduleDao {
 
         updateLog();
 
-        if (isLogCheck && AuthMgr.getInstance().isLogin()) {
+        if (isLogCheck && AuthManager.getInstance().isLogin()) {
             try {
                 if (ScheduleUtil.deleteSchedule())
                     ServerDbUpdateHelper.pushLog(context, LogModule.Mod_Schedule);
@@ -211,7 +211,7 @@ public class ScheduleDao {
         db.close();
         updateLog();
 
-        if (AuthMgr.getInstance().isLogin()) {
+        if (AuthManager.getInstance().isLogin()) {
             try {
                 if (ScheduleUtil.updateSchedule(scheduleJson))
                     ServerDbUpdateHelper.pushLog(context, LogModule.Mod_Schedule);

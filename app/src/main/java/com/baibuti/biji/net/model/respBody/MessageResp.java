@@ -5,6 +5,7 @@ import org.json.JSONObject;
 
 import java.io.Serializable;
 
+@Deprecated
 public class MessageResp implements Serializable {
 
     private String message;

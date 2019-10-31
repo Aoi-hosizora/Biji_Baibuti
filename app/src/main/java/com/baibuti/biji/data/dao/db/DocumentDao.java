@@ -9,10 +9,10 @@ import android.database.sqlite.SQLiteStatement;
 import android.util.Log;
 
 import com.baibuti.biji.data.dao.DbOpenHelper;
-import com.baibuti.biji.data.model.Document;
+import com.baibuti.biji.data.po.Document;
 import com.baibuti.biji.iGlobal.IPushCallBack;
 import com.baibuti.biji.net.model.respObj.ServerErrorException;
-import com.baibuti.biji.net.module.auth.AuthMgr;
+import com.baibuti.biji.service.auth.AuthManager;
 import com.baibuti.biji.net.module.file.DocumentUtil;
 
 import java.util.ArrayList;
@@ -24,7 +24,7 @@ public class DocumentDao {
     private Context context;
 
     public DocumentDao(Context context) {
-        this(context, (AuthMgr.getInstance().isLogin()) ? AuthMgr.getInstance().getUserName() : "");
+        this(context, (AuthManager.getInstance().isLogin()) ? AuthManager.getInstance().getUserName() : "");
     }
 
     @Deprecated
@@ -154,7 +154,7 @@ public class DocumentDao {
      * 进行 push pull
      */
     public void pushpull() {
-        if (AuthMgr.getInstance().isLogin()) {
+        if (AuthManager.getInstance().isLogin()) {
             if (ServerDbUpdateHelper.isLocalNewer(context, LogModule.Mod_Document)) { // 本地新
                 // TODO 异步
                 ServerDbUpdateHelper.pushData(context, LogModule.Mod_Document);
@@ -228,7 +228,7 @@ public class DocumentDao {
 
         document.setId((int)ret);
 
-        if (AuthMgr.getInstance().isLogin()) {
+        if (AuthManager.getInstance().isLogin()) {
             try {
                 DocumentUtil.postFile(document, new IPushCallBack() {
                     @Override
@@ -349,7 +349,7 @@ public class DocumentDao {
 
         updateLog();
 
-        if (isLogCheck && AuthMgr.getInstance().isLogin()) {
+        if (isLogCheck && AuthManager.getInstance().isLogin()) {
             try {
                 if (document != null)
                     if (DocumentUtil.deleteFile(document))
@@ -392,7 +392,7 @@ public class DocumentDao {
 
         updateLog();
 
-        if (isLogCheck && AuthMgr.getInstance().isLogin()) {
+        if (isLogCheck && AuthManager.getInstance().isLogin()) {
             try {
                 if (DocumentUtil.deleteFiles(documentClassName))
                     ServerDbUpdateHelper.pushLog(context, LogModule.Mod_Document);

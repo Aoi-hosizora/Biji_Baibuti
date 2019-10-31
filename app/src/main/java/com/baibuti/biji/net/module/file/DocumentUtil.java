@@ -4,15 +4,15 @@ import android.os.Environment;
 import android.support.annotation.NonNull;
 import android.util.Log;
 
-import com.baibuti.biji.data.model.Document;
+import com.baibuti.biji.data.po.Document;
 import com.baibuti.biji.iGlobal.IPushCallBack;
 import com.baibuti.biji.net.model.reqBody.DocumentReqBody;
 import com.baibuti.biji.net.model.respBody.MessageResp;
 import com.baibuti.biji.net.model.respObj.ServerErrorException;
 import com.baibuti.biji.net.model.RespType;
-import com.baibuti.biji.net.module.auth.AuthMgr;
+import com.baibuti.biji.service.auth.AuthManager;
 import com.baibuti.biji.net.NetHelper;
-import com.baibuti.biji.net.Urls;
+import com.baibuti.biji.service.Urls;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -57,13 +57,13 @@ public class DocumentUtil {
     }
 
     public static Document[] getAllFiles(String params) throws ServerErrorException {
-        RespType resp = NetHelper.httpGetSync(AllFileUrl + params, NetHelper.getOneHeader("Authorization", AuthMgr.getInstance().getToken()));
+        RespType resp = NetHelper.httpGetSync(AllFileUrl + params, NetHelper.getOneHeader("Authorization", AuthManager.getInstance().getToken()));
         try {
             int code = resp.getCode();
             if (code == 200) {
                 String newToken = resp.getHeaders().get("Authorization");
                 if (newToken != null && !(newToken.isEmpty()))
-                    AuthMgr.getInstance().setToken(newToken);
+                    AuthManager.getInstance().setToken(newToken);
 
                 DocumentReqBody[] rets = DocumentReqBody.getFileRespsFromJson(resp.getBody());
                 return DocumentReqBody.toDocuments(rets);
@@ -86,7 +86,7 @@ public class DocumentUtil {
         NetHelper.httpPostFileAsync(
                 PostFileUrl, k_v,
                 "file", new File(document.getDocumentPath()),
-                NetHelper.getOneHeader("Authorization", AuthMgr.getInstance().getToken()),
+                NetHelper.getOneHeader("Authorization", AuthManager.getInstance().getToken()),
                 new Callback() {
                     @Override
                     @EverythingIsNonNull
@@ -99,7 +99,7 @@ public class DocumentUtil {
                         if (code == 200) {
                             String newToken = response.headers().get("Authorization");
                             if (newToken != null && !(newToken.isEmpty()))
-                                AuthMgr.getInstance().setToken(newToken);
+                                AuthManager.getInstance().setToken(newToken);
                             pushCallBack.onCallBack();
                         }
                     }
@@ -114,7 +114,7 @@ public class DocumentUtil {
         RespType resp = NetHelper.httpPostPutDeleteSync(
                 DeleteFileUrl, NetHelper.DELETE,
                 DocumentReqBody.toFileReqBody(document).toJson(),
-                NetHelper.getOneHeader("Authorization", AuthMgr.getInstance().getToken())
+                NetHelper.getOneHeader("Authorization", AuthManager.getInstance().getToken())
         );
         Log.e("", "deleteFile: " + document.getDocumentClassName() + " , " + document.getDocumentName());
         try {
@@ -122,7 +122,7 @@ public class DocumentUtil {
             if (code == 200) {
                 String newToken = resp.getHeaders().get("Authorization");
                 if (newToken != null && !(newToken.isEmpty()))
-                    AuthMgr.getInstance().setToken(newToken);
+                    AuthManager.getInstance().setToken(newToken);
                 return true;
             }
             else {
@@ -142,7 +142,7 @@ public class DocumentUtil {
             resp = NetHelper.httpPostPutDeleteSync(
                     DeleteFileByClassUrl, NetHelper.DELETE,
                     new JSONObject().put("foldername", fileClassName).toString(),
-                    NetHelper.getOneHeader("Authorization", AuthMgr.getInstance().getToken())
+                    NetHelper.getOneHeader("Authorization", AuthManager.getInstance().getToken())
             );
         }catch(JSONException e){
             e.printStackTrace();
@@ -154,7 +154,7 @@ public class DocumentUtil {
             if (code == 200) {
                 String newToken = resp.getHeaders().get("Authorization");
                 if (newToken != null && !(newToken.isEmpty()))
-                    AuthMgr.getInstance().setToken(newToken);
+                    AuthManager.getInstance().setToken(newToken);
                 return true;
             }
             else {
@@ -175,7 +175,7 @@ public class DocumentUtil {
                 "&&id=" + document.getId(),
                 document.getDocumentClassName(),
                 document.getDocumentName(),
-                NetHelper.getOneHeader("Authorization", AuthMgr.getInstance().getToken())
+                NetHelper.getOneHeader("Authorization", AuthManager.getInstance().getToken())
         );
         if(null != file) {
             document.setDocumentPath(file.getPath());
@@ -192,7 +192,7 @@ public class DocumentUtil {
         NetHelper.httpPostPutDeleteAsync(
                 PushFileUrl, NetHelper.POST,
                 DocumentReqBody.getJsonFromDocumentBodies(DocumentReqBody.toFileReqBodies(documents)),
-                NetHelper.getOneHeader("Authorization", AuthMgr.getInstance().getToken()),
+                NetHelper.getOneHeader("Authorization", AuthManager.getInstance().getToken()),
                 new Callback() {
                     @Override
                     @EverythingIsNonNull
@@ -205,8 +205,8 @@ public class DocumentUtil {
                         if (code == 200) {
                             String newToken = response.headers().get("Authorization");
                             if (newToken != null && !(newToken.isEmpty()))
-                                AuthMgr.getInstance().setToken(newToken);
-                            Log.e("测试", "pushDocumentsAsync: newToken is " + AuthMgr.getInstance().getToken());
+                                AuthManager.getInstance().setToken(newToken);
+                            Log.e("测试", "pushDocumentsAsync: newToken is " + AuthManager.getInstance().getToken());
                             pushCallBack.onCallBack();
                         }
                     }
@@ -216,13 +216,13 @@ public class DocumentUtil {
 
     public static boolean getSharedFiles(String params) throws ServerErrorException {
         RespType resp = NetHelper.httpGetSync(GetSharedDocuments + params,
-                NetHelper.getOneHeader("Authorization", AuthMgr.getInstance().getToken()));
+                NetHelper.getOneHeader("Authorization", AuthManager.getInstance().getToken()));
         try {
             int code = resp.getCode();
             if (code == 200) {
                 String newToken = resp.getHeaders().get("Authorization");
                 if (newToken != null && !(newToken.isEmpty()))
-                    AuthMgr.getInstance().setToken(newToken);
+                    AuthManager.getInstance().setToken(newToken);
 
                 return true;
             }

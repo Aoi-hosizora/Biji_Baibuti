@@ -1,6 +1,6 @@
 package com.baibuti.biji.data.dto;
 
-import com.baibuti.biji.data.model.SearchItem;
+import com.baibuti.biji.data.po.SearchItem;
 
 import java.io.Serializable;
 import java.util.List;

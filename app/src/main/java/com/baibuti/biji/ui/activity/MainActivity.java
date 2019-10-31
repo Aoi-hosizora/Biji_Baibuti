@@ -29,8 +29,8 @@ import android.widget.Toast;
 import android.view.MenuItem;
 
 import com.baibuti.biji.net.model.respObj.ServerErrorException;
-import com.baibuti.biji.net.module.auth.AuthMgr;
-import com.baibuti.biji.net.module.auth.AuthUtil;
+import com.baibuti.biji.service.auth.AuthManager;
+import com.baibuti.biji.service.auth.AuthService;
 import com.baibuti.biji.ui.fragment.ScheduleFragment;
 import com.baibuti.biji.ui.fragment.NoteFragment;
 import com.baibuti.biji.ui.fragment.SearchFragment;
@@ -393,7 +393,7 @@ public class MainActivity extends FragmentActivity implements NavigationView.OnN
      */
     private void login() {
         m_navigationView.getMenu().findItem(R.id.id_nav_login).setTitle(R.string.nav_logout);
-        refreshUserInfo(AuthMgr.getInstance().getUserName());
+        refreshUserInfo(AuthManager.getInstance().getUserName());
 
         // TODO 更新界面
         checkLoginStatus();
@@ -407,12 +407,12 @@ public class MainActivity extends FragmentActivity implements NavigationView.OnN
             @Override
             public void run() {
                 try {
-                    if (AuthUtil.logout()) {
+                    if (AuthService.logout()) {
 
                         runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
-                                AuthMgr.getInstance().logout();
+                                AuthManager.getInstance().logout();
                                 m_navigationView.getMenu().findItem(R.id.id_nav_login).setTitle(R.string.nav_login);
                                 Toast.makeText(MainActivity.this, "注销成功，请重新登录。", Toast.LENGTH_SHORT).show();
                                 checkLoginStatus();
@@ -423,7 +423,7 @@ public class MainActivity extends FragmentActivity implements NavigationView.OnN
                         runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
-                                AuthMgr.getInstance().logout();
+                                AuthManager.getInstance().logout();
                                 new AlertDialog.Builder(MainActivity.this)
                                         .setTitle("错误")
                                         .setMessage("注销未知错误。")
@@ -453,7 +453,7 @@ public class MainActivity extends FragmentActivity implements NavigationView.OnN
 
         // TODO 更新界面
 
-        // AuthMgr.getInstance().addLoginChangeListener(new AuthMgr.OnLoginChangeListener() {
+        // AuthManager.getInstance().addLoginChangeListener(new AuthManager.OnLoginChangeListener() {
         //
         //     @Override
         //     public void onLogin(String UserName) {
@@ -469,10 +469,10 @@ public class MainActivity extends FragmentActivity implements NavigationView.OnN
 
     private void checkLoginStatus() {
         // TODO
-        if (!(AuthMgr.getInstance().isLogin()))
+        if (!(AuthManager.getInstance().isLogin()))
             refreshUserInfo("未登录用户");
         else
-            refreshUserInfo(AuthMgr.getInstance().getUserName());
+            refreshUserInfo(AuthManager.getInstance().getUserName());
 
     }
 

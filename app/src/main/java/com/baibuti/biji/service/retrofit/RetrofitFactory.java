@@ -1,7 +1,6 @@
-package com.baibuti.biji.data.dao;
+package com.baibuti.biji.service.retrofit;
 
-import com.baibuti.biji.data.dao.daoInterface.RetrofitInterface;
-import com.baibuti.biji.net.Urls;
+import com.baibuti.biji.service.Urls;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -74,7 +73,7 @@ public class RetrofitFactory {
      */
     private synchronized Retrofit getRetrofit(Map<String, String> kv) {
         return new Retrofit.Builder()
-            .baseUrl(Urls.ServerIP)
+            .baseUrl(Urls.ServerHost)
             .client(getOkHttpClient(kv))
             .addConverterFactory(GsonConverterFactory.create())
             .addCallAdapterFactory(RxJavaCallAdapterFactory.create())

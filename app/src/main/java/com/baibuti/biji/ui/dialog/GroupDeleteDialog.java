@@ -4,8 +4,8 @@ import android.app.Activity;
 import android.content.DialogInterface;
 import android.support.annotation.UiThread;
 
-import com.baibuti.biji.data.model.Group;
-import com.baibuti.biji.data.model.Note;
+import com.baibuti.biji.data.po.Group;
+import com.baibuti.biji.data.po.Note;
 import com.baibuti.biji.R;
 import com.baibuti.biji.data.dao.db.GroupDao;
 import com.baibuti.biji.data.dao.db.NoteDao;
