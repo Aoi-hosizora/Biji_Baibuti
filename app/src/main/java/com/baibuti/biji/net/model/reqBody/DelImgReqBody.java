@@ -38,7 +38,7 @@ public class DelImgReqBody {
         JSONObject jsonObject = new JSONObject();
         try {
             jsonObject.put("username", username);
-            jsonObject.put("filename", filename);
+            jsonObject.put("filePath", filename);
             return jsonObject.toString();
         }
         catch (JSONException ex) {

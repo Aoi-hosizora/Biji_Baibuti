@@ -6,436 +6,226 @@ import android.database.Cursor;
 import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteStatement;
-import android.util.Log;
 
 import com.baibuti.biji.model.dao.DbOpenHelper;
 import com.baibuti.biji.model.dao.daoInterface.IFileClassDao;
-import com.baibuti.biji.model.dto.ServerException;
 import com.baibuti.biji.model.po.FileClass;
-import com.baibuti.biji.service.auth.AuthManager;
-import com.baibuti.biji.net.module.file.FileClassUtil;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
-
-import static android.content.ContentValues.TAG;
-
 
 public class FileClassDao implements IFileClassDao {
 
     private static final String TBL_NAME = "tbl_file_class";
 
+    private static final String COL_ID = "f_id";
+    private static final String COL_NAME = "f_name";
+    private static final String COL_ORDER = "f_order";
+
     private DbOpenHelper helper;
-    private Context context;
 
     public FileClassDao(Context context) {
-        this(context, (AuthManager.getInstance().isLogin()) ? AuthManager.getInstance().getUserName() : "");
-    }
+        helper = new DbOpenHelper(context);
 
-    @Deprecated
-    public FileClassDao(Context context, String Username) {
-        helper = new DbOpenHelper(context, Username);
-        this.context = context;
+        // 预处理顺序
+        precessOrder();
     }
 
     /**
-     * 更新文件分类日志，可能存在冗杂
+     * 查询所有分类
+     * @return 文件分类列表
      */
-    private void updateLog() {
-        UtLogDao utLogDao = new UtLogDao(context);
-        utLogDao.updateLog(LogModule.Mod_FileClass);
-    }
+    @Override
+    public List<FileClass> queryAllFileClasses() {
 
-    public List<FileClass> queryFileClassAll() {
-        return queryFileClassAll(true);
-    }
+        SQLiteDatabase db = helper.getWritableDatabase();
+        String sql = "select * from " + TBL_NAME;
+        Cursor cursor = null;
 
-    /**
-     * 查询所有分类列表
-     *
-     * @return
-     */
-    public List<FileClass> queryFileClassAll(boolean isLogCheck) { // ArrayList
+        List<FileClass> fileClassList = new ArrayList<>();
+        try {
+            cursor = db.rawQuery(sql, null);
 
-        if (isLogCheck) pushpull();
+            while (cursor.moveToNext()) {
+                int id = cursor.getInt(cursor.getColumnIndex(COL_ID));
+                String className = cursor.getString(cursor.getColumnIndex(COL_NAME));
+                int order = cursor.getInt(cursor.getColumnIndex(COL_ORDER));
 
-        List<FileClass> fileClassList = selectAllClasses();
+                fileClassList.add(new FileClass(id, className, order));
+            }
 
-        if (fileClassList.isEmpty())
-            fileClassList.add(insertDefaultClasses());
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            if (cursor != null && !cursor.isClosed()) cursor.close();
+            if (db != null && db.isOpen()) db.close();
+        }
 
         return fileClassList;
     }
 
-    public void pushpull() {
-        if (AuthManager.getInstance().isLogin()) {
+    /**
+     * 根据分类名查询分类
+     * @param className 分类名
+     * @return 一个分类
+     */
+    @Override
+    public FileClass queryFileClassByName(String className) {
 
-            if (ServerDbUpdateHelper.isLocalNewer(context, LogModule.Mod_FileClass)) { // 本地新
-                // TODO 异步
-                Log.e("测试", "fileclass本地新");
-                ServerDbUpdateHelper.pushData(context, LogModule.Mod_FileClass);
-            }
-            else if (ServerDbUpdateHelper.isLocalOlder(context, LogModule.Mod_FileClass)) { // 服务器新
-                // TODO 同步
-                Log.e("测试", "fileclass服务器新");
-                ServerDbUpdateHelper.pullData(context, LogModule.Mod_FileClass);
-            }
-        }
-    }
-
-    // 内部 select
-    private List<FileClass> selectAllClasses() {
         SQLiteDatabase db = helper.getWritableDatabase();
-        List<FileClass> fileClassList = new ArrayList<FileClass>();
-
-        FileClass fileClass ;
+        String sql = "select * from " + TBL_NAME + " where " + COL_NAME + " = \"" + className + "\"";
         Cursor cursor = null;
+
         try {
-            cursor = db.query("db_file_class", null, null, null, null, null, "null");
-            while (cursor.moveToNext()) {
+            cursor = db.rawQuery(sql, null);
 
-                int fileClassId = cursor.getInt(cursor.getColumnIndex("f_id"));
-                String fileClassName = cursor.getString(cursor.getColumnIndex("f_name"));
-                int order = cursor.getInt(cursor.getColumnIndex("f_order"));
+            if (cursor.moveToFirst()) {
+                int id = cursor.getInt(cursor.getColumnIndex(COL_ID));
+                int order = cursor.getInt(cursor.getColumnIndex(COL_ORDER));
 
-                //生成一个分类
-
-                fileClass = new FileClass();
-                fileClass.setId(fileClassId);
-                fileClass.setFileClassName(fileClassName);
-                fileClass.setOrder(order);
-
-                fileClassList.add(fileClass);
+                return new FileClass(id, className, order);
             }
+
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
-            if (cursor != null && !cursor.isClosed()) {
-                cursor.close();
-            }
-            if (db != null) {
-                db.close();
-            }
+            if (cursor != null && !cursor.isClosed()) cursor.close();
+            if (db != null && db.isOpen()) db.close();
         }
-        return fileClassList;
+
+        return null;
     }
 
-    public FileClass queryFileClassByName(String fileClassName) {
-        return queryFileClassByName(fileClassName, true);
-    }
-
-    @Deprecated
-    public FileClass queryFileClassByName(String fileClassName, boolean isLogCheck) {
-
-        if (isLogCheck) pushpull();
+    /**
+     * 根据分类 id 查询分类
+     * @param id 分类 id
+     * @return 一个分类
+     */
+    @Override
+    public FileClass queryFileClassById(int id) {
 
         SQLiteDatabase db = helper.getWritableDatabase();
-
-        FileClass fileClass = null;
+        String sql = "select * from " + TBL_NAME + " where " + COL_ID + " = " + id;
         Cursor cursor = null;
+
         try {
-            Log.i(TAG, "###queryGroupByName: "+fileClassName);
-            cursor = db.query("db_file_class", null, "f_name=?", new String[]{fileClassName}, null, null, null);
-            while (cursor.moveToNext()) {
-                int fileClassId = cursor.getInt(cursor.getColumnIndex("f_id"));
+            cursor = db.rawQuery(sql, null);
 
-                int order = cursor.getInt(cursor.getColumnIndex("f_order"));
+            if (cursor.moveToFirst()) {
+                String name = cursor.getString(cursor.getColumnIndex(COL_NAME));
+                int order = cursor.getInt(cursor.getColumnIndex(COL_ORDER));
 
-                //生成一个分类
-
-                fileClass = new FileClass();
-
-                fileClass.setId(fileClassId);
-                fileClass.setFileClassName(fileClassName);
-
-                fileClass.setOrder(order);
-
+                return new FileClass(id, name, order);
             }
+
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
-            if (cursor != null && !cursor.isClosed()) {
-                cursor.close();
-            }
-            if (db != null) {
-                db.close();
-            }
+            if (cursor != null && !cursor.isClosed()) cursor.close();
+            if (db != null && db.isOpen()) db.close();
         }
-        return fileClass;
+
+        return null;
     }
 
-    public FileClass queryFileClassById(int fileClassId) {
-        return queryFileClassById(fileClassId, true);
-    }
-
-    @Deprecated
-    public FileClass queryFileClassById(int fileClassId, boolean isLogCheck) {
-
-        if (isLogCheck) pushpull();
+    /**
+     * 添加分组
+     * @param fileClass 新分类，自动编码
+     * @return 分类 id
+     */
+    @Override
+    public long insertFileClass(FileClass fileClass) {
 
         SQLiteDatabase db = helper.getWritableDatabase();
-
-        FileClass fileClass = null;
-        Cursor cursor = null;
-        try {
-            cursor = db.query("db_file_class", null, "f_id=?", new String[]{fileClassId + ""}, null, null, null);
-            while (cursor.moveToNext()) {
-                int order = cursor.getInt(cursor.getColumnIndex("f_order"));
-
-                String fileClassName = cursor.getString(cursor.getColumnIndex("f_name"));
-
-
-                //生成一个文件分类
-
-                fileClass = new FileClass();
-
-                fileClass.setId(fileClassId);
-                fileClass.setFileClassName(fileClassName);
-
-                fileClass.setOrder(order);
-
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        } finally {
-            if (cursor != null && !cursor.isClosed()) {
-                cursor.close();
-            }
-            if (db != null) {
-                db.close();
-            }
-        }
-        return fileClass;
-    }
-
-
-    public FileClass queryDefaultFileClass() {
-        FileClass fileClass = null;
-
-        fileClass = this.queryFileClassByName(FileClass.GetDefaultFileClassName, false);
-        if (fileClass != null)
-            return fileClass;
-
-        return insertDefaultClasses();
-    }
-
-    private FileClass insertDefaultClasses() {
-        FileClass def = new FileClass();
-        def.setOrder(0);
-        def.setFileClassName(FileClass.GetDefaultFileClassName);
-
-        this.insertFileClass(def, def.getId());
-
-        return this.queryFileClassByName(FileClass.GetDefaultFileClassName, false);
-    }
-
-    /**
-     * 检查是否有重复
-     */
-    public int checkDuplicate(FileClass fileClass, FileClass oldFileClass) {
-        List<FileClass> tmp = selectAllClasses();
-        int cnt=0;
-        if (oldFileClass==null)
-            oldFileClass = new FileClass();
-        for (FileClass f : tmp)
-            if (f.getFileClassName().equals(fileClass.getFileClassName()) && !f.getFileClassName().equals(oldFileClass.getFileClassName()))
-                cnt++;
-        return cnt;
-    }
-
-    /**
-     * 处理重复插入
-     */
-    private FileClass HandleDuplicate(FileClass fileClass, FileClass oldFileClass) {
-        int cnt = checkDuplicate(fileClass, oldFileClass);
-        if (cnt!=0)
-            fileClass.setFileClassName(fileClass.getFileClassName() + " (" + cnt + ")");
-
-        return fileClass;
-    }
-
-    public long insertFileClass(FileClass fileClass){
-
-        Log.e("测试", "insertFileClass: " + fileClass.getId());
-
-        pushpull();
-
-        long ret = insertFileClass(fileClass, -1);
-
-        fileClass.setId((int)ret);
-
-        List<FileClass> fileClasses = queryFileClassAll();
-        for(FileClass fileClass1: fileClasses){
-            Log.e("测试", "insertFileClass: " +fileClass1.getId() + " " + fileClass1.getFileClassName());
-        }
-
-        if (AuthManager.getInstance().isLogin()) {
-            try {
-                if (FileClassUtil.insertFileClass(fileClass) != null)
-                    ServerDbUpdateHelper.pushLog(context, LogModule.Mod_FileClass);
-            }
-            catch (ServerException ex) {
-                ex.printStackTrace();
-            }
-        }
-
-        return ret;
-    }
-
-    /**
-     * 添加一个分类
-     */
-    public long insertFileClass(FileClass fileClass, int id) {
-        HandleDuplicate(fileClass, null);
-
-        SQLiteDatabase db = helper.getWritableDatabase();
-        String sql;
-
-        if (id == -1)
-            sql = "insert into db_file_class(f_name,f_order) values(?,?)";
-        else
-            sql = "insert into db_file_class(f_name,f_order,f_id) values(?,?,?)";
-
-        long ret = 0;
-
+        String sql = "insert into " + TBL_NAME +
+            "(" + COL_NAME + ", " + COL_ORDER + ") " +
+            "values(?, ?)";
         SQLiteStatement stat = db.compileStatement(sql);
         db.beginTransaction();
+
+        long ret_id = 0;
         try {
+            fileClass.setOrder(queryAllFileClasses().size()); // 插入到最后
 
-            stat.bindString(1, fileClass.getFileClassName());
-            stat.bindLong(2, fileClass.getOrder());
+            stat.bindString(1, fileClass.getName()); // COL_NAME
+            stat.bindLong(2, fileClass.getOrder()); // COL_ORDER
 
-            if (id != -1)
-                stat.bindLong(3, id); // id
-
-            ret = stat.executeInsert();
+            ret_id = stat.executeInsert();
             db.setTransactionSuccessful();
         } catch (SQLException e) {
-            e.printStackTrace();
-        } catch (Exception e) {
             e.printStackTrace();
         } finally {
             db.endTransaction();
             db.close();
         }
 
-        Log.e("测试", "insertFileClass: 调用");
-
-        updateLog();
-
-        return ret;
-    }
-
-    public void updateFileClass(FileClass fileClass){
-        updateFileClass(fileClass, true);
+        return ret_id;
     }
 
     /**
-     * 更新一个分类
+     * 更新分类
+     * @param fileClass 覆盖更新
+     * @return 是否成功更新
      */
-    @Deprecated
-    public void updateFileClass(FileClass fileClass, boolean isLogCheck) {
-
-        FileClass oldFileClass = queryFileClassById(fileClass.getId(), isLogCheck);
-
-        HandleDuplicate(fileClass, oldFileClass);
-
-        //////////////////////////////////////////////////
+    @Override
+    public boolean updateFileClass(FileClass fileClass) {
 
         SQLiteDatabase db = helper.getWritableDatabase();
+        ContentValues values = new ContentValues();
 
-        try {
-            ContentValues values = new ContentValues();
+        values.put(COL_NAME, fileClass.getName());
+        values.put(COL_ORDER, fileClass.getOrder());
 
-            values.put("f_name", fileClass.getFileClassName());
+        int ret = db.update(TBL_NAME, values, COL_ID + " = ?", new String[] { String.valueOf(fileClass.getId()) });
+        db.close();
 
-            values.put("f_order", fileClass.getOrder());
-
-            db.update("db_file_class", values, "f_id=?", new String[]{fileClass.getId() + ""});
-        }
-        catch (Exception e) {
-            e.printStackTrace();
-        } finally {
-            if (db != null) {
-                db.close();
-            }
-        }
-
-        if (isLogCheck && AuthManager.getInstance().isLogin()) {
-            try {
-                if (FileClassUtil.updateFileClass(fileClass) != null)
-                    ServerDbUpdateHelper.pushLog(context, LogModule.Mod_FileClass);
-            }
-            catch (ServerException ex) {
-                ex.printStackTrace();
-            }
-        }
-
-        updateLog();
+        return ret > 0;
     }
 
     /**
-     * 检查是否为默认分组
+     * 删除分类 (刷新 Order)
+     * @param id 删除的分类 id
+     * @return 是否成功删除
      */
-    private boolean checkDefaultFileClass(FileClass fileClass) {
-        if (fileClass==null) {
-            Log.e("checkDefaultFileClass", "checkDefaultFileCLass: fileClass==null");
-        }
-        else
-        if (FileClass.GetDefaultFileClassName.equals(fileClass.getFileClassName())) {
-            return true;
-        }
-        return false;
-    }
-
-    public int deleteFileClass(int fileClassId) throws EditDefaultFileClassException {
-        return deleteFileClass(fileClassId, true);
-    }
-
-    /**
-     * 删除一个分类
-     */
-    @Deprecated
-    public int deleteFileClass(int fileClassId, boolean isLogCheck) throws EditDefaultFileClassException {
-
-        FileClass f = queryFileClassById(fileClassId, false);
-
-        if (isLogCheck)
-            if (checkDefaultFileClass(queryFileClassById(fileClassId)))
-                throw new EditDefaultFileClassException();
-
-        //////////////////////////////////////////////////
+    @Override
+    public boolean deleteFileClass(int id) {
 
         SQLiteDatabase db = helper.getWritableDatabase();
 
         int ret = 0;
         try {
-            ret = db.delete("db_file_class", "f_id=?", new String[]{fileClassId + ""});
+            ret = db.delete(TBL_NAME, COL_ID + " = ?", new String[] { String.valueOf(id) });
         }
-
         catch (Exception e) {
             e.printStackTrace();
-        } finally {
-            if (db != null) {
+        }
+        finally {
+            if (db != null && db.isOpen())
                 db.close();
-            }
-        }
-        if (selectAllClasses().isEmpty())
-            queryDefaultFileClass();
-
-        updateLog();
-
-        if (isLogCheck && AuthManager.getInstance().isLogin()) {
-            try {
-                if (FileClassUtil.deleteFileClass(f) != null)
-                    ServerDbUpdateHelper.pushLog(context, LogModule.Mod_FileClass);
-            }
-            catch (ServerException ex) {
-                ex.printStackTrace();
-            }
         }
 
-        return ret;
+        // 删除后刷新 Order
+        precessOrder();
+        return ret > 0;
+    }
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    /**
+     * 处理顺序 (所有操作前 以及 删除操作后)
+     */
+    private void precessOrder() {
+        List<FileClass> fileClasses = queryAllFileClasses();
+        Collections.sort(fileClasses);
+
+        for (int i = 0; i < fileClasses.size(); i++) {
+            if (fileClasses.get(i).getOrder() != i) {
+                fileClasses.get(i).setOrder(i);
+                updateFileClass(fileClasses.get(i));
+            }
+        }
     }
 }
 

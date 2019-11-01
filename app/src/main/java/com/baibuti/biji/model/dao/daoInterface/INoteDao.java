@@ -8,10 +8,7 @@ import java.util.List;
 public interface INoteDao {
 
     // 查
-    default List<Note> queryAllNotes() throws ServerException {
-        return queryNotesByGroupId(-1);
-    }
-
+    List<Note> queryAllNotes() throws ServerException;
     List<Note> queryNotesByGroupId(int id) throws ServerException;
     Note queryNoteById(int id) throws ServerException;
 

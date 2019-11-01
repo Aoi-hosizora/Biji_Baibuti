@@ -308,7 +308,7 @@ public class FileFragment extends Fragment {
 
                     Log.e("测试", "run: " + lastPositionClicked);
                     fileClassDao.deleteFileClass(fileClassListItems.get(lastPositionClicked).getId());
-                    documentDao.deleteDocumentByClass(fileClassListItems.get(lastPositionClicked).getFileClassName(), true);
+                    documentDao.deleteDocumentByClass(fileClassListItems.get(lastPositionClicked).getName(), true);
                     activity.runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
@@ -511,7 +511,7 @@ public class FileFragment extends Fragment {
                 @Override
                 public void run() {
                     try {
-                        DocumentUtil.getSharedFiles("?username=" + username + "&foldername="+foldername);
+                        DocumentUtil.getSharedFiles("?username=" + username + "&className="+foldername);
                         activity.runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
@@ -584,11 +584,11 @@ public class FileFragment extends Fragment {
 
                 if(documentDao == null)
                     documentDao = new DocumentDao(activity);
-                fileClassListItems = fileClassDao.queryFileClassAll();
+                fileClassListItems = fileClassDao.queryAllFileClasses();
                 documentDao.pushpull();
                 for(FileClass f: fileClassListItems){
-                    if(!f.getFileClassName().equals("+")) {
-                        List<Document> l = documentDao.queryDocumentsByClassName(f.getFileClassName(), false);
+                    if(!f.getName().equals("+")) {
+                        List<Document> l = documentDao.queryDocumentsByClassName(f.getName(), false);
                         documentListsByClass.add(l);
                     }
                 }
@@ -611,7 +611,7 @@ public class FileFragment extends Fragment {
                                     lastPositionClicked = position;
                                     FileClass currentFileClass = (FileClass) fileClassListItems.get(position);
                                     //更改文件列表标题
-                                    documentHeader.setText(currentFileClass.getFileClassName());
+                                    documentHeader.setText(currentFileClass.getName());
                                     //获取分类下的文件
                                     updateDocumentRecyclerview(position);
                                 }
@@ -620,7 +620,7 @@ public class FileFragment extends Fragment {
                             }
                         });
 
-                        if(!fileClassListItems.get(fileClassListItems.size() - 1).getFileClassName().equals("+")) {
+                        if(!fileClassListItems.get(fileClassListItems.size() - 1).getName().equals("+")) {
                             FileClass temp = new FileClass("+", 0);
                             fileClassListItems.add(fileClassAdapter.getCount(), temp);
                             fileClassAdapter.notifyDataSetChanged();
@@ -753,7 +753,7 @@ public class FileFragment extends Fragment {
                                         fileClassListItems.add(fileClassAdapter.getCount() - 1, newFileClass);
                                     }
                                 });
-                                List<Document> l = documentDao.queryDocumentsByClassName(newFileClass.getFileClassName());
+                                List<Document> l = documentDao.queryDocumentsByClassName(newFileClass.getName());
                                 activity.runOnUiThread(new Runnable() {
                                     @Override
                                     public void run() {
@@ -780,7 +780,7 @@ public class FileFragment extends Fragment {
                                     }
                                 });
 
-                                currentFileClass.setFileClassName(newFileClassName);
+                                currentFileClass.setName(newFileClassName);
                                 fileClassDao.updateFileClass(currentFileClass);
                                 activity.runOnUiThread(new Runnable() {
                                     @Override
@@ -868,7 +868,7 @@ public class FileFragment extends Fragment {
         android.support.v7.app.AlertDialog dupalert = new android.support.v7.app.AlertDialog
                 .Builder(getContext())
                 .setTitle(R.string.GroupDialog_DuplicateAlertTitle)
-                .setMessage(String.format(getContext().getText(R.string.GroupDialog_DuplicateAlertMsg).toString(), newFileClass.getFileClassName()))
+                .setMessage(String.format(getContext().getText(R.string.GroupDialog_DuplicateAlertMsg).toString(), newFileClass.getName()))
                 .setNegativeButton(R.string.GroupDialog_DuplicateAlertOk, null)
                 .create();
         dupalert.show();
@@ -883,8 +883,8 @@ public class FileFragment extends Fragment {
         String name;
         for(List<Document> l: documentListsByClass){
             for(Document d: l){
-                if(!d.getPath().equals("")) {
-                    file = new File(d.getPath());
+                if(!d.getFilePath().equals("")) {
+                    file = new File(d.getFilePath());
                     name = file.getName();
                     d.setDocName(name);
                 }
@@ -923,7 +923,7 @@ public class FileFragment extends Fragment {
             new Thread(new Runnable() {
                 @Override
                 public void run() {
-                    File file = new File(document.getPath());
+                    File file = new File(document.getFilePath());
                     if(!file.exists()){
                         activity.runOnUiThread(new Runnable() {
                             @Override
@@ -942,7 +942,7 @@ public class FileFragment extends Fragment {
                                 });
                                 return;
                             }
-                            documentDao.updateDocumentPath(document);
+                            documentDao.updateDocument(document);
                             cancelLoadingDialog();
                         }catch (ServerException e){
                             e.printStackTrace();
@@ -1004,8 +1004,8 @@ public class FileFragment extends Fragment {
                         }
                     });
                     String name = documentListItems.get(position).getDocName();
-                    String path = documentListItems.get(position).getPath();
-                    documentDao.deleteDocumentByPath(name, path, true);
+                    String path = documentListItems.get(position).getFilePath();
+                    documentDao.deleteDocument(name, path, true);
                     documentListItems.remove(position);
                     documentListsByClass.get(lastPositionClicked).remove(position);
                     activity.runOnUiThread(new Runnable() {
@@ -1071,11 +1071,11 @@ public class FileFragment extends Fragment {
                 fileClassDao = new FileClassDao(activity);
                 documentDao = new DocumentDao(activity);
 
-                fileClassListItems.addAll(fileClassDao.queryFileClassAll());
+                fileClassListItems.addAll(fileClassDao.queryAllFileClasses());
                 documentDao.pushpull();
                 for(FileClass f: fileClassListItems){
-                    if(!f.getFileClassName().equals("+")) {
-                        List<Document> l = documentDao.queryDocumentsByClassName(f.getFileClassName(), false);
+                    if(!f.getName().equals("+")) {
+                        List<Document> l = documentDao.queryDocumentsByClassName(f.getName(), false);
                         if(null != l && l.size() != 0) {
                             for (Document document : l)
                                 Log.e("测试", "refresh: " + document.getId() + ' ' +
@@ -1086,7 +1086,7 @@ public class FileFragment extends Fragment {
                     }
                 }
 
-                if(!fileClassListItems.get(fileClassListItems.size() - 1).getFileClassName().equals("+")) {
+                if(!fileClassListItems.get(fileClassListItems.size() - 1).getName().equals("+")) {
                     FileClass temp = new FileClass("+", 0);
                     fileClassListItems.add(fileClassAdapter.getCount(), temp);
                 }

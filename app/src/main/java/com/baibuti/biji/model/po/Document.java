@@ -8,28 +8,26 @@ import lombok.Data;
 public class Document implements Serializable {
 
     private int id;
-    private String path;
+    private String filePath;
     private String className;
-    private String docName;
 
     @Override
     public boolean equals(Object obj) {
         if (!(obj instanceof Document)) return false;
-        return path.equals(((Document) obj).getPath());
+        return filePath.equals(((Document) obj).getFilePath());
     }
 
-    // public Document(String path, String className) {
-    //     this(0, path, className, "");
+    // public Document() {
+    //     this(0, "", "");
     // }
     //
-    // public Document(String path, String className, String docName) {
-    //     this(0, path, className, docName);
+    // public Document(String filePath, String className) {
+    //     this(0, filePath, className);
     // }
 
-    public Document(int id, String path, String className, String docName) {
+    public Document(int id, String filePath, String className) {
         this.id = id;
-        this.path = path;
+        this.filePath = filePath;
         this.className = className;
-        this.docName = docName;
     }
 }

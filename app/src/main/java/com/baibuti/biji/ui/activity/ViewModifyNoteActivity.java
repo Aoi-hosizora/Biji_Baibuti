@@ -333,11 +333,11 @@ public class ViewModifyNoteActivity extends AppCompatActivity implements View.On
      */
     private void requestForOpenChooseFolder(Intent data) {
         // isReturnType == true
-        String path = data.getStringExtra("path"); // 包含后缀名
+        String path = data.getStringExtra("filePath"); // 包含后缀名
         String type = data.getStringExtra("type");
 
         if (!path.isEmpty()) {
-            ShowLogE("requestForOpenChooseFolder", "path: " + path);
+            ShowLogE("requestForOpenChooseFolder", "filePath: " + path);
 
             if (!".pdf".equals(type) && !".docx".equals(type))
                 type = ".docx";

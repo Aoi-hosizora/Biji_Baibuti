@@ -79,7 +79,7 @@ public class DbOpenHelper extends SQLiteOpenHelper {
         db.execSQL("create table if not exists db_file_class(" +
             "f_id integer primary key autoincrement, " +
             "f_name varchar, " +
-            "f_order integer )");
+            "f_order integer)");
     }
 
     private void CreateDocumentTbl(SQLiteDatabase db) {
@@ -204,20 +204,20 @@ public class DbOpenHelper extends SQLiteOpenHelper {
         }
     }
 
-    /**
-     * 判断表格是否存在
-     * @param table 表名
-     */
-    public boolean isTblExists(String table) {
-        SQLiteDatabase db = getWritableDatabase();
-        String sql = "SELECT COUNT(*) FROM sqlite_master where type='table' and name='" + table + "'";
-        Cursor cursor = db.rawQuery(sql, null);
-
-        boolean ret = cursor.moveToNext() && cursor.getInt(0) > 0;
-
-        if (!cursor.isClosed()) cursor.close();
-        if (db.isOpen()) db.close();
-
-        return ret;
-    }
+    // /**
+    //  * 判断表格是否存在
+    //  * @param table 表名
+    //  */
+    // public boolean isTblExists(String table) {
+    //     SQLiteDatabase db = getWritableDatabase();
+    //     String sql = "SELECT COUNT(*) FROM sqlite_master where type='table' and name='" + table + "'";
+    //     Cursor cursor = db.rawQuery(sql, null);
+    //
+    //     boolean ret = cursor.moveToNext() && cursor.getInt(0) > 0;
+    //
+    //     if (!cursor.isClosed()) cursor.close();
+    //     if (db.isOpen()) db.close();
+    //
+    //     return ret;
+    // }
 }

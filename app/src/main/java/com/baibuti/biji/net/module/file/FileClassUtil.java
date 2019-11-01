@@ -2,10 +2,10 @@ package com.baibuti.biji.net.module.file;
 
 import android.support.annotation.NonNull;
 
+import com.baibuti.biji.model.dto.FileClassDTO;
 import com.baibuti.biji.model.dto.ServerException;
 import com.baibuti.biji.model.po.FileClass;
 import com.baibuti.biji.iGlobal.IPushCallBack;
-import com.baibuti.biji.net.model.reqBody.FileClassReqBody;
 import com.baibuti.biji.net.model.respBody.MessageResp;
 import com.baibuti.biji.net.model.RespType;
 import com.baibuti.biji.service.auth.AuthManager;
@@ -37,8 +37,8 @@ public class FileClassUtil {
                 if (newToken != null && !(newToken.isEmpty()))
                     AuthManager.getInstance().setToken(newToken);
 
-                FileClassReqBody[] rets = FileClassReqBody.getFileClassRespsFromJson(resp.getBody());
-                return FileClassReqBody.toFileClasses(rets);
+                FileClassDTO[] rets = FileClassDTO.getFileClassRespsFromJson(resp.getBody());
+                return FileClassDTO.toFileClasses(rets);
             }
             else {
                 MessageResp msg = MessageResp.getMsgRespFromJson(resp.getBody());
@@ -54,7 +54,7 @@ public class FileClassUtil {
     public static FileClass updateFileClass(FileClass fileClass) throws ServerException {
         RespType resp = NetHelper.httpPostPutDeleteSync(
                 UpdateFileClassUrl, NetHelper.PUT,
-                FileClassReqBody.toFileClassReqBody(fileClass).toJson(),
+                FileClassDTO.toFileClassDTO(fileClass).toJson(),
                 NetHelper.getOneHeader("Authorization", AuthManager.getInstance().getToken())
         );
 
@@ -65,7 +65,7 @@ public class FileClassUtil {
                 if (newToken != null && !(newToken.isEmpty()))
                     AuthManager.getInstance().setToken(newToken);
 
-                FileClassReqBody ret = FileClassReqBody.getFileClassRespFromJson(resp.getBody());
+                FileClassDTO ret = FileClassDTO.getFileClassRespFromJson(resp.getBody());
                 return ret.toFileClass();
             }
             else {
@@ -82,7 +82,7 @@ public class FileClassUtil {
     public static FileClass insertFileClass(FileClass fileClass) throws ServerException {
         RespType resp = NetHelper.httpPostPutDeleteSync(
                 InsertFileClassUrl, NetHelper.POST,
-                FileClassReqBody.toFileClassReqBody(fileClass).toJson(),
+                FileClassDTO.toFileClassDTO(fileClass).toJson(),
                 NetHelper.getOneHeader("Authorization", AuthManager.getInstance().getToken())
         );
 
@@ -93,7 +93,7 @@ public class FileClassUtil {
                 if (newToken != null && !(newToken.isEmpty()))
                     AuthManager.getInstance().setToken(newToken);
 
-                FileClassReqBody ret = FileClassReqBody.getFileClassRespFromJson(resp.getBody());
+                FileClassDTO ret = FileClassDTO.getFileClassRespFromJson(resp.getBody());
                 return ret.toFileClass();
             }
             else {
@@ -110,7 +110,7 @@ public class FileClassUtil {
     public static FileClass deleteFileClass(FileClass fileClass) throws ServerException {
         RespType resp = NetHelper.httpPostPutDeleteSync(
                 DeleteFileClassUrl, NetHelper.DELETE,
-                FileClassReqBody.toFileClassReqBody(fileClass).toJson(),
+                FileClassDTO.toFileClassDTO(fileClass).toJson(),
                 NetHelper.getOneHeader("Authorization", AuthManager.getInstance().getToken())
         );
 
@@ -121,7 +121,7 @@ public class FileClassUtil {
                 if (newToken != null && !(newToken.isEmpty()))
                     AuthManager.getInstance().setToken(newToken);
 
-                FileClassReqBody ret = FileClassReqBody.getFileClassRespFromJson(resp.getBody());
+                FileClassDTO ret = FileClassDTO.getFileClassRespFromJson(resp.getBody());
                 return ret.toFileClass();
             }
             else {
@@ -139,7 +139,7 @@ public class FileClassUtil {
     public static void pushFileClassAsync(FileClass[] fileClasses, @NonNull IPushCallBack pushCallBack) throws ServerException {
         NetHelper.httpPostPutDeleteAsync(
                 PushFileClassUrl, NetHelper.POST,
-                FileClassReqBody.getJsonFromFileClassReqRodies(FileClassReqBody.toFileClassReqBodies(fileClasses)),
+                FileClassDTO.getJsonFromFileClassReqRodies(FileClassDTO.toFileClassesDTO(fileClasses)),
                 NetHelper.getOneHeader("Authorization", AuthManager.getInstance().getToken()),
                 new Callback() {
                     @Override
@@ -164,7 +164,7 @@ public class FileClassUtil {
     public static File getShareCode(String fileClassName){
 
         return NetHelper.httpGetFileSync(
-                GetShareCodeUrl + "?foldername=" + fileClassName,
+                GetShareCodeUrl + "?className=" + fileClassName,
                 "Share",
                 fileClassName + ".png",
                 NetHelper.getOneHeader("Authorization", AuthManager.getInstance().getToken())

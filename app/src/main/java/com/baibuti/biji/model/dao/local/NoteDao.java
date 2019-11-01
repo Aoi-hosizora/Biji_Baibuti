@@ -168,8 +168,8 @@ public class NoteDao implements INoteDao {
 
     /**
      * 更新笔记
-     * @param note 覆盖更新笔记
-     * @return 是否成功更新 (更新非 0 项)
+     * @param note 覆盖更新
+     * @return 是否成功更新
      */
     @Override
     public boolean updateNote(Note note) {
@@ -185,22 +185,22 @@ public class NoteDao implements INoteDao {
         int ret = db.update(TBL_NAME, values, COL_ID + " = ?", new String[] { String.valueOf(note.getId()) });
         db.close();
 
-        return ret != 0;
+        return ret > 0;
     }
 
     /**
      * 删除笔记
-     * @param noteId 删除笔记的 id
-     * @return 是否成功删除 (删除 1 项)
+     * @param id 删除笔记的 id
+     * @return 是否成功删除
      */
     @Override
-    public boolean deleteNote(int noteId) {
+    public boolean deleteNote(int id) {
 
         SQLiteDatabase db = helper.getWritableDatabase();
 
         int ret = 0;
         try {
-            ret = db.delete(TBL_NAME, COL_ID + " = ?", new String[] { String.valueOf(noteId) });
+            ret = db.delete(TBL_NAME, COL_ID + " = ?", new String[] { String.valueOf(id) });
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -209,6 +209,6 @@ public class NoteDao implements INoteDao {
             if (db != null && db.isOpen()) db.close();
         }
 
-        return ret == 1;
+        return ret > 0;
     }
 }

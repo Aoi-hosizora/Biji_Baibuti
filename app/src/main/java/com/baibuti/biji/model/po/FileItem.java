@@ -2,9 +2,10 @@ package com.baibuti.biji.model.po;
 
 import java.io.Serializable;
 
-/*
-* FileItem为导入文件对话框中的文件列表项
-*/
+/**
+ * FileItem为导入文件对话框中的文件列表项
+ */
+@Deprecated
 public class FileItem implements Serializable {
 
     private int tag;

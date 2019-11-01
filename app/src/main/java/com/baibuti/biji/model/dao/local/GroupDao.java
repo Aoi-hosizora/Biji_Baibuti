@@ -37,9 +37,6 @@ public class GroupDao implements IGroupDao {
         precessOrder();
     }
 
-    // queryAllGroups queryGroupById queryDefaultGroup insertGroup updateGroup deleteGroup
-    // region 常规操作 增删改查
-
     /**
      * 查询所有分组
      * @return 分组列表
@@ -154,8 +151,8 @@ public class GroupDao implements IGroupDao {
 
         SQLiteDatabase db = helper.getWritableDatabase();
         String sql = "insert into " + TBL_NAME +
-                "(" + COL_NAME + ", " + COL_ORDER + ", " + COL_COLOR + ") " +
-                "values(?, ?, ?)";
+            "(" + COL_NAME + ", " + COL_ORDER + ", " + COL_COLOR + ") " +
+            "values(?, ?, ?)";
         SQLiteStatement stat = db.compileStatement(sql);
         db.beginTransaction();
 
@@ -165,15 +162,13 @@ public class GroupDao implements IGroupDao {
 
             stat.bindString(1, group.getName()); // COL_NAME
             stat.bindLong(2, group.getOrder()); // COL_ORDER
-            stat.bindString(3, group.getColor()); // COL_COLOR
+            stat.bindString(3, group.getColor()); // COL_ORDER
 
             ret_id = stat.executeInsert();
             db.setTransactionSuccessful();
-        }
-        catch (SQLException e) {
+        } catch (SQLException e) {
             e.printStackTrace();
-        }
-        finally {
+        } finally {
             db.endTransaction();
             db.close();
         }
@@ -183,8 +178,8 @@ public class GroupDao implements IGroupDao {
 
     /**
      * 更新分组 (没必要刷新 Order)
-     * @param group 覆盖更新笔记
-     * @return 是否成功更新 (更新非 0 项)
+     * @param group 覆盖更新
+     * @return 是否成功更新
      */
     @Override
     public boolean updateGroup(Group group) {
@@ -201,30 +196,32 @@ public class GroupDao implements IGroupDao {
         values.put(COL_ORDER, group.getOrder());
         values.put(COL_COLOR, group.getColor());
 
-        int ret = db.update(TBL_NAME, values, COL_ID + " = ?", new String[] { String.valueOf(group.getId()) });
+        int ret = db.update(TBL_NAME, values, COL_ID + " = ?",
+            new String[] { String.valueOf(group.getId()) });
         db.close();
 
-        return ret != 0;
+        return ret > 0;
     }
 
 
     /**
      * 删除分组 (刷新 Order)
-     * @param groupId 删除的分组 id
-     * @return 是否成功删除 (删除 1 项)
+     * @param id 删除的分组 id
+     * @return 是否成功删除
      */
     @Override
-    public boolean deleteGroup(int groupId) {
+    public boolean deleteGroup(int id) {
 
         // 删除默认分组
-        if (queryDefaultGroup().getId() == groupId)
+        if (queryDefaultGroup().getId() == id)
             return false;
 
         SQLiteDatabase db = helper.getWritableDatabase();
 
         int ret = 0;
         try {
-            ret = db.delete(TBL_NAME, COL_ID + " = ?", new String[] { String.valueOf(groupId) });
+            ret = db.delete(TBL_NAME, COL_ID + " = ?",
+                new String[] { String.valueOf(id) });
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -236,13 +233,11 @@ public class GroupDao implements IGroupDao {
 
         // 删除后刷新 Order
         precessOrder();
-        return ret == 1;
+        return ret > 0;
     }
 
-    // endregion
-
-    // precessOrder
-    // region 内部处理
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     /**
      * 处理顺序 (所有操作前 以及 删除操作后)
@@ -259,5 +254,4 @@ public class GroupDao implements IGroupDao {
         }
     }
 
-    // endregion
 }

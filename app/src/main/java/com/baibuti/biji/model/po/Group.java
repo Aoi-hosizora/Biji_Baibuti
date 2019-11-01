@@ -5,11 +5,18 @@ import android.support.annotation.NonNull;
 
 import java.io.Serializable;
 
+import lombok.Getter;
+import lombok.Setter;
+
 public class Group implements Serializable, Comparable<Group> {
 
+    @Getter @Setter
     private int id;
+    @Getter @Setter
     private String name;
+    @Getter @Setter
     private int order;
+    @Getter @Setter
     private String color;
 
     private static String DEF_GROUP_NAME = "默认分组";
@@ -23,11 +30,11 @@ public class Group implements Serializable, Comparable<Group> {
     public static final Group AllGroups = new Group("所有分组", -1, "#00000000");
 
     public Group() {
-        this(0, "", 0, DEF_GROUP_NAME);
+        this(0, DEF_GROUP_NAME, 0, DEF_GROUP_COLOR);
     }
 
     public Group(int id) {
-        this(id, "", 0, DEF_GROUP_COLOR);
+        this(id, DEF_GROUP_NAME, 0, DEF_GROUP_COLOR);
     }
 
     public Group(String name, int order, String color) {
@@ -48,46 +55,14 @@ public class Group implements Serializable, Comparable<Group> {
 
     @Override
     public boolean equals(Object obj) {
+        if (!(obj instanceof Group)) return false;
+
         Group that = (Group) obj;
 
-        return this.id == that.id &&
-            this.name.equals(that.name) &&
-            this.order == that.order &&
-            this.color.equals(that.color);
-    }
-
-    /////////////////////////////////////////////////
-
-    public int getId() {
-        return id;
-    }
-
-    public void setId(int id) {
-        this.id = id;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public int getOrder() {
-        return order;
-    }
-
-    public void setOrder(int order) {
-        this.order = order;
-    }
-
-    public String getColor() {
-        return color;
-    }
-
-    public void setColor(String color) {
-        this.color = color;
+        return id == that.id &&
+            name.equals(that.name) &&
+            order == that.order &&
+            color.equals(that.color);
     }
 
     public String getStringColor() {

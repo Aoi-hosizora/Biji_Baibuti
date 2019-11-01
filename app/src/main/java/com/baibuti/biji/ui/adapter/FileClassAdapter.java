@@ -76,7 +76,7 @@ public class FileClassAdapter extends BaseAdapter {
             holder.fileClassListItemName.setBackground(buttonTransition);
         }
 
-        holder.fileClassListItemName.setText(getItem(position).getFileClassName());
+        holder.fileClassListItemName.setText(getItem(position).getName());
 
         holder.fileClassListItemName.setOnClickListener(new View.OnClickListener() {
             @Override

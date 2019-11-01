@@ -1,60 +1,48 @@
 package com.baibuti.biji.model.po;
 
+import android.support.annotation.NonNull;
+
 import java.io.Serializable;
 
-public class FileClass implements Serializable {
+import lombok.Getter;
+import lombok.Setter;
 
+public class FileClass implements Serializable, Comparable<FileClass> {
+
+    @Getter @Setter
     private int id;
+    @Getter @Setter
+    private String name;
+    @Getter @Setter
     private int order;
-    private String fileClassName;
-    public static String GetDefaultFileClassName = "PDF";
+
+    // /**
+    //  * 默认分类
+    //  */
+    // public static final String DEF_CLASS_NAME = "PDF";
+    //
+    // public FileClass() {
+    //     this(0, DEF_CLASS_NAME, 0);
+    // }
+
+    public FileClass(int id, String name, int order) {
+        this.id = id;
+        this.name = name;
+        this.order = order;
+    }
 
     @Override
     public boolean equals(Object obj) {
+        if (!(obj instanceof FileClass)) return false;
+
         FileClass that = (FileClass) obj;
-        return (this.id == that.getId()&&
-                this.order == that.getOrder()&&
-                this.fileClassName.equals(that.getFileClassName()));
+        return id == that.getId() &&
+            name.equals(that.getName()) &&
+            order == that.getOrder() ;
     }
 
-    public FileClass(){
-        id = order = 0;
-        fileClassName = "+";
-    }
-
-    public FileClass(int id, int order, String fileClassName){
-        this.id = id;
-        this.order = order;
-        this.fileClassName = fileClassName;
-    }
-
-    public FileClass(String fileClassName, int order){
-        this.id = id;
-        this.fileClassName = fileClassName;
-        this.order = order;
-    }
-
-    public void setId(int id){
-        this.id = id;
-    }
-
-    public int getId(){
-        return id;
-    }
-
-    public void setOrder(int order){
-        this.order = order;
-    }
-
-    public int getOrder(){
-        return order;
-    }
-
-    public void setFileClassName(String fileClassName){
-        this.fileClassName = fileClassName;
-    }
-
-    public String getFileClassName(){
-        return fileClassName;
+    @Override
+    public int compareTo(@NonNull FileClass o) {
+        return Integer.compare(o.order, this.order);
     }
 }

@@ -6,15 +6,10 @@ import android.database.Cursor;
 import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteStatement;
-import android.util.Log;
 
 import com.baibuti.biji.model.dao.DbOpenHelper;
 import com.baibuti.biji.model.dao.daoInterface.IDocumentDao;
-import com.baibuti.biji.model.dto.ServerException;
 import com.baibuti.biji.model.po.Document;
-import com.baibuti.biji.iGlobal.IPushCallBack;
-import com.baibuti.biji.service.auth.AuthManager;
-import com.baibuti.biji.net.module.file.DocumentUtil;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -38,6 +33,7 @@ public class DocumentDao implements IDocumentDao {
      * 查询所有文件
      * @return 文件列表
      */
+    @Override
     public List<Document> queryAllDocuments() {
         return queryDocumentsByClassName(null);
     }
@@ -47,6 +43,7 @@ public class DocumentDao implements IDocumentDao {
      * @param className 分类，null for all
      * @return 文件分类列表
      */
+    @Override
     public List<Document> queryDocumentsByClassName(String className) {
 
         SQLiteDatabase db = helper.getWritableDatabase();
@@ -82,6 +79,7 @@ public class DocumentDao implements IDocumentDao {
      * @param id 归档文件 id
      * @return 一个文档
      */
+    @Override
     public Document queryDocumentById(int id) {
 
         SQLiteDatabase db = helper.getWritableDatabase();
@@ -111,41 +109,11 @@ public class DocumentDao implements IDocumentDao {
     }
 
     /**
-     * 根据 path 查询文件
-     * @param path 归档文件 id
-     * @return 一个文档
-     */
-    private Document queryDocumentByDocumentPath(String path) {
-
-        SQLiteDatabase db = helper.getWritableDatabase();
-        Cursor cursor = null;
-        String sql = "select * from " + TBL_NAME + " where " + COL_PATH + " = " + path;
-
-        Document document = null;
-        try {
-            cursor = db.rawQuery(sql, null);
-            while (cursor.moveToNext()) {
-
-                int id = cursor.getInt(cursor.getColumnIndex(COL_ID));
-                String className = cursor.getString(cursor.getColumnIndex(COL_CLASS_NAME));
-                String docName = cursor.getString(cursor.getColumnIndex(COL_NAME));
-
-                document = new Document(id, path, className, docName);
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        } finally {
-            if (cursor != null && !cursor.isClosed()) cursor.close();
-            if (db != null && db.isOpen()) db.close();
-        }
-        return document;
-    }
-
-    /**
      * 插入归档文件
      * @param document 新归档，自动编号
      * @return 归档 id
      */
+    @Override
     public long insertDocument(Document document) {
 
         SQLiteDatabase db = helper.getWritableDatabase();
@@ -158,7 +126,7 @@ public class DocumentDao implements IDocumentDao {
 
         long ret_id = 0;
         try {
-            stat.bindString(1, document.getPath() == null ? "" : document.getPath()); // COL_PATH
+            stat.bindString(1, document.getFilePath() == null ? "" : document.getFilePath()); // COL_PATH
             stat.bindString(2, document.getClassName()); // COL_CLASS_NAME
             stat.bindString(3, document.getDocName()); // COL_NAME
 
@@ -175,133 +143,50 @@ public class DocumentDao implements IDocumentDao {
     }
 
     /**
-     * 下载文件时，更新本地路径为下载后的路径
-     * @param document
+     * 修改归档文件信息
+     * @param document 覆盖更新信息
+     * @return 是否成功更新
      */
-    public void updateDocumentPath(Document document){
-
+    @Override
+    public boolean updateDocument(Document document) {
         SQLiteDatabase db = helper.getWritableDatabase();
         ContentValues values = new ContentValues();
 
-        values.put("doc_path", document.getPath());
+        values.put(COL_NAME, document.getDocName());
+        values.put(COL_CLASS_NAME, document.getClassName());
+        values.put(COL_PATH, document.getFilePath());
 
-        db.update("db_document", values, "doc_id=?", new String[]{document.getId()+""});
+        int ret = db.update(TBL_NAME, values, COL_ID + " = ?",
+            new String[] { String.valueOf(document.getId()) } );
         db.close();
-        updateLog();
+
+        return ret != 0;
     }
 
     /**
      * 删除资料
+     * @param id 删除的资料 id
+     * @return 是否删除成功
      */
-    public int deleteDocument() {
+    @Override
+    public boolean deleteDocument(int id) {
 
         SQLiteDatabase db = helper.getWritableDatabase();
 
         int ret = 0;
         try {
-            ret = db.delete("db_document", null, null);
+            ret = db.delete(TBL_NAME, COL_ID + " = ?",
+                new String[]{ String.valueOf(id) });
         }
-
         catch (Exception e) {
             e.printStackTrace();
-        } finally {
-            if (db != null) {
+        }
+        finally {
+            if (db != null && db.isOpen())
                 db.close();
-            }
         }
 
-        return ret;
-    }
-
-    /**
-     * 删除资料
-     */
-    @Deprecated
-    public int deleteDocumentByPath(String documentName, String documentPath, boolean isLogCheck) {
-
-        Document document = queryDocumentByDocumentPath(documentName, documentPath, false);
-
-        if (isLogCheck) pushpull();
-
-        SQLiteDatabase db = helper.getWritableDatabase();
-
-        int ret = 0;
-        try {
-            ret = db.delete("db_document", "doc_path=?", new String[]{documentPath});
-        }
-
-        catch (Exception e) {
-            e.printStackTrace();
-        } finally {
-            if (db != null) {
-                db.close();
-            }
-        }
-
-        updateLog();
-
-        if (isLogCheck && AuthManager.getInstance().isLogin()) {
-            try {
-                if (document != null)
-                    if (DocumentUtil.deleteFile(document))
-                        ServerDbUpdateHelper.pushLog(context, LogModule.Mod_Document);
-            }
-            catch (ServerException ex) {
-                ex.printStackTrace();
-            }
-        }
-
-        return ret;
-    }
-
-    /**
-     * 删除整个分类
-     * @param documentClassName
-     * @return
-     */
-    @Deprecated
-    public int deleteDocumentByClass(String documentClassName, boolean isLogCheck){
-
-        Log.e("", "deleteDocumentByClass: " + isLogCheck);
-
-        if (isLogCheck) pushpull();
-
-        SQLiteDatabase db = helper.getWritableDatabase();
-
-        int ret = 0;
-        try {
-            ret = db.delete("db_document", "doc_class_name=?", new String[]{documentClassName});
-        }
-
-        catch (Exception e) {
-            e.printStackTrace();
-        } finally {
-            if (db != null) {
-                db.close();
-            }
-        }
-
-        updateLog();
-
-        if (isLogCheck && AuthManager.getInstance().isLogin()) {
-            try {
-                if (DocumentUtil.deleteFiles(documentClassName))
-                    ServerDbUpdateHelper.pushLog(context, LogModule.Mod_Document);
-            }
-            catch (ServerException ex) {
-                ex.printStackTrace();
-            }
-        }
-
-        return ret;
-    }
-
-    /**
-     * 更新文件日志
-     */
-    private void updateLog() {
-        UtLogDao utLogDao = new UtLogDao(context);
-        utLogDao.updateLog(LogModule.Mod_Document);
+        return ret > 0;
     }
 }
 

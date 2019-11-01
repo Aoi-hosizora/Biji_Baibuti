@@ -129,7 +129,7 @@ public class SearchItemDao implements ISearchItemDao {
     /**
      * 删除收藏项
      * @param url 收藏的链接
-     * @return 是否成功删除 (删除 1 项)
+     * @return 是否成功删除
      */
     @Override
     public boolean deleteSearchItem(String url) {
@@ -148,7 +148,7 @@ public class SearchItemDao implements ISearchItemDao {
                 db.close();
         }
 
-        return ret == 1;
+        return ret > 0;
     }
 
     /**

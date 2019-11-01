@@ -4,10 +4,10 @@ import android.os.Environment;
 import android.support.annotation.NonNull;
 import android.util.Log;
 
+import com.baibuti.biji.model.dto.DocumentDTO;
 import com.baibuti.biji.model.dto.ServerException;
 import com.baibuti.biji.model.po.Document;
 import com.baibuti.biji.iGlobal.IPushCallBack;
-import com.baibuti.biji.net.model.reqBody.DocumentReqBody;
 import com.baibuti.biji.net.model.respBody.MessageResp;
 import com.baibuti.biji.net.model.RespType;
 import com.baibuti.biji.service.auth.AuthManager;
@@ -64,8 +64,8 @@ public class DocumentUtil {
                 if (newToken != null && !(newToken.isEmpty()))
                     AuthManager.getInstance().setToken(newToken);
 
-                DocumentReqBody[] rets = DocumentReqBody.getFileRespsFromJson(resp.getBody());
-                return DocumentReqBody.toDocuments(rets);
+                DocumentDTO[] rets = DocumentDTO.getFileRespsFromJson(resp.getBody());
+                return DocumentDTO.toDocuments(rets);
             }
             else {
                 MessageResp msg = MessageResp.getMsgRespFromJson(resp.getBody());
@@ -81,10 +81,10 @@ public class DocumentUtil {
     public static void postFile(Document document, @NonNull IPushCallBack pushCallBack) throws ServerException {
         Map<String, String> k_v = new HashMap<>();
         k_v.put("id", document.getId()+"");
-        k_v.put("foldername", document.getClassName());
+        k_v.put("className", document.getClassName());
         NetHelper.httpPostFileAsync(
                 PostFileUrl, k_v,
-                "file", new File(document.getPath()),
+                "file", new File(document.getFilePath()),
                 NetHelper.getOneHeader("Authorization", AuthManager.getInstance().getToken()),
                 new Callback() {
                     @Override
@@ -108,11 +108,11 @@ public class DocumentUtil {
 
     public static boolean deleteFile(Document document) throws ServerException {
 
-        Log.e("测试", "deleteFile: " + DocumentReqBody.toFileReqBody(document).toJson());
+        Log.e("测试", "deleteFile: " + DocumentDTO.toDocument(document).toJson());
 
         RespType resp = NetHelper.httpPostPutDeleteSync(
                 DeleteFileUrl, NetHelper.DELETE,
-                DocumentReqBody.toFileReqBody(document).toJson(),
+                DocumentDTO.toDocument(document).toJson(),
                 NetHelper.getOneHeader("Authorization", AuthManager.getInstance().getToken())
         );
         Log.e("", "deleteFile: " + document.getClassName() + " , " + document.getDocName());
@@ -140,7 +140,7 @@ public class DocumentUtil {
         try {
             resp = NetHelper.httpPostPutDeleteSync(
                     DeleteFileByClassUrl, NetHelper.DELETE,
-                    new JSONObject().put("foldername", fileClassName).toString(),
+                    new JSONObject().put("className", fileClassName).toString(),
                     NetHelper.getOneHeader("Authorization", AuthManager.getInstance().getToken())
             );
         }catch(JSONException e){
@@ -169,15 +169,15 @@ public class DocumentUtil {
 
     public static boolean downloadFile(Document document) throws ServerException {
         File file = NetHelper.httpGetFileSync(
-                DownloadFileUrl + "?foldername=" + document.getClassName() +
-                "&&filename=" + document.getDocName() +
+                DownloadFileUrl + "?className=" + document.getClassName() +
+                "&&filePath=" + document.getDocName() +
                 "&&id=" + document.getId(),
                 document.getClassName(),
                 document.getDocName(),
                 NetHelper.getOneHeader("Authorization", AuthManager.getInstance().getToken())
         );
         if(null != file) {
-            document.setPath(file.getPath());
+            document.setFilePath(file.getPath());
             return true;
         }
         return false;
@@ -190,7 +190,7 @@ public class DocumentUtil {
         }
         NetHelper.httpPostPutDeleteAsync(
                 PushFileUrl, NetHelper.POST,
-                DocumentReqBody.getJsonFromDocumentBodies(DocumentReqBody.toFileReqBodies(documents)),
+                DocumentDTO.getJsonFromDocumentBodies(DocumentDTO.toDocumentsDTO(documents)),
                 NetHelper.getOneHeader("Authorization", AuthManager.getInstance().getToken()),
                 new Callback() {
                     @Override

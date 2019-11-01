@@ -113,4 +113,10 @@ public interface ServerApi {
 
     // endregion Schedule
 
+    // region FileClass
+
+
+
+    // endregion FileClass
+
 }

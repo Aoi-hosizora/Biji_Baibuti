@@ -662,7 +662,7 @@ public class ModifyNoteActivity extends AppCompatActivity implements View.OnClic
 
         ShowLogE("StartEditImg", "uridata: " + uri.getPath());
 
-        // uri.getPath():
+        // uri.getFilePath():
         // /document/image:172305
         // /images/NoteImage/20190518133854935_Photo.jpg
 
