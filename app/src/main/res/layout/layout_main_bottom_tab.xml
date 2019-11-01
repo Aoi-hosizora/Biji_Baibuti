@@ -9,7 +9,6 @@
     android:orientation="horizontal">
 
     <LinearLayout
-        android:id="@+id/tab_note"
         android:layout_width="0dp"
         android:layout_height="match_parent"
         android:layout_weight="1"
@@ -17,25 +16,24 @@
         android:orientation="vertical">
 
         <ImageButton
-            android:id="@+id/tab_note_img"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:background="#00000000"
+            android:background="@color/trans"
             android:clickable="false"
-            android:contentDescription="@string/tudo"
+            android:contentDescription="@string/todo"
             android:src="@drawable/tab_note_normal" />
 
         <TextView
-            android:id="@+id/tab_note_text"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/notefragment_tab_text"
+            android:text="@string/tab_note"
             android:textColor="@color/image_color_black"
-            android:textSize="12sp" />
+            android:contentDescription="@string/todo"
+            android:textSize="@dimen/bottom_nav_text_size" />
+
     </LinearLayout>
 
     <LinearLayout
-        android:id="@+id/tab_search"
         android:layout_width="0dp"
         android:layout_height="match_parent"
         android:layout_weight="1"
@@ -43,25 +41,23 @@
         android:orientation="vertical">
 
         <ImageButton
-            android:id="@+id/tab_search_img"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:background="#00000000"
+            android:background="@color/trans"
             android:clickable="false"
-            android:contentDescription="@string/tudo"
+            android:contentDescription="@string/todo"
             android:src="@drawable/tab_search_normal" />
 
         <TextView
-            android:id="@+id/tab_search_text"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/searchfragment_tab_text"
+            android:text="@string/tab_search"
             android:textColor="@color/image_color_black"
-            android:textSize="12sp" />
+            android:contentDescription="@string/todo"
+            android:textSize="@dimen/bottom_nav_text_size" />
     </LinearLayout>
 
     <LinearLayout
-        android:id="@+id/tab_class"
         android:layout_width="0dp"
         android:layout_height="match_parent"
         android:layout_weight="1"
@@ -69,25 +65,24 @@
         android:orientation="vertical">
 
         <ImageButton
-            android:id="@+id/tab_class_img"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:background="#00000000"
+            android:background="@color/trans"
             android:clickable="false"
-            android:contentDescription="@string/tudo"
+            android:contentDescription="@string/todo"
             android:src="@drawable/tab_class_normal" />
 
         <TextView
-            android:id="@+id/tab_class_text"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/classfragment_tab_text"
+            android:text="@string/tab_schedule"
             android:textColor="@color/image_color_black"
-            android:textSize="12sp" />
+            android:contentDescription="@string/todo"
+            android:textSize="@dimen/bottom_nav_text_size" />
+
     </LinearLayout>
 
     <LinearLayout
-        android:id="@+id/tab_file"
         android:layout_width="0dp"
         android:layout_height="match_parent"
         android:layout_weight="1"
@@ -95,21 +90,21 @@
         android:orientation="vertical">
 
         <ImageButton
-            android:id="@+id/tab_file_img"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:background="#00000000"
+            android:background="@color/trans"
             android:clickable="false"
-            android:contentDescription="@string/tudo"
+            android:contentDescription="@string/todo"
             android:src="@drawable/tab_file_normal" />
 
         <TextView
-            android:id="@+id/tab_file_text"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/filefragment_tab_text"
+            android:text="@string/tab_file"
             android:textColor="@color/image_color_black"
-            android:textSize="12sp" />
+            android:contentDescription="@string/todo"
+            android:textSize="@dimen/bottom_nav_text_size" />
+
     </LinearLayout>
 
 </LinearLayout>

@@ -6,20 +6,20 @@
     android:padding="10dp">
 
     <de.hdodenhof.circleimageview.CircleImageView
-        android:id="@+id/id_nav_icon_image"
+        android:id="@+id/mainAct_nav_image"
         android:layout_width="70dp"
         android:layout_height="70dp"
         android:layout_centerHorizontal="true"
         android:layout_marginTop="32dp"
-        android:src="@mipmap/ic_launcher"/>
+        android:src="@mipmap/app_icon"/>
 
     <TextView
-        android:id="@+id/id_nav_username"
+        android:id="@+id/mainAct_nav_username"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
-        android:text="Tony Green"
-        android:textColor="#FFF"
+        android:text=""
+        android:textColor="@color/white"
         android:textSize="18sp" />
 
 </RelativeLayout>

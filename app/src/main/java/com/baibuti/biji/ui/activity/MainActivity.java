@@ -47,13 +47,13 @@ import butterknife.OnItemSelected;
 
 public class MainActivity extends FragmentActivity implements IContextHelper, AuthManager.OnLoginChangeListener {
 
-    @BindView(R.id.id_viewpager)
+    @BindView(R.id.mainAct_view_pager)
     private ViewPager m_viewPager;
 
-    @BindView(R.id.id_mainAct_drawer_layout)
+    @BindView(R.id.mainAct_layout_drawer)
     private DrawerLayout m_drawerLayout;
 
-    @BindView(R.id.id_mainAct_left_nav)
+    @BindView(R.id.mainAct_view_left_nav)
     private NavigationView m_navigationView;
 
     // 权限请求：读写，网络，摄像机，震动
@@ -127,19 +127,19 @@ public class MainActivity extends FragmentActivity implements IContextHelper, Au
         fragments.add(new FileFragment());
 
         // Navigation
-        BottomNavigationView navigationView = findViewById(R.id.id_bottomnavigation);
+        BottomNavigationView navigationView = findViewById(R.id.mainAct_view_bottom_navi);
         navigationView.setOnNavigationItemSelectedListener((@NonNull MenuItem item) -> {
             switch (item.getItemId()) {
-                case R.id.bottom_navi_note:
+                case R.id.nav_bottom_note:
                     m_viewPager.setCurrentItem(0);
                     break;
-                case R.id.bottom_navi_search:
+                case R.id.nav_bottom_search:
                     m_viewPager.setCurrentItem(1);
                     break;
-                case R.id.bottom_navi_schedule:
+                case R.id.nav_bottom_schedule:
                     m_viewPager.setCurrentItem(2);
                     break;
-                case R.id.bottom_navi_file:
+                case R.id.nav_bottom_file:
                     m_viewPager.setCurrentItem(3);
                     break;
             }
@@ -157,16 +157,16 @@ public class MainActivity extends FragmentActivity implements IContextHelper, Au
                 m_viewPager.setCurrentItem(position);
                 switch (position) {
                     case 0:
-                        navigationView.setSelectedItemId(R.id.bottom_navi_note);
+                        navigationView.setSelectedItemId(R.id.nav_bottom_note);
                         break;
                     case 1:
-                        navigationView.setSelectedItemId(R.id.bottom_navi_search);
+                        navigationView.setSelectedItemId(R.id.nav_bottom_search);
                         break;
                     case 2:
-                        navigationView.setSelectedItemId(R.id.bottom_navi_schedule);
+                        navigationView.setSelectedItemId(R.id.nav_bottom_schedule);
                         break;
                     case 3:
-                        navigationView.setSelectedItemId(R.id.bottom_navi_file);
+                        navigationView.setSelectedItemId(R.id.nav_bottom_file);
                         break;
                 }
             }
@@ -258,7 +258,7 @@ public class MainActivity extends FragmentActivity implements IContextHelper, Au
         m_navigationView.setLayoutParams(params);
 
         // 默认选中
-        m_navigationView.setCheckedItem(R.id.id_nav_main);
+        m_navigationView.setCheckedItem(R.id.nav_left_main);
     }
 
     /**
@@ -278,11 +278,11 @@ public class MainActivity extends FragmentActivity implements IContextHelper, Au
     /**
      * 侧边栏 登录注销
      */
-    @OnItemSelected(R.id.id_nav_login)
+    @OnItemSelected(R.id.nav_left_login)
     private void Nav_Login_Selected() {
         closeNavMenu();
 
-        if (m_navigationView.getMenu().findItem(R.id.id_nav_login).getTitle().equals(getString(R.string.nav_login))) {
+        if (m_navigationView.getMenu().findItem(R.id.nav_left_login).getTitle().equals(getString(R.string.nav_login))) {
             // 登录
             Intent authIntent = new Intent(MainActivity.this, AuthActivity.class);
             startActivity(authIntent);
@@ -308,7 +308,7 @@ public class MainActivity extends FragmentActivity implements IContextHelper, Au
     /**
      * 侧边栏 关于
      */
-    @OnItemSelected(R.id.id_nav_about)
+    @OnItemSelected(R.id.nav_left_about)
     private void Nav_About_Selected() {
         closeNavMenu();
 
@@ -323,7 +323,7 @@ public class MainActivity extends FragmentActivity implements IContextHelper, Au
     /**
      * 侧边栏 反馈
      */
-    @OnItemSelected(R.id.id_nav_feedback)
+    @OnItemSelected(R.id.nav_left_feedback)
     private void Nav_Feedback_Selected() {
         closeNavMenu();
 
@@ -340,7 +340,7 @@ public class MainActivity extends FragmentActivity implements IContextHelper, Au
      */
     @Override
     public void onLogin(String username) {
-        m_navigationView.getMenu().findItem(R.id.id_nav_login).setTitle(R.string.nav_logout);
+        m_navigationView.getMenu().findItem(R.id.nav_left_login).setTitle(R.string.nav_logout);
         setTitle("笔迹 - " + username);
     }
 
@@ -349,7 +349,7 @@ public class MainActivity extends FragmentActivity implements IContextHelper, Au
      */
     @Override
     public void onLogout() {
-        m_navigationView.getMenu().findItem(R.id.id_nav_login).setTitle(R.string.nav_login);
+        m_navigationView.getMenu().findItem(R.id.nav_left_login).setTitle(R.string.nav_login);
         setTitle("笔迹 - 未登录用户");
     }
 }

@@ -1,24 +1,16 @@
 <resources>
 
-    <!-- Main -->
     <string name="app_name">笔迹</string>
-
-    <!-- IShowLog -->
-    <string name="IShowLog_LogE">BijiLogE</string>
-
-    <!-- Provider / xml -->
-    <string name="FileProvider">com.baibuti.biji.FileProvider</string>
+    <string name="file_provider">com.baibuti.biji.FileProvider</string>
+    <string name="todo">TODO</string>
 
     <!-- Tab Text -->
-    <string name="notefragment_tab_text">笔记</string>
-    <string name="searchfragment_tab_text">搜索</string>
-    <string name="classfragment_tab_text">课表</string>
-    <string name="filefragment_tab_text">资料</string>
+    <string name="tab_note">笔记</string>
+    <string name="tab_search">搜索</string>
+    <string name="tab_schedule">课表</string>
+    <string name="tab_file">资料</string>
 
-    <!-- Hint Text -->
-    <string name="tudo">TODO</string>
-
-    <!-- Nav -->
+    <!-- Left Nav -->
     <string name="nav_main">首页</string>
     <string name="nav_login">登录</string>
     <string name="nav_logout">注销</string>

@@ -117,7 +117,7 @@ public class AppPathUtil {
 
         Uri uri;
         if (Build.VERSION.SDK_INT >= 24) {
-            String provider = context.getString(R.string.FileProvider);
+            String provider = context.getString(R.string.file_provider);
             uri = FileProvider.getUriForFile(context.getApplicationContext(), provider, file);
         } else {
             uri = Uri.fromFile(file);
@@ -130,7 +130,7 @@ public class AppPathUtil {
      * @param uri -> content://com.baibuti.biji.FileProvider/
      */
     private static boolean isThisAppAuthority(Context context, Uri uri) {
-        return context.getString(R.string.FileProvider).equals(uri.getAuthority());
+        return context.getString(R.string.file_provider).equals(uri.getAuthority());
     }
 
     /** !!!!

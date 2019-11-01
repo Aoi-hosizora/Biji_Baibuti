@@ -11,8 +11,8 @@
     <color name="colorDarkHighLightAccent">@color/grey_800</color>
 
     <color name="color_shadow">#417F7F81</color>
-    <color name="color_searchview">#E0E0E0</color>
 
+    <!-- Theme -->
     <color name="background">#F8F8F8</color>
     <color name="half_black">#808080</color>
     <color name="white">#FFFFFF</color>
@@ -20,6 +20,7 @@
     <color name="light_pink">#FAA4BF</color>
     <color name="disable">#D5D6D6</color>
     <color name="black">#000000</color>
+    <color name="trans">#00000000</color>
 
     <!-- Grey-->
     <color name="grey_100">#F5F5F5</color>

@@ -39,6 +39,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.baibuti.biji.service.auth.AuthManager;
+import com.baibuti.biji.ui.IContextHelper;
 import com.baibuti.biji.ui.adapter.GroupRadioAdapter;
 import com.baibuti.biji.ui.activity.MainActivity;
 import com.baibuti.biji.ui.activity.ModifyNoteActivity;
@@ -72,7 +73,7 @@ import me.kareluo.imaging.IMGEditActivity;
 
 import static android.app.Activity.RESULT_OK;
 
-public class NoteFragment extends BaseFragment implements View.OnClickListener {
+public class NoteFragment extends BaseFragment implements IContextHelper, View.OnClickListener {
 
     // region 声明: View UI ProgressDialog Toolbar DrawerLayout
 
