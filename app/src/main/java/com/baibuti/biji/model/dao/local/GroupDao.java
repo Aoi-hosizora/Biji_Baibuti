@@ -142,7 +142,7 @@ public class GroupDao implements IGroupDao {
     }
 
     /**
-     * 添加分组 (没必要刷新 Order)
+     * 添加分组 (添加在末尾，不更新 Order)
      * @param group 新分组，自动编码
      * @return 分组 id
      */
@@ -177,7 +177,7 @@ public class GroupDao implements IGroupDao {
     }
 
     /**
-     * 更新分组 (没必要刷新 Order)
+     * 更新分组 (刷新 Order)
      * @param group 覆盖更新
      * @return 是否成功更新
      */
@@ -200,6 +200,8 @@ public class GroupDao implements IGroupDao {
             new String[] { String.valueOf(group.getId()) });
         db.close();
 
+        // 更新后刷新 Order
+        precessOrder();
         return ret > 0;
     }
 

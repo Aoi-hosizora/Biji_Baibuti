@@ -60,7 +60,7 @@ public class DaoStrategyHelper {
             return new DocumentNetDao();
     }
 
-    public IFileClassDao getFileClass(Context context) {
+    public IFileClassDao getFileClassDao(Context context) {
         if (!AuthManager.getInstance().isLogin())
             return new FileClassDao(context);
         else

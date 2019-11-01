@@ -64,7 +64,8 @@ public class SearchItemNetDao implements ISearchItemDao {
             if (response.getCode() != ServerErrorHandle.SUCCESS)
                 throw ServerErrorHandle.parseErrorMessage(response);
 
-            return 1;
+            // TODO
+            return response.getData().toSearchItem().getUrl().length();
         }
         catch (ServerException | InterruptedException | ExecutionException ex) {
             ex.printStackTrace();

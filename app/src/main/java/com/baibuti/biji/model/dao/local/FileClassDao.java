@@ -28,6 +28,10 @@ public class FileClassDao implements IFileClassDao {
     public FileClassDao(Context context) {
         helper = new DbOpenHelper(context);
 
+        // 处理默认
+        if (queryAllFileClasses().isEmpty())
+            insertFileClass(new FileClass()); // DEF_CLASS_NAME
+
         // 预处理顺序
         precessOrder();
     }
@@ -98,7 +102,40 @@ public class FileClassDao implements IFileClassDao {
     }
 
     /**
-     * 添加分组
+     * 查询默认分类
+     * @return 返回数据库中的默认分类
+     */
+    @Override
+    public FileClass queryDefaultFileClass() {
+
+        SQLiteDatabase db = helper.getWritableDatabase();
+        Cursor cursor = null;
+        String sql = "select * from " + TBL_NAME + " where " + COL_NAME + " = \"" + FileClass.DEF_CLASS_NAME + "\"";
+
+        FileClass fileClass = null;
+        try {
+            cursor = db.rawQuery(sql, null);
+
+            if (cursor.moveToFirst()) {
+
+                fileClass = new FileClass();
+                fileClass.setId(cursor.getInt(cursor.getColumnIndex(COL_ID)));
+                fileClass.setName(cursor.getString(cursor.getColumnIndex(COL_NAME)));
+                fileClass.setOrder(cursor.getInt(cursor.getColumnIndex(COL_ORDER)));
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            if (cursor != null && !cursor.isClosed()) cursor.close();
+            if (db != null && db.isOpen()) db.close();
+        }
+
+        return fileClass;
+    }
+
+    /**
+     * 添加分组 (添加在末尾，不更新 Order)
      * @param fileClass 新分类，自动编码
      * @return 分类 id
      */
@@ -132,7 +169,7 @@ public class FileClassDao implements IFileClassDao {
     }
 
     /**
-     * 更新分类
+     * 更新分类 (刷新 Order)
      * @param fileClass 覆盖更新
      * @return 是否成功更新
      */
@@ -148,6 +185,8 @@ public class FileClassDao implements IFileClassDao {
         int ret = db.update(TBL_NAME, values, COL_ID + " = ?", new String[] { String.valueOf(fileClass.getId()) });
         db.close();
 
+        // 更新后刷新 Order
+        precessOrder();
         return ret > 0;
     }
 

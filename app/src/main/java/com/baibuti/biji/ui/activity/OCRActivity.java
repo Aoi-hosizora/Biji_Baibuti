@@ -23,7 +23,7 @@ import com.baibuti.biji.service.ocr.OCRService;
 import com.baibuti.biji.service.ocr.dto.OCRFrame;
 import com.baibuti.biji.service.ocr.dto.OCRPoint;
 import com.baibuti.biji.service.ocr.dto.OCRRegion;
-import com.baibuti.biji.net.module.note.ImgUtil;
+import com.baibuti.biji.net.ImgUtil;
 import com.baibuti.biji.R;
 import com.baibuti.biji.ui.widget.ocrView.OCRRegionGroupLayout;
 import com.baibuti.biji.util.fileUtil.AppPathUtil;

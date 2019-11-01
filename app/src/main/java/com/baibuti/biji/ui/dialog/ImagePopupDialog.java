@@ -13,7 +13,7 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import com.baibuti.biji.net.module.note.ImgUtil;
+import com.baibuti.biji.net.ImgUtil;
 import com.baibuti.biji.R;
 import com.baibuti.biji.ui.widget.imageView.PhotoView;
 import com.baibuti.biji.util.imgDocUtil.ImageUtil;

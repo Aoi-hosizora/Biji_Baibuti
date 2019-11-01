@@ -10,7 +10,7 @@ public interface IFileClassDao {
     // 查
     List<FileClass> queryAllFileClasses() throws ServerException;
     FileClass queryFileClassById(int id) throws ServerException;
-    // FileClass queryDefaultFileClass() throws ServerException;
+    FileClass queryDefaultFileClass() throws ServerException;
 
     // 增删改
     long insertFileClass(FileClass fileClass) throws ServerException;

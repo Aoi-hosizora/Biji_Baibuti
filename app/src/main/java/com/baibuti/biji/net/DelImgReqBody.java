@@ -1,4 +1,4 @@
-package com.baibuti.biji.net.model.reqBody;
+package com.baibuti.biji.net;
 
 import org.json.JSONArray;
 import org.json.JSONException;

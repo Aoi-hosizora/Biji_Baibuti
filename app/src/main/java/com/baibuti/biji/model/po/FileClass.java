@@ -20,10 +20,10 @@ public class FileClass implements Serializable, Comparable<FileClass> {
      * 默认分类
      */
     public static final String DEF_CLASS_NAME = "默认";
-    //
-    // public FileClass() {
-    //     this(0, DEF_CLASS_NAME, 0);
-    // }
+
+    public FileClass() {
+        this(0, DEF_CLASS_NAME, 0);
+    }
 
     public FileClass(int id, String name, int order) {
         this.id = id;

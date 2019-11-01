@@ -62,6 +62,27 @@ public class FileClassNetDao implements IFileClassDao {
     }
 
     @Override
+    public FileClass queryDefaultFileClass() throws ServerException {
+        Observable<ResponseDTO<FileClassDTO>> observable = RetrofitFactory.getInstance()
+            .createRequest(AuthManager.getInstance().getAuthorizationHead())
+            .getDefaultFileClass()
+            .subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread());
+
+        try {
+            ResponseDTO<FileClassDTO> response = observable.toFuture().get();
+            if (response.getCode() != ServerErrorHandle.SUCCESS)
+                throw ServerErrorHandle.parseErrorMessage(response);
+
+            return response.getData().toFileClass();
+        }
+        catch (ServerException | InterruptedException | ExecutionException ex) {
+            ex.printStackTrace();
+            throw ServerErrorHandle.getClientError(ex);
+        }
+    }
+
+    @Override
     public long insertFileClass(FileClass fileClass) throws ServerException {
         Observable<ResponseDTO<FileClassDTO>> observable = RetrofitFactory.getInstance()
             .createRequest(AuthManager.getInstance().getAuthorizationHead())

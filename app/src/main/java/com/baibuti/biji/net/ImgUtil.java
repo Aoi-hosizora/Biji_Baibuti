@@ -1,4 +1,4 @@
-package com.baibuti.biji.net.module.note;
+package com.baibuti.biji.net;
 
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -6,10 +6,7 @@ import android.support.annotation.WorkerThread;
 import android.util.Log;
 
 import com.baibuti.biji.model.dto.ServerException;
-import com.baibuti.biji.net.model.reqBody.DelImgReqBody;
 import com.baibuti.biji.net.model.respBody.MessageResp;
-import com.baibuti.biji.net.model.respObj.UploadStatus;
-import com.baibuti.biji.net.model.RespType;
 import com.baibuti.biji.service.auth.AuthManager;
 import com.baibuti.biji.service.Urls;
 

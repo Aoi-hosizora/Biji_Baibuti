@@ -1,4 +1,4 @@
-package com.baibuti.biji.net.model;
+package com.baibuti.biji.net;
 
 import okhttp3.Headers;
 
