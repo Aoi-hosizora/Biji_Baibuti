@@ -1,12 +1,15 @@
 package com.baibuti.biji.ui.activity;
 
 import android.Manifest;
+import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Build;
 import android.support.annotation.NonNull;
+import android.support.design.internal.BottomNavigationItemView;
+import android.support.design.internal.BottomNavigationMenuView;
 import android.support.design.widget.BottomNavigationView;
 import android.support.design.widget.NavigationView;
 import android.support.v4.app.ActivityCompat;
@@ -36,10 +39,11 @@ import com.baibuti.biji.ui.fragment.NoteFragment;
 import com.baibuti.biji.ui.fragment.SearchFragment;
 import com.baibuti.biji.ui.fragment.FileFragment;
 import com.baibuti.biji.R;
-import com.baibuti.biji.util.strSrchUtil.SearchUtil;
+import com.baibuti.biji.util.otherUtil.LayoutUtil;
+import com.baibuti.biji.util.stringUtil.SearchUtil;
 import com.facebook.stetho.Stetho;
-import com.baibuti.biji.util.layoutUtil.BottomNavigationHelper;
 
+import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -54,9 +58,7 @@ public class MainActivity extends FragmentActivity implements NavigationView.OnN
 
     // endregion 声明显示元素
 
-    // region 声明列表信息 mFragments mxxFrags
-
-    private List<Fragment> mFragments;
+    // region 声明列表信息 mxxFrags
 
     private NoteFragment mNoteFrag;
     private SearchFragment mSearchFrag;
@@ -95,17 +97,14 @@ public class MainActivity extends FragmentActivity implements NavigationView.OnN
         }
 
 
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
+        new Thread(() -> {
 
-                // FB 数据库查看
-                Stetho.initializeWithDefaults(getApplicationContext());
+            // FB 数据库查看
+            Stetho.initializeWithDefaults(getApplicationContext());
 
-                // 初始化结巴分词
-                SearchUtil.initJieba(getApplicationContext());
+            // 初始化结巴分词
+            SearchUtil.initJieba(getApplicationContext());
 
-            }
         }).start();
 
         initViews();
@@ -113,50 +112,52 @@ public class MainActivity extends FragmentActivity implements NavigationView.OnN
         initNav();
 
         // TODO
-         checkLoginStatus();
+        checkLoginStatus();
     }
 
     /**
      * 初始化布局
      */
+    @SuppressLint("RestrictedApi")
     private void initViews() {
 
+        // Frags
         mNoteFrag = new NoteFragment();
         mSearchFrag = new SearchFragment();
         mClassFrag = new ScheduleFragment();
         mFileFrag = new FileFragment();
 
-        bottomNavigationView = (BottomNavigationView) findViewById(R.id.id_bottomnavigation);
-        bottomNavigationView.setOnNavigationItemSelectedListener(new BottomNavigationView.OnNavigationItemSelectedListener() {
-            @Override
-            public boolean onNavigationItemSelected(@NonNull MenuItem item) {
-                switch(item.getItemId()){
-                    case R.id.item1:
-                        mViewPager.setCurrentItem(0);
+        // Navigation
+        bottomNavigationView = findViewById(R.id.id_bottomnavigation);
+        bottomNavigationView.setOnNavigationItemSelectedListener((@NonNull MenuItem item) -> {
+            switch (item.getItemId()) {
+                case R.id.item1:
+                    mViewPager.setCurrentItem(0);
                     break;
-                    case R.id.item2:
-                        mViewPager.setCurrentItem(1);
+                case R.id.item2:
+                    mViewPager.setCurrentItem(1);
                     break;
-                    case R.id.item3:
-                        mViewPager.setCurrentItem(2);
+                case R.id.item3:
+                    mViewPager.setCurrentItem(2);
                     break;
-                    case R.id.item4:
-                        mViewPager.setCurrentItem(3);
+                case R.id.item4:
+                    mViewPager.setCurrentItem(3);
                     break;
-                }
-                return true;
             }
+            return true;
         });
-        BottomNavigationHelper.disableShiftMode(bottomNavigationView);
 
+        LayoutUtil.disableShiftMode(bottomNavigationView);
+
+        // ViewPager
         mViewPager = findViewById(R.id.id_viewpager);
-
         mViewPager.addOnPageChangeListener(new OnPageChangeListener() {
 
             @Override
             public void onPageSelected(int position) {
+
                 mViewPager.setCurrentItem(position);
-                switch(position){
+                switch (position) {
                     case 0:
                         bottomNavigationView.setSelectedItemId(R.id.item1);
                         break;
@@ -185,7 +186,7 @@ public class MainActivity extends FragmentActivity implements NavigationView.OnN
      */
     private void initAdpts() {
 
-        mFragments = new ArrayList<Fragment>();
+        List<Fragment> mFragments = new ArrayList<>();
         mFragments.add(mNoteFrag);
         mFragments.add(mSearchFrag);
         mFragments.add(mClassFrag);
@@ -393,7 +394,7 @@ public class MainActivity extends FragmentActivity implements NavigationView.OnN
      */
     private void login() {
         m_navigationView.getMenu().findItem(R.id.id_nav_login).setTitle(R.string.nav_logout);
-        refreshUserInfo(AuthManager.getInstance().getUserName());
+        refreshUserInfo(AuthManager.getInstance().getUsername());
 
         // TODO 更新界面
         checkLoginStatus();
@@ -472,7 +473,7 @@ public class MainActivity extends FragmentActivity implements NavigationView.OnN
         if (!(AuthManager.getInstance().isLogin()))
             refreshUserInfo("未登录用户");
         else
-            refreshUserInfo(AuthManager.getInstance().getUserName());
+            refreshUserInfo(AuthManager.getInstance().getUsername());
 
     }
 

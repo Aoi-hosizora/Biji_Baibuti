@@ -27,8 +27,8 @@ import com.baibuti.biji.R;
 import com.baibuti.biji.ui.widget.listView.SpacesItemDecoration;
 import com.baibuti.biji.ui.widget.listView.RecyclerViewEmptySupport;
 import com.baibuti.biji.util.otherUtil.CommonUtil;
-import com.baibuti.biji.util.layoutUtil.PopupMenuUtil;
-import com.baibuti.biji.util.strSrchUtil.SearchUtil;
+import com.baibuti.biji.util.otherUtil.LayoutUtil;
+import com.baibuti.biji.util.stringUtil.SearchUtil;
 
 import java.util.ArrayList;
 
@@ -261,7 +261,7 @@ public class StarSearchItemActivity extends AppCompatActivity implements View.On
      */
     private void ShowItemLongClickPopupMenu(SearchItem searchItem) {
         m_LongClickItemPopupMenu = new Dialog(this, R.style.BottomDialog);
-        LinearLayout root = PopupMenuUtil.initPopupMenu(this, m_LongClickItemPopupMenu, R.layout.popupmenu_starsearchitem_longclickstaritem);
+        LinearLayout root = LayoutUtil.initPopupMenu(this, m_LongClickItemPopupMenu, R.layout.popupmenu_starsearchitem_longclickstaritem);
 
         root.findViewById(R.id.id_SSIActivity_PopupMenu_CancelStar).setOnClickListener(this);
         root.findViewById(R.id.id_SSIActivity_PopupMenu_Cancel).setOnClickListener(this);

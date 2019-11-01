@@ -26,7 +26,7 @@ import com.baibuti.biji.service.ocr.dto.OCRRegion;
 import com.baibuti.biji.net.module.note.ImgUtil;
 import com.baibuti.biji.R;
 import com.baibuti.biji.ui.widget.ocrView.OCRRegionGroupLayout;
-import com.baibuti.biji.util.fileDirUtil.SDCardUtil;
+import com.baibuti.biji.util.fileUtil.FilePathUtil;
 import com.baibuti.biji.util.imgDocUtil.BitmapUtil;
 
 import java.text.SimpleDateFormat;
@@ -164,7 +164,7 @@ public class OCRActivity extends AppCompatActivity implements View.OnClickListen
                                 public void run() {
                                     // TODO 保存文件
                                     String time = new SimpleDateFormat("yyyyMMddHHmmssSSS", Locale.CHINA).format(new Date());
-                                    String fileName = SDCardUtil.getOCTTmpDir() + time + ".jpg";
+                                    String fileName = FilePathUtil.getOCTTmpDir() + time + ".jpg";
                                     BitmapUtil.saveBitmap(bitmap, fileName);
                                     m_ocrRegionGroupLayout.setImgBG(bitmap);
                                     toOCRHandler(fileName);
@@ -308,8 +308,8 @@ public class OCRActivity extends AppCompatActivity implements View.OnClickListen
     private void getRetTmp(String localDir) {
 
         // OCR 临时存储
-        if (localDir.contains(SDCardUtil.getOCTTmpDir()))
-            if (SDCardUtil.deleteFile(localDir))
+        if (localDir.contains(FilePathUtil.getOCTTmpDir()))
+            if (FilePathUtil.deleteFile(localDir))
                 Log.e("", "run: delete OCRtmp" + localDir );
 
         OCRRegion ret = new OCRRegion(
@@ -346,8 +346,8 @@ public class OCRActivity extends AppCompatActivity implements View.OnClickListen
                 OCRRegion ret = OCRService.getOCRRet(localDir);
 
                 // OCR 临时存储
-                if (localDir.contains(SDCardUtil.getOCTTmpDir()))
-                    if (SDCardUtil.deleteFile(localDir))
+                if (localDir.contains(FilePathUtil.getOCTTmpDir()))
+                    if (FilePathUtil.deleteFile(localDir))
                         Log.e("", "run: delete OCRtmp" + localDir );
 
                 runOnUiThread(new Runnable() {

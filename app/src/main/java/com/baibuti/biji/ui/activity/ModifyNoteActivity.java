@@ -43,13 +43,12 @@ import com.baibuti.biji.R;
 import com.baibuti.biji.model.dao.local.GroupDao;
 import com.baibuti.biji.model.dao.local.NoteDao;
 import com.baibuti.biji.ui.dialog.ImagePopupDialog;
+import com.baibuti.biji.util.fileUtil.FilePathUtil;
 import com.baibuti.biji.util.otherUtil.CommonUtil;
-import com.baibuti.biji.util.fileDirUtil.FilePathUtil;
 import com.baibuti.biji.util.imgDocUtil.ImageUtil;
-import com.baibuti.biji.util.layoutUtil.PopupMenuUtil;
-import com.baibuti.biji.util.fileDirUtil.SDCardUtil;
-import com.baibuti.biji.util.strSrchUtil.StringUtil;
-import com.baibuti.biji.util.otherUtil.ExtractUtil;
+import com.baibuti.biji.util.otherUtil.LayoutUtil;
+import com.baibuti.biji.util.fileUtil.SaveFileUtil;
+import com.baibuti.biji.util.stringUtil.StringUtil;
 import com.sendtion.xrichtext.RichTextEditor;
 
 
@@ -69,9 +68,6 @@ import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
 import me.kareluo.imaging.IMGEditActivity;
-
-import static com.baibuti.biji.util.otherUtil.ExtractUtil.assets2SD;
-
 
 public class ModifyNoteActivity extends AppCompatActivity implements View.OnClickListener {
 
@@ -220,7 +216,7 @@ public class ModifyNoteActivity extends AppCompatActivity implements View.OnClic
      */
     private void initPopupMenu() {
         mLongClickImgPopupMenu = new Dialog(this, R.style.BottomDialog);
-        LinearLayout root = PopupMenuUtil.initPopupMenu(this, mLongClickImgPopupMenu, R.layout.popupmenu_mnote_longclickimg);
+        LinearLayout root = LayoutUtil.initPopupMenu(this, mLongClickImgPopupMenu, R.layout.popupmenu_mnote_longclickimg);
 
         root.findViewById(R.id.id_MNoteAct_PopupMenu_OCR).setOnClickListener(this);
         root.findViewById(R.id.id_MNoteAct_PopupMenu_OCRCancel).setOnClickListener(this);
@@ -601,7 +597,7 @@ public class ModifyNoteActivity extends AppCompatActivity implements View.OnClic
                 // 图片路径
                 String imagePath = StringUtil.getImgSrc(blocks);
                 // 本地路径，网络路径忽略
-                if (imagePath.startsWith(SDCardUtil.SDCardRoot)) { // /storage/emulated/0/
+                if (imagePath.startsWith(FilePathUtil.SDCardRoot)) { // /storage/emulated/0/
                     try {
                         UploadStatus uploadStatus = ImgUtil.uploadImg(imagePath);
                         if (uploadStatus != null) {
@@ -633,7 +629,7 @@ public class ModifyNoteActivity extends AppCompatActivity implements View.OnClic
         String fileName = time + "_Photo";
 
         // /Biji/NoteImage/
-        String path = SDCardUtil.getPictureDir(); // 保存路径
+        String path = FilePathUtil.getPictureDir(); // 保存路径
         File file = new File(path);
 
         // 要保存的图片文件
@@ -708,7 +704,7 @@ public class ModifyNoteActivity extends AppCompatActivity implements View.OnClic
             Intent intent = new Intent(ModifyNoteActivity.this, IMGEditActivity.class);
 
             intent.putExtra("IMAGE_URI", uri);
-            intent.putExtra("IMAGE_SAVE_PATH", SDCardUtil.getPictureDir());
+            intent.putExtra("IMAGE_SAVE_PATH", FilePathUtil.getPictureDir());
 
             startActivityForResult(intent, REQUEST_CROP);
         } catch (Exception e) {
@@ -725,7 +721,7 @@ public class ModifyNoteActivity extends AppCompatActivity implements View.OnClic
 
         // 判断是否需要删除原图片
         if (isTakePhoto_Delete)
-            SDCardUtil.deleteFile(FilePathUtil.getFilePathByUri(this, imgUri));
+            FilePathUtil.deleteFile(FilePathUtil.getFilePathByUri(this, imgUri));
 
         insertImagesSync(mCutUri); // URI
     }
@@ -862,138 +858,6 @@ public class ModifyNoteActivity extends AppCompatActivity implements View.OnClic
         intent.putExtra(OCRActivity.INT_BUNDLE, bundle);
         startActivity(intent);
     }
-
-    //
-    // /**
-    //  * 处理文字识别
-    //  * 在 dealWithContent 处理图片点击事件
-    //  * @param imagePath
-    //  */
-    // private void ShowdealWithContentForOCR(final String imagePath) {
-    //
-    //     AlertDialog.Builder idenDialog = new AlertDialog
-    //             .Builder(ModifyNoteActivity.this)
-    //             .setTitle(R.string.MNoteActivity_OCRCheckAlertTitle)
-    //             .setMessage(getResources().getString(R.string.MNoteActivity_OCRCheckAlertMsg) + imagePath)
-    //             .setCancelable(true)
-    //             .setPositiveButton(R.string.MNoteActivity_OCRCheckAlertPositiveButtonForOK, new DialogInterface.OnClickListener() {
-    //                 @Override
-    //                 public void onClick(DialogInterface dialog, int which) {
-    //
-    //                     Bitmap bitmap = BitmapUtil.getBitmapFromFile(imagePath);
-    //                     // 异步识别文字
-    //                     idenWordsSync(bitmap);
-    //                     dialog.dismiss();
-    //                 }
-    //             })
-    //             .setNegativeButton(R.string.MNoteActivity_OCRCheckAlertNegativeButtonForCancel, null);
-    //     idenDialog.show();
-    // }
-    //
-    // /**
-    //  * 异步识别文字
-    //  * @param bitmap 图片路径
-    //  */
-    // private void idenWordsSync(final Bitmap bitmap) {
-    //     idenLoadingDialog = new ProgressDialog(ModifyNoteActivity.this);
-    //     idenLoadingDialog.setTitle(R.string.MNoteActivity_OCRSyncAlertTitle);
-    //     idenLoadingDialog.setMessage(getResources().getString(R.string.MNoteActivity_OCRSyncAlertMsg));
-    //
-    //     class HasDismiss {
-    //         private boolean dismiss = false;
-    //         HasDismiss() {}
-    //         void setDismiss() { this.dismiss = true; }
-    //         boolean getDismiss() { return this.dismiss; }
-    //     }
-    //     final HasDismiss isHasDismiss = new HasDismiss();
-    //
-    //     final Observable<String> mObservable = Observable.create(new ObservableOnSubscribe<String>() {
-    //         @Override
-    //         public void subscribe(ObservableEmitter<String> emitter) throws Exception {
-    //
-    //             // 识别 ExtractUtil.recognition <<< 异步
-    //             final String extaText = ExtractUtil.recognition(bitmap, ModifyNoteActivity.this);
-    //
-    //             emitter.onNext(extaText); // 处理识别后响应
-    //             emitter.onComplete(); // 完成
-    //         }
-    //     })
-    //             .subscribeOn(Schedulers.io()) //生产事件在io
-    //             .observeOn(AndroidSchedulers.mainThread()); //消费事件在UI线程
-    //
-    //     idenLoadingDialog.setOnCancelListener(new DialogInterface.OnCancelListener() {
-    //         @Override
-    //         public void onCancel(DialogInterface dialog) { ////////// 待改
-    //             // Toast.makeText(ModifyNoteActivity.this, "d", Toast.LENGTH_SHORT).show();
-    //             // ExtractUtil.tessBaseAPI.clear();
-    //             // mObservable.onTerminateDetach();
-    //             isHasDismiss.setDismiss();
-    //         }
-    //     });
-    //     idenLoadingDialog.show();
-    //
-    //     mObservable.subscribe(new Observer<String>() {
-    //         @Override
-    //         public void onComplete() {
-    //
-    //         }
-    //
-    //         @Override
-    //         public void onError(Throwable e) {
-    //             if (idenLoadingDialog != null && idenLoadingDialog.isShowing()) {
-    //                 idenLoadingDialog.dismiss();
-    //             }
-    //             Toast.makeText(ModifyNoteActivity.this, R.string.MNoteActivity_OCRSyncAlertError, Toast.LENGTH_SHORT).show();
-    //         }
-    //
-    //         @Override
-    //         public void onSubscribe(Disposable d) {
-    //             subsInsert = d;
-    //         }
-    //
-    //         // 识别后的处理
-    //         @Override
-    //         public void onNext(final String extaText) {
-    //             // 关闭进度条
-    //             if (idenLoadingDialog != null && idenLoadingDialog.isShowing()) {
-    //                 idenLoadingDialog.dismiss();
-    //             }
-    //             // 处理回显
-    //             ShowLogE("idenWordsSync.onNext()", isHasDismiss.getDismiss() + "");
-    //             if (!isHasDismiss.getDismiss()) // GOMI Code
-    //                 idenWordsNextReturn(extaText);
-    //         }
-    //     });
-    // }
-    //
-    // /**
-    //  * 异步识别出图片后的回显
-    //  * @param extaText 识别出的文字
-    //  */
-    // private void idenWordsNextReturn(final String extaText) {
-    //     final EditText et = new EditText(ModifyNoteActivity.this);
-    //     et.setText(extaText);
-    //
-    //     AlertDialog.Builder resultDialog = new AlertDialog
-    //             .Builder(ModifyNoteActivity.this)
-    //             .setTitle(R.string.MNoteActivity_OCRSyncResultAlertTitle)
-    //             .setView(et)
-    //             .setCancelable(true)
-    //             .setPositiveButton(R.string.MNoteActivity_OCRSyncResultAlertPositiveButtonForCopy, new DialogInterface.OnClickListener() {
-    //                 @Override
-    //                 public void onClick(DialogInterface dialog, int which) {
-    //                     ClipboardManager clipboardManager = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
-    //                     ClipData clip = ClipData.newPlainText(getResources().getString(R.string.MNoteActivity_OCRSyncResultAlertCopyClipLabel), extaText);
-    //                     clipboardManager.setPrimaryClip(clip);
-    //                     Toast.makeText(ModifyNoteActivity.this, R.string.MNoteActivity_OCRSyncAlertCopy, Toast.LENGTH_SHORT).show();
-    //                 }
-    //             })
-    //             .setNegativeButton(R.string.MNoteActivity_OCRSyncResultAlertNegativeButtonForCancel, null);
-    //
-    //     resultDialog.show();
-    // }
-    //
-    // endregion  OCR部分
     
     // region 权限 软键盘 checkPermissions onRequestPermissionsResult closeSoftKeyInput
 
@@ -1028,11 +892,6 @@ public class ModifyNoteActivity extends AppCompatActivity implements View.OnClic
             else {
                 Toast.makeText(this, R.string.MNoteActivity_PermissionGrantedError, Toast.LENGTH_SHORT).show();
                 hasPermission = false;
-            }
-        }
-        else if (requestCode == PERMISSION_REQUEST_CODE) {
-            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                assets2SD(getApplicationContext(), ExtractUtil.LANGUAGE_PATH, ExtractUtil.DEFAULT_LANGUAGE_NAME);
             }
         }
     }
@@ -1072,7 +931,7 @@ public class ModifyNoteActivity extends AppCompatActivity implements View.OnClic
             @Override
             public void onRtImageDelete(String imagePath) {
                 if (!TextUtils.isEmpty(imagePath))
-                    if (SDCardUtil.deleteFile(imagePath))
+                    if (FilePathUtil.deleteFile(imagePath))
                         Toast.makeText(ModifyNoteActivity.this, R.string.MNoteActivity_DWCRtImageDelete, Toast.LENGTH_SHORT).show();
             }
         });
@@ -1083,7 +942,7 @@ public class ModifyNoteActivity extends AppCompatActivity implements View.OnClic
             public void onRtImageClick(final String imagePath) {
                 if (!TextUtils.isEmpty(getEditData())) {
 
-                    ArrayList<String> imageList = StringUtil.getTextFromHtml(getEditData(), true);
+                    List<String> imageList = StringUtil.getTextFromHtml(getEditData(), true);
                     if (!TextUtils.isEmpty(imagePath)) {
                         int currentPosition = imageList.indexOf(imagePath);
                         ShowClickImg(imageList, currentPosition);
@@ -1112,17 +971,13 @@ public class ModifyNoteActivity extends AppCompatActivity implements View.OnClic
      * @param imageList
      * @param currentPosition
      */
-    private void ShowClickImg(ArrayList<String> imageList, int currentPosition) {
+    private void ShowClickImg(List<String> imageList, int currentPosition) {
         try {
             String[] imgs = imageList.toArray(new String[0]);
             ImagePopupDialog dialog = new ImagePopupDialog(this, imgs, currentPosition);
-            dialog.setOnLongClickImageListener(new ImagePopupDialog.onLongClickImageListener() {
-
-                @Override
-                public void onLongClick(View v, int index) {
-                    LongClickImgPath = imgs[index];
-                    mLongClickImgPopupMenu.show();
-                }
+            dialog.setOnLongClickImageListener((View v, int index) -> {
+                LongClickImgPath = imgs[index];
+                mLongClickImgPopupMenu.show();
             });
             dialog.show();
         }
@@ -1224,12 +1079,12 @@ public class ModifyNoteActivity extends AppCompatActivity implements View.OnClic
                     ShowLogE("insertImagesSync", "data: " + data); // _Edited
 
                     Bitmap bitmap = ImageUtil.getSmallBitmap(data + "", screenWidth, screenHeight); // 压缩图片
-                    String smallImagePath = SDCardUtil.saveSmallImgToSdCard(bitmap);
+                    String smallImagePath = SaveFileUtil.saveSmallImgToSdCard(bitmap);
 
                     ShowLogE("insertImagesSync", "imagePath: " + smallImagePath); // _Small
 
                     // 删除 Edited
-                    SDCardUtil.deleteFile("" + data);
+                    FilePathUtil.deleteFile("" + data);
 
                     emitter.onNext(smallImagePath);
 

@@ -51,7 +51,7 @@ import com.baibuti.biji.R;
 import com.baibuti.biji.ui.activity.MainActivity;
 import com.baibuti.biji.ui.activity.QrCodeActivity;
 import com.baibuti.biji.ui.dialog.FileImportDialog;
-import com.baibuti.biji.util.stringUtil.Define;
+import com.baibuti.biji.util.otherUtil.DefineString;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -952,18 +952,18 @@ public class FileFragment extends Fragment {
                     Intent intent = activity.getPackageManager().getLaunchIntentForPackage("cn.wps.moffice_eng");
                     Bundle bundle = new Bundle();
                     //打开模式
-                    bundle.putString(Define.OPEN_MODE, Define.NORMAL);
-                    bundle.putBoolean(Define.ENTER_REVISE_MODE, true);//以修订模式打开
-                    //bundle.putString(Define.OPEN_MODE, Define.READ_ONLY);
-                    bundle.putBoolean(Define.SEND_SAVE_BROAD, true);
-                    bundle.putBoolean(Define.SEND_CLOSE_BROAD, true);
-                    bundle.putBoolean(Define.HOME_KEY_DOWN, true);
-                    bundle.putBoolean(Define.BACK_KEY_DOWN, true);
-                    bundle.putBoolean(Define.ENTER_REVISE_MODE, true);
-                    bundle.putBoolean(Define.IS_SHOW_VIEW, false);
-                    bundle.putBoolean(Define.AUTO_JUMP, true);
+                    bundle.putString(DefineString.OPEN_MODE, DefineString.NORMAL);
+                    bundle.putBoolean(DefineString.ENTER_REVISE_MODE, true);//以修订模式打开
+                    //bundle.putString(DefineString.OPEN_MODE, DefineString.READ_ONLY);
+                    bundle.putBoolean(DefineString.SEND_SAVE_BROAD, true);
+                    bundle.putBoolean(DefineString.SEND_CLOSE_BROAD, true);
+                    bundle.putBoolean(DefineString.HOME_KEY_DOWN, true);
+                    bundle.putBoolean(DefineString.BACK_KEY_DOWN, true);
+                    bundle.putBoolean(DefineString.ENTER_REVISE_MODE, true);
+                    bundle.putBoolean(DefineString.IS_SHOW_VIEW, false);
+                    bundle.putBoolean(DefineString.AUTO_JUMP, true);
                     //设置广播
-                    bundle.putString(Define.THIRD_PACKAGE, activity.getPackageName());
+                    bundle.putString(DefineString.THIRD_PACKAGE, activity.getPackageName());
                     intent.setAction(Intent.ACTION_VIEW);
                     Log.e("test", "openDocument: 设置action");
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {

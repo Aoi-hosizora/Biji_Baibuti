@@ -19,6 +19,7 @@ public class ScheduleDao implements IScheduleDao {
     @Override
     public String querySchedule() {
 
+        return "";
     }
 
     /**
@@ -28,7 +29,7 @@ public class ScheduleDao implements IScheduleDao {
      */
     @Override
     public boolean newSchedule(String json) {
-
+        return true;
     }
 
     /**
@@ -37,6 +38,6 @@ public class ScheduleDao implements IScheduleDao {
      */
     @Override
     public boolean deleteSchedule() {
-
+        return true;
     }
 }

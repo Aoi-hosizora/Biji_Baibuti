@@ -56,15 +56,15 @@ import com.baibuti.biji.ui.widget.listView.SpacesItemDecoration;
 import com.baibuti.biji.ui.widget.listView.RecyclerViewEmptySupport;
 import com.baibuti.biji.model.dao.local.GroupDao;
 import com.baibuti.biji.model.dao.local.NoteDao;
-import com.baibuti.biji.util.fileDirUtil.FilePathUtil;
-import com.baibuti.biji.util.fileDirUtil.SDCardUtil;
+import com.baibuti.biji.util.fileUtil.FilePathUtil;
+import com.baibuti.biji.util.fileUtil.SaveFileUtil;
 import com.baibuti.biji.util.imgDocUtil.ImageUtil;
-import com.baibuti.biji.util.layoutUtil.PopupMenuUtil;
+import com.baibuti.biji.util.otherUtil.LayoutUtil;
 import com.baibuti.biji.util.otherUtil.CommonUtil;
 import com.getbase.floatingactionbutton.FloatingActionButton;
 import com.getbase.floatingactionbutton.FloatingActionsMenu;
 import com.wyt.searchbox.SearchFragment;
-import com.baibuti.biji.util.strSrchUtil.SearchUtil;
+import com.baibuti.biji.util.stringUtil.SearchUtil;
 
 import java.io.File;
 import java.text.SimpleDateFormat;
@@ -1015,10 +1015,10 @@ public class NoteFragment extends Fragment implements View.OnClickListener {
         LongClickNoteItem = note;
 
         m_LongClickNotePopupMenu = new Dialog(getContext(), R.style.BottomDialog);
-        LinearLayout root = PopupMenuUtil.initPopupMenu(getContext(), m_LongClickNotePopupMenu, R.layout.popupmenu_note_longclicknote);
+        LinearLayout root = LayoutUtil.initPopupMenu(getContext(), m_LongClickNotePopupMenu, R.layout.popupmenu_note_longclicknote);
 
         root.findViewById(R.id.id_NoteFrag_PopupMenu_ViewNote).setOnClickListener(NoteFragment.this);
-         root.findViewById(R.id.id_NoteFrag_PopupMenu_ChangeGroup).setOnClickListener(NoteFragment.this);
+        root.findViewById(R.id.id_NoteFrag_PopupMenu_ChangeGroup).setOnClickListener(NoteFragment.this);
         root.findViewById(R.id.id_NoteFrag_PopupMenu_DeleteNote).setOnClickListener(NoteFragment.this);
         root.findViewById(R.id.id_NoteFrag_PopupMenu_Cancel).setOnClickListener(NoteFragment.this);
 
@@ -1050,7 +1050,7 @@ public class NoteFragment extends Fragment implements View.OnClickListener {
         String fileName = time + "_Photo";
 
         // /Biji/NoteImage/
-        String path = SDCardUtil.getPictureDir(); // 保存路径
+        String path = FilePathUtil.getPictureDir(); // 保存路径
         File file = new File(path);
 
         // 要保存的图片文件
@@ -1092,8 +1092,8 @@ public class NoteFragment extends Fragment implements View.OnClickListener {
         int screenHeight = CommonUtil.getScreenHeight(getContext());
 
         Bitmap bitmap = ImageUtil.getSmallBitmap(imgUri + "", screenWidth, screenHeight); // 压缩图片
-        String smallImagePath = SDCardUtil.saveSmallImgToSdCard(bitmap);
-        SDCardUtil.deleteFile("" + imgUri);
+        String smallImagePath = SaveFileUtil.saveSmallImgToSdCard(bitmap);
+        FilePathUtil.deleteFile("" + imgUri);
 
 
         Intent intent = new Intent(getContext(), OCRActivity.class);
@@ -1130,7 +1130,7 @@ public class NoteFragment extends Fragment implements View.OnClickListener {
             Intent intent = new Intent(getActivity(), IMGEditActivity.class);
 
             intent.putExtra("IMAGE_URI", uri);
-            intent.putExtra("IMAGE_SAVE_PATH", SDCardUtil.getPictureDir());
+            intent.putExtra("IMAGE_SAVE_PATH", FilePathUtil.getPictureDir());
 
             startActivityForResult(intent, REQUEST_CROP);
         } catch (Exception e) {
@@ -1348,7 +1348,7 @@ public class NoteFragment extends Fragment implements View.OnClickListener {
             case REQUEST_CROP: // 裁剪
                 if (resultCode == RESULT_OK) {
                     // _PHOTO
-                    SDCardUtil.deleteFile(FilePathUtil.getFilePathByUri(getContext(), imgUri));
+                    FilePathUtil.deleteFile(FilePathUtil.getFilePathByUri(getContext(), imgUri));
                     OpenOCRAct(data.getData()); // _small uri
                 }
                 break;

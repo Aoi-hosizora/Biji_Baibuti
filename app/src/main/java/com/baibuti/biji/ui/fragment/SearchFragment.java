@@ -35,7 +35,7 @@ import com.baibuti.biji.ui.activity.StarSearchItemActivity;
 import com.baibuti.biji.ui.widget.listView.SpacesItemDecoration;
 import com.baibuti.biji.ui.widget.listView.RecyclerViewEmptySupport;
 import com.baibuti.biji.util.otherUtil.CommonUtil;
-import com.baibuti.biji.util.layoutUtil.PopupMenuUtil;
+import com.baibuti.biji.util.otherUtil.LayoutUtil;
 import com.baibuti.biji.service.searchng.SearchEngineService;
 
 import java.util.ArrayList;
@@ -287,7 +287,7 @@ public class SearchFragment extends Fragment implements View.OnClickListener {
      */
     private void ShowItemLongClickPopupMenu(SearchItem searchItem) {
         m_LongClickItemPopupMenu = new Dialog(getActivity(), R.style.BottomDialog);
-        LinearLayout root = PopupMenuUtil.initPopupMenu(getActivity(), m_LongClickItemPopupMenu, R.layout.popupmenu_searchitem_longclickitem);
+        LinearLayout root = LayoutUtil.initPopupMenu(getActivity(), m_LongClickItemPopupMenu, R.layout.popupmenu_searchitem_longclickitem);
 
         SearchItemDao searchItemDao = new SearchItemDao(getContext());
 

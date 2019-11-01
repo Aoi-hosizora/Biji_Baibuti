@@ -21,10 +21,11 @@ import android.widget.Toast;
 import com.baibuti.biji.model.po.Note;
 import com.baibuti.biji.ui.dialog.ImagePopupDialog;
 import com.baibuti.biji.R;
+import com.baibuti.biji.util.fileUtil.FilePathUtil;
 import com.baibuti.biji.util.otherUtil.CommonUtil;
-import com.baibuti.biji.util.layoutUtil.PopupMenuUtil;
-import com.baibuti.biji.util.strSrchUtil.StringUtil;
-import com.baibuti.biji.util.imgDocUtil.ToDocUtil;
+import com.baibuti.biji.util.otherUtil.LayoutUtil;
+import com.baibuti.biji.util.stringUtil.StringUtil;
+import com.baibuti.biji.util.imgDocUtil.DocPdfUtil;
 import com.sendtion.xrichtext.RichTextView;
 
 import java.io.File;
@@ -130,7 +131,7 @@ public class ViewModifyNoteActivity extends AppCompatActivity implements View.On
      */
     private void initPopupMenu() {
         m_LongClickImgPopupMenu = new Dialog(this, R.style.BottomDialog);
-        LinearLayout root = PopupMenuUtil.initPopupMenu(this, m_LongClickImgPopupMenu, R.layout.popupmenu_vmnote_longclickimg);
+        LinearLayout root = LayoutUtil.initPopupMenu(this, m_LongClickImgPopupMenu, R.layout.popupmenu_vmnote_longclickimg);
 
         root.findViewById(R.id.id_VMNoteAct_PopupMenu_OCR).setOnClickListener(this);
         root.findViewById(R.id.id_VMNoteAct_PopupMenu_Cancel).setOnClickListener(this);
@@ -315,7 +316,7 @@ public class ViewModifyNoteActivity extends AppCompatActivity implements View.On
         Intent savefile_intent=new Intent(this, OpenSaveFileActivity.class);
         savefile_intent.putExtra("isSaving", true);
         savefile_intent.putExtra("FileType", ".docx");
-        savefile_intent.putExtra("CurrentDir", ToDocUtil.getDefaultPath());
+        savefile_intent.putExtra("CurrentDir", FilePathUtil.getFileNoteDir());
         savefile_intent.putExtra("FileName", note.getTitle());
         savefile_intent.putExtra("FileFilterType", "docx|pdf");
 
@@ -424,9 +425,17 @@ public class ViewModifyNoteActivity extends AppCompatActivity implements View.On
 
         class HasDismiss {
             private boolean dismiss = false;
-            HasDismiss() {}
-            void setDismiss() { this.dismiss = true; }
-            boolean getDismiss() { return this.dismiss; }
+
+            HasDismiss() {
+            }
+
+            void setDismiss() {
+                this.dismiss = true;
+            }
+
+            boolean getDismiss() {
+                return this.dismiss;
+            }
         }
         final HasDismiss isHasDismiss = new HasDismiss();
 
@@ -434,55 +443,35 @@ public class ViewModifyNoteActivity extends AppCompatActivity implements View.On
         String Msg = String.format(getResources().getString(R.string.VMNoteActivity_SavingDataMessage), isSaveAsDocx ? "Docx" : "Pdf", Path);
         savingDialog.setTitle(getResources().getString(R.string.VMNoteActivity_SavingData));
         savingDialog.setMessage(Msg);
-        savingDialog.setOnCancelListener(new DialogInterface.OnCancelListener() {
-            @Override
-            public void onCancel(DialogInterface dialog) {
-                // 取消保存
-                isHasDismiss.setDismiss();
-            }
-        });
+        savingDialog.setOnCancelListener(dialog -> isHasDismiss.setDismiss());
         savingDialog.show();
 
-        new Thread(new Runnable() {
-
-            @Override
-            public void run() {
-                try {
-                    Thread.sleep(200);
-                }
-                catch (InterruptedException ex) {
-                    ex.printStackTrace();
-                }
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-
-                        try {
-                            if (isSaveAsDocx)
-                                ToDocUtil.CreateDocxByNote(Path, mnote.getTitle(), mnote.getContent(), true);
-                            else
-                                ToDocUtil.CreatePdfByNote(Path, mnote.getTitle(), mnote.getContent(), true);
-
-                            if (!isHasDismiss.getDismiss()) {
-                                if (savingDialog != null)
-                                    savingDialog.dismiss();
-
-                                Toast.makeText(ViewModifyNoteActivity.this, "文件 " + Path + " 保存成功。", Toast.LENGTH_SHORT).show();
-                            }
-                            else {
-                                ShowLogE("SavingDocxPdfAsNote", "Saning is HasDismiss");
-                                File f = new File(Path);
-                                if (f.exists())
-                                    f.delete();
-                            }
-
-                        }
-                        catch (Exception ex) {
-                            ex.printStackTrace();
-                        }
-                    }
-                });
+        new Thread(() -> {
+            try {
+                Thread.sleep(200);
+            } catch (InterruptedException ex) {
+                ex.printStackTrace();
             }
+            runOnUiThread(() -> {
+                boolean isOk;
+                if (isSaveAsDocx)
+                    isOk = DocPdfUtil.CreateDocxByNote(Path, mnote.getTitle(), mnote.getContent(), true);
+                else
+                    isOk = DocPdfUtil.CreatePdfByNote(Path, mnote.getTitle(), mnote.getContent(), true);
+
+                if (!isHasDismiss.getDismiss()) {
+                    if (savingDialog != null)
+                        savingDialog.dismiss();
+
+                    Toast.makeText(ViewModifyNoteActivity.this,
+                        "文件 " + Path + " 保存" + (isOk ? "成功" : "失败"), Toast.LENGTH_SHORT).show();
+                } else {
+                    ShowLogE("SavingDocxPdfAsNote", "Saning is HasDismiss");
+                    File f = new File(Path);
+                    if (f.exists())
+                        f.delete();
+                }
+            });
         }).start();
     }
 
