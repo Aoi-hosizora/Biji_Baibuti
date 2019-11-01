@@ -66,11 +66,8 @@ import com.getbase.floatingactionbutton.FloatingActionsMenu;
 import com.wyt.searchbox.SearchFragment;
 import com.baibuti.biji.util.stringUtil.SearchUtil;
 
-import java.io.File;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
@@ -248,7 +245,7 @@ public class NoteFragment extends Fragment implements View.OnClickListener {
             @Override
             public void onClick(View view) {
                 m_fabMenu.collapse();
-                NotePhoto_Click();
+                takePhoto();
             }
         });
         mNoteEdit.setOnClickListener(new View.OnClickListener() {
@@ -1037,27 +1034,21 @@ public class NoteFragment extends Fragment implements View.OnClickListener {
 
     // endregion 进入笔记
 
-    // region 笔记增删改 文字识别 活动返回 NotePhoto_Click OpenOCRAct DeleteNote HandleNewUpdateNote onActivityResult
+    // region 笔记增删改 文字识别 活动返回 takePhoto OpenOCRAct DeleteNote HandleNewUpdateNote onActivityResult
 
     private Uri imgUri; // 拍照时返回的uri
 
     /**
      * 浮动菜单 OCR
      */
-    private void NotePhoto_Click() {
-        // Photo 类型
-        String time = new SimpleDateFormat("yyyyMMddHHmmssSSS", Locale.CHINA).format(new Date());
-        String fileName = time + "_Photo";
+    private void takePhoto() {
 
-        // /Biji/NoteImage/
-        String path = FilePathUtil.getPictureDir(); // 保存路径
-        File file = new File(path);
+        // 要保存的图片文件 _PHOTO 格式
+        String filename = SaveFileUtil.getImageFileName(SaveFileUtil.SaveImageType.PHOTO);
 
-        // 要保存的图片文件
-        File imgFile = new File(file + File.separator + fileName + ".jpg");
-
-        // 将file转换成uri，返回 provider 路径
-        imgUri = FilePathUtil.getUriForFile(getContext(), imgFile);
+        // 7.0 调用系统相机拍照不再允许使用 Uri 方式，应该替换为 FileProvider
+        // provider 路径
+        imgUri = FilePathUtil.getUriByPath(getContext(), filename);
 
         Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
         // 权限
@@ -1071,13 +1062,13 @@ public class NoteFragment extends Fragment implements View.OnClickListener {
         catch (Exception ex) {
             ex.printStackTrace();
             new AlertDialog.Builder(getContext())
-                    .setTitle(R.string.NoteFrag_CameraNoFoundAlertTitle)
-                    .setMessage(R.string.NoteFrag_CameraNoFoundAlertMsg)
-                    .setPositiveButton(R.string.NoteFrag_CameraNoFoundAlertPosButton, null)
-                    .create().show();
+                .setTitle(R.string.NoteFrag_CameraNoFoundAlertTitle)
+                .setMessage(R.string.NoteFrag_CameraNoFoundAlertMsg)
+                .setPositiveButton(R.string.NoteFrag_CameraNoFoundAlertPosButton, null)
+                .create().show();
         }
 
-        // TODO nox 模拟器没有相机可以测试
+        // TODO nox_adb 没有相机可以测试
     }
 
     /**
@@ -1091,10 +1082,9 @@ public class NoteFragment extends Fragment implements View.OnClickListener {
         int screenWidth = CommonUtil.getScreenWidth(getContext());
         int screenHeight = CommonUtil.getScreenHeight(getContext());
 
-        Bitmap bitmap = ImageUtil.getSmallBitmap(imgUri + "", screenWidth, screenHeight); // 压缩图片
+        Bitmap bitmap = ImageUtil.getSmallBitmap(imgUri.toString(), screenWidth, screenHeight); // 压缩图片
         String smallImagePath = SaveFileUtil.saveSmallImgToSdCard(bitmap);
         FilePathUtil.deleteFile("" + imgUri);
-
 
         Intent intent = new Intent(getContext(), OCRActivity.class);
 
@@ -1106,31 +1096,30 @@ public class NoteFragment extends Fragment implements View.OnClickListener {
     }
 
     /**
-     * 微信弹出图片涂鸦裁剪
-     * @param uridata
+     * 图片编辑
      */
-    private void StartEditImg(Uri uridata) {
-
+    private void StartEditImg(Uri uri) {
         try {
             // 获得源路径
-            String uri_path = FilePathUtil.getFilePathByUri(getContext(), uridata);
+            String imgPath = FilePathUtil.getFilePathByUri(getContext(), uri);
 
-            if (uri_path.isEmpty()) {
+            if (imgPath == null || imgPath.isEmpty()) {
                 new AlertDialog.Builder(getContext())
-                        .setTitle("插入图片")
-                        .setMessage("从相册获取的图片或拍照得到的图片不存在，请重试。")
-                        .setNegativeButton("确定", null)
-                        .create()
-                        .show();
+                    .setTitle("插入图片")
+                    .setMessage("从相册获取的图片或拍照得到的图片不存在，请重试。")
+                    .setNegativeButton("确定", null)
+                    .create()
+                    .show();
                 return;
             }
 
-            Uri uri = Uri.fromFile(new File(uri_path));
+            // Uri uri2 = Uri.fromFile(new File(imgPath));
 
             Intent intent = new Intent(getActivity(), IMGEditActivity.class);
 
-            intent.putExtra("IMAGE_URI", uri);
-            intent.putExtra("IMAGE_SAVE_PATH", FilePathUtil.getPictureDir());
+            // intent.putExtra(IMGEditActivity.INT_IMAGE_URI, uri2);
+            intent.putExtra(IMGEditActivity.INT_IMAGE_URI, uri);
+            intent.putExtra(IMGEditActivity.INT_IMAGE_SAVE_URI, SaveFileUtil.getImageFileName(SaveFileUtil.SaveImageType.EDITED));
 
             startActivityForResult(intent, REQUEST_CROP);
         } catch (Exception e) {

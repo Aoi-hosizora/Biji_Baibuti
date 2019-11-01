@@ -44,18 +44,6 @@ public class DocPdfUtil {
     private static int A4_MAX_WIDTH = (int)(1775 * A4_PX_RATE);
     private static int A4_MAX_HEIGHT = (int)(5628 * A4_PX_RATE);
 
-
-    private static Size getImgSize(String path) {
-
-        // 图片信息
-        BitmapFactory.Options opt = new BitmapFactory.Options();
-        opt.inJustDecodeBounds = true;
-        BitmapFactory.decodeFile(path, opt);
-
-        // 图片尺寸
-        return new Size(opt.outWidth, opt.outHeight);
-    }
-
     /**
      * 修改图片尺寸至适合尺寸
      */
@@ -145,7 +133,7 @@ public class DocPdfUtil {
                 else {
                     // 本地图片
                     try {
-                        Size newSize = handleImgSize(getImgSize(imagePath));
+                        Size newSize = handleImgSize(ImageUtil.getImgSize(imagePath));
                         insertImageToDocx(docx, imagePath, newSize.getWidth(), newSize.getHeight());
                     }
                     catch (Exception ex) {
@@ -237,7 +225,7 @@ public class DocPdfUtil {
                 }
                 else {
                     try {
-                        Size newSize = handleImgSize(getImgSize(imagePath));
+                        Size newSize = handleImgSize(ImageUtil.getImgSize(imagePath));
 
                         try {
                             Image img = Image.getInstance(imagePath);

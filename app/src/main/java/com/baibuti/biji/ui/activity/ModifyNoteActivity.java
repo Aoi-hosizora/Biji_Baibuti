@@ -53,12 +53,9 @@ import com.sendtion.xrichtext.RichTextEditor;
 
 
 import java.io.File;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Date;
 import java.util.List;
-import java.util.Locale;
 
 import io.reactivex.Observable;
 import io.reactivex.ObservableEmitter;
@@ -624,89 +621,79 @@ public class ModifyNoteActivity extends AppCompatActivity implements View.OnClic
      * 拍照
      */
     private void takePhone() {
-        // Photo 类型
-        String time = new SimpleDateFormat("yyyyMMddHHmmssSSS", Locale.CHINA).format(new Date());
-        String fileName = time + "_Photo";
 
-        // /Biji/NoteImage/
-        String path = FilePathUtil.getPictureDir(); // 保存路径
-        File file = new File(path);
+        // 要保存的图片文件 _PHOTO 格式
+        String filename = SaveFileUtil.getImageFileName(SaveFileUtil.SaveImageType.PHOTO);
 
-        // 要保存的图片文件
-        File imgFile = new File(file + File.separator + fileName + ".jpg");
-
-        // 将file转换成uri，返回 provider 路径
-        imgUri = FilePathUtil.getUriForFile(this, imgFile);
+        // 7.0 调用系统相机拍照不再允许使用 Uri 方式，应该替换为 FileProvider
+        // provider 路径
+        imgUri = FilePathUtil.getUriByPath(this, filename);
 
         Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
         // 权限
         intent.addFlags(Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION);
         // 传入新图片名
         intent.putExtra(MediaStore.EXTRA_OUTPUT, imgUri);
+
         try {
             startActivityForResult(intent, REQUEST_TAKE_PHOTO);
         }
         catch (Exception ex) {
             ex.printStackTrace();
             new AlertDialog.Builder(this)
-                    .setTitle(R.string.MNoteActivity_CameraNoFoundAlertTitle)
-                    .setMessage(R.string.MNoteActivity_CameraNoFoundAlertMsg)
-                    .setPositiveButton(R.string.MNoteActivity_CameraNoFoundAlertPosButton, null)
-                    .create().show();
+                .setTitle(R.string.MNoteActivity_CameraNoFoundAlertTitle)
+                .setMessage(R.string.MNoteActivity_CameraNoFoundAlertMsg)
+                .setPositiveButton(R.string.MNoteActivity_CameraNoFoundAlertPosButton, null)
+                .create().show();
         }
 
         // TODO nox 模拟器没有相机可以测试
     }
 
     /**
-     * 微信弹出图片涂鸦裁剪
-     * @param uridata
+     * 图片编辑
+     * @param uri
      * @param isTakePhoto
      */
-    private void StartEditImg(Uri uridata, boolean isTakePhoto) {
+    private void StartEditImg(Uri uri, boolean isTakePhoto) {
 
-        // uridata:
+        // uri:
         // content://com.android.providers.media.documents/document/image%3A172304
         // content://com.baibuti.biji.FileProvider/images/NoteImage/20190518133507370_Photo.jpg
 
-        ShowLogE("StartEditImg", "uridata: " + uridata.getPath());
+        ShowLogE("StartEditImg", "uridata: " + uri.getPath());
 
-        // uridata.getPath():
+        // uri.getPath():
         // /document/image:172305
         // /images/NoteImage/20190518133854935_Photo.jpg
 
         try {
             // 获得源路径
-            String uri_path = FilePathUtil.getFilePathByUri(this, uridata);
+            String imgPath = FilePathUtil.getFilePathByUri(this, uri);
 
-            ShowLogE("StartEditImg", "uri_path: " + uri_path);
-
-            // FilePathUtil.getFilePathByUri:
-            // /storage/emulated/0/Tencent/TIMfile_recv/Q52T81B2LV(XA1Y7}1BS0{F.png
-            // /storage/emulated/0/Biji/NoteImage/NoteImage
-
-            if (uri_path.isEmpty()) {
+            if (imgPath == null || imgPath.isEmpty()) {
                 new AlertDialog.Builder(this)
-                        .setTitle("插入图片")
-                        .setMessage("从相册获取的图片或拍照得到的图片不存在，请重试。")
-                        .setNegativeButton("确定", null)
-                        .create()
-                        .show();
+                    .setTitle("插入图片")
+                    .setMessage("从相册获取的图片或拍照得到的图片不存在，请重试。")
+                    .setNegativeButton("确定", null)
+                    .create()
+                    .show();
                 return;
             }
-
-            Uri uri = Uri.fromFile(new File(uri_path));
 
             // 删除图片判断
             this.isTakePhoto_Delete = isTakePhoto;
 
-            // 打开编辑页面
-            Intent intent = new Intent(ModifyNoteActivity.this, IMGEditActivity.class);
+            // Uri uri2 = Uri.fromFile(new File(imgPath));
 
-            intent.putExtra("IMAGE_URI", uri);
-            intent.putExtra("IMAGE_SAVE_PATH", FilePathUtil.getPictureDir());
+            Intent intent = new Intent(this, IMGEditActivity.class);
+
+            // intent.putExtra(IMGEditActivity.INT_IMAGE_URI, uri2);
+            intent.putExtra(IMGEditActivity.INT_IMAGE_URI, uri);
+            intent.putExtra(IMGEditActivity.INT_IMAGE_SAVE_URI, SaveFileUtil.getImageFileName(SaveFileUtil.SaveImageType.EDITED));
 
             startActivityForResult(intent, REQUEST_CROP);
+
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -1078,7 +1065,7 @@ public class ModifyNoteActivity extends AppCompatActivity implements View.OnClic
 
                     ShowLogE("insertImagesSync", "data: " + data); // _Edited
 
-                    Bitmap bitmap = ImageUtil.getSmallBitmap(data + "", screenWidth, screenHeight); // 压缩图片
+                    Bitmap bitmap = ImageUtil.getSmallBitmap(data.toString(), screenWidth, screenHeight); // 压缩图片
                     String smallImagePath = SaveFileUtil.saveSmallImgToSdCard(bitmap);
 
                     ShowLogE("insertImagesSync", "imagePath: " + smallImagePath); // _Small

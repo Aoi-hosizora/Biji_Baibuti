@@ -92,13 +92,23 @@ public class FilePathUtil {
 
     /////////////////////////////////////////////////////////////////////
     /////////////////////////////////////////////////////////////////////
+    // https://blog.csdn.net/weixin_37577039/article/details/79242455
+    // Path -> Uri; File -> Uri; Uri -> Path (!!!)
 
     /**
-     * File -> Uri，FileProvider.getUriForFile() / Uri.fromFile()
+     * Path -> Uri
+     * 委托 getUriByFile()
+     */
+    public static Uri getUriByPath(Context context, String path) {
+        return getUriByFile(context, new File(path));
+    }
+
+    /** !!!!
+     * File -> Uri，FileProvider.getUriByFile() / Uri.fromFile()
      * >= 7.0 content://com.xxx.xxx.FileProvider/images/photo_20180824173621.jpg
      * <  6.0 file:///storage/emulated/0/take_photo/photo_20180824171132.jpg
      */
-    public static Uri getUriForFile(Context context, File file) {
+    private static Uri getUriByFile(Context context, File file) {
         if (context == null || file == null)
             throw new NullPointerException();
 
@@ -113,9 +123,18 @@ public class FilePathUtil {
     }
 
     /**
-     * Uri -> Path, uri.getPath()
-     * file:///
-     * content://package
+     * 判断是否是当前项目的 FileProvider
+     * @param uri -> content://com.baibuti.biji.FileProvider/
+     */
+    private static boolean isThisAppAuthority(Context context, Uri uri) {
+        return context.getString(R.string.FileProvider).equals(uri.getAuthority());
+    }
+
+    /** !!!!
+     * Uri -> Path, uri.getPath() / handle Path
+     * Uri.getPath() 的返回情况
+     *      file:///
+     *      content://package
      */
     public static String getFilePathByUri(Context context, Uri uri) {
 
@@ -127,7 +146,7 @@ public class FilePathUtil {
         // 2. content://
 
         // content://com.baibuti.biji.FileProvider/images/NoteImage/20190518133507370_Photo.jpg
-        if (context.getString(R.string.FileProvider).equals(uri.getAuthority())) {
+        if (isThisAppAuthority(context, uri)) {
             String uriPath = uri.getPath();
             if (uriPath == null) return null;
 

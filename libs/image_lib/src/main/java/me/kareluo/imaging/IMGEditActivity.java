@@ -35,9 +35,8 @@ public class IMGEditActivity extends IMGEditBaseActivity {
 
     private static final int MAX_HEIGHT = 1024;
 
-    public static final String EXTRA_IMAGE_URI = "IMAGE_URI";
-    public static final String EXTRA_IMAGE_SAVE_PATH = "IMAGE_SAVE_PATH";
-
+    public static final String INT_IMAGE_URI = "IMAGE_URI";
+    public static final String INT_IMAGE_SAVE_URI = "IMAGE_SAVE_URI";
 
     @Override
     public void onCreated() {
@@ -51,7 +50,7 @@ public class IMGEditActivity extends IMGEditBaseActivity {
             return null;
         }
 
-        Uri uri = intent.getParcelableExtra(EXTRA_IMAGE_URI);
+        Uri uri = intent.getParcelableExtra(INT_IMAGE_URI);
 
         if (uri == null) {
             return null;
@@ -134,21 +133,17 @@ public class IMGEditActivity extends IMGEditBaseActivity {
         finish();
     }
 
-
     /**
      * Add By AoiHosizora
      * 保存编辑后的图片
-     * @param bitmap
-     * @return
+     * @return 保存的绝对路径
      */
     public String saveEditedImgToSdCard(Bitmap bitmap) {
 
         Intent intent = getIntent();
-        String Edited_Image_Save_Path = intent.getStringExtra(EXTRA_IMAGE_SAVE_PATH);
+        String save_file_name = intent.getStringExtra(INT_IMAGE_SAVE_URI);
 
-        String time = new SimpleDateFormat("yyyyMMddHHmmssSSS", Locale.CHINA).format(new Date());
-        String imageUrl = Edited_Image_Save_Path + time + "_Edited.jpg"; //////////
-        File file = new File(imageUrl);
+        File file = new File(save_file_name);
         try {
             FileOutputStream out = new FileOutputStream(file);
             if (bitmap.compress(Bitmap.CompressFormat.JPEG, 100, out)) {

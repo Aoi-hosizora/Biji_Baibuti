@@ -27,7 +27,7 @@ import com.baibuti.biji.net.module.note.ImgUtil;
 import com.baibuti.biji.R;
 import com.baibuti.biji.ui.widget.ocrView.OCRRegionGroupLayout;
 import com.baibuti.biji.util.fileUtil.FilePathUtil;
-import com.baibuti.biji.util.imgDocUtil.BitmapUtil;
+import com.baibuti.biji.util.imgDocUtil.ImageUtil;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -146,7 +146,7 @@ public class OCRActivity extends AppCompatActivity implements View.OnClickListen
      */
     private void initBG(String ImgPath) {
 
-        Bitmap bg = BitmapUtil.getBitmapFromFile(ImgPath);
+        Bitmap bg = ImageUtil.getBitmapFromFile(ImgPath);
 
         if (bg == null) 
             new Thread(new Runnable() {
@@ -165,7 +165,7 @@ public class OCRActivity extends AppCompatActivity implements View.OnClickListen
                                     // TODO 保存文件
                                     String time = new SimpleDateFormat("yyyyMMddHHmmssSSS", Locale.CHINA).format(new Date());
                                     String fileName = FilePathUtil.getOCTTmpDir() + time + ".jpg";
-                                    BitmapUtil.saveBitmap(bitmap, fileName);
+                                    ImageUtil.saveBitmap(bitmap, fileName);
                                     m_ocrRegionGroupLayout.setImgBG(bitmap);
                                     toOCRHandler(fileName);
                                 }

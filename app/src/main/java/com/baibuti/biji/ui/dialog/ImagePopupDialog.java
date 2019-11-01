@@ -16,7 +16,7 @@ import android.widget.TextView;
 import com.baibuti.biji.net.module.note.ImgUtil;
 import com.baibuti.biji.R;
 import com.baibuti.biji.ui.widget.imageView.PhotoView;
-import com.baibuti.biji.util.imgDocUtil.BitmapUtil;
+import com.baibuti.biji.util.imgDocUtil.ImageUtil;
 
 import java.util.ArrayList;
 import java.util.Locale;
@@ -90,7 +90,7 @@ public class ImagePopupDialog extends Dialog {
             final String url = urls[i];
 
             // TODO File
-            Bitmap file = BitmapUtil.getBitmapFromFile(url);
+            Bitmap file = ImageUtil.getBitmapFromFile(url);
 
             if (file == null) {
                 bitmaps.add(null);

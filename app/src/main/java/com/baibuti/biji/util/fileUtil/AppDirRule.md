@@ -23,6 +23,7 @@
     + ~~ExtractUtil~~
 
 ## 图片文件的产生记录：
+> 已过期，未改
 
 + `_PHOTO`
     + `NoteFrag (OCR)`: `takePhone()` 生成，`onActivityResult()` 删除
