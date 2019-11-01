@@ -9,6 +9,7 @@ import android.database.sqlite.SQLiteStatement;
 import android.util.Log;
 
 import com.baibuti.biji.model.dao.DbOpenHelper;
+import com.baibuti.biji.model.dao.daoInterface.IDocumentDao;
 import com.baibuti.biji.model.dto.ServerException;
 import com.baibuti.biji.model.po.Document;
 import com.baibuti.biji.iGlobal.IPushCallBack;
@@ -18,9 +19,9 @@ import com.baibuti.biji.net.module.file.DocumentUtil;
 import java.util.ArrayList;
 import java.util.List;
 
-public class DocumentDao {
+public class DocumentDao implements IDocumentDao {
 
-    private final static String TBL_NAME = "db_document";
+    private final static String TBL_NAME = "tbl_document";
 
     private final static String COL_ID = "doc_id";
     private final static String COL_PATH = "doc_path";

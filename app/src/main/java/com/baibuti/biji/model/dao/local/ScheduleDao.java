@@ -1,7 +1,5 @@
 package com.baibuti.biji.model.dao.local;
 
-import android.content.Context;
-
 import com.baibuti.biji.model.dao.daoInterface.IScheduleDao;
 import com.baibuti.biji.util.fileUtil.SaveNameUtil;
 import com.baibuti.biji.util.imgDocUtil.TextUtil;

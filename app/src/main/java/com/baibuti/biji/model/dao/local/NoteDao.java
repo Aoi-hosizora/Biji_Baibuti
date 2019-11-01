@@ -19,7 +19,7 @@ import java.util.List;
 
 public class NoteDao implements INoteDao {
 
-    private final static String TBL_NAME = "db_note";
+    private final static String TBL_NAME = "tbl_note";
 
     private final static String COL_ID = "n_id";
     private final static String COL_TITLE = "n_title";

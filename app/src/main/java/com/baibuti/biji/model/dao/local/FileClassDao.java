@@ -9,6 +9,7 @@ import android.database.sqlite.SQLiteStatement;
 import android.util.Log;
 
 import com.baibuti.biji.model.dao.DbOpenHelper;
+import com.baibuti.biji.model.dao.daoInterface.IFileClassDao;
 import com.baibuti.biji.model.dto.ServerException;
 import com.baibuti.biji.model.po.FileClass;
 import com.baibuti.biji.service.auth.AuthManager;
@@ -20,7 +21,10 @@ import java.util.List;
 import static android.content.ContentValues.TAG;
 
 
-public class FileClassDao {
+public class FileClassDao implements IFileClassDao {
+
+    private static final String TBL_NAME = "tbl_file_class";
+
     private DbOpenHelper helper;
     private Context context;
 
@@ -432,27 +436,6 @@ public class FileClassDao {
         }
 
         return ret;
-    }
-}
-
-@Deprecated
-class EditDefaultFileClassException extends Exception {
-
-    public EditDefaultFileClassException() {
-        super();
-    }
-
-    public EditDefaultFileClassException(String message) {
-        super(message);
-    }
-
-    public EditDefaultFileClassException(String message, Throwable cause) {
-        super(message,cause);
-    }
-
-    public EditDefaultFileClassException(Throwable cause) {
-
-        super(cause);
     }
 }
 

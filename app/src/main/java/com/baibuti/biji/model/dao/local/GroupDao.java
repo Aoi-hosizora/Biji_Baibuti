@@ -17,7 +17,7 @@ import java.util.List;
 
 public class GroupDao implements IGroupDao {
 
-    private final static String TBL_NAME = "db_group";
+    private final static String TBL_NAME = "tbl_group";
 
     private final static String COL_ID = "g_id";
     private final static String COL_NAME = "g_name";

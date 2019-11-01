@@ -4,6 +4,8 @@ import android.content.Context;
 
 import com.baibuti.biji.model.dao.daoInterface.*;
 import com.baibuti.biji.model.dao.local.*;
+import com.baibuti.biji.model.dao.net.DocumentNetDao;
+import com.baibuti.biji.model.dao.net.FileClassNetDao;
 import com.baibuti.biji.model.dao.net.GroupNetDao;
 import com.baibuti.biji.model.dao.net.NoteNetDao;
 import com.baibuti.biji.model.dao.net.ScheduleNetDao;
@@ -49,5 +51,19 @@ public class DaoStrategyHelper {
             return new ScheduleDao();
         else
             return new ScheduleNetDao();
+    }
+
+    public IDocumentDao getDocumentDao(Context context) {
+        if (!AuthManager.getInstance().isLogin())
+            return new DocumentDao(context);
+        else
+            return new DocumentNetDao();
+    }
+
+    public IFileClassDao getFileClass(Context context) {
+        if (!AuthManager.getInstance().isLogin())
+            return new FileClassDao(context);
+        else
+            return new FileClassNetDao();
     }
 }

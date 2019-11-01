@@ -37,6 +37,7 @@ public class DbOpenHelper extends SQLiteOpenHelper {
      * 7:
      * drop table db_schedule
      * drop table db_log
+     * alter table db_xx rename to tbl_xxx
      */
 
     private final static int DB_VERSION = 6;// 数据库版本
@@ -96,17 +97,18 @@ public class DbOpenHelper extends SQLiteOpenHelper {
             "sis_content varchar)");
     }
 
-    private void CreateScheduleTbl(SQLiteDatabase db) {
-        db.execSQL("create table if not exists db_schedule (" +
-            "schedule_json varchar primary key)");
-    }
+    // @Deprecated
+    // private void CreateScheduleTbl(SQLiteDatabase db) {
+    //     db.execSQL("create table if not exists db_schedule (" +
+    //         "schedule_json varchar primary key)");
+    // }
 
-    @Deprecated
-    private void CreateLogTbl(SQLiteDatabase db) {
-        db.execSQL("create table if not exists db_log (" +
-            "log_module varchar primary key, " +
-            "log_ut datetime)");
-    }
+    // @Deprecated
+    // private void CreateLogTbl(SQLiteDatabase db) {
+    //     db.execSQL("create table if not exists db_log (" +
+    //         "log_module varchar primary key, " +
+    //         "log_ut datetime)");
+    // }
 
     private void DropScheduleTbl(SQLiteDatabase db) {
         db.execSQL("drop table if exists db_schedule");
@@ -114,6 +116,29 @@ public class DbOpenHelper extends SQLiteOpenHelper {
 
     private void DropLogTbl(SQLiteDatabase db) {
         db.execSQL("drop table if exists db_log");
+    }
+
+    private void RenameTblName(SQLiteDatabase db) {
+        db.execSQL("alter table db_note rename to tbl_note");
+        db.execSQL("alter table db_group rename to tbl_group");
+        db.execSQL("alter table db_file_class rename to tbl_file_class");
+        db.execSQL("alter table db_document rename to tbl_document");
+        db.execSQL("alter table db_search_item_star rename to tbl_search_item");
+    }
+
+    private void AddUniqueConstraint(SQLiteDatabase db) {
+        db.execSQL("create index tbl_group_g_name_unique on tbl_group(g_name)");
+        db.execSQL("create index tbl_file_class_g_name_unique on tbl_file_class(f_name)");
+    }
+
+    private void AddNotNullConstraint(SQLiteDatabase db) {
+        db.execSQL("alter table tbl_db_file_class rename to tbl_db_file_class_tmp");
+        db.execSQL("create table if not exists db_file_class(" +
+            "f_id integer primary key autoincrement, " +
+            "f_name varchar not null, " +
+            "f_order integer)");
+        db.execSQL("insert into db_file_class select * from tbl_db_file_class_tmp");
+        db.execSQL("drop table tbl_db_file_class_tmp");
     }
 
     @Override
@@ -138,6 +163,15 @@ public class DbOpenHelper extends SQLiteOpenHelper {
 
         // // 创建日志表
         // CreateLogTbl(db);
+
+        // 统一重命名表明
+        RenameTblName(db);
+
+        // 增加 UNIQUE 约束
+        AddUniqueConstraint(db);
+
+        // 增加 NOTNULL 约束
+        AddNotNullConstraint(db);
     }
 
     @Override
@@ -158,19 +192,21 @@ public class DbOpenHelper extends SQLiteOpenHelper {
             case 3:
                 CreateSearchItemTbl(db);
             case 4:
-                CreateLogTbl(db);
+                // CreateLogTbl(db);
             case 5:
-                CreateScheduleTbl(db);
+                // CreateScheduleTbl(db);
             case 6:
                 DropScheduleTbl(db);
                 DropLogTbl(db);
+                RenameTblName(db);
+                AddUniqueConstraint(db);
+                AddNotNullConstraint(db);
         }
     }
 
     /**
      * 判断表格是否存在
      * @param table 表名
-     * @return
      */
     public boolean isTblExists(String table) {
         SQLiteDatabase db = getWritableDatabase();
@@ -178,6 +214,8 @@ public class DbOpenHelper extends SQLiteOpenHelper {
         Cursor cursor = db.rawQuery(sql, null);
 
         boolean ret = cursor.moveToNext() && cursor.getInt(0) > 0;
+
+        if (!cursor.isClosed()) cursor.close();
         if (db.isOpen()) db.close();
 
         return ret;

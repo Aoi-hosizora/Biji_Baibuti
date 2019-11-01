@@ -14,7 +14,7 @@ import java.util.List;
 
 public class SearchItemDao implements ISearchItemDao {
 
-    private final static String TBL_NAME = "db_search_item_star";
+    private final static String TBL_NAME = "tbl_search_item";
 
     private final static String COL_URL = "sis_url";
     private final static String COL_TITLE = "sis_title";
