@@ -1,6 +1,9 @@
 package com.baibuti.biji.model.dao;
 
+import com.baibuti.biji.model.dto.DocumentDTO;
+import com.baibuti.biji.model.dto.FileClassDTO;
 import com.baibuti.biji.model.dto.ResponseDTO;
+import com.baibuti.biji.model.po.FileClass;
 import com.baibuti.biji.service.auth.dto.AuthRespDTO;
 import com.baibuti.biji.model.dto.GroupDTO;
 import com.baibuti.biji.model.dto.NoteDTO;
@@ -33,7 +36,7 @@ public interface ServerApi {
 
     // endregion Auth
 
-    // region Note (5)
+    // region Note (6)
 
     @GET("/note/all")
     Observable<ResponseDTO<NoteDTO[]>> getAllNotes();
@@ -57,7 +60,7 @@ public interface ServerApi {
 
     // endregion Note
 
-    // region Group (5)
+    // region Group (6)
 
     @GET("/group/all")
     Observable<ResponseDTO<GroupDTO[]>> getAllGroups();
@@ -113,10 +116,62 @@ public interface ServerApi {
 
     // endregion Schedule
 
-    // region FileClass
+    // region FileClass (7)
 
+    @GET("/fileclass/all")
+    Observable<ResponseDTO<FileClassDTO[]>> getAllFileClasses();
 
+    // TODO 接口待加
+    @GET("/fileclass/one/{id}")
+    Observable<ResponseDTO<FileClassDTO>> getFileClassById(@Path("id") int id);
+
+    // TODO 接口待加
+    @GET("/group/default")
+    Observable<ResponseDTO<FileClassDTO>> getDefaultFileClass();
+
+    @POST("/fileclass/insert")
+    Observable<ResponseDTO<FileClassDTO>> insertFileClass(@Body() FileClassDTO fileClassDTO);
+
+    @PUT("/fileclass/update")
+    Observable<ResponseDTO<FileClassDTO>> updateFileClass(@Body() FileClassDTO fileClassDTO);
+
+    // TODO 接口待改
+    @DELETE("/fileclass/delete/{id}")
+    Observable<ResponseDTO<FileClassDTO>> deleteFileClass(@Path("id") int id);
+
+    // TODO 接口待改
+    // @GET("/fileclass/share")
+    // Observable<ResponseDTO<>> getShareCode(@Path("id") int id);
 
     // endregion FileClass
+
+    // region Document (7)
+
+    @GET("/file/all")
+    Observable<ResponseDTO<DocumentDTO[]>> getAllDocuments();
+
+    // TODO 接口待加
+    @GET("/file/class/{class}")
+    Observable<ResponseDTO<DocumentDTO[]>> getDocumentsByFileClass(@Path("class") String fileClass);
+
+    // TODO 接口待改
+    @GET("/file/{id}")
+    Observable<ResponseDTO<DocumentDTO>> getDocumentById(@Path("id") int id);
+
+    @POST("/file/insert")
+    Observable<ResponseDTO<DocumentDTO>> insertDocument(@Body() DocumentDTO documentDTO);
+
+    @PUT("/file/update")
+    Observable<ResponseDTO<DocumentDTO>> updateDocument(@Body() DocumentDTO documentDTO);
+
+    // TODO 接口待改
+    @DELETE("/file/delete/{id}")
+    Observable<ResponseDTO<DocumentDTO>> deleteDocument(@Path("id") int id);
+
+    // TODO 接口待改
+    // @GET("/file/get_share")
+    // Observable<ResponseDTO<>> getShareCode(@Path("id") int id);
+
+    // endregion Document
 
 }

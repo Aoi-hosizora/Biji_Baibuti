@@ -21,7 +21,6 @@ public class DocumentDao implements IDocumentDao {
     private final static String COL_ID = "doc_id";
     private final static String COL_PATH = "doc_path";
     private final static String COL_CLASS_NAME = "doc_class_name";
-    private final static String COL_NAME = "doc_name";
 
     private DbOpenHelper helper;
 
@@ -60,9 +59,8 @@ public class DocumentDao implements IDocumentDao {
                 int id = cursor.getInt(cursor.getColumnIndex(COL_ID));
                 String path = cursor.getString(cursor.getColumnIndex(COL_PATH));
                 String queryClassName = cursor.getString(cursor.getColumnIndex(COL_CLASS_NAME));
-                String docName = cursor.getString(cursor.getColumnIndex(COL_NAME));
 
-                documentList.add(new Document(id, path, queryClassName, docName));
+                documentList.add(new Document(id, path, queryClassName));
             }
 
         } catch (Exception e) {
@@ -94,9 +92,8 @@ public class DocumentDao implements IDocumentDao {
 
                 String path = cursor.getString(cursor.getColumnIndex(COL_PATH));
                 String className = cursor.getString(cursor.getColumnIndex(COL_CLASS_NAME));
-                String docName = cursor.getString(cursor.getColumnIndex(COL_NAME));
 
-                document = new Document(id, path, className, docName);
+                document = new Document(id, path, className);
             }
 
         } catch (Exception e) {
@@ -119,8 +116,8 @@ public class DocumentDao implements IDocumentDao {
         SQLiteDatabase db = helper.getWritableDatabase();
         String sql =
             "insert into " + TBL_NAME +
-            "(" + COL_PATH + ", " + COL_CLASS_NAME + ", " + COL_NAME + ") " +
-            "values (?, ?, ?)";
+            "(" + COL_PATH + ", " + COL_CLASS_NAME + ") " +
+            "values (?, ?)";
         SQLiteStatement stat = db.compileStatement(sql);
         db.beginTransaction();
 
@@ -128,7 +125,6 @@ public class DocumentDao implements IDocumentDao {
         try {
             stat.bindString(1, document.getFilePath() == null ? "" : document.getFilePath()); // COL_PATH
             stat.bindString(2, document.getClassName()); // COL_CLASS_NAME
-            stat.bindString(3, document.getDocName()); // COL_NAME
 
             ret_id = stat.executeInsert();
             db.setTransactionSuccessful();
@@ -152,7 +148,6 @@ public class DocumentDao implements IDocumentDao {
         SQLiteDatabase db = helper.getWritableDatabase();
         ContentValues values = new ContentValues();
 
-        values.put(COL_NAME, document.getDocName());
         values.put(COL_CLASS_NAME, document.getClassName());
         values.put(COL_PATH, document.getFilePath());
 

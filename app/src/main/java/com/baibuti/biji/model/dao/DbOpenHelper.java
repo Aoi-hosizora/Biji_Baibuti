@@ -38,6 +38,11 @@ public class DbOpenHelper extends SQLiteOpenHelper {
      * drop table db_schedule
      * drop table db_log
      * alter table db_xx rename to tbl_xxx
+     * alter table tbl_group add constraint
+     * alter table tbl_file_class add constraint
+     *
+     * 8:
+     * alter table tbl_document
      */
 
     private final static int DB_VERSION = 6;// 数据库版本
@@ -141,6 +146,14 @@ public class DbOpenHelper extends SQLiteOpenHelper {
         db.execSQL("drop table tbl_db_file_class_tmp");
     }
 
+    private void AlterDocumentTbl(SQLiteDatabase db) {
+        db.execSQL("drop table tbl_document");
+        db.execSQL("create table if not exists tbl_document(" +
+            "doc_id integer primary key autoincrement, " +
+            "doc_path varchar, " +
+            "doc_class_name varchar)");
+    }
+
     @Override
     public void onCreate(SQLiteDatabase db) {
         // 创建分组表
@@ -172,6 +185,9 @@ public class DbOpenHelper extends SQLiteOpenHelper {
 
         // 增加 NOTNULL 约束
         AddNotNullConstraint(db);
+
+        // 修改文件表结构
+        AlterDocumentTbl(db);
     }
 
     @Override
@@ -201,6 +217,8 @@ public class DbOpenHelper extends SQLiteOpenHelper {
                 RenameTblName(db);
                 AddUniqueConstraint(db);
                 AddNotNullConstraint(db);
+            case 7:
+                AlterDocumentTbl(db);
         }
     }
 

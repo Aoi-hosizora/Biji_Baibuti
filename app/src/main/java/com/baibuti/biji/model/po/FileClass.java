@@ -16,10 +16,10 @@ public class FileClass implements Serializable, Comparable<FileClass> {
     @Getter @Setter
     private int order;
 
-    // /**
-    //  * 默认分类
-    //  */
-    // public static final String DEF_CLASS_NAME = "PDF";
+    /**
+     * 默认分类
+     */
+    public static final String DEF_CLASS_NAME = "默认";
     //
     // public FileClass() {
     //     this(0, DEF_CLASS_NAME, 0);

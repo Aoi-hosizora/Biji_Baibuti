@@ -34,26 +34,26 @@ public class FileClassDTO implements Serializable {
     }
 
     /**
-     * FileClass[] -> FileClassDTO[]
+     * FileClassDTO[] -> FileClass[]
      */
-    public static FileClassDTO[] toFileClassesDTO(FileClass[] fileClasses) {
-        if (fileClasses == null)
+    public static FileClass[] toFileClasses(FileClassDTO[] fileClassesDTO) {
+        if (fileClassesDTO == null)
             return null;
-        FileClassDTO[] fileClassesDTO = new FileClassDTO[fileClasses.length];
-        for (int i = 0; i < fileClasses.length; i++)
-            fileClassesDTO[i] = toFileClassDTO(fileClasses[i]);
-        return fileClassesDTO;
+        FileClass[] fileClasses = new FileClass[fileClassesDTO.length];
+        for (int i = 0; i < fileClassesDTO.length; i++)
+            fileClasses[i] = fileClassesDTO[i].toFileClass();
+        return fileClasses;
     }
 
     // /**
-    //  * FileClassDTO[] -> FileClass[]
+    //  * FileClass[] -> FileClassDTO[]
     //  */
-    // public static FileClass[] toFileClasses(FileClassDTO[] fileClassesDTO) {
-    //     if (fileClassesDTO == null)
+    // public static FileClassDTO[] toFileClassesDTO(FileClass[] fileClasses) {
+    //     if (fileClasses == null)
     //         return null;
-    //     FileClass[] fileClasses = new FileClass[fileClassesDTO.length];
-    //     for (int i = 0; i < fileClassesDTO.length; i++)
-    //         fileClasses[i] = fileClassesDTO[i].toFileClass();
-    //     return fileClasses;
+    //     FileClassDTO[] groupsDTO = new FileClassDTO[fileClasses.length];
+    //     for (int i = 0; i < fileClasses.length; i++)
+    //         groupsDTO[i] = toFileClassDTO(fileClasses[i]);
+    //     return groupsDTO;
     // }
 }

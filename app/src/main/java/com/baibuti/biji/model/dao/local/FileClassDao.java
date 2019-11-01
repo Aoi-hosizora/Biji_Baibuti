@@ -66,38 +66,6 @@ public class FileClassDao implements IFileClassDao {
     }
 
     /**
-     * 根据分类名查询分类
-     * @param className 分类名
-     * @return 一个分类
-     */
-    @Override
-    public FileClass queryFileClassByName(String className) {
-
-        SQLiteDatabase db = helper.getWritableDatabase();
-        String sql = "select * from " + TBL_NAME + " where " + COL_NAME + " = \"" + className + "\"";
-        Cursor cursor = null;
-
-        try {
-            cursor = db.rawQuery(sql, null);
-
-            if (cursor.moveToFirst()) {
-                int id = cursor.getInt(cursor.getColumnIndex(COL_ID));
-                int order = cursor.getInt(cursor.getColumnIndex(COL_ORDER));
-
-                return new FileClass(id, className, order);
-            }
-
-        } catch (Exception e) {
-            e.printStackTrace();
-        } finally {
-            if (cursor != null && !cursor.isClosed()) cursor.close();
-            if (db != null && db.isOpen()) db.close();
-        }
-
-        return null;
-    }
-
-    /**
      * 根据分类 id 查询分类
      * @param id 分类 id
      * @return 一个分类

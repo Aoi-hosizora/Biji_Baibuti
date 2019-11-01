@@ -22,7 +22,7 @@ public class DocumentDTO implements Serializable {
     /**
      * DocumentDTO -> Document
      */
-    private Document toDocument() {
+    public Document toDocument() {
         return new Document(id, filePath, className);
     }
 
