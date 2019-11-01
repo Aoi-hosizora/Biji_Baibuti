@@ -72,7 +72,7 @@ import me.kareluo.imaging.IMGEditActivity;
 
 import static android.app.Activity.RESULT_OK;
 
-public class NoteFragment extends Fragment implements View.OnClickListener {
+public class NoteFragment extends BaseFragment implements View.OnClickListener {
 
     // region 声明: View UI ProgressDialog Toolbar DrawerLayout
 
@@ -164,6 +164,28 @@ public class NoteFragment extends Fragment implements View.OnClickListener {
         }
 
         return view;
+    }
+
+    @Override
+    public boolean onBackPressed() {
+        // 是否打开着Drawer
+        if (getDrawerIsOpen()) {
+            closeDrawer();
+            return true;
+        }
+
+        // 判断是否处于笔记搜索页面或分类界面
+        if (getIsSearching() || getIsGrouping()) {
+            SearchGroupBack();
+            return true;
+        }
+
+        if (isFabExpanded()) {
+            collapseFab();
+            return true;
+        }
+
+        return false;
     }
 
     /**

@@ -41,7 +41,7 @@ import com.baibuti.biji.service.searchng.SearchEngineService;
 import java.util.ArrayList;
 import java.util.Locale;
 
-public class SearchFragment extends Fragment implements View.OnClickListener {
+public class SearchFragment extends BaseFragment implements View.OnClickListener {
 
     // region 定义界面元素 view m_toolbar m_SearchButton m_QuestionEditText m_SearchRetList m_SearchingDialog m_LongClickItemPopupMenu m_LongClickedSearchItem
 
@@ -109,6 +109,10 @@ public class SearchFragment extends Fragment implements View.OnClickListener {
         return view;
     }
 
+    @Override
+    public boolean onBackPressed() {
+
+    }
 
     /**
      * 初始化界面

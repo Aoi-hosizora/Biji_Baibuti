@@ -2,7 +2,6 @@
 
     <!-- Main -->
     <string name="app_name">笔迹</string>
-    <string name="onKeyDownExit">再按一次退出笔迹</string>
 
     <!-- IShowLog -->
     <string name="IShowLog_LogE">BijiLogE</string>

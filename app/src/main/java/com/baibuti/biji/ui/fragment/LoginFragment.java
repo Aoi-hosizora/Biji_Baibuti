@@ -57,7 +57,7 @@ public class LoginFragment extends Fragment implements IContextHelper {
      */
     private void initView() {
         if (AuthManager.getInstance().isLogin())
-            m_LoginEditText.setText(AuthManager.getInstance().getUserName());
+            m_LoginEditText.setText(AuthManager.getInstance().getUsername());
     }
 
     /**

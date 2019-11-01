@@ -63,7 +63,7 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class FileFragment extends Fragment {
+public class FileFragment extends BaseFragment {
 
     private Activity activity;
 
@@ -140,6 +140,11 @@ public class FileFragment extends Fragment {
         super.onCreate(savedInstanceState);
         activity = getActivity();
         Log.e("test_filefragment", "onCreate: 执行");
+    }
+
+    @Override
+    public boolean onBackPressed() {
+
     }
 
     /**

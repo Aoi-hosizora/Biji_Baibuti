@@ -63,12 +63,12 @@ public class RegisterFragment extends Fragment implements IContextHelper {
         String password = m_PasswordEditText.getText().toString();
 
         if (username.length() < 5 || username.length() >= 30) {
-            m_RegisterLayout.setError("用户名长度应在 5-30 之间");
+            m_RegisterLayout.setError("用户名长度应大于等于 5 而小于 30");
             return;
         }
 
         if (password.length() < 8 || password.length() >= 20) {
-            m_PasswordLayout.setError("密码长度应在 8-20 之间");
+            m_PasswordLayout.setError("密码长度应大于等于 8 而小于 20");
             return;
         }
 

@@ -19,11 +19,11 @@ public class AuthManager {
         return Instance;
     }
 
-    @Getter private String userName;
+    @Getter private String username;
     @Getter private String token;
 
     public boolean isLogin() {
-        return userName != null && !userName.isEmpty() &&
+        return username != null && !username.isEmpty() &&
             token != null && !token.isEmpty();
     }
 
@@ -42,7 +42,7 @@ public class AuthManager {
      */
     public void logout() {
         this.token = "";
-        this.userName = "";
+        this.username = "";
 
         if (onLoginChangeListeners != null)
             for (OnLoginChangeListener onLoginChangeListener : onLoginChangeListeners)
@@ -54,7 +54,7 @@ public class AuthManager {
      */
     public void login(String username, String token) {
         this.token = token;
-        this.userName = username;
+        this.username = username;
 
         if (onLoginChangeListeners != null)
             for (OnLoginChangeListener onLoginChangeListener : onLoginChangeListeners)
@@ -62,7 +62,7 @@ public class AuthManager {
     }
 
     public interface OnLoginChangeListener {
-        void onLogin(String UserName);
+        void onLogin(String username);
         void onLogout();
     }
 

@@ -4,6 +4,8 @@ import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
+import android.net.Uri;
 import android.support.design.widget.Snackbar;
 import android.view.View;
 import android.widget.Toast;
@@ -105,5 +107,21 @@ public interface IContextHelper {
             .make(view, message, Snackbar.LENGTH_SHORT)
             .setAction(action, onClickListener)
             .show();
+    }
+
+    /**
+     * Intent.ACTION_VIEW: 打开浏览器
+     */
+    default void showBrowser(Context context, String[] links) {
+        for (String link : links) {
+            try {
+                Uri uri = Uri.parse(link);
+                Intent intent = new Intent(Intent.ACTION_VIEW, uri);
+                context.startActivity(intent);
+            }
+            catch (Exception ex) {
+                ex.printStackTrace();
+            }
+        }
     }
 }

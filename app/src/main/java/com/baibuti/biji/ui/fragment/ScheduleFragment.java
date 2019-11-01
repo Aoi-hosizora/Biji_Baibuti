@@ -51,7 +51,7 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class ScheduleFragment extends Fragment {
+public class ScheduleFragment extends BaseFragment {
 
     private Activity activity;
     private View view;
@@ -108,6 +108,11 @@ public class ScheduleFragment extends Fragment {
             registerAuthActions();
         }
         return view;
+    }
+
+    @Override
+    public boolean onBackPressed() {
+
     }
 
     @Override
