@@ -6,6 +6,7 @@ import com.baibuti.biji.model.dao.daoInterface.*;
 import com.baibuti.biji.model.dao.local.*;
 import com.baibuti.biji.model.dao.net.GroupNetDao;
 import com.baibuti.biji.model.dao.net.NoteNetDao;
+import com.baibuti.biji.model.dao.net.ScheduleNetDao;
 import com.baibuti.biji.model.dao.net.SearchItemNetDao;
 import com.baibuti.biji.service.auth.AuthManager;
 
@@ -41,5 +42,12 @@ public class DaoStrategyHelper {
             return new SearchItemDao(context);
         else
             return new SearchItemNetDao();
+    }
+
+    public IScheduleDao getScheduleDao() {
+        if (!AuthManager.getInstance().isLogin())
+            return new ScheduleDao();
+        else
+            return new ScheduleNetDao();
     }
 }

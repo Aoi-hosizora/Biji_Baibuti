@@ -32,10 +32,10 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.baibuti.biji.model.dto.ServerException;
 import com.baibuti.biji.model.po.Group;
 import com.baibuti.biji.ui.adapter.GroupAdapter;
 import com.baibuti.biji.model.po.Note;
-import com.baibuti.biji.net.model.respObj.ServerErrorException;
 import com.baibuti.biji.net.model.respObj.UploadStatus;
 import com.baibuti.biji.service.auth.AuthManager;
 import com.baibuti.biji.net.module.note.ImgUtil;
@@ -43,11 +43,11 @@ import com.baibuti.biji.R;
 import com.baibuti.biji.model.dao.local.GroupDao;
 import com.baibuti.biji.model.dao.local.NoteDao;
 import com.baibuti.biji.ui.dialog.ImagePopupDialog;
-import com.baibuti.biji.util.fileUtil.FilePathUtil;
+import com.baibuti.biji.util.fileUtil.AppPathUtil;
 import com.baibuti.biji.util.otherUtil.CommonUtil;
 import com.baibuti.biji.util.imgDocUtil.ImageUtil;
 import com.baibuti.biji.util.otherUtil.LayoutUtil;
-import com.baibuti.biji.util.fileUtil.SaveFileUtil;
+import com.baibuti.biji.util.fileUtil.SaveNameUtil;
 import com.baibuti.biji.util.stringUtil.StringUtil;
 import com.sendtion.xrichtext.RichTextEditor;
 
@@ -593,7 +593,7 @@ public class ModifyNoteActivity extends AppCompatActivity implements View.OnClic
                 // 图片路径
                 String imagePath = StringUtil.getImgSrc(blocks);
                 // 本地路径，网络路径忽略
-                if (imagePath.startsWith(FilePathUtil.SDCardRoot)) { // /storage/emulated/0/
+                if (imagePath.startsWith(AppPathUtil.SDCardRoot)) { // /storage/emulated/0/
                     try {
                         UploadStatus uploadStatus = ImgUtil.uploadImg(imagePath);
                         if (uploadStatus != null) {
@@ -602,7 +602,7 @@ public class ModifyNoteActivity extends AppCompatActivity implements View.OnClic
                             ret = ret.replaceAll(imagePath, newFileName);
                         }
                     }
-                    catch (ServerErrorException ex) {
+                    catch (ServerException ex) {
                         ex.printStackTrace();
                     }
                 }
@@ -622,11 +622,11 @@ public class ModifyNoteActivity extends AppCompatActivity implements View.OnClic
     private void takePhone() {
 
         // 要保存的图片文件 _PHOTO 格式
-        String filename = SaveFileUtil.getImageFileName(SaveFileUtil.SaveImageType.PHOTO);
+        String filename = SaveNameUtil.getImageFileName(SaveNameUtil.SaveType.PHOTO);
 
         // 7.0 调用系统相机拍照不再允许使用 Uri 方式，应该替换为 FileProvider
         // provider 路径
-        imgUri = FilePathUtil.getUriByPath(this, filename);
+        imgUri = AppPathUtil.getUriByPath(this, filename);
 
         Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
         // 权限
@@ -668,7 +668,7 @@ public class ModifyNoteActivity extends AppCompatActivity implements View.OnClic
 
         try {
             // 获得源路径
-            String imgPath = FilePathUtil.getFilePathByUri(this, uri);
+            String imgPath = AppPathUtil.getFilePathByUri(this, uri);
 
             if (imgPath == null || imgPath.isEmpty()) {
                 new AlertDialog.Builder(this)
@@ -689,7 +689,7 @@ public class ModifyNoteActivity extends AppCompatActivity implements View.OnClic
 
             // intent.putExtra(IMGEditActivity.INT_IMAGE_URI, uri2);
             intent.putExtra(IMGEditActivity.INT_IMAGE_URI, uri);
-            intent.putExtra(IMGEditActivity.INT_IMAGE_SAVE_URI, SaveFileUtil.getImageFileName(SaveFileUtil.SaveImageType.EDITED));
+            intent.putExtra(IMGEditActivity.INT_IMAGE_SAVE_URI, SaveNameUtil.getImageFileName(SaveNameUtil.SaveType.EDITED));
 
             startActivityForResult(intent, REQUEST_CROP);
 
@@ -707,7 +707,7 @@ public class ModifyNoteActivity extends AppCompatActivity implements View.OnClic
 
         // 判断是否需要删除原图片
         if (isTakePhoto_Delete)
-            FilePathUtil.deleteFile(FilePathUtil.getFilePathByUri(this, imgUri));
+            AppPathUtil.deleteFile(AppPathUtil.getFilePathByUri(this, imgUri));
 
         insertImagesSync(mCutUri); // URI
     }
@@ -917,7 +917,7 @@ public class ModifyNoteActivity extends AppCompatActivity implements View.OnClic
             @Override
             public void onRtImageDelete(String imagePath) {
                 if (!TextUtils.isEmpty(imagePath))
-                    if (FilePathUtil.deleteFile(imagePath))
+                    if (AppPathUtil.deleteFile(imagePath))
                         Toast.makeText(ModifyNoteActivity.this, R.string.MNoteActivity_DWCRtImageDelete, Toast.LENGTH_SHORT).show();
             }
         });
@@ -1062,14 +1062,16 @@ public class ModifyNoteActivity extends AppCompatActivity implements View.OnClic
 
                 ShowLogE("insertImagesSync", "data: " + data); // _Edited
 
-                Bitmap bitmap = ImageUtil.compressImage(
-                    ImageUtil.getBitmapFromPath(data.toString()),
-                    screenWidth, screenHeight, true); // 压缩图片
-                String smallImagePath = SaveFileUtil.saveSmallImg(bitmap);
+                Bitmap bitmap = ImageUtil.getBitmapFromPath(data.toString());
+                bitmap = ImageUtil.compressImage(bitmap, screenWidth, screenHeight, true); // 等屏幕大小 压缩图片
+                bitmap = ImageUtil.compressImage(bitmap); // 质量 压缩图片
+
+                String smallImagePath = SaveNameUtil.getImageFileName(SaveNameUtil.SaveType.SMALL);
+                ImageUtil.saveBitmap(bitmap, smallImagePath);
 
                 ShowLogE("insertImagesSync", "imagePath: " + smallImagePath); // _Small
 
-                FilePathUtil.deleteFile(data.toString()); // 删除 Edited
+                AppPathUtil.deleteFile(data.toString()); // 删除 Edited
 
                 emitter.onNext(smallImagePath);
 

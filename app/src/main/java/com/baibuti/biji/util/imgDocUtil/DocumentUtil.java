@@ -1,6 +1,5 @@
 package com.baibuti.biji.util.imgDocUtil;
 
-import android.graphics.BitmapFactory;
 import android.util.Size;
 
 import com.baibuti.biji.util.stringUtil.StringUtil;
@@ -36,7 +35,7 @@ import java.util.List;
 /**
  * Using POI & IText By AoiHosizora
  */
-public class DocPdfUtil {
+public class DocumentUtil {
 
     // private static int A4_WIDTH = 2480;
     // private static int A4_HEIGHT = 3508;

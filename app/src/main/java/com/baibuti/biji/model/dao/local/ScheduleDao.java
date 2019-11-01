@@ -3,23 +3,25 @@ package com.baibuti.biji.model.dao.local;
 import android.content.Context;
 
 import com.baibuti.biji.model.dao.daoInterface.IScheduleDao;
+import com.baibuti.biji.util.fileUtil.SaveNameUtil;
+import com.baibuti.biji.util.imgDocUtil.TextUtil;
+
+import java.io.File;
+import java.io.IOException;
 
 public class ScheduleDao implements IScheduleDao {
 
-    private Context context;
-
-    public ScheduleDao(Context context) {
-        this.context = context;
-    }
+    public ScheduleDao() { }
 
     /**
      * 查询本地课表
-     * @return Json
+     * @return Json, empty for error
      */
     @Override
     public String querySchedule() {
-
-        return "";
+        String filename = SaveNameUtil.getScheduleFileName(SaveNameUtil.LOCAL);
+        String content = TextUtil.readFromFile(filename);
+        return content == null ? "" : content;
     }
 
     /**
@@ -29,7 +31,8 @@ public class ScheduleDao implements IScheduleDao {
      */
     @Override
     public boolean newSchedule(String json) {
-        return true;
+        String filename = SaveNameUtil.getScheduleFileName(SaveNameUtil.LOCAL);
+        return TextUtil.writeIntoFile(filename, json);
     }
 
     /**
@@ -38,6 +41,15 @@ public class ScheduleDao implements IScheduleDao {
      */
     @Override
     public boolean deleteSchedule() {
-        return true;
+        String filename = SaveNameUtil.getScheduleFileName(SaveNameUtil.LOCAL);
+        try {
+            File file = new File(filename);
+            if (file.exists() && !file.delete())
+                throw new IOException();
+            return true;
+        } catch (IOException ex) {
+            ex.printStackTrace();
+            return false;
+        }
     }
 }

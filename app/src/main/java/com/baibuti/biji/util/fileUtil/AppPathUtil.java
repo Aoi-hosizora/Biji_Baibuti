@@ -15,7 +15,10 @@ import com.baibuti.biji.R;
 
 import java.io.File;
 
-public class FilePathUtil {
+/**
+ * 统一设置 应用路径
+ */
+public class AppPathUtil {
 
     public static final String SDCardRoot = Environment.getExternalStorageDirectory().getAbsolutePath() + File.separator;
     private static final String APP_ROOT = SDCardRoot + "Biji" + File.separator;
@@ -56,7 +59,7 @@ public class FilePathUtil {
     /**
      * OCR 临时保存路径, /Biji/OCRTmp/
      */
-    public static String getOCTTmpDir() {
+    public static String getOCRTmpDir() {
         return mkdirAndGetDir(APP_ROOT + SUB_PATH_OCR_TMP);
     }
 

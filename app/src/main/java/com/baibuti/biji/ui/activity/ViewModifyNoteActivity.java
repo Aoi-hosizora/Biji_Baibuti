@@ -21,11 +21,11 @@ import android.widget.Toast;
 import com.baibuti.biji.model.po.Note;
 import com.baibuti.biji.ui.dialog.ImagePopupDialog;
 import com.baibuti.biji.R;
-import com.baibuti.biji.util.fileUtil.FilePathUtil;
+import com.baibuti.biji.util.fileUtil.AppPathUtil;
 import com.baibuti.biji.util.otherUtil.CommonUtil;
 import com.baibuti.biji.util.otherUtil.LayoutUtil;
 import com.baibuti.biji.util.stringUtil.StringUtil;
-import com.baibuti.biji.util.imgDocUtil.DocPdfUtil;
+import com.baibuti.biji.util.imgDocUtil.DocumentUtil;
 import com.sendtion.xrichtext.RichTextView;
 
 import java.io.File;
@@ -316,7 +316,7 @@ public class ViewModifyNoteActivity extends AppCompatActivity implements View.On
         Intent savefile_intent=new Intent(this, OpenSaveFileActivity.class);
         savefile_intent.putExtra("isSaving", true);
         savefile_intent.putExtra("FileType", ".docx");
-        savefile_intent.putExtra("CurrentDir", FilePathUtil.getFileNoteDir());
+        savefile_intent.putExtra("CurrentDir", AppPathUtil.getFileNoteDir());
         savefile_intent.putExtra("FileName", note.getTitle());
         savefile_intent.putExtra("FileFilterType", "docx|pdf");
 
@@ -455,9 +455,9 @@ public class ViewModifyNoteActivity extends AppCompatActivity implements View.On
             runOnUiThread(() -> {
                 boolean isOk;
                 if (isSaveAsDocx)
-                    isOk = DocPdfUtil.CreateDocxByNote(Path, mnote.getTitle(), mnote.getContent(), true);
+                    isOk = DocumentUtil.CreateDocxByNote(Path, mnote.getTitle(), mnote.getContent(), true);
                 else
-                    isOk = DocPdfUtil.CreatePdfByNote(Path, mnote.getTitle(), mnote.getContent(), true);
+                    isOk = DocumentUtil.CreatePdfByNote(Path, mnote.getTitle(), mnote.getContent(), true);
 
                 if (!isHasDismiss.getDismiss()) {
                     if (savingDialog != null)

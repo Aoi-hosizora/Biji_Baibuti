@@ -10,6 +10,9 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 
+/**
+ * 读取写入 Bitmap & 压缩图片
+ */
 public class ImageUtil {
 
     /**
@@ -55,25 +58,28 @@ public class ImageUtil {
      * 根据默认质量 (90) 压缩图片
      */
     public static Bitmap compressImage(Bitmap bitmap) {
-        return compressImage(bitmap, 90);
-    }
-
-    /**
-     * 根据质量压缩图片
-     */
-    private static Bitmap compressImage(Bitmap bitmap, int quality) {
         ByteArrayOutputStream stream = new ByteArrayOutputStream();
-        bitmap.compress(Bitmap.CompressFormat.JPEG, quality, stream);
+        bitmap.compress(Bitmap.CompressFormat.JPEG, 90, stream);
         byte[] bytes = stream.toByteArray();
         return BitmapFactory.decodeByteArray(bytes, 0, bytes.length);
     }
 
-    /**
-     * 根据等比率压缩图片
-     */
-    public static Bitmap compressImage(Bitmap bitmap, double rate) {
-        return compressImage(bitmap, rate, rate);
-    }
+    // /**
+    //  * 根据质量压缩图片
+    //  */
+    // private static Bitmap compressImage(Bitmap bitmap, int quality) {
+    //     ByteArrayOutputStream stream = new ByteArrayOutputStream();
+    //     bitmap.compress(Bitmap.CompressFormat.JPEG, quality, stream);
+    //     byte[] bytes = stream.toByteArray();
+    //     return BitmapFactory.decodeByteArray(bytes, 0, bytes.length);
+    // }
+
+    // /**
+    //  * 根据等比率压缩图片
+    //  */
+    // public static Bitmap compressImage(Bitmap bitmap, double rate) {
+    //     return compressImage(bitmap, rate, rate);
+    // }
 
     /**
      * 根据不等比率压缩图片
@@ -89,15 +95,15 @@ public class ImageUtil {
 
     /**
      * 根据大小不等比例压缩图片
-     * @param isEqualMatrix 是否等比例，如果不等比例则按照更小的尺寸压缩
+     * @param isKeep 是否等比例，如果不等比例则按照更小的尺寸压缩
      */
-    public static Bitmap compressImage(Bitmap bitmap, int newWidth, int newHeight, boolean isEqualMatrix) {
+    public static Bitmap compressImage(Bitmap bitmap, int newWidth, int newHeight, boolean isKeep) {
         int motoHeight = bitmap.getHeight();
         int motoWidth = bitmap.getWidth();
         double rateX = (double) motoWidth / newWidth;
         double rateY = (double) motoHeight / newHeight;
 
-        if (!isEqualMatrix)
+        if (!isKeep)
             return compressImage(bitmap, rateX, rateY);
         else {
             double rateMin = Math.min(rateX, rateY);

@@ -3,7 +3,6 @@ package com.baibuti.biji.service.searchng;
 import android.util.Log;
 
 import com.baibuti.biji.model.po.SearchItem;
-import com.baibuti.biji.net.NetHelper;
 
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;

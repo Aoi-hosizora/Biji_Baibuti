@@ -8,8 +8,6 @@ import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Build;
 import android.support.annotation.NonNull;
-import android.support.design.internal.BottomNavigationItemView;
-import android.support.design.internal.BottomNavigationMenuView;
 import android.support.design.widget.BottomNavigationView;
 import android.support.design.widget.NavigationView;
 import android.support.v4.app.ActivityCompat;
@@ -31,7 +29,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 import android.view.MenuItem;
 
-import com.baibuti.biji.net.model.respObj.ServerErrorException;
+import com.baibuti.biji.model.dto.ServerException;
 import com.baibuti.biji.service.auth.AuthManager;
 import com.baibuti.biji.service.auth.AuthService;
 import com.baibuti.biji.ui.fragment.ScheduleFragment;
@@ -43,7 +41,6 @@ import com.baibuti.biji.util.otherUtil.LayoutUtil;
 import com.baibuti.biji.util.stringUtil.SearchUtil;
 import com.facebook.stetho.Stetho;
 
-import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -436,7 +433,7 @@ public class MainActivity extends FragmentActivity implements NavigationView.OnN
                         });
                     }
                 }
-                catch (ServerErrorException ex) {
+                catch (ServerException ex) {
                     ex.printStackTrace();
                     runOnUiThread(new Runnable() {
                         @Override

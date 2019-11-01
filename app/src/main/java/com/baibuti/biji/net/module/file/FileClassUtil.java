@@ -2,14 +2,13 @@ package com.baibuti.biji.net.module.file;
 
 import android.support.annotation.NonNull;
 
+import com.baibuti.biji.model.dto.ServerException;
 import com.baibuti.biji.model.po.FileClass;
 import com.baibuti.biji.iGlobal.IPushCallBack;
 import com.baibuti.biji.net.model.reqBody.FileClassReqBody;
 import com.baibuti.biji.net.model.respBody.MessageResp;
-import com.baibuti.biji.net.model.respObj.ServerErrorException;
 import com.baibuti.biji.net.model.RespType;
 import com.baibuti.biji.service.auth.AuthManager;
-import com.baibuti.biji.net.NetHelper;
 import com.baibuti.biji.service.Urls;
 
 import java.io.File;
@@ -29,7 +28,7 @@ public class FileClassUtil {
     private static final String PushFileClassUrl = Urls.FileClassUrl + "/push";
     private static final String GetShareCodeUrl = Urls.FileClassUrl + "/share";
 
-    public static FileClass[] getAllFileClasses() throws ServerErrorException {
+    public static FileClass[] getAllFileClasses() throws ServerException {
         RespType resp = NetHelper.httpGetSync(AllFileClassUrl, NetHelper.getOneHeader("Authorization", AuthManager.getInstance().getToken()));
         try {
             int code = resp.getCode();
@@ -43,7 +42,7 @@ public class FileClassUtil {
             }
             else {
                 MessageResp msg = MessageResp.getMsgRespFromJson(resp.getBody());
-                throw new ServerErrorException(msg.getMessage(), msg.getDetail(), code);
+                throw new ServerException(msg.getMessage(), msg.getDetail(), code);
             }
         }
         catch (NullPointerException ex) {
@@ -52,7 +51,7 @@ public class FileClassUtil {
         }
     }
 
-    public static FileClass updateFileClass(FileClass fileClass) throws ServerErrorException {
+    public static FileClass updateFileClass(FileClass fileClass) throws ServerException {
         RespType resp = NetHelper.httpPostPutDeleteSync(
                 UpdateFileClassUrl, NetHelper.PUT,
                 FileClassReqBody.toFileClassReqBody(fileClass).toJson(),
@@ -71,7 +70,7 @@ public class FileClassUtil {
             }
             else {
                 MessageResp msg = MessageResp.getMsgRespFromJson(resp.getBody());
-                throw new ServerErrorException(msg.getMessage(), msg.getDetail(), code);
+                throw new ServerException(msg.getMessage(), msg.getDetail(), code);
             }
         }
         catch (NullPointerException ex) {
@@ -80,7 +79,7 @@ public class FileClassUtil {
         }
     }
 
-    public static FileClass insertFileClass(FileClass fileClass) throws ServerErrorException {
+    public static FileClass insertFileClass(FileClass fileClass) throws ServerException {
         RespType resp = NetHelper.httpPostPutDeleteSync(
                 InsertFileClassUrl, NetHelper.POST,
                 FileClassReqBody.toFileClassReqBody(fileClass).toJson(),
@@ -99,7 +98,7 @@ public class FileClassUtil {
             }
             else {
                 MessageResp msg = MessageResp.getMsgRespFromJson(resp.getBody());
-                throw new ServerErrorException(msg.getMessage(), msg.getDetail(), code);
+                throw new ServerException(msg.getMessage(), msg.getDetail(), code);
             }
         }
         catch (NullPointerException ex) {
@@ -108,7 +107,7 @@ public class FileClassUtil {
         }
     }
 
-    public static FileClass deleteFileClass(FileClass fileClass) throws ServerErrorException {
+    public static FileClass deleteFileClass(FileClass fileClass) throws ServerException {
         RespType resp = NetHelper.httpPostPutDeleteSync(
                 DeleteFileClassUrl, NetHelper.DELETE,
                 FileClassReqBody.toFileClassReqBody(fileClass).toJson(),
@@ -127,7 +126,7 @@ public class FileClassUtil {
             }
             else {
                 MessageResp msg = MessageResp.getMsgRespFromJson(resp.getBody());
-                throw new ServerErrorException(msg.getMessage(), msg.getDetail(), code);
+                throw new ServerException(msg.getMessage(), msg.getDetail(), code);
             }
         }
         catch (NullPointerException ex) {
@@ -137,7 +136,7 @@ public class FileClassUtil {
     }
 
     @Deprecated
-    public static void pushFileClassAsync(FileClass[] fileClasses, @NonNull IPushCallBack pushCallBack) throws ServerErrorException {
+    public static void pushFileClassAsync(FileClass[] fileClasses, @NonNull IPushCallBack pushCallBack) throws ServerException {
         NetHelper.httpPostPutDeleteAsync(
                 PushFileClassUrl, NetHelper.POST,
                 FileClassReqBody.getJsonFromFileClassReqRodies(FileClassReqBody.toFileClassReqBodies(fileClasses)),

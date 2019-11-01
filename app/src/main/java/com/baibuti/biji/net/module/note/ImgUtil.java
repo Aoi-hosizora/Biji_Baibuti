@@ -5,13 +5,12 @@ import android.graphics.BitmapFactory;
 import android.support.annotation.WorkerThread;
 import android.util.Log;
 
+import com.baibuti.biji.model.dto.ServerException;
 import com.baibuti.biji.net.model.reqBody.DelImgReqBody;
 import com.baibuti.biji.net.model.respBody.MessageResp;
-import com.baibuti.biji.net.model.respObj.ServerErrorException;
 import com.baibuti.biji.net.model.respObj.UploadStatus;
 import com.baibuti.biji.net.model.RespType;
 import com.baibuti.biji.service.auth.AuthManager;
-import com.baibuti.biji.net.NetHelper;
 import com.baibuti.biji.service.Urls;
 
 import java.io.File;
@@ -34,7 +33,7 @@ public class ImgUtil {
     private static final String GetImgUrl = GetImgUrlHead + "%s/%s";
     private static final String DeleteImgUrl = Urls.ImageUrl + "/delete";
 
-    public static UploadStatus uploadImg(String path) throws ServerErrorException {
+    public static UploadStatus uploadImg(String path) throws ServerException {
         Log.e("", "uploadImg: " + ImgUploadUrl );
         File img = new File(path);
         RespType resp = NetHelper.httpPostFileSync(ImgUploadUrl,
@@ -60,7 +59,7 @@ public class ImgUtil {
             }
             else {
                 MessageResp msg = MessageResp.getMsgRespFromJson(resp.getBody());
-                throw new ServerErrorException(msg.getMessage(), msg.getDetail(), code);
+                throw new ServerException(msg.getMessage(), msg.getDetail(), code);
             }
         }
         catch (NullPointerException ex) {

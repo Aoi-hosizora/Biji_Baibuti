@@ -521,7 +521,7 @@ public class StarSearchItemActivity extends AppCompatActivity implements View.On
     //                 for (SearchItem searchItem: searchItems)
     //                     StarUtil.insertStar(searchItem);
     //             }
-    //             catch (ServerErrorException ex) {
+    //             catch (ServerException ex) {
     //                 ex.printStackTrace();
     //                 runOnUiThread(new Runnable() {
     //                     @Override

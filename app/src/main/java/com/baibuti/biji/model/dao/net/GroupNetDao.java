@@ -1,6 +1,7 @@
 package com.baibuti.biji.model.dao.net;
 
 import com.baibuti.biji.model.dto.ResponseDTO;
+import com.baibuti.biji.model.dto.ServerException;
 import com.baibuti.biji.service.auth.AuthManager;
 import com.baibuti.biji.service.retrofit.RetrofitFactory;
 import com.baibuti.biji.model.dao.daoInterface.IGroupDao;
@@ -19,7 +20,7 @@ import io.reactivex.schedulers.Schedulers;
 public class GroupNetDao implements IGroupDao {
 
     @Override
-    public List<Group> queryAllGroups() throws Exception {
+    public List<Group> queryAllGroups() throws ServerException {
         Observable<ResponseDTO<GroupDTO[]>> observable = RetrofitFactory.getInstance()
             .createRequest(AuthManager.getInstance().getAuthorizationHead())
             .getAllGroups()
@@ -33,14 +34,14 @@ public class GroupNetDao implements IGroupDao {
 
             return Arrays.asList(GroupDTO.toGroups(response.getData()));
         }
-        catch (InterruptedException | ExecutionException ex) {
+        catch (ServerException | InterruptedException | ExecutionException ex) {
             ex.printStackTrace();
-            throw ex;
+            throw ServerErrorHandle.getClientError(ex);
         }
     }
 
     @Override
-    public Group queryGroupById(int id) throws Exception {
+    public Group queryGroupById(int id) throws ServerException {
         Observable<ResponseDTO<GroupDTO>> observable = RetrofitFactory.getInstance()
             .createRequest(AuthManager.getInstance().getAuthorizationHead())
             .getGroupById(id)
@@ -54,14 +55,14 @@ public class GroupNetDao implements IGroupDao {
 
             return response.getData().toGroup();
         }
-        catch (InterruptedException | ExecutionException ex) {
+        catch (ServerException | InterruptedException | ExecutionException ex) {
             ex.printStackTrace();
-            throw ex;
+            throw ServerErrorHandle.getClientError(ex);
         }
     }
 
     @Override
-    public Group queryDefaultGroup() throws Exception {
+    public Group queryDefaultGroup() throws ServerException {
         Observable<ResponseDTO<GroupDTO>> observable = RetrofitFactory.getInstance()
             .createRequest(AuthManager.getInstance().getAuthorizationHead())
             .getDefaultGroup()
@@ -75,14 +76,14 @@ public class GroupNetDao implements IGroupDao {
 
             return response.getData().toGroup();
         }
-        catch (InterruptedException | ExecutionException ex) {
+        catch (ServerException | InterruptedException | ExecutionException ex) {
             ex.printStackTrace();
-            throw ex;
+            throw ServerErrorHandle.getClientError(ex);
         }
     }
 
     @Override
-    public long insertGroup(Group group) throws Exception {
+    public long insertGroup(Group group) throws ServerException {
         Observable<ResponseDTO<GroupDTO>> observable = RetrofitFactory.getInstance()
             .createRequest(AuthManager.getInstance().getAuthorizationHead())
             .insertGroup(GroupDTO.toGroupDTO(group))
@@ -96,14 +97,14 @@ public class GroupNetDao implements IGroupDao {
 
             return response.getData().getId();
         }
-        catch (InterruptedException | ExecutionException ex) {
+        catch (ServerException | InterruptedException | ExecutionException ex) {
             ex.printStackTrace();
-            throw ex;
+            throw ServerErrorHandle.getClientError(ex);
         }
     }
 
     @Override
-    public boolean updateGroup(Group group) throws Exception {
+    public boolean updateGroup(Group group) throws ServerException {
         Observable<ResponseDTO<GroupDTO>> observable = RetrofitFactory.getInstance()
             .createRequest(AuthManager.getInstance().getAuthorizationHead())
             .updateGroup(GroupDTO.toGroupDTO(group))
@@ -117,14 +118,14 @@ public class GroupNetDao implements IGroupDao {
 
             return true;
         }
-        catch (InterruptedException | ExecutionException ex) {
+        catch (ServerException | InterruptedException | ExecutionException ex) {
             ex.printStackTrace();
-            throw ex;
+            throw ServerErrorHandle.getClientError(ex);
         }
     }
 
     @Override
-    public boolean deleteGroup(int id) throws Exception {
+    public boolean deleteGroup(int id) throws ServerException {
         Observable<ResponseDTO<GroupDTO>> observable = RetrofitFactory.getInstance()
             .createRequest(AuthManager.getInstance().getAuthorizationHead())
             .deleteGroup(id)
@@ -137,9 +138,9 @@ public class GroupNetDao implements IGroupDao {
                 throw ServerErrorHandle.parseErrorMessage(response);
 
             return true;
-        } catch (InterruptedException | ExecutionException ex) {
+        } catch (ServerException | InterruptedException | ExecutionException ex) {
             ex.printStackTrace();
-            throw ex;
+            throw ServerErrorHandle.getClientError(ex);
         }
     }
 }

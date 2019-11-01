@@ -1,5 +1,6 @@
 package com.baibuti.biji.model.dao.daoInterface;
 
+import com.baibuti.biji.model.dto.ServerException;
 import com.baibuti.biji.model.po.SearchItem;
 
 import java.util.List;
@@ -7,11 +8,11 @@ import java.util.List;
 public interface ISearchItemDao {
 
     // 查
-    List<SearchItem> queryAllSearchItems() throws Exception;
-    SearchItem querySearchItemByUrl(String url) throws Exception;
+    List<SearchItem> queryAllSearchItems() throws ServerException;
+    SearchItem querySearchItemByUrl(String url) throws ServerException;
 
     // 增删改
-    long insertSearchItem(SearchItem searchItem) throws Exception;
-    boolean deleteSearchItem(String url) throws Exception;
-    int deleteSearchItems(List<SearchItem> searchItems) throws Exception;
+    long insertSearchItem(SearchItem searchItem) throws ServerException;
+    boolean deleteSearchItem(String url) throws ServerException;
+    int deleteSearchItems(List<SearchItem> searchItems) throws ServerException;
 }

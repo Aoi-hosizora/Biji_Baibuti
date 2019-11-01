@@ -1,6 +1,7 @@
 package com.baibuti.biji.model.dao.net;
 
 import com.baibuti.biji.model.dto.ResponseDTO;
+import com.baibuti.biji.model.dto.ServerException;
 import com.baibuti.biji.service.auth.AuthManager;
 import com.baibuti.biji.service.retrofit.RetrofitFactory;
 import com.baibuti.biji.model.dao.daoInterface.ISearchItemDao;
@@ -19,7 +20,7 @@ import io.reactivex.schedulers.Schedulers;
 public class SearchItemNetDao implements ISearchItemDao {
 
     @Override
-    public List<SearchItem> queryAllSearchItems() throws Exception {
+    public List<SearchItem> queryAllSearchItems() throws ServerException {
         Observable<ResponseDTO<SearchItemDTO[]>> observable = RetrofitFactory.getInstance()
             .createRequest(AuthManager.getInstance().getAuthorizationHead())
             .getAllStars()
@@ -33,15 +34,15 @@ public class SearchItemNetDao implements ISearchItemDao {
 
             return Arrays.asList(SearchItemDTO.toSearchItems(response.getData()));
         }
-        catch (InterruptedException | ExecutionException ex) {
+        catch (ServerException | InterruptedException | ExecutionException ex) {
             ex.printStackTrace();
-            throw ex;
+            throw ServerErrorHandle.getClientError(ex);
         }
     }
 
     // TODO 接口待改
     @Override
-    public SearchItem querySearchItemByUrl(String url) throws Exception {
+    public SearchItem querySearchItemByUrl(String url) throws ServerException {
         List<SearchItem> searchItems = queryAllSearchItems();
 
         for (SearchItem searchItem : searchItems)
@@ -51,7 +52,7 @@ public class SearchItemNetDao implements ISearchItemDao {
     }
 
     @Override
-    public long insertSearchItem(SearchItem searchItem) throws Exception {
+    public long insertSearchItem(SearchItem searchItem) throws ServerException {
         Observable<ResponseDTO<SearchItemDTO>> observable = RetrofitFactory.getInstance()
             .createRequest(AuthManager.getInstance().getAuthorizationHead())
             .insertStar(SearchItemDTO.toSearchItemDTO(searchItem))
@@ -65,14 +66,14 @@ public class SearchItemNetDao implements ISearchItemDao {
 
             return 1;
         }
-        catch (InterruptedException | ExecutionException ex) {
+        catch (ServerException | InterruptedException | ExecutionException ex) {
             ex.printStackTrace();
-            throw ex;
+            throw ServerErrorHandle.getClientError(ex);
         }
     }
 
     @Override
-    public boolean deleteSearchItem(String url) throws Exception {
+    public boolean deleteSearchItem(String url) throws ServerException {
         Observable<ResponseDTO<SearchItemDTO>> observable = RetrofitFactory.getInstance()
             .createRequest(AuthManager.getInstance().getAuthorizationHead())
             .deleteStar(url)
@@ -86,15 +87,15 @@ public class SearchItemNetDao implements ISearchItemDao {
 
             return true;
         }
-        catch (InterruptedException | ExecutionException ex) {
+        catch (ServerException | InterruptedException | ExecutionException ex) {
             ex.printStackTrace();
-            throw ex;
+            throw ServerErrorHandle.getClientError(ex);
         }
     }
 
     // TODO 接口待改
     @Override
-    public int deleteSearchItems(List<SearchItem> searchItems) throws Exception {
+    public int deleteSearchItems(List<SearchItem> searchItems) throws ServerException {
         Observable<ResponseDTO<SearchItemDTO[]>> observable = RetrofitFactory.getInstance()
             .createRequest(AuthManager.getInstance().getAuthorizationHead())
             .deleteStars(SearchItemDTO.toSearchItemUrls(searchItems))
@@ -108,9 +109,9 @@ public class SearchItemNetDao implements ISearchItemDao {
 
             return response.getData().length;
         }
-        catch (InterruptedException | ExecutionException ex) {
+        catch (ServerException | InterruptedException | ExecutionException ex) {
             ex.printStackTrace();
-            throw ex;
+            throw ServerErrorHandle.getClientError(ex);
         }
     }
 }

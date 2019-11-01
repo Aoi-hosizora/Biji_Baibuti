@@ -4,14 +4,13 @@ import android.os.Environment;
 import android.support.annotation.NonNull;
 import android.util.Log;
 
+import com.baibuti.biji.model.dto.ServerException;
 import com.baibuti.biji.model.po.Document;
 import com.baibuti.biji.iGlobal.IPushCallBack;
 import com.baibuti.biji.net.model.reqBody.DocumentReqBody;
 import com.baibuti.biji.net.model.respBody.MessageResp;
-import com.baibuti.biji.net.model.respObj.ServerErrorException;
 import com.baibuti.biji.net.model.RespType;
 import com.baibuti.biji.service.auth.AuthManager;
-import com.baibuti.biji.net.NetHelper;
 import com.baibuti.biji.service.Urls;
 
 import org.json.JSONException;
@@ -56,7 +55,7 @@ public class DocumentUtil {
         return FILE_PATH+foldername+"/";
     }
 
-    public static Document[] getAllFiles(String params) throws ServerErrorException {
+    public static Document[] getAllFiles(String params) throws ServerException {
         RespType resp = NetHelper.httpGetSync(AllFileUrl + params, NetHelper.getOneHeader("Authorization", AuthManager.getInstance().getToken()));
         try {
             int code = resp.getCode();
@@ -70,7 +69,7 @@ public class DocumentUtil {
             }
             else {
                 MessageResp msg = MessageResp.getMsgRespFromJson(resp.getBody());
-                throw new ServerErrorException(msg.getMessage(), msg.getDetail(), code);
+                throw new ServerException(msg.getMessage(), msg.getDetail(), code);
             }
         }
         catch (NullPointerException ex) {
@@ -79,7 +78,7 @@ public class DocumentUtil {
         }
     }
 
-    public static void postFile(Document document, @NonNull IPushCallBack pushCallBack) throws ServerErrorException{
+    public static void postFile(Document document, @NonNull IPushCallBack pushCallBack) throws ServerException {
         Map<String, String> k_v = new HashMap<>();
         k_v.put("id", document.getId()+"");
         k_v.put("foldername", document.getClassName());
@@ -107,7 +106,7 @@ public class DocumentUtil {
         );
     }
 
-    public static boolean deleteFile(Document document) throws ServerErrorException {
+    public static boolean deleteFile(Document document) throws ServerException {
 
         Log.e("测试", "deleteFile: " + DocumentReqBody.toFileReqBody(document).toJson());
 
@@ -127,7 +126,7 @@ public class DocumentUtil {
             }
             else {
                 MessageResp msg = MessageResp.getMsgRespFromJson(resp.getBody());
-                throw new ServerErrorException(msg.getMessage(), msg.getDetail(), code);
+                throw new ServerException(msg.getMessage(), msg.getDetail(), code);
             }
         }
         catch (NullPointerException ex) {
@@ -136,7 +135,7 @@ public class DocumentUtil {
         }
     }
 
-    public static boolean deleteFiles(String fileClassName) throws ServerErrorException {
+    public static boolean deleteFiles(String fileClassName) throws ServerException {
         RespType resp;
         try {
             resp = NetHelper.httpPostPutDeleteSync(
@@ -159,7 +158,7 @@ public class DocumentUtil {
             }
             else {
                 MessageResp msg = MessageResp.getMsgRespFromJson(resp.getBody());
-                throw new ServerErrorException(msg.getMessage(), msg.getDetail(), code);
+                throw new ServerException(msg.getMessage(), msg.getDetail(), code);
             }
         }
         catch (NullPointerException ex) {
@@ -168,7 +167,7 @@ public class DocumentUtil {
         }
     }
 
-    public static boolean downloadFile(Document document) throws ServerErrorException {
+    public static boolean downloadFile(Document document) throws ServerException {
         File file = NetHelper.httpGetFileSync(
                 DownloadFileUrl + "?foldername=" + document.getClassName() +
                 "&&filename=" + document.getDocName() +
@@ -184,7 +183,7 @@ public class DocumentUtil {
         return false;
     }
 
-    public static void pushDocumentsAsync(Document[] documents, @NonNull IPushCallBack pushCallBack) throws ServerErrorException {
+    public static void pushDocumentsAsync(Document[] documents, @NonNull IPushCallBack pushCallBack) throws ServerException {
         for(Document document: documents){
             Log.e("测试", "pushDocumentsAsync: \n"
             + document.getId() + ' ' + document.getDocName() + ' ' + document.getClassName() + '\n');
@@ -214,7 +213,7 @@ public class DocumentUtil {
         );
     }
 
-    public static boolean getSharedFiles(String params) throws ServerErrorException {
+    public static boolean getSharedFiles(String params) throws ServerException {
         RespType resp = NetHelper.httpGetSync(GetSharedDocuments + params,
                 NetHelper.getOneHeader("Authorization", AuthManager.getInstance().getToken()));
         try {
@@ -228,7 +227,7 @@ public class DocumentUtil {
             }
             else {
                 MessageResp msg = MessageResp.getMsgRespFromJson(resp.getBody());
-                throw new ServerErrorException(msg.getMessage(), msg.getDetail(), code);
+                throw new ServerException(msg.getMessage(), msg.getDetail(), code);
             }
         }
         catch (NullPointerException ex) {

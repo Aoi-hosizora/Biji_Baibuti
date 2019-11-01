@@ -36,6 +36,7 @@ import android.widget.SearchView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.baibuti.biji.model.dto.ServerException;
 import com.baibuti.biji.service.auth.AuthManager;
 import com.baibuti.biji.ui.adapter.DocumentAdapter;
 import com.baibuti.biji.ui.adapter.FileClassAdapter;
@@ -44,7 +45,6 @@ import com.baibuti.biji.model.dao.local.FileClassDao;
 import com.baibuti.biji.model.po.Document;
 import com.baibuti.biji.model.po.FileClass;
 import com.baibuti.biji.model.po.FileItem;
-import com.baibuti.biji.net.model.respObj.ServerErrorException;
 import com.baibuti.biji.net.module.file.DocumentUtil;
 import com.baibuti.biji.net.module.file.FileClassUtil;
 import com.baibuti.biji.R;
@@ -518,7 +518,7 @@ public class FileFragment extends Fragment {
                                 refresh();
                             }
                         });
-                    }catch(ServerErrorException e){
+                    }catch(ServerException e){
                         e.printStackTrace();
                     }
                 }
@@ -944,7 +944,7 @@ public class FileFragment extends Fragment {
                             }
                             documentDao.updateDocumentPath(document);
                             cancelLoadingDialog();
-                        }catch (ServerErrorException e){
+                        }catch (ServerException e){
                             e.printStackTrace();
                         }
                     }

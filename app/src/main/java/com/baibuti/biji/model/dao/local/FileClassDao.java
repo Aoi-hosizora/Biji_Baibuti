@@ -9,8 +9,8 @@ import android.database.sqlite.SQLiteStatement;
 import android.util.Log;
 
 import com.baibuti.biji.model.dao.DbOpenHelper;
+import com.baibuti.biji.model.dto.ServerException;
 import com.baibuti.biji.model.po.FileClass;
-import com.baibuti.biji.net.model.respObj.ServerErrorException;
 import com.baibuti.biji.service.auth.AuthManager;
 import com.baibuti.biji.net.module.file.FileClassUtil;
 
@@ -270,7 +270,7 @@ public class FileClassDao {
                 if (FileClassUtil.insertFileClass(fileClass) != null)
                     ServerDbUpdateHelper.pushLog(context, LogModule.Mod_FileClass);
             }
-            catch (ServerErrorException ex) {
+            catch (ServerException ex) {
                 ex.printStackTrace();
             }
         }
@@ -362,7 +362,7 @@ public class FileClassDao {
                 if (FileClassUtil.updateFileClass(fileClass) != null)
                     ServerDbUpdateHelper.pushLog(context, LogModule.Mod_FileClass);
             }
-            catch (ServerErrorException ex) {
+            catch (ServerException ex) {
                 ex.printStackTrace();
             }
         }
@@ -426,7 +426,7 @@ public class FileClassDao {
                 if (FileClassUtil.deleteFileClass(f) != null)
                     ServerDbUpdateHelper.pushLog(context, LogModule.Mod_FileClass);
             }
-            catch (ServerErrorException ex) {
+            catch (ServerException ex) {
                 ex.printStackTrace();
             }
         }

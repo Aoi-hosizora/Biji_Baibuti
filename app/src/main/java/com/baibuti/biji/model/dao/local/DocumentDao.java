@@ -9,9 +9,9 @@ import android.database.sqlite.SQLiteStatement;
 import android.util.Log;
 
 import com.baibuti.biji.model.dao.DbOpenHelper;
+import com.baibuti.biji.model.dto.ServerException;
 import com.baibuti.biji.model.po.Document;
 import com.baibuti.biji.iGlobal.IPushCallBack;
-import com.baibuti.biji.net.model.respObj.ServerErrorException;
 import com.baibuti.biji.service.auth.AuthManager;
 import com.baibuti.biji.net.module.file.DocumentUtil;
 
@@ -245,7 +245,7 @@ public class DocumentDao {
                     if (DocumentUtil.deleteFile(document))
                         ServerDbUpdateHelper.pushLog(context, LogModule.Mod_Document);
             }
-            catch (ServerErrorException ex) {
+            catch (ServerException ex) {
                 ex.printStackTrace();
             }
         }
@@ -287,7 +287,7 @@ public class DocumentDao {
                 if (DocumentUtil.deleteFiles(documentClassName))
                     ServerDbUpdateHelper.pushLog(context, LogModule.Mod_Document);
             }
-            catch (ServerErrorException ex) {
+            catch (ServerException ex) {
                 ex.printStackTrace();
             }
         }

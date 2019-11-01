@@ -5,7 +5,6 @@ import android.app.Dialog;
 import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
@@ -56,11 +55,9 @@ import com.baibuti.biji.ui.widget.listView.SpacesItemDecoration;
 import com.baibuti.biji.ui.widget.listView.RecyclerViewEmptySupport;
 import com.baibuti.biji.model.dao.local.GroupDao;
 import com.baibuti.biji.model.dao.local.NoteDao;
-import com.baibuti.biji.util.fileUtil.FilePathUtil;
-import com.baibuti.biji.util.fileUtil.SaveFileUtil;
-import com.baibuti.biji.util.imgDocUtil.ImageUtil;
+import com.baibuti.biji.util.fileUtil.AppPathUtil;
+import com.baibuti.biji.util.fileUtil.SaveNameUtil;
 import com.baibuti.biji.util.otherUtil.LayoutUtil;
-import com.baibuti.biji.util.otherUtil.CommonUtil;
 import com.getbase.floatingactionbutton.FloatingActionButton;
 import com.getbase.floatingactionbutton.FloatingActionsMenu;
 import com.wyt.searchbox.SearchFragment;
@@ -1044,11 +1041,11 @@ public class NoteFragment extends Fragment implements View.OnClickListener {
     private void takePhoto() {
 
         // 要保存的图片文件 _PHOTO 格式
-        String filename = SaveFileUtil.getImageFileName(SaveFileUtil.SaveImageType.PHOTO);
+        String filename = SaveNameUtil.getImageFileName(SaveNameUtil.SaveType.PHOTO);
 
         // 7.0 调用系统相机拍照不再允许使用 Uri 方式，应该替换为 FileProvider
         // provider 路径
-        imgUri = FilePathUtil.getUriByPath(getContext(), filename);
+        imgUri = AppPathUtil.getUriByPath(getContext(), filename);
 
         Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
         // 权限
@@ -1091,7 +1088,7 @@ public class NoteFragment extends Fragment implements View.OnClickListener {
     private void StartEditImg(Uri uri) {
         try {
             // 获得源路径
-            String imgPath = FilePathUtil.getFilePathByUri(getContext(), uri);
+            String imgPath = AppPathUtil.getFilePathByUri(getContext(), uri);
 
             if (imgPath == null || imgPath.isEmpty()) {
                 new AlertDialog.Builder(getContext())
@@ -1109,7 +1106,7 @@ public class NoteFragment extends Fragment implements View.OnClickListener {
 
             // intent.putExtra(IMGEditActivity.INT_IMAGE_URI, uri2);
             intent.putExtra(IMGEditActivity.INT_IMAGE_URI, uri);
-            intent.putExtra(IMGEditActivity.INT_IMAGE_SAVE_URI, SaveFileUtil.getImageFileName(SaveFileUtil.SaveImageType.EDITED));
+            intent.putExtra(IMGEditActivity.INT_IMAGE_SAVE_URI, SaveNameUtil.getImageFileName(SaveNameUtil.SaveType.EDITED));
 
             startActivityForResult(intent, REQUEST_CROP);
         } catch (Exception e) {
@@ -1327,7 +1324,7 @@ public class NoteFragment extends Fragment implements View.OnClickListener {
             case REQUEST_CROP: // 裁剪
                 if (resultCode == RESULT_OK) {
                     // _PHOTO
-                    FilePathUtil.deleteFile(FilePathUtil.getFilePathByUri(getContext(), imgUri));
+                    AppPathUtil.deleteFile(AppPathUtil.getFilePathByUri(getContext(), imgUri));
                     OpenOCRAct(data.getData()); // _small uri
                 }
                 break;

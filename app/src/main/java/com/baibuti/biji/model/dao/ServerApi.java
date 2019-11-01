@@ -100,4 +100,17 @@ public interface ServerApi {
 
     // endregion SearchItem
 
+    // region Schedule (3)
+
+    @GET("/schedule/download")
+    Observable<ResponseDTO<String>> getSchedule();
+
+    @POST("/schedule/new")
+    Observable<ResponseDTO<Object>> newSchedule();
+
+    @DELETE("/schedule/delete")
+    Observable<ResponseDTO<Object>> deleteSchedule();
+
+    // endregion Schedule
+
 }

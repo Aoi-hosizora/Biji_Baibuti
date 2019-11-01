@@ -2,6 +2,7 @@ package com.baibuti.biji.model.dao.net;
 
 import com.baibuti.biji.model.dao.daoInterface.INoteDao;
 import com.baibuti.biji.model.dto.ResponseDTO;
+import com.baibuti.biji.model.dto.ServerException;
 import com.baibuti.biji.model.po.Note;
 import com.baibuti.biji.service.auth.AuthManager;
 import com.baibuti.biji.service.retrofit.RetrofitFactory;
@@ -19,7 +20,7 @@ import io.reactivex.schedulers.Schedulers;
 public class NoteNetDao implements INoteDao {
 
     @Override
-    public List<Note> queryAllNotes() throws Exception {
+    public List<Note> queryAllNotes() throws ServerException {
         Observable<ResponseDTO<NoteDTO[]>> observable = RetrofitFactory.getInstance()
             .createRequest(AuthManager.getInstance().getAuthorizationHead())
             .getAllNotes()
@@ -33,14 +34,14 @@ public class NoteNetDao implements INoteDao {
 
             return Arrays.asList(NoteDTO.toNotes(response.getData()));
         }
-        catch (InterruptedException | ExecutionException ex) {
+        catch (ServerException | InterruptedException | ExecutionException ex) {
             ex.printStackTrace();
-            throw ex;
+            throw ServerErrorHandle.getClientError(ex);
         }
     }
 
     @Override
-    public List<Note> queryNotesByGroupId(int id) throws Exception {
+    public List<Note> queryNotesByGroupId(int id) throws ServerException {
         Observable<ResponseDTO<NoteDTO[]>> observable = RetrofitFactory.getInstance()
             .createRequest(AuthManager.getInstance().getAuthorizationHead())
             .getNotesByGroupId(id)
@@ -54,14 +55,14 @@ public class NoteNetDao implements INoteDao {
 
             return Arrays.asList(NoteDTO.toNotes(response.getData()));
         }
-        catch (InterruptedException | ExecutionException ex) {
+        catch (ServerException | InterruptedException | ExecutionException ex) {
             ex.printStackTrace();
-            throw ex;
+            throw ServerErrorHandle.getClientError(ex);
         }
     }
 
     @Override
-    public Note queryNoteById(int id) throws Exception {
+    public Note queryNoteById(int id) throws ServerException {
         Observable<ResponseDTO<NoteDTO>> observable = RetrofitFactory.getInstance()
             .createRequest(AuthManager.getInstance().getAuthorizationHead())
             .getNoteById(id)
@@ -75,14 +76,14 @@ public class NoteNetDao implements INoteDao {
 
             return response.getData().toNote();
         }
-        catch (InterruptedException | ExecutionException ex) {
+        catch (ServerException | InterruptedException | ExecutionException ex) {
             ex.printStackTrace();
-            throw ex;
+            throw ServerErrorHandle.getClientError(ex);
         }
     }
 
     @Override
-    public long insertNote(Note note) throws Exception {
+    public long insertNote(Note note) throws ServerException {
         // TODO 同时上传图片
         Observable<ResponseDTO<NoteDTO>> observable = RetrofitFactory.getInstance()
             .createRequest(AuthManager.getInstance().getAuthorizationHead())
@@ -97,14 +98,14 @@ public class NoteNetDao implements INoteDao {
 
             return response.getData().getId();
         }
-        catch (InterruptedException | ExecutionException ex) {
+        catch (ServerException | InterruptedException | ExecutionException ex) {
             ex.printStackTrace();
-            throw ex;
+            throw ServerErrorHandle.getClientError(ex);
         }
     }
 
     @Override
-    public boolean updateNote(Note note) throws Exception {
+    public boolean updateNote(Note note) throws ServerException {
         // TODO 同时上传图片
         Observable<ResponseDTO<NoteDTO>> observable = RetrofitFactory.getInstance()
             .createRequest(AuthManager.getInstance().getAuthorizationHead())
@@ -119,14 +120,14 @@ public class NoteNetDao implements INoteDao {
 
             return true;
         }
-        catch (InterruptedException | ExecutionException ex) {
+        catch (ServerException | InterruptedException | ExecutionException ex) {
             ex.printStackTrace();
-            throw ex;
+            throw ServerErrorHandle.getClientError(ex);
         }
     }
 
     @Override
-    public boolean deleteNote(int id) throws Exception {
+    public boolean deleteNote(int id) throws ServerException {
         // TODO 同时判断，删除图片
         Observable<ResponseDTO<NoteDTO>> observable = RetrofitFactory.getInstance()
             .createRequest(AuthManager.getInstance().getAuthorizationHead())
@@ -141,9 +142,9 @@ public class NoteNetDao implements INoteDao {
 
             return true;
         }
-        catch (InterruptedException | ExecutionException ex) {
+        catch (ServerException | InterruptedException | ExecutionException ex) {
             ex.printStackTrace();
-            throw ex;
+            throw ServerErrorHandle.getClientError(ex);
         }
     }
 }
