@@ -382,7 +382,7 @@ public class MainActivity extends FragmentActivity implements NavigationView.OnN
      * 导航栏 登录
      */
     private void toLogin() {
-        Intent reglogIntent = new Intent(MainActivity.this, RegLogActivity.class);
+        Intent reglogIntent = new Intent(MainActivity.this, AuthActivity.class);
         startActivityForResult(reglogIntent, REQ_LOGIN);
     }
 
@@ -391,7 +391,7 @@ public class MainActivity extends FragmentActivity implements NavigationView.OnN
      */
     private void login() {
         m_navigationView.getMenu().findItem(R.id.id_nav_login).setTitle(R.string.nav_logout);
-        refreshUserInfo(AuthManager.getInstance().getUsername());
+        refreshUserInfo(AuthManager.getInstance().getUserName());
 
         // TODO 更新界面
         checkLoginStatus();
@@ -470,7 +470,7 @@ public class MainActivity extends FragmentActivity implements NavigationView.OnN
         if (!(AuthManager.getInstance().isLogin()))
             refreshUserInfo("未登录用户");
         else
-            refreshUserInfo(AuthManager.getInstance().getUsername());
+            refreshUserInfo(AuthManager.getInstance().getUserName());
 
     }
 

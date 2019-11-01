@@ -11,17 +11,17 @@ import com.baibuti.biji.R;
 import com.baibuti.biji.ui.fragment.LoginFragment;
 import com.baibuti.biji.ui.fragment.RegisterFragment;
 
-public class RegLogPageAdapter extends FragmentPagerAdapter {
+public class AuthPageAdapter extends FragmentPagerAdapter {
 
     @StringRes
     public static final int[] TAB_TITLES = new int[] {
-            R.string.RegLogAct_Login,
-            R.string.RegLogAct_Register
+        R.string.RegLogAct_Login,
+        R.string.RegLogAct_Register
     };
 
     private final Context m_Context;
 
-    public RegLogPageAdapter(Context context, FragmentManager fm) {
+    public AuthPageAdapter(Context context, FragmentManager fm) {
         super(fm);
         m_Context = context;
     }

@@ -76,7 +76,7 @@
             </intent-filter>
         </activity> <!-- RegLog Activity -->
         <activity
-            android:name=".ui.activity.RegLogActivity"
+            android:name=".ui.activity.AuthActivity"
             android:screenOrientation="portrait">
             <intent-filter>
                 <action android:name="activitytest.example.com.activitytest.RegLogActivity" />

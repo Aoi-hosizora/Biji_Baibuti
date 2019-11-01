@@ -19,11 +19,11 @@ public class AuthManager {
         return Instance;
     }
 
-    @Getter private String username;
+    @Getter private String userName;
     @Getter private String token;
 
     public boolean isLogin() {
-        return username != null && !username.isEmpty() &&
+        return userName != null && !userName.isEmpty() &&
             token != null && !token.isEmpty();
     }
 
@@ -38,37 +38,27 @@ public class AuthManager {
     }
 
     /**
-     * 注销操作，并通知订阅器
+     * !! 注销，并通知订阅器
      */
     public void logout() {
         this.token = "";
-        this.username = "";
+        this.userName = "";
 
-        try {
-            if (onLoginChangeListeners != null)
-                for (OnLoginChangeListener onLoginChangeListener : onLoginChangeListeners)
-                    onLoginChangeListener.onLogout();
-        }
-        catch (Exception ex) {
-            ex.printStackTrace();
-        }
+        if (onLoginChangeListeners != null)
+            for (OnLoginChangeListener onLoginChangeListener : onLoginChangeListeners)
+                onLoginChangeListener.onLogout();
     }
 
     /**
-     * 登录，并通知订阅器
+     * !! 登录，并通知订阅器
      */
     public void login(String username, String token) {
         this.token = token;
-        this.username = username;
+        this.userName = username;
 
-        try {
-            if (onLoginChangeListeners != null)
-                for (OnLoginChangeListener onLoginChangeListener : onLoginChangeListeners)
-                    onLoginChangeListener.onLogin(username);
-        }
-        catch (Exception ex) {
-            ex.printStackTrace();
-        }
+        if (onLoginChangeListeners != null)
+            for (OnLoginChangeListener onLoginChangeListener : onLoginChangeListeners)
+                onLoginChangeListener.onLogin(username);
     }
 
     public interface OnLoginChangeListener {

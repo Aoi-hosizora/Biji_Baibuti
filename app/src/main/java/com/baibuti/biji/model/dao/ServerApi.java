@@ -11,22 +11,29 @@ import com.baibuti.biji.model.dto.SearchItemDTO;
 import com.baibuti.biji.service.auth.dto.LoginDTO;
 import com.baibuti.biji.service.auth.dto.RegisterDTO;
 
+import java.util.Map;
+
 import io.reactivex.Observable;
+import okhttp3.RequestBody;
+import retrofit2.Response;
 import retrofit2.http.Body;
 import retrofit2.http.DELETE;
 import retrofit2.http.Field;
 import retrofit2.http.FormUrlEncoded;
 import retrofit2.http.GET;
+import retrofit2.http.Multipart;
 import retrofit2.http.POST;
 import retrofit2.http.PUT;
+import retrofit2.http.PartMap;
 import retrofit2.http.Path;
 
 public interface ServerApi {
 
     // region Auth (3)
 
+    // TODO Authorization 响应头
     @POST("/auth/login")
-    Observable<ResponseDTO<AuthRespDTO>> login(@Body() LoginDTO loginDTO);
+    Observable<Response<ResponseDTO<AuthRespDTO>>> login(@Body() LoginDTO loginDTO);
 
     @POST("/auth/logout")
     Observable<ResponseDTO<AuthRespDTO>> logout();
@@ -83,6 +90,17 @@ public interface ServerApi {
     Observable<ResponseDTO<GroupDTO>> deleteGroup(@Path("id") int id);
 
     // endregion Group
+
+    // region Image
+
+    @Multipart
+    @POST("/image/upload")
+    Observable<ResponseDTO<String>> uploadImage(@PartMap Map<String, RequestBody> requestBodyMap);
+
+    @DELETE("/image/upload")
+    Observable<ResponseDTO<Object>> deleteImage();
+
+    // endregion
 
     // region SearchItem (4)
 

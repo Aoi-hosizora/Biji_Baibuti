@@ -1,7 +1,6 @@
 package com.baibuti.biji.ui.fragment;
 
 import android.app.Activity;
-import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.Intent;
 import android.support.annotation.NonNull;
@@ -10,32 +9,31 @@ import android.support.design.widget.TextInputLayout;
 import android.support.v4.app.Fragment;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
-import android.widget.Toast;
 
+import com.baibuti.biji.model.dto.ServerException;
 import com.baibuti.biji.service.auth.AuthManager;
 import com.baibuti.biji.service.auth.AuthService;
 import com.baibuti.biji.R;
-import com.baibuti.biji.ui.activity.RegLogActivity;
+import com.baibuti.biji.service.auth.dto.AuthRespDTO;
+import com.baibuti.biji.ui.activity.AuthActivity;
+import com.baibuti.biji.ui.IContextHelper;
 
 import java.util.Locale;
 
-public class LoginFragment extends Fragment implements View.OnClickListener {
+import butterknife.BindView;
+import butterknife.OnClick;
+
+public class LoginFragment extends Fragment implements IContextHelper {
 
     public View view;
-    private Button m_LoginButton;
-    private Button m_ClearButton;
-    private Button m_ToRegisterButton;
-    private TextInputLayout m_LoginLayout;
-    private TextInputEditText m_LoginEditText;
-    private TextInputLayout m_PasswordLayout;
-    private TextInputEditText m_PasswordEditText;
 
-    private ProgressDialog m_logining;
+    @BindView(R.id.id_LoginFrag_UsernameLayout)     private TextInputLayout m_LoginLayout;
+    @BindView(R.id.id_LoginFrag_UsernameText)       private TextInputEditText m_LoginEditText;
+    @BindView(R.id.id_LoginFrag_PasswordLayout)     private TextInputLayout m_PasswordLayout;
+    @BindView(R.id.id_LoginFrag_PasswordText)       private TextInputEditText m_PasswordEditText;
 
     @Nullable
     @Override
@@ -54,44 +52,19 @@ public class LoginFragment extends Fragment implements View.OnClickListener {
         return view;
     }
 
+    /**
+     * 初始化界面，标题
+     */
     private void initView() {
-        m_LoginButton = view.findViewById(R.id.id_LoginFrag_LoginButton);
-        m_ToRegisterButton = view.findViewById(R.id.id_LoginFrag_ToRegisterButton);
-        m_ClearButton = view.findViewById(R.id.id_LoginFrag_ClearButton);
-
-        m_LoginLayout = view.findViewById(R.id.id_LoginFrag_LoginLayout);
-        m_LoginEditText = view.findViewById(R.id.id_LoginFrag_LoginText);
-        m_PasswordLayout = view.findViewById(R.id.id_LoginFrag_PasswordLayout);
-        m_PasswordEditText = view.findViewById(R.id.id_LoginFrag_PasswordText);
-
-        m_LoginButton.setOnClickListener(this);
-        m_ToRegisterButton.setOnClickListener(this);
-        m_ClearButton.setOnClickListener(this);
-
-        m_logining = new ProgressDialog(getContext());
-        m_logining.setCancelable(false);
-
         if (AuthManager.getInstance().isLogin())
             m_LoginEditText.setText(AuthManager.getInstance().getUserName());
     }
 
-    @Override
-    public void onClick(View v) {
-        switch (v.getId()) {
-            case R.id.id_LoginFrag_LoginButton:
-                LoginButton_Click();
-            break;
-            case R.id.id_LoginFrag_ClearButton:
-                ClearButton_Click();
-            break;
-            case R.id.id_LoginFrag_ToRegisterButton:
-                ((RegLogActivity) getActivity()).openRegister();
-            break;
-        }
-    }
-
-    private void LoginButton_Click() {
-
+    /**
+     * 登录按钮
+     */
+    @OnClick(R.id.id_LoginFrag_LoginButton)
+    private void LoginButton_Clicked() {
         String username = m_LoginEditText.getText().toString();
         String password = m_PasswordEditText.getText().toString();
 
@@ -105,48 +78,45 @@ public class LoginFragment extends Fragment implements View.OnClickListener {
             return;
         }
 
-        m_logining.setMessage(String.format(Locale.CHINA, "用户 \"%s\" 登录中，请稍后...", username));
-        m_logining.show();
+        ProgressDialog progressDialog =
+            showProgress(getContext(),
+                String.format(Locale.CHINA, "用户 \"%s\" 登录中，请稍后...", username),
+                true, null);
 
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                AuthStatus status = AuthService.login(username, password);
+        try {
+            AuthRespDTO auth = AuthService.login(username, password);
 
-                getActivity().runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        m_logining.dismiss();
+            progressDialog.dismiss();
+            showToast(getContext(), String.format(Locale.CHINA, "用户 \"%s\" 登录成功", auth.getUsername()));
+            AuthManager.getInstance().login(auth.getUsername(), auth.getToken());
 
-                        if (status.isSuccess()) {
-                            Toast.makeText(getActivity(),
-                                String.format(Locale.CHINA, "用户 \"%s\" 登录成功", status.getUsername()), Toast.LENGTH_SHORT).show();
-                            AuthManager.getInstance().login(status.getUsername(), status.getToken());
-
-                            Log.e("", "usr: " + AuthManager.getInstance().getUserName() + ", token: " + AuthManager.getInstance().getToken() );
-                            getActivity().setResult(Activity.RESULT_OK, new Intent());
-                            getActivity().finish();
-                        }
-                        else
-                            showErrorAlert(status.getErrorMsg());
-                    }
-                });
-
+            AuthActivity activity = (AuthActivity) getActivity();
+            if (activity != null) {
+                activity.setResult(Activity.RESULT_OK, new Intent());
+                activity.finish();
             }
-        }).start();
-
+        } catch (ServerException ex) {
+            progressDialog.dismiss();
+            showAlert(getContext(), "登录失败", ex.getMessage());
+        }
     }
 
-    private void ClearButton_Click() {
+    /**
+     * 清空按钮
+     */
+    @OnClick(R.id.id_LoginFrag_ClearButton)
+    private void ClearButton_Clicked() {
         m_LoginEditText.setText("");
         m_PasswordEditText.setText("");
     }
 
-    private void showErrorAlert(String message) {
-        new AlertDialog.Builder(getContext())
-                .setTitle("错误")
-                .setMessage(message)
-                .setPositiveButton("确定", null)
-                .create().show();
+    /**
+     * 去注册按钮
+     */
+    @OnClick(R.id.id_LoginFrag_ToRegisterButton)
+    private void ToRegisterButton_Clicked() {
+        AuthActivity activity = (AuthActivity) getActivity();
+        if (activity != null)
+            activity.openRegister();
     }
 }

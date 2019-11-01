@@ -1,6 +1,5 @@
 package com.baibuti.biji.ui.fragment;
 
-import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.support.annotation.NonNull;
 import android.support.design.widget.TextInputEditText;
@@ -11,26 +10,27 @@ import android.support.annotation.Nullable;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
 
+import com.baibuti.biji.model.dto.ServerException;
 import com.baibuti.biji.service.auth.AuthService;
 import com.baibuti.biji.R;
-import com.baibuti.biji.ui.activity.RegLogActivity;
+import com.baibuti.biji.service.auth.dto.AuthRespDTO;
+import com.baibuti.biji.ui.activity.AuthActivity;
+import com.baibuti.biji.ui.IContextHelper;
 
 import java.util.Locale;
 
-public class RegisterFragment extends Fragment implements View.OnClickListener {
+import butterknife.BindView;
+import butterknife.OnClick;
+
+public class RegisterFragment extends Fragment implements IContextHelper {
 
     public View view;
-    private Button m_RegisterButton;
-    private Button m_ClearButton;
-    private Button m_ToLoginButton;
-    private TextInputLayout m_LoginLayout;
-    private TextInputEditText m_LoginEditText;
-    private TextInputLayout m_PasswordLayout;
-    private TextInputEditText m_PasswordEditText;
 
-    private ProgressDialog m_reging;
+    @BindView(R.id.id_RegisterFrag_UsernameLayout)  private TextInputLayout m_RegisterLayout;
+    @BindView(R.id.id_RegisterFrag_UsernameText)    private TextInputEditText m_RegisterEditText;
+    @BindView(R.id.id_RegisterFrag_PasswordLayout)  private TextInputLayout m_PasswordLayout;
+    @BindView(R.id.id_RegisterFrag_PasswordText)    private TextInputEditText m_PasswordEditText;
 
     @Nullable
     @Override
@@ -49,46 +49,21 @@ public class RegisterFragment extends Fragment implements View.OnClickListener {
         return view;
     }
 
-    private void initView() {
-        m_RegisterButton = view.findViewById(R.id.id_RegisterFrag_RegisterButton);
-        m_ToLoginButton = view.findViewById(R.id.id_RegisterFrag_ToLoginButton);
-        m_ClearButton = view.findViewById(R.id.id_RegisterFrag_ClearButton);
+    /**
+     * 初始化界面，无
+     */
+    private void initView() { }
 
-        m_LoginLayout = view.findViewById(R.id.id_RegisterFrag_LoginLayout);
-        m_LoginEditText = view.findViewById(R.id.id_RegisterFrag_LoginText);
-        m_PasswordLayout = view.findViewById(R.id.id_RegisterFrag_PasswordLayout);
-        m_PasswordEditText = view.findViewById(R.id.id_RegisterFrag_PasswordText);
-
-        m_RegisterButton.setOnClickListener(this);
-        m_ToLoginButton.setOnClickListener(this);
-        m_ClearButton.setOnClickListener(this);
-
-        m_reging = new ProgressDialog(getContext());
-        m_reging.setCancelable(false);
-    }
-
-    @Override
-    public void onClick(View v) {
-        switch (v.getId()) {
-            case R.id.id_RegisterFrag_RegisterButton:
-                RegisterButton_Click();
-            break;
-            case R.id.id_RegisterFrag_ClearButton:
-                ClearButton_Click();
-                break;
-            case R.id.id_RegisterFrag_ToLoginButton:
-                ((RegLogActivity) getActivity()).openLogin();
-            break;
-        }
-    }
-
-    private void RegisterButton_Click() {
-
-        String username = m_LoginEditText.getText().toString();
+    /**
+     * 注册按钮
+     */
+    @OnClick(R.id.id_RegisterFrag_RegisterButton)
+    private void RegisterButton_Clicked() {
+        String username = m_RegisterEditText.getText().toString();
         String password = m_PasswordEditText.getText().toString();
 
         if (username.length() < 5 || username.length() >= 30) {
-            m_LoginLayout.setError("用户名长度应在 5-30 之间");
+            m_RegisterLayout.setError("用户名长度应在 5-30 之间");
             return;
         }
 
@@ -97,39 +72,37 @@ public class RegisterFragment extends Fragment implements View.OnClickListener {
             return;
         }
 
-        m_reging.setMessage(String.format(Locale.CHINA, "用户 \"%s\" 注册中，请稍后...", username));
-        m_reging.show();
+        ProgressDialog progressDialog =
+            showProgress(getContext(),
+                String.format(Locale.CHINA, "用户 \"%s\" 注册中，请稍后...", username),
+                true, null);
 
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                AuthStatus status = AuthService.register(username, password);
-
-                getActivity().runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        m_reging.cancel();
-                        if (status.isSuccess())
-                            showAlert("注册成功", String.format(Locale.CHINA, "用户 \"%s\" 注册成功，请登录。", status.getUsername()));
-                        else
-                            showAlert("注册失败", status.getErrorMsg());
-                    }
-                });
-
-            }
-        }).start();
+        try {
+            progressDialog.dismiss();
+            AuthRespDTO auth = AuthService.register(username, password);
+            showToast(getContext(), String.format(Locale.CHINA, "用户 \"%s\" 注册成功，请登录。", auth.getUsername()));
+        } catch (ServerException ex) {
+            progressDialog.dismiss();
+            showAlert(getContext(), "注册失败", ex.getMessage());
+        }
     }
 
-    private void ClearButton_Click() {
-        m_LoginEditText.setText("");
+    /**
+     * 清除按钮
+     */
+    @OnClick(R.id.id_RegisterFrag_ClearButton)
+    private void ClearButton_Clicked() {
+        m_RegisterEditText.setText("");
         m_PasswordEditText.setText("");
     }
 
-    private void showAlert(String title, String message) {
-        new AlertDialog.Builder(getContext())
-                .setTitle(title)
-                .setMessage(message)
-                .setPositiveButton("确定", null)
-                .create().show();
+    /**
+     * 去登录按钮
+     */
+    @OnClick(R.id.id_RegisterFrag_ToLoginButton)
+    private void ToLoginButton_Clicked() {
+        AuthActivity activity = (AuthActivity) getActivity();
+        if (activity != null)
+            activity.openLogin();
     }
 }
