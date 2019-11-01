@@ -90,7 +90,7 @@ public class ImagePopupDialog extends Dialog {
             final String url = urls[i];
 
             // TODO File
-            Bitmap file = ImageUtil.getBitmapFromFile(url);
+            Bitmap file = ImageUtil.getBitmapFromPath(url);
 
             if (file == null) {
                 bitmaps.add(null);

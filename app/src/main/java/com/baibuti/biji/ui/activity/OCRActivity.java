@@ -27,11 +27,9 @@ import com.baibuti.biji.net.module.note.ImgUtil;
 import com.baibuti.biji.R;
 import com.baibuti.biji.ui.widget.ocrView.OCRRegionGroupLayout;
 import com.baibuti.biji.util.fileUtil.FilePathUtil;
+import com.baibuti.biji.util.fileUtil.SaveFileUtil;
 import com.baibuti.biji.util.imgDocUtil.ImageUtil;
-
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.Locale;
+import com.baibuti.biji.util.otherUtil.CommonUtil;
 
 /**
  * OCR 用
@@ -88,12 +86,12 @@ public class OCRActivity extends AppCompatActivity implements View.OnClickListen
 
     /**
      * 初始化界面，显示图片和等待框
-     * @param ImgPath 本地 / 网络地址
+     * @param imgPath 本地 (原始图片) / 网络地址
      */
-    private void initView(String ImgPath) {
+    private void initView(String imgPath) {
         setTitle(R.string.OCRActivity_Title);
 
-        ShowLogE("initView", ImgPath);
+        ShowLogE("initView", imgPath);
 
         m_ocringProgressDlg = new ProgressDialog(this);
         m_ocringProgressDlg.setMessage(getString(R.string.OCRActivity_Loading));
@@ -137,48 +135,46 @@ public class OCRActivity extends AppCompatActivity implements View.OnClickListen
         setEnabled(m_CopyButton, false);
         setRetLabelText(0, 0);
 
-        initBG(ImgPath);
+        initBG(imgPath);
     }
 
     /**
      * 加载背景
-     * @param ImgPath 本地 / 网络地址
+     * @param imgPath 本地 / 网络地址
      */
-    private void initBG(String ImgPath) {
+    private void initBG(String imgPath) {
 
-        Bitmap bg = ImageUtil.getBitmapFromFile(ImgPath);
+        // 压缩图片
 
-        if (bg == null) 
-            new Thread(new Runnable() {
-                @Override
-                public void run() {
+        // imgPath _Edited
+        // smallImagePath _Small
 
-                    ImgUtil.GetImgAsync(ImgPath, new ImgUtil.IImageBack() {
-                        @Override
-                        public void onGetImg(Bitmap bitmap) {
+        int screenWidth = CommonUtil.getScreenWidth(this);
+        int screenHeight = CommonUtil.getScreenHeight(this);
 
-                            Log.e("", "onGetImg: " + ImgPath);
+        Bitmap bg = ImageUtil.getBitmapFromPath(imgPath);
 
-                            runOnUiThread(new Runnable() {
-                                @Override
-                                public void run() {
-                                    // TODO 保存文件
-                                    String time = new SimpleDateFormat("yyyyMMddHHmmssSSS", Locale.CHINA).format(new Date());
-                                    String fileName = FilePathUtil.getOCTTmpDir() + time + ".jpg";
-                                    ImageUtil.saveBitmap(bitmap, fileName);
-                                    m_ocrRegionGroupLayout.setImgBG(bitmap);
-                                    toOCRHandler(fileName);
-                                }
-                            });
-                        }
-                    });
-                }
-            }).start();
+        if (bg == null)
+            new Thread(() ->
+                ImgUtil.GetImgAsync(imgPath, (Bitmap bitmap) ->
+                    runOnUiThread(() -> {
+                        // TODO 保存文件
+                        Bitmap net_bg = ImageUtil.compressImage(bitmap, screenWidth, screenHeight, true);
+                        net_bg = ImageUtil.compressImage(net_bg);
+                        String fileName = SaveFileUtil.saveOCRTmp(net_bg);
+                        m_ocrRegionGroupLayout.setImgBG(net_bg);
+                        toOCRHandler(fileName);
+                    })
+                )
+            ).start();
+
         else {
-            m_ocrRegionGroupLayout.setImgBG(bg);
-            toOCRHandler(ImgPath);
-        }
+            bg = ImageUtil.compressImage(bg, screenWidth, screenHeight, true);
+            bg = ImageUtil.compressImage(bg);
 
+            m_ocrRegionGroupLayout.setImgBG(bg);
+            toOCRHandler(imgPath);
+        }
     }
 
     /**

@@ -1073,23 +1073,13 @@ public class NoteFragment extends Fragment implements View.OnClickListener {
 
     /**
      * 拍完照后文字识别
+     * @param imgUri 原图片
      */
     private void OpenOCRAct(Uri imgUri) {
-
-        // imgUri _Edited
-        // smallImagePath _Small
-
-        int screenWidth = CommonUtil.getScreenWidth(getContext());
-        int screenHeight = CommonUtil.getScreenHeight(getContext());
-
-        Bitmap bitmap = ImageUtil.getSmallBitmap(imgUri.toString(), screenWidth, screenHeight); // 压缩图片
-        String smallImagePath = SaveFileUtil.saveSmallImgToSdCard(bitmap);
-        FilePathUtil.deleteFile("" + imgUri);
-
         Intent intent = new Intent(getContext(), OCRActivity.class);
 
         Bundle bundle = new Bundle();
-        bundle.putString(OCRActivity.INT_IMGPATH, smallImagePath);
+        bundle.putString(OCRActivity.INT_IMGPATH, imgUri.toString());
 
         intent.putExtra(OCRActivity.INT_BUNDLE, bundle);
         startActivity(intent);

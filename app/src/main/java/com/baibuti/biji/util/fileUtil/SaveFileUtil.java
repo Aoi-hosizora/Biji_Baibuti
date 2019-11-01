@@ -2,9 +2,8 @@ package com.baibuti.biji.util.fileUtil;
 
 import android.graphics.Bitmap;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
+import com.baibuti.biji.util.imgDocUtil.ImageUtil;
+
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
@@ -23,7 +22,7 @@ public class SaveFileUtil {
      * 应用中涉及到的几种 图片处理格式
      */
     public enum SaveImageType {
-        PHOTO, EDITED, SMALL
+        PHOTO, EDITED, SMALL, OCR
     }
 
     /**
@@ -36,8 +35,8 @@ public class SaveFileUtil {
         String filename = dir + getTimeToken();
         switch (type) {
             case SMALL:
-                // ModifyNoteAct::insertImagesSync() -> 委托保存
-                // NoteFrag::OpenOCRAct() -> 委托保存
+                // ModifyNoteAct::insertImagesSync() -> 委托 this 保存
+                // NoteFrag::OpenOCRAct() -> 委托 this 保存
                 filename += "_SMALL.jpg";
                 break;
             case PHOTO:
@@ -50,25 +49,34 @@ public class SaveFileUtil {
                 // NoteFrag::StartEditImg() -> IMGEditActivity 自行保存
                 filename += "_EDITED.jpg";
                 break;
+            case OCR:
+                // OCRAct::initBG() -> 委托 this 保存
+                filename += ".jpg";
+                break;
         }
         return filename;
     }
 
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////
+
     /**
-     * 保存图片
+     * 保存笔记的小图片
+     * @param bitmap 未压缩的图片
      */
-    public static String saveSmallImgToSdCard(Bitmap bitmap) {
+    public static String saveSmallImg(Bitmap bitmap) {
         String imageUrl = getImageFileName(SaveImageType.SMALL);
-        File file = new File(imageUrl);
-        try {
-            FileOutputStream out = new FileOutputStream(file);
-            if (bitmap.compress(Bitmap.CompressFormat.JPEG, 90, out)) {
-                out.flush();
-                out.close();
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return file.getAbsolutePath();
+        ImageUtil.saveBitmap(ImageUtil.compressImage(bitmap), imageUrl);
+        return imageUrl;
+    }
+
+    /**
+     * 保存 OCR 临时图片
+     * @param bitmap OCR临时图片，已处理大小
+     */
+    public static String saveOCRTmp(Bitmap bitmap) {
+        String fileName = getImageFileName(SaveImageType.OCR);
+        ImageUtil.saveBitmap(bitmap, fileName);
+        return fileName;
     }
 }

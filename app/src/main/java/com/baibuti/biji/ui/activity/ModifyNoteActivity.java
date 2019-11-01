@@ -52,7 +52,6 @@ import com.baibuti.biji.util.stringUtil.StringUtil;
 import com.sendtion.xrichtext.RichTextEditor;
 
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -1057,68 +1056,67 @@ public class ModifyNoteActivity extends AppCompatActivity implements View.OnClic
 
         // TODO 整理
 
-        Observable.create(new ObservableOnSubscribe<String>() {
-            @Override
-            public void subscribe(ObservableEmitter<String> emitter) {
-                try {
-                    ContentEditText.measure(0, 0);
+        Observable.create((ObservableEmitter<String> emitter) -> {
+            try {
+                ContentEditText.measure(0, 0);
 
-                    ShowLogE("insertImagesSync", "data: " + data); // _Edited
+                ShowLogE("insertImagesSync", "data: " + data); // _Edited
 
-                    Bitmap bitmap = ImageUtil.getSmallBitmap(data.toString(), screenWidth, screenHeight); // 压缩图片
-                    String smallImagePath = SaveFileUtil.saveSmallImgToSdCard(bitmap);
+                Bitmap bitmap = ImageUtil.compressImage(
+                    ImageUtil.getBitmapFromPath(data.toString()),
+                    screenWidth, screenHeight, true); // 压缩图片
+                String smallImagePath = SaveFileUtil.saveSmallImg(bitmap);
 
-                    ShowLogE("insertImagesSync", "imagePath: " + smallImagePath); // _Small
+                ShowLogE("insertImagesSync", "imagePath: " + smallImagePath); // _Small
 
-                    // 删除 Edited
-                    FilePathUtil.deleteFile("" + data);
+                FilePathUtil.deleteFile(data.toString()); // 删除 Edited
 
-                    emitter.onNext(smallImagePath);
+                emitter.onNext(smallImagePath);
 
-                    // TODO 网络图片插入
+                // TODO 网络图片插入
 
-                    // <img src="https://www.baidu.com/img/bd_logo1.png"> <- `https://` 不可漏
+                // <img src="https://www.baidu.com/img/bd_logo1.png"> <- `https://` 不可漏
 
-                    // 测试插入网络图片
-                    // emitter.onNext("https://raw.githubusercontent.com/Aoi-hosizora/Biji_Baibuti/a5bb15af4098296ace557e281843513b2f672e0f/assets/DB_Query.png");
+                // 测试插入网络图片
+                // emitter.onNext("https://raw.githubusercontent.com/Aoi-hosizora/Biji_Baibuti/a5bb15af4098296ace557e281843513b2f672e0f/assets/DB_Query.png");
 
-                    emitter.onComplete();
-                } catch (Exception e) {
-                    e.printStackTrace();
-                    emitter.onError(e);
-                }
+                emitter.onComplete();
+            } catch (Exception e) {
+                e.printStackTrace();
+                emitter.onError(e);
             }
+
         })
-                //.onBackpressureBuffer()
-                .subscribeOn(Schedulers.io())//生产事件在io
-                .observeOn(AndroidSchedulers.mainThread())//消费事件在UI线程
-                .subscribe(new Observer<String>() {
-                    @Override
-                    public void onComplete() {
-                        if (insertDialog != null && insertDialog.isShowing()) {
-                            insertDialog.dismiss();
-                        }
-                        Toast.makeText(ModifyNoteActivity.this, R.string.MNoteActivity_insertImagesSyncSuccess, Toast.LENGTH_SHORT).show();
-                    }
+        //.onBackpressureBuffer()
+        .subscribeOn(Schedulers.io())//生产事件在io
+        .observeOn(AndroidSchedulers.mainThread())//消费事件在UI线程
+        .subscribe(new Observer<String>() {
+            @Override
+            public void onComplete() {
+                if (insertDialog != null && insertDialog.isShowing()) {
+                    insertDialog.dismiss();
+                }
+                Toast.makeText(ModifyNoteActivity.this, R.string.MNoteActivity_insertImagesSyncSuccess, Toast.LENGTH_SHORT).show();
+            }
 
-                    @Override
-                    public void onError(Throwable e) {
-                        if (insertDialog != null && insertDialog.isShowing()) {
-                            insertDialog.dismiss();
-                        }
-                        Toast.makeText(ModifyNoteActivity.this, R.string.MNoteActivity_insertImagesSyncError, Toast.LENGTH_SHORT).show();
-                    }
+            @Override
+            public void onError(Throwable e) {
+                if (insertDialog != null && insertDialog.isShowing()) {
+                    insertDialog.dismiss();
+                }
+                Toast.makeText(ModifyNoteActivity.this, R.string.MNoteActivity_insertImagesSyncError, Toast.LENGTH_SHORT).show();
+            }
 
-                    @Override
-                    public void onSubscribe(Disposable d) {
-                        subsInsert = d;
-                    }
+            @Override
+            public void onSubscribe(Disposable d) {
+                subsInsert = d;
+            }
 
-                    @Override
-                    public void onNext(String imagePath) {
-                        ContentEditText.insertImage(imagePath, ContentEditText.getMeasuredWidth());
-                    }
-                });
+            @Override
+            public void onNext(String imagePath) {
+                ContentEditText.insertImage(imagePath, ContentEditText.getMeasuredWidth());
+            }
+        });
     }
 
     // endregion 文字图片显示处理

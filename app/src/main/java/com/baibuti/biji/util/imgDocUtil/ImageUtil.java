@@ -2,7 +2,7 @@ package com.baibuti.biji.util.imgDocUtil;
 
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.util.Log;
+import android.graphics.Matrix;
 import android.util.Size;
 
 import java.io.ByteArrayOutputStream;
@@ -15,15 +15,15 @@ public class ImageUtil {
     /**
      * 通过文件路径来获取Bitmap
      */
-    public static Bitmap getBitmapFromFile(String pathName) {
+    public static Bitmap getBitmapFromPath(String pathName) {
         return BitmapFactory.decodeFile(pathName);
     }
 
     /**
      * 存储 bitmap
      */
-    public static void saveBitmap(Bitmap bitmap, String pathname) {
-        File bf = new File(pathname);
+    public static void saveBitmap(Bitmap bitmap, String pathName) {
+        File bf = new File(pathName);
         if (bf.exists() && !bf.delete())
             return;
 
@@ -52,70 +52,56 @@ public class ImageUtil {
     }
 
     /**
-     * 计算图片的缩放值
-     * @param options BitmapFactory.Options
-     * @param reqWidth 目标 Width
-     * @param reqHeight 目标 Height
-     * @return 当前 / 目标
+     * 根据默认质量 (90) 压缩图片
      */
-    private static int calculateInSampleSize(BitmapFactory.Options options, int reqWidth, int reqHeight) {
-        final int height = options.outHeight;
-        final int width = options.outWidth;
-        int inSampleSize = 1;
-
-        if (height > reqHeight || width > reqWidth) {
-            final int heightRatio = Math.round((float) height / (float) reqHeight);
-            final int widthRatio = Math.round((float) width / (float) reqWidth);
-            inSampleSize = heightRatio < widthRatio ? heightRatio : widthRatio;
-        }
-
-        return inSampleSize;
+    public static Bitmap compressImage(Bitmap bitmap) {
+        return compressImage(bitmap, 90);
     }
 
     /**
-     * 根据路径压缩返回 bitmap
+     * 根据质量压缩图片
      */
-    public static Bitmap getSmallBitmap(String filePath, int newWidth, int newHeight) {
-        final BitmapFactory.Options options = new BitmapFactory.Options();
-        options.inJustDecodeBounds = true;
-        BitmapFactory.decodeFile(filePath, options);
-
-        options.inSampleSize = calculateInSampleSize(options, newWidth, newHeight);
-        options.inJustDecodeBounds = false;
-
-        Bitmap bitmap = BitmapFactory.decodeFile(filePath, options);
-        Bitmap newBitmap = compressImage(bitmap, 500);
-
-        if (!bitmap.isRecycled())
-            bitmap.recycle();
-        return newBitmap;
+    private static Bitmap compressImage(Bitmap bitmap, int quality) {
+        ByteArrayOutputStream stream = new ByteArrayOutputStream();
+        bitmap.compress(Bitmap.CompressFormat.JPEG, quality, stream);
+        byte[] bytes = stream.toByteArray();
+        return BitmapFactory.decodeByteArray(bytes, 0, bytes.length);
     }
 
     /**
-     * 质量压缩
-     * @param maxSize 最大大小
+     * 根据等比率压缩图片
      */
-    private static Bitmap compressImage(Bitmap image, int maxSize){
-        ByteArrayOutputStream os = new ByteArrayOutputStream();
+    public static Bitmap compressImage(Bitmap bitmap, double rate) {
+        return compressImage(bitmap, rate, rate);
+    }
 
-        // scale
-        int options = 80;
+    /**
+     * 根据不等比率压缩图片
+     */
+    private static Bitmap compressImage(Bitmap bitmap, double rateX, double rateY) {
+        Matrix matrix = new Matrix();
+        matrix.setScale((float) rateX, (float) rateY);
+        return Bitmap.createBitmap(bitmap,
+            0, 0,
+            bitmap.getWidth(), bitmap.getHeight(),
+            matrix, true);
+    }
 
-        // Store the bitmap into output stream(no compress)
-        image.compress(Bitmap.CompressFormat.JPEG, options, os);
+    /**
+     * 根据大小不等比例压缩图片
+     * @param isEqualMatrix 是否等比例，如果不等比例则按照更小的尺寸压缩
+     */
+    public static Bitmap compressImage(Bitmap bitmap, int newWidth, int newHeight, boolean isEqualMatrix) {
+        int motoHeight = bitmap.getHeight();
+        int motoWidth = bitmap.getWidth();
+        double rateX = (double) motoWidth / newWidth;
+        double rateY = (double) motoHeight / newHeight;
 
-        // Compress by loop: Clean up os
-        while (os.toByteArray().length / 1024 > maxSize) {
-            os.reset();
-            options -= 10;
-            image.compress(Bitmap.CompressFormat.JPEG, options, os);
+        if (!isEqualMatrix)
+            return compressImage(bitmap, rateX, rateY);
+        else {
+            double rateMin = Math.min(rateX, rateY);
+            return compressImage(bitmap, rateMin, rateMin);
         }
-
-        Bitmap bitmap = null;
-        byte[] b = os.toByteArray();
-        if (b.length != 0)
-            bitmap = BitmapFactory.decodeByteArray(b, 0, b.length);
-
-        return bitmap;
     }
 }
