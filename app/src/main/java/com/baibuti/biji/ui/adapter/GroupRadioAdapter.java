@@ -18,26 +18,35 @@ import java.util.List;
 
 public class GroupRadioAdapter extends BaseAdapter {
 
-    public List<Group> list;
-    LayoutInflater inflater;
-    OnRadioButtonSelect mOnRadioButtonSelect;
+    private Context context;
+    private List<Group> list;
+    private OnRadioButtonClickListener onRadioButtonClickListener;
 
-    public interface OnRadioButtonSelect{
-        // void onSelect(Group g);
+    public GroupRadioAdapter(Context context) {
+       this.context = context;
+    }
+
+    public List<Group> getList() {
+        return list;
+    }
+
+    public void setList(List<Group> list) {
+        this.list = list;
+    }
+
+    public interface OnRadioButtonClickListener {
         void onSelect(int position);
     }
 
-    public GroupRadioAdapter(Context context, List<Group> list, OnRadioButtonSelect mOnRadioButtonSelect) {
-        this.list = list;
-        inflater = LayoutInflater.from(context);
-        this.mOnRadioButtonSelect=mOnRadioButtonSelect;
+    public OnRadioButtonClickListener getOnRadioButtonClickListener() {
+        return onRadioButtonClickListener;
     }
 
-    public void ShowLogE(String FunctionName, String Msg) {
-        String ClassName = "GroupRadioAdapter";
-        Log.e("BijiLogE",
-                ClassName + ": " + FunctionName + "###" + Msg); // MainActivity: initDatas###data=xxx
+    public void setOnRadioButtonClickListener(OnRadioButtonClickListener onRadioButtonClickListener) {
+        this.onRadioButtonClickListener = onRadioButtonClickListener;
     }
+
+    //////
 
     @Override
     public int getCount() {
@@ -57,61 +66,54 @@ public class GroupRadioAdapter extends BaseAdapter {
         return i;
     }
 
-    public HashMap<Group, Boolean> states = new HashMap<Group, Boolean>();
+    private HashMap<Group, Boolean> states = new HashMap<>();
 
     @Override
-    public View getView(final int position, View convertView, ViewGroup viewGroup) {
+    public View getView(final int position, View view, ViewGroup viewGroup) {
         ViewHolder holder;
-        if (convertView == null) {
-            holder = new ViewHolder();
-            convertView = inflater.inflate(R.layout.modulelayout_groupdialog_grouplistradioitem, null);
-            holder.GroupColor = (ImageView) convertView.findViewById(R.id.id_adapter_radiogroup_color);
-            holder.GroupSelectRadio = (RadioButton) convertView.findViewById(R.id.id_adapter_radiogroup_radioButton);
 
-            convertView.setTag(holder);
+        if (view == null) {
+            view = LayoutInflater.from(context)
+                .inflate(R.layout.modulelayout_groupdialog_grouplistradioitem, viewGroup, false);
+
+            holder = new ViewHolder();
+            holder.GroupColor = view.findViewById(R.id.id_adapter_radiogroup_color);
+            holder.GroupSelectRadio = view.findViewById(R.id.id_adapter_radiogroup_radioButton);
+
+            view.setTag(holder);
         }
-        else {
-            holder = (ViewHolder) convertView.getTag();
-        }
-//        ShowLogE("getView", "position:" + position );
-//        ShowLogE("getView", "list:" + list.isEmpty() );
-//        ShowLogE("getView", "GroupSelectRadio:" + (holder.GroupSelectRadio == null) );
+        else
+            holder = (ViewHolder) view.getTag();
 
         holder.GroupSelectRadio.setText(getItem(position).getName());
         holder.GroupColor.setBackgroundColor(Color.parseColor(getItem(position).getColor()));
 
         final RadioButton raButton = holder.GroupSelectRadio;
 
-        holder.GroupSelectRadio.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                raButton.setChecked(true);
+        holder.GroupSelectRadio.setOnClickListener((v) -> {
+            raButton.setChecked(true);
 
-                for(Group key:states.keySet())
-                    states.put(key, false);
-                states.put(list.get(position), raButton.isChecked());
-                GroupRadioAdapter.this.notifyDataSetChanged();
+            for (Group key : states.keySet())
+                states.put(key, false);
+            states.put(list.get(position), raButton.isChecked());
+            GroupRadioAdapter.this.notifyDataSetChanged();
 
-                if (mOnRadioButtonSelect!=null)
-                    mOnRadioButtonSelect.onSelect(position);
-            }
+            if (onRadioButtonClickListener != null)
+                onRadioButtonClickListener.onSelect(position);
         });
 
-        boolean res = false;
         if (states.get(list.get(position)) == null || !states.get(list.get(position))) {
-            res = false;
+            holder.GroupSelectRadio.setChecked(false);
             states.put(list.get(position), false);
-        } else
-            res = true;
+        } else {
+            holder.GroupSelectRadio.setChecked(true);
+        }
 
-        holder.GroupSelectRadio.setChecked(res);
-
-        return convertView;
+        return view;
     }
 
     /**
      * 选择项
-     * @param position
      */
     public void setChecked(int position) {
         states.put(list.get(position), true);
@@ -119,14 +121,13 @@ public class GroupRadioAdapter extends BaseAdapter {
 
     /**
      * 选择项
-     * @param group
      */
     public void setChecked(Group group) {
         states.put(group, true);
     }
 
     public static class ViewHolder {
-        public RadioButton GroupSelectRadio;
-        public ImageView GroupColor;
+        RadioButton GroupSelectRadio;
+        ImageView GroupColor;
     }
 }

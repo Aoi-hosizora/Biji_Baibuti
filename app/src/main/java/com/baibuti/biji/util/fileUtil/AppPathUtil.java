@@ -9,6 +9,7 @@ import android.os.Build;
 import android.os.Environment;
 import android.provider.DocumentsContract;
 import android.provider.MediaStore;
+import android.support.annotation.Nullable;
 import android.support.v4.content.FileProvider;
 
 import com.baibuti.biji.R;
@@ -139,6 +140,7 @@ public class AppPathUtil {
      *      file:///
      *      content://package
      */
+    @Nullable
     public static String getFilePathByUri(Context context, Uri uri) {
 
         // 1. file://

@@ -1,8 +1,8 @@
 package com.baibuti.biji.ui.fragment;
 
-import android.app.Activity;
 import android.app.Dialog;
 import android.app.ProgressDialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.Uri;
@@ -11,15 +11,11 @@ import android.os.Handler;
 import android.provider.MediaStore;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.annotation.WorkerThread;
 import android.support.design.widget.NavigationView;
-import android.support.design.widget.Snackbar;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v4.widget.SwipeRefreshLayout;
-import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
@@ -29,57 +25,61 @@ import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
-import android.widget.Toast;
 
+import com.baibuti.biji.model.dao.DaoStrategyHelper;
+import com.baibuti.biji.model.dto.ServerException;
 import com.baibuti.biji.service.auth.AuthManager;
 import com.baibuti.biji.ui.IContextHelper;
-import com.baibuti.biji.ui.adapter.GroupRadioAdapter;
 import com.baibuti.biji.ui.activity.MainActivity;
+import com.baibuti.biji.model.po.Group;
+import com.baibuti.biji.model.po.Note;
 import com.baibuti.biji.ui.activity.ModifyNoteActivity;
 import com.baibuti.biji.ui.activity.OCRActivity;
 import com.baibuti.biji.ui.activity.ViewModifyNoteActivity;
-import com.baibuti.biji.model.po.Group;
 import com.baibuti.biji.ui.adapter.GroupAdapter;
-import com.baibuti.biji.model.po.Note;
+import com.baibuti.biji.ui.adapter.GroupRadioAdapter;
 import com.baibuti.biji.ui.adapter.NoteAdapter;
-import com.baibuti.biji.ui.dialog.GroupDialog;
 import com.baibuti.biji.R;
-import com.baibuti.biji.ui.widget.listView.SpacesItemDecoration;
+import com.baibuti.biji.ui.dialog.GroupDialog;
 import com.baibuti.biji.ui.widget.listView.RecyclerViewEmptySupport;
-import com.baibuti.biji.model.dao.local.GroupDao;
-import com.baibuti.biji.model.dao.local.NoteDao;
+import com.baibuti.biji.ui.widget.listView.SpacesItemDecoration;
 import com.baibuti.biji.util.fileUtil.AppPathUtil;
 import com.baibuti.biji.util.fileUtil.SaveNameUtil;
 import com.baibuti.biji.util.otherUtil.LayoutUtil;
+import com.baibuti.biji.util.stringUtil.SearchUtil;
 import com.getbase.floatingactionbutton.FloatingActionsMenu;
 import com.wyt.searchbox.SearchFragment;
-import com.baibuti.biji.util.stringUtil.SearchUtil;
 
 import java.util.ArrayList;
-import java.util.Collections;
+import java.util.Collection;
 import java.util.List;
 import java.util.Locale;
 
 import butterknife.BindView;
 import butterknife.OnClick;
+import butterknife.OnItemSelected;
 import me.kareluo.imaging.IMGEditActivity;
 
 import static android.app.Activity.RESULT_OK;
 
-public class NoteFragment extends BaseFragment implements IContextHelper, View.OnClickListener {
+public class NoteFragment extends BaseFragment implements IContextHelper {
 
     private View view;
 
     @BindView(R.id.note_list)
     private RecyclerViewEmptySupport m_noteListView;
 
+    @BindView(R.id.id_NoteFrag_nav_GroupList)
+    private ListView m_groupListView;
+
     @BindView(R.id.note_fabmenu)
     private FloatingActionsMenu m_fabMenu;
 
-    private SearchFragment searchFragment;
+    // SearchFragment.newInstance()
+    private SearchFragment m_searchFragment;
 
     @BindView(R.id.note_listsrl)
-    private SwipeRefreshLayout mSwipeRefresh;
+    private SwipeRefreshLayout m_swipeRefresh;
 
     @BindView(R.id.NoteFrag_Toolbar)
     private Toolbar m_toolbar;
@@ -87,38 +87,8 @@ public class NoteFragment extends BaseFragment implements IContextHelper, View.O
     @BindView(R.id.id_noteFrag_drawer_layout)
     private DrawerLayout m_drawerLayout;
 
-    @BindView(R.id.id_NoteFrag_nav_GroupList)
-    private ListView m_nav_groupList;
-
-    private Dialog m_LongClickNotePopupMenu;
-    private Note LongClickNoteItem;
-
-    // region 声明: flag REQ
-
-    private static final int NOTE_NEW = 0; // new
-    private static final int NOTE_UPDATE = 1; // modify
-
-    private static final int REQ_NOTE_NEW = 2; // 从 MNote 返回
-    private static final int REQ_NOTE_UPDATE = 1; // 从 VMNote 返回
-
-    private static final int REQUEST_CROP = 3; // 剪辑
-    private static final int REQUEST_TAKE_PHOTO = 4; // 拍照
-
-    // endregion 声明: flag REQ
-
-    // region 声明: 一些等待的秒数
-
-    private final static int SearchReturnSecond = 200;
-    private final static int SwipeRefreshSecond = 100;
-    private final static int ShowGroupDlgSecond = 10;
-    private final static int HideGroupPrgSecond = 100;
-
-    /**
-     * 标记登录时是否刷新过
-     */
-    private boolean HasRefreshed = false;
-
-    // endregion 声明: 一些等待的秒数
+    // new Dialog(getContext(), R.style.BottomDialog)
+    private Dialog m_notePopupMenu;
 
     @Nullable
     @Override
@@ -131,8 +101,17 @@ public class NoteFragment extends BaseFragment implements IContextHelper, View.O
             view = inflater.inflate(R.layout.fragment_notetab, container, false);
             initView();
 
-            // TODO Auth
-            registerAuthActions();
+            AuthManager.getInstance().addLoginChangeListener(new AuthManager.OnLoginChangeListener() {
+                @Override
+                public void onLogin(String username) {
+                    onInitNoteData();
+                }
+
+                @Override
+                public void onLogout() {
+                    onInitNoteData();
+                }
+            });
         }
         return view;
     }
@@ -146,53 +125,24 @@ public class NoteFragment extends BaseFragment implements IContextHelper, View.O
         m_noteListView.setEmptyView(view.findViewById(R.id.note_emptylist));
 
         // Swipe Refresh
-        mSwipeRefresh.setColorSchemeResources(R.color.colorPrimary);
-        mSwipeRefresh.setOnRefreshListener(() -> refreshData(500));
+        m_swipeRefresh.setColorSchemeResources(R.color.colorPrimary);
+        m_swipeRefresh.setOnRefreshListener(this::onInitNoteData);
 
         // Toolbar
-        m_toolbar.setTitle(R.string.NoteFrag_Header);
+        m_toolbar.setTitle("所有笔记");
         m_toolbar.inflateMenu(R.menu.notefragment_actionbar);
         m_toolbar.setNavigationIcon(R.drawable.tab_menu);
-        // TODO
-        m_toolbar.setOnMenuItemClickListener((MenuItem item) -> {
-            switch (item.getItemId()) {
-                case R.id.action_search:
-                    MainActivity activity = (MainActivity) getActivity();
-                    if (activity != null)
-                        searchFragment.show(activity.getSupportFragmentManager(), com.wyt.searchbox.SearchFragment.TAG);
-                    break;
-                case R.id.action_modifygroup:
-                    ModifyGroupMenuClick();
-                    break;
-                case R.id.action_search_back:
-                    SearchGroupBack();
-                    break;
-            }
-            return true;
-        });
         m_toolbar.setNavigationOnClickListener((View view) -> {
             MainActivity activity = (MainActivity) getActivity();
             if (activity != null) activity.openNavMenu();
         });
 
         // SearchFrag
-        searchFragment = com.wyt.searchbox.SearchFragment.newInstance();
-        searchFragment.setAllowReturnTransitionOverlap(true);
-        searchFragment.setOnSearchClickListener((String keyword) -> {
-            if (!keyword.trim().isEmpty()) {
-                // TODO
-                // searchNote(keyword);
-
-                IsSearching = true;
-                SearchingStr = keyword;
-
-                initListView(search(keyword));
-
-                m_toolbar.getMenu().findItem(R.id.action_search_back).setVisible(true);
-                mSwipeRefresh.setEnabled(false);
-                m_fabMenu.setVisibility(View.GONE);
-                // m_toolbar.setTitle(String.format(getContext().getString(R.string.NoteFrag_menu_search_content), keyword));
-            }
+        m_searchFragment = SearchFragment.newInstance();
+        m_searchFragment.setAllowReturnTransitionOverlap(true);
+        m_searchFragment.setOnSearchClickListener((String keyword) -> {
+            if (!keyword.trim().isEmpty())
+                searchNote(keyword);
         });
 
         // Fab
@@ -202,7 +152,7 @@ public class NoteFragment extends BaseFragment implements IContextHelper, View.O
 
             @Override
             public void onMenuExpanded() {
-                new Handler().postDelayed(() -> back.setVisibility(View.VISIBLE), 50);
+                back.setVisibility(View.VISIBLE);
             }
 
             @Override
@@ -220,73 +170,47 @@ public class NoteFragment extends BaseFragment implements IContextHelper, View.O
         ImageButton m_groupMgrBackButton = view.findViewById(R.id.id_NoteFrag_nav_BackButton);
         m_groupMgrBackButton.setOnClickListener(v -> m_drawerLayout.closeDrawer(Gravity.END));
 
+        GroupRadioAdapter groupAdapter = new GroupRadioAdapter(getContext());
+        groupAdapter.setOnRadioButtonClickListener(this::GroupRadio_Clicked);
+        m_groupListView.setAdapter(groupAdapter);
+
+        // List Adapter
+        m_noteListView.addItemDecoration(new SpacesItemDecoration(0));
+        LinearLayoutManager layoutManager = new LinearLayoutManager(getContext());
+        layoutManager.setOrientation(LinearLayoutManager.VERTICAL);
+        m_noteListView.setLayoutManager(layoutManager);
+
+        NoteAdapter noteAdapter = new NoteAdapter(getContext());
+        noteAdapter.setOnItemClickListener(this::NoteItem_Clicked);
+        noteAdapter.setOnItemLongClickListener(this::NoteItem_LongClicked);
+        m_noteListView.setAdapter(noteAdapter);
+
         // Data
-        initData(); // GetDao & List
-        initAdapter();
-        initListView(NoteList);
+        onInitNoteData();
     }
 
     @Override
     public boolean onBackPressed() {
 
-        // 是否打开着Drawer
+        // 是否打开 Drawer
         if (m_drawerLayout.isDrawerOpen(Gravity.END)) {
-            closeDrawer();
+            m_drawerLayout.closeDrawer(Gravity.END);
             return true;
         }
 
-        // 判断是否处于笔记搜索页面或分类界面
-        if (getIsSearching() || getIsGrouping()) {
-            SearchGroupBack();
-            return true;
-        }
-
+        // 是否展开 Fab
         if (m_fabMenu.isExpanded()) {
             m_fabMenu.collapse();
             return true;
         }
 
+        // 是否处于搜索或分组
+        if (pageData.pageState != PageState.NORMAL) {
+            toNormal();
+            return true;
+        }
+
         return false;
-    }
-
-    /**
-     * 对用户可见时，判断是否需要刷新
-     */
-    @Override
-    public void onResume() {
-        super.onResume();
-        if(!HasRefreshed) {
-            SearchGroupBack();
-            HasRefreshed = true;
-        }
-    }
-
-    /**
-     * 弹出菜单点击
-     */
-    @Override
-    public void onClick(View v) {
-        switch (v.getId()) {
-            case R.id.id_NoteFrag_PopupMenu_ViewNote:
-                HandleNewUpdateNote(false, LongClickNoteItem, false);
-                LongClickNoteItem = null;
-                m_LongClickNotePopupMenu.cancel();
-            break;
-             case R.id.id_NoteFrag_PopupMenu_ChangeGroup:
-                 modifyNoteGroup(LongClickNoteItem);
-                 LongClickNoteItem = null;
-                 m_LongClickNotePopupMenu.cancel();
-             break;
-            case R.id.id_NoteFrag_PopupMenu_DeleteNote:
-                DeleteNote(getView(), LongClickNoteItem);
-                LongClickNoteItem = null;
-                m_LongClickNotePopupMenu.cancel();
-            break;
-            case R.id.id_NoteFrag_PopupMenu_Cancel:
-                LongClickNoteItem = null;
-                m_LongClickNotePopupMenu.cancel();
-            break;
-        }
     }
 
     /*
@@ -297,54 +221,201 @@ public class NoteFragment extends BaseFragment implements IContextHelper, View.O
 
      */
 
-    /**
-     * 当前页面 状态与数据
-     */
-    private Data pageData;
+    // region Toolbar Fab Popup
 
     /**
-     * 初始化与刷新 加载数据
+     * 工具栏 搜索
      */
-    private void onRefreshData() {
-        pageData = new Data();
+    @OnItemSelected(R.id.action_search)
+    private void ToolbarSearch_Clicked() {
+        MainActivity activity = (MainActivity) getActivity();
+        if (activity != null)
+            m_searchFragment.show(activity.getSupportFragmentManager(), com.wyt.searchbox.SearchFragment.TAG);
     }
 
     /**
-     * 更新页面显示为 noteList
+     * 工具栏 分组
      */
-    private void setListContent(List<Note> noteList) {
-        NoteAdapter adapter = (NoteAdapter) m_noteListView.getAdapter();
-        if (adapter == null) return;
-
-        adapter.setNoteList(noteList);
-        adapter.notifyDataSetChanged();
+    @OnItemSelected(R.id.action_group)
+    private void ToolbarGroup_Clicked() {
+        m_drawerLayout.openDrawer(Gravity.END);
     }
 
     /**
-     * 分组显示
+     * 工具栏 返回
      */
-    private void groupNote(Group group) {
-        pageData.pageState = PageState.GROUPING;
-        m_toolbar.setTitle("\"" + group.getName() + "\" 的分组结果");
-        setListContent(null);
+    @OnItemSelected(R.id.action_search_group_back)
+    private void ToolbarBack_Clicked() {
+        toNormal();
     }
 
     /**
-     * 搜索显示
+     * Tab 新建笔记
      */
-    private void searchNote(String searchingStr) {
-        pageData.pageState = PageState.SEARCHING;
-        m_toolbar.setTitle("\"" + searchingStr + "\" 的搜索结果");
-        setListContent(null);
+    @OnClick(R.id.note_edit)
+    private void NewNoteFab_Clicked() {
+        m_fabMenu.collapse();
+        newNote();
     }
 
     /**
-     * 正常状态，非搜索非分组
+     * Tab OCR 拍照
      */
-    private void toNormal() {
-        pageData.pageState = PageState.NORMAL;
-        m_toolbar.setTitle("所有笔记");
-        setListContent(pageData.allNotes);
+    @OnClick(R.id.note_photo)
+    private void OCRFab_Clicked() {
+        m_fabMenu.collapse();
+        OCRTakePhoto();
+    }
+
+    /**
+     * 弹出菜单
+     */
+    private void showPopupMenu(Note note) {
+        Context context = getContext();
+        if (context == null) return;
+
+        m_notePopupMenu = new Dialog(context, R.style.BottomDialog);
+        LinearLayout root = LayoutUtil.initPopupMenu(getContext(), m_notePopupMenu, R.layout.popupmenu_note_longclicknote);
+        m_notePopupMenu.setOnCancelListener((dialog) -> pageData.longClickedNote = null);
+
+        TextView label = root.findViewById(R.id.id_NoteFrag_PopupMenu_Label);
+        label.setText(String.format(Locale.CHINA, "当前选中：%s", note.getTitle()));
+
+        root.findViewById(R.id.id_NoteFrag_PopupMenu_ViewNote).setOnClickListener(this::ViewNotePopup_Clicked);
+        root.findViewById(R.id.id_NoteFrag_PopupMenu_ChangeGroup).setOnClickListener(this::ChangeGroupPopup_Clicked);
+        root.findViewById(R.id.id_NoteFrag_PopupMenu_DeleteNote).setOnClickListener(this::DeleteNotePopup_Clicked);
+        root.findViewById(R.id.id_NoteFrag_PopupMenu_Cancel).setOnClickListener((view) -> m_notePopupMenu.cancel());
+
+        m_notePopupMenu.show();
+    }
+
+    /**
+     * 弹出菜单 打开笔记
+     */
+    private void ViewNotePopup_Clicked(View view) {
+        m_notePopupMenu.cancel();
+        Note note = pageData.longClickedNote;
+        if (note == null) return;
+
+        openNote(note);
+    }
+
+    /**
+     * 弹出菜单 修改分组
+     */
+    private void ChangeGroupPopup_Clicked(View view) {
+        m_notePopupMenu.cancel();
+        Note note = pageData.longClickedNote;
+        if (note == null) return;
+
+        ProgressDialog progressDialog = showProgress(getContext(), "分组信息加载中...", false, null);
+        try {
+            List<Group> groups = DaoStrategyHelper.getInstance().getGroupDao(getContext()).queryAllGroups();
+            GroupAdapter groupAdapter = new GroupAdapter(getContext(), groups);
+
+            showAlert(getContext(), "修改分组", groupAdapter,
+                (d, w) -> note.setGroup(groups.get(w)));
+
+            DaoStrategyHelper.getInstance().getNoteDao(getContext()).updateNote(note);
+            DaoStrategyHelper.getInstance().getNoteDao(getContext()).updateNote(note);
+
+            NoteAdapter adapter = (NoteAdapter) m_noteListView.getAdapter();
+            for (Note n : pageData.allNotes)
+                if (n.getId() == note.getId()) {
+                    pageData.allNotes.set(pageData.allNotes.indexOf(n), note);
+                    return;
+                }
+            adapter.setNoteList(pageData.allNotes);
+            adapter.notifyDataSetChanged();
+
+        } catch (ServerException ex) {
+            showAlert(getContext(), "错误", "分组信息加载错误：" + ex.getMessage());
+        }
+
+    }
+
+    /**
+     * 弹出菜单 删除笔记
+     */
+    private void DeleteNotePopup_Clicked(View view) {
+        m_notePopupMenu.cancel();
+        Note note = pageData.longClickedNote;
+        if (note == null) return;
+
+        showAlert(getContext(), "删除笔记", "确定删除笔记 \"" + note.getTitle() + "\" 吗？",
+            "删除", (d, w) -> deleteNote(note),
+            "取消", null);
+    }
+
+    // endregion
+
+    // region Right Nav Group
+
+    /**
+     * 右边栏 分组管理
+     */
+    @OnClick(R.id.id_NoteFrag_nav_GroupMgrButton)
+    private void GroupMgrButton_Click() {
+        if (pageData.pageState == PageState.GROUPING) {
+            showAlert(getContext(), "分组管理", "进行分组管理需要退出分组显示，是否继续？",
+                "继续", (DialogInterface dialog, int which) -> ShowGroupDialog(),
+                "取消", null);
+        }
+        else
+            ShowGroupDialog();
+    }
+
+    /**
+     * 右边栏 选中列表
+     */
+    private void GroupRadio_Clicked(int position) {
+        GroupRadioAdapter adapter = (GroupRadioAdapter) m_groupListView.getAdapter();
+        groupNote(adapter.getList().get(position));
+    }
+
+
+    /**
+     * 显示分组管理对话框
+     */
+    private void ShowGroupDialog() {
+        m_drawerLayout.closeDrawer(Gravity.END);
+        ProgressDialog progressDialog = showProgress(getContext(), "分组信息加载中...", false, null);
+
+        GroupDialog dialog = new GroupDialog(getActivity(), new GroupDialog.OnUpdateGroupListener() {
+
+            @Override
+            public void OnUICreateFinished() {
+                new Handler().postDelayed(progressDialog::dismiss, 100);
+            }
+
+            @Override
+            public void UpdateGroupFinished() {
+                onInitNoteData();
+            }
+        });
+
+        dialog.setCancelable(false);
+        dialog.show();
+    }
+
+    // endregion
+
+    // region List PageData
+
+    /**
+     * 单击列表项
+     */
+    private void NoteItem_Clicked(View v, Note note) {
+        openNote(note);
+    }
+
+    /**
+     * 长按列表项
+     */
+    private boolean NoteItem_LongClicked(View v, Note note) {
+        pageData.longClickedNote = note;
+        showPopupMenu(note);
+        return true;
     }
 
     /**
@@ -360,945 +431,321 @@ public class NoteFragment extends BaseFragment implements IContextHelper, View.O
     private class Data {
         List<Note> allNotes = null;
         PageState pageState = PageState.NORMAL;
+
+        Note longClickedNote = null;
     }
 
-    // region 搜索处理 IsSearching IsSearchingNull getIsSearching SearchingStr search SearchGroupBack
+    // endregion
+
+    /*
+
+    1. 新建笔记:
+        打开 MNote Act -> 返回 -> 传递 INT_NOTE_DATA 和 INT_IS_NEW
+        打开 VMNote Act -> 返回 -> 结束
+
+    2. 浏览笔记:
+        打开 VMNote Act -> 返回 -> 结束
+
+    3. 返回:
+        MNote Act -> INT_NOTE_DATA, INT_IS_NEW
+        VMNote Act -> INT_NOTE_DATA, INT_IS_NEW, INT_IS_MODIFIED
+
+     */
+
+    private static final int REQ_NEW_NOTE_INTENT = 0;
+    private static final int REQ_OPEN_NOTE_INTENT = 1;
+    private static final int REQ_OCR_TAKE_PHOTO = 2;
+    private static final int REQ_OCR_EDIT_PHOTO = 3;
+
+    public static final String INT_NOTE_DATA = "note_data";
+    public static final String INT_IS_NEW = "is_new";
+    public static final String INT_IS_MODIFIED = "is_modified";
+
+    // region Note Init New Modify
 
     /**
-     * 用于返回数据时判断当前是否处在搜索页面
-     * 而进行下一步处理刷新 ListView
+     * 当前页面 状态与数据
      */
-    private boolean IsSearching = false;
-
-    private boolean IsSearchingNull = false;
+    private Data pageData;
 
     /**
-     * MainAct用
-     * @return
+     * 初始化与刷新 加载数据
      */
-    public boolean getIsSearching() {
-        // TODO ???
-        return !SearchingStr.equals("");
-    }
-
-    /**
-     * 当 IsSearching 时表示当前所有页面的 keyWord
-     */
-    private String SearchingStr = "";
-
-    /**
-     * 查找笔记功能
-     *
-     * @param str
-     * @return
-     */
-    private List<Note> search(String str) {
-        List<Note> notelist = SearchUtil.getSearchItems(NoteList.toArray(new Note[0]), str);
-        noteAdapter.notifyDataSetChanged();
-
-        IsSearchingNull = notelist.isEmpty();
-
-        if (IsSearchingNull) {
-            Toast.makeText(getContext(), R.string.NoteFrag_SearchNullToast, Toast.LENGTH_SHORT).show();
-        }
-
-        return notelist;
-    }
-
-    /**
-     * 返回原界面，退出搜索或分类，以及重新登陆
-     */
-    public void SearchGroupBack() {
-        if (!loadingDialog.isShowing())
-            loadingDialog.show();
-
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    Thread.sleep(SearchReturnSecond); // 200
-                }
-                catch (InterruptedException ex) {
-                    ex.printStackTrace();
-                }
-                try {
-                    new Thread(new Runnable() {
-                        @Override
-                        public void run() {
-
-                            NoteDao noteDao = new NoteDao(getContext());
-
-                            // TODO !!!
-                            //     java.lang.NullPointerException: Attempt to invoke virtual method '
-                            //          android.database.sqlite.SQLiteDatabase android.content.Context.openOrCreateDatabase
-                            //          (java.lang.String, int, android.database.sqlite.SQLiteDatabase$CursorFactory, android.database.DatabaseErrorHandler)
-                            //     ' on a null object reference
-                            try {
-                                NoteList = noteDao.queryAllNotes();
-                            }
-                            catch (Exception ex) {
-                                ex.printStackTrace();
-                            }
-
-
-                            // TODO !!!
-                            //     java.lang.NullPointerException: Attempt to invoke virtual method '
-                            //          void android.support.v4.app.FragmentActivity.runOnUiThread(java.lang.Runnable)
-                            //     ' on a null object reference
-
-                            Activity a = getActivity();
-
-                            if (a != null) {
-                                a.runOnUiThread(new Runnable() {
-                                    @Override
-                                    public void run() {
-                                        initListView(NoteList);
-
-                                        mSwipeRefresh.setEnabled(true);
-                                        m_fabMenu.setVisibility(View.VISIBLE);
-
-                                        m_toolbar.getMenu().findItem(R.id.action_search_back).setVisible(false);
-                                        m_toolbar.getMenu().findItem(R.id.action_search).setEnabled(true);
-                                        m_toolbar.getMenu().findItem(R.id.action_search).setIcon(R.drawable.search);
-                                        m_toolbar.setTitle(R.string.NoteFrag_Header);
-
-                                        IsSearching = false;
-                                        SearchingStr = "";
-                                        IsSearchingNull = false;
-
-                                        IsGrouping = false;
-                                        currGroup = null;
-                                        currGroupIdx = -1;
-                                        IsGroupingNull = false;
-
-                                        loadingDialog.cancel();
-
-                                    }
-                                });
-                            }
-                        }
-                    }).start();
-                }
-                catch (NullPointerException ex) {
-                    ex.printStackTrace();
-                    Log.e("", "run: NullPointerException" );
-                    loadingDialog.cancel();
-                }
-
-            }
-        }).start();
-
-    }
-
-    @OnClick(R.id.note_photo)
-    private void Fab_NoteOCR_Clicked() {
-        m_fabMenu.collapse();
-        takePhoto();
-    }
-
-    @OnClick(R.id.note_edit)
-    private void FAb_NewNote_Clicked() {
-        m_fabMenu.collapse();
-        HandleNewUpdateNote(true, null, false);
-    }
-
-    // endregion 搜索处理
-
-    // region 列表数据 初始化各种数据和适配器 下拉刷新 initData initAdapter refreshNoteList refreshGroupList refreshData refreshAll
-
-    private List<Note> NoteList;
-    private List<Group> GroupList;
-
-    private NoteAdapter noteAdapter;
-    private GroupAdapter groupAdapter;
-
-    /**
-     * 初始化 Dao 和 List 数据
-     */
-    @WorkerThread
-    public void initData() {
-        NoteDao noteDao = new NoteDao(this.getContext());
-        GroupDao groupDao = new GroupDao(this.getContext());
-
-        NoteList = noteDao.queryAllNotes();
-        GroupList = groupDao.queryAllGroups();
-    }
-
-    /**
-     * 初始化 note/group Adapter
-     */
-    public void initAdapter() {
-        noteAdapter = new NoteAdapter();
-        groupAdapter = new GroupAdapter(getContext(), GroupList);
-    }
-
-    /**
-     * 刷新 笔记列表
-     */
-    @WorkerThread
-    public void refreshNoteList() {
-        NoteDao noteDao = new NoteDao(getContext());
-        noteDao = new NoteDao(getContext());
-        NoteList = noteDao.queryAllNotes();
-        Collections.sort(NoteList);
-        noteAdapter = new NoteAdapter();
-        noteAdapter.setNoteList(NoteList);
-        noteAdapter.notifyDataSetChanged();
-    }
-
-    /**
-     * 刷新 分组列表
-     */
-    @WorkerThread
-    public void refreshGroupList() {
-        GroupDao groupDao = new GroupDao(getContext());
-        groupDao = new GroupDao(getContext());
-        GroupList = groupDao.queryAllGroups();
-        Collections.sort(GroupList);
-        groupAdapter = new GroupAdapter(getContext(), GroupList); // 必要
-        groupAdapter.notifyDataSetChanged();
-    }
-
-    /**
-     * 刷新数据，用于 下拉 和 返回刷新
-     *
-     * @param ms 毫秒
-     */
-    private void refreshData(int ms) {
-
-        new Handler().postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                new Thread(new Runnable() {
-                    @Override
-                    public void run() {
-
-                        refreshAll();
-
-                        getActivity().runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                initListView(NoteList);
-
-                                mSwipeRefresh.setRefreshing(false);
-                            }
-                        });
-                    }
-                }).start();
-            }
-
-        }, ms);
-    }
-
-    /**
-     * 下拉刷新用
-     */
-    public void refreshAll() {
-        initData();
-        initAdapter();
-        refreshNoteList();
-        refreshGroupList();
-    }
-
-    // endregion 初始化各种数据和适配器 下拉刷新
-
-    // region 显示分组 分组显示 ShowGroupDialog ModifyGroupMenuClick currGroup showAsGroup getGroupOfNote showAsDefault
-
-    /**
-     * 显示 分类 对话框
-     */
-    public void ShowGroupDialog() {
-        m_drawerLayout.closeDrawer(Gravity.END);
-        loadingGroupDialog.show();
-        new Handler().postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                GroupDialog dialog = new GroupDialog(getActivity(), new GroupDialog.OnUpdateGroupListener() {
-
-                    @Override
-                    public void OnUICreateFinished() {
-                        // 双重等待隐藏等待对话框
-                        new Handler().postDelayed(new Runnable() {
-                            @Override
-                            public void run() {
-                                loadingGroupDialog.dismiss();
-                            }
-                        }, HideGroupPrgSecond); // 100
-                    }
-
-                    @Override
-                    public void UpdateGroupFinished() {
-
-                        // 更新完分组信息后同时在列表中刷新数据
-                        refreshData(SwipeRefreshSecond); // 100
-
-                        if (IsSearching)
-                            if (!IsSearchingNull)
-                                initListView(search(SearchingStr));
-                            else
-                                initListView(NoteList);
-                        else
-                            // 防止冲突，直接回复
-                            if (IsGrouping)
-                                SearchGroupBack();
-                    }
-                });
-                dialog.setCancelable(false);
-                dialog.show();
-            }
-        }, ShowGroupDlgSecond); // 10
-    }
-
-    /**
-     * 菜单点击，显示左滑菜单
-     */
-    public void ModifyGroupMenuClick() {
-
-        // 列表
-        GroupDao groupDao = new GroupDao(getContext());
-
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-
-                List<Group> groups = groupDao.queryAllGroups();
-
-                getActivity().runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        Collections.sort(groups);
-
-                        groups.add(0, Group.AllGroups);
-
-                        GroupRadioAdapter groupRadioAdapter = new GroupRadioAdapter(getContext(), groups, new GroupRadioAdapter.OnRadioButtonSelect() {
-
-                            @Override
-                            public void onSelect(int position) {
-                                Group curr = groups.get(position);
-                                if (curr == Group.AllGroups)
-                                    showAsDefault();
-                                else
-                                    showAsGroup(curr, position);
-                            }
-                        });
-
-                        m_nav_groupList.setAdapter(groupRadioAdapter);
-
-                        if (currGroup != null)
-                            groupRadioAdapter.setChecked(currGroupIdx);
-                        else
-                            groupRadioAdapter.setChecked(Group.AllGroups);
-
-                        groupAdapter.notifyDataSetChanged();
-
-                        m_drawerLayout.openDrawer(Gravity.END);
-                    }
-                });
-            }
-        }).start();
-    }
-
-    private Group currGroup = null;
-    private int currGroupIdx = -1;
-
-    /**
-     * MainAct用
-     * @return
-     */
-    public boolean getIsGrouping() {
-        // TODO ???
-        return currGroup != null;
-    }
-
-    private boolean IsGrouping = false;
-    private boolean IsGroupingNull = false;
-
-    /**
-     * 关闭侧边栏
-     */
-    public void closeDrawer() {
-        m_drawerLayout.closeDrawer(Gravity.END);
-    }
-
-    /**
-     * 按分组显示
-     * @param group
-     */
-    private void showAsGroup(Group group, int idx) {
-        currGroup = group;
-        currGroupIdx = idx;
-//        new Thread(new Runnable() {
-//            @Override
-//            public void run() {
-
-                List<Note> groupNotes = getGroupOfNote(group);
-
-                getActivity().runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        IsGrouping = true;
-                        IsGroupingNull = groupNotes.isEmpty();
-
-                        if (IsGroupingNull) {
-                            Toast.makeText(getContext(), R.string.NoteFrag_GroupNullToast, Toast.LENGTH_SHORT).show();
-                        }
-
-                        m_toolbar.getMenu().findItem(R.id.action_search_back).setVisible(true);
-                        m_toolbar.getMenu().findItem(R.id.action_search).setEnabled(false);
-                        m_toolbar.getMenu().findItem(R.id.action_search).setIcon(R.drawable.ic_search_grey_24dp);
-                        mSwipeRefresh.setEnabled(false);
-
-                        initListView(groupNotes);
-                        closeDrawer();
-
-                        m_toolbar.setTitle(String.format(Locale.CHINA,
-                                getString(R.string.NoteFrag_GroupingTitle), group.getName()));
-                    }
-                });
-//            }
-//        });
-
-    }
-
-    /**
-     * 显示全部分组
-     */
-    @WorkerThread
-    private void showAsDefault() {
-        currGroup = null;
-        currGroupIdx = -1;
-        IsGrouping = false;
-
-        SearchGroupBack();
-        closeDrawer();
-    }
-    
-    /**
-     * 获取分组笔记
-     * @param group
-     * @return
-     */
-    @WorkerThread
-    private List<Note> getGroupOfNote(Group group) {
-        List<Note> ret = new ArrayList<>();
-        NoteDao noteDao = new NoteDao(getContext());
-        List<Note> allNotes = noteDao.queryAllNotes();
-        for (Note note : allNotes)
-            if (note.getGroup().getName().equals(group.getName()))
-                ret.add(note);
-        return ret;
-    }
-
-     /**
-      * 修改分组
-      */
-     private void modifyNoteGroup(final Note note) {
-
-         ProgressDialog loading = new ProgressDialog(getContext());
-         loading.setMessage("分组数据加载中...");
-         loading.setCancelable(false);
-         if (!loading.isShowing())
-             loading.show();
-
-         new Thread(new Runnable() {
-             @Override
-             public void run() {
-
-                 refreshGroupList();
-
-                 getActivity().runOnUiThread(new Runnable() {
-                     @Override
-                     public void run() {
-
-                         AlertDialog GroupSettingDialog = new AlertDialog
-                                 .Builder(getContext())
-                                 .setTitle(R.string.MNoteActivity_GroupSetAlertTitle)
-                                 .setNegativeButton(R.string.MNoteActivity_GroupSetAlertNegativeButtonForCancel, null)
-                                 .setSingleChoiceItems(groupAdapter, 0, new DialogInterface.OnClickListener() {
-
-                                     @Override
-                                     public void onClick(final DialogInterface dialog, int which) {
-
-                                         new Thread(new Runnable() {
-                                             @Override
-                                             public void run() {
-
-                                                 // 修改保存数据库
-                                                 NoteDao noteDao = new NoteDao(getContext());
-                                                 Group group = GroupList.get(which);
-                                                 note.setGroup(group, true);
-                                                 noteDao.updateNote(note);
-
-                                                 getActivity().runOnUiThread(new Runnable() {
-                                                     @Override
-                                                     public void run() {
-
-                                                         // 更新数据
-                                                         if (IsSearching && !IsSearchingNull)
-                                                             initListView(search(SearchingStr));
-                                                         else if (IsGrouping && !IsGroupingNull)
-                                                             initListView(getGroupOfNote(currGroup));
-                                                         else
-                                                             initListView(NoteList);
-
-
-                                                         // 排序显示
-                                                         Collections.sort(NoteList);
-                                                         noteAdapter.notifyDataSetChanged();
-
-                                                         // 提示
-                                                         Toast.makeText(getActivity(), String.format(Locale.CHINA,
-                                                                 getString(R.string.NoteFrag_ModifyGroupToast), note.getTitle(), group.getName()), Toast.LENGTH_SHORT).show();
-
-                                                         dialog.dismiss();
-                                                     }
-                                                 });
-                                             }
-                                         }).start();
-                                     }
-                                 }).create();
-
-
-                         GroupSettingDialog.setOnShowListener(new DialogInterface.OnShowListener() {
-                             @Override
-                             public void onShow(DialogInterface dialog) {
-                                 loading.dismiss();
-                             }
-                         });
-
-                         GroupSettingDialog.show();
-                     }
-                 });
-             }
-         }).start();
-     }
-
-     @OnClick(R.id.id_NoteFrag_nav_GroupMgrButton)
-     private void GroupMgrButton_Clicked() {
-         if (IsGrouping)
-             new AlertDialog.Builder(getContext())
-                 .setTitle(R.string.NoteFrag_GroupingMgrAlertTitle)
-                 .setMessage(R.string.NoteFrag_GroupingMgrAlertMsg)
-                 .setPositiveButton(R.string.NoteFrag_GroupingMgrAlertPosDoButton, new DialogInterface.OnClickListener() {
-                     @Override
-                     public void onClick(DialogInterface dialog, int which) {
-                         SearchGroupBack();
-                         ShowGroupDialog();
-                     }
-                 })
-                 .setNegativeButton(R.string.NoteFrag_GroupingMgrAlertNegBackButton, null)
-                 .create().show();
-         else
-             ShowGroupDialog();
-     }
-
-    // endregion 显示分组 分组显示
-
-    // region 初始化笔记列表 进入笔记 SelectedNoteItem initListView
-
-    /**
-     * 当前选中的笔记，用于返回时修改列表
-     */
-    private int SelectedNoteItem;
-
-    /**
-     * 初始化 笔记列表 View，并处理点击笔记事件
-     *
-     * @param nlist
-     */
-    private void initListView(final List<Note> nlist) {
-
-        m_noteListView.addItemDecoration(new SpacesItemDecoration(0));//设置item间距
-
-        LinearLayoutManager layoutManager = new LinearLayoutManager(getContext());
-        layoutManager.setOrientation(LinearLayoutManager.VERTICAL);//竖向列表
-        m_noteListView.setLayoutManager(layoutManager);
-
-        Collections.sort(nlist);
-        noteAdapter.setNoteList(nlist);
-
-        m_noteListView.setAdapter(noteAdapter);
-
-        noteAdapter.notifyDataSetChanged();
-
-        noteAdapter.setOnItemClickListener(new NoteAdapter.OnItemClickListener() {
-            @Override
-            public void onItemClick(View view, int position) {
-                SelectedNoteItem = position;
-                HandleNewUpdateNote(false, nlist.get(position), false);
-            }
-        });
-
-        noteAdapter.setOnItemLongClickListener(new NoteAdapter.OnRecyclerViewItemLongClickListener() {
-            @Override
-            public void onItemLongClick(final View view, final Note note) {
-                showPopupMenuOfNote(note);
-            }
-        });
-    }
-
-    /**
-     * 长按笔记显示弹出菜单
-     * @param note
-     */
-    private void showPopupMenuOfNote(Note note) {
-        // 记录长按项
-        LongClickNoteItem = note;
-
-        m_LongClickNotePopupMenu = new Dialog(getContext(), R.style.BottomDialog);
-        LinearLayout root = LayoutUtil.initPopupMenu(getContext(), m_LongClickNotePopupMenu, R.layout.popupmenu_note_longclicknote);
-
-        root.findViewById(R.id.id_NoteFrag_PopupMenu_ViewNote).setOnClickListener(NoteFragment.this);
-        root.findViewById(R.id.id_NoteFrag_PopupMenu_ChangeGroup).setOnClickListener(NoteFragment.this);
-        root.findViewById(R.id.id_NoteFrag_PopupMenu_DeleteNote).setOnClickListener(NoteFragment.this);
-        root.findViewById(R.id.id_NoteFrag_PopupMenu_Cancel).setOnClickListener(NoteFragment.this);
-
-        m_LongClickNotePopupMenu.setOnCancelListener(new DialogInterface.OnCancelListener() {
-            @Override
-            public void onCancel(DialogInterface dialog) {
-                LongClickNoteItem = null;
-            }
-        });
-
-        TextView label = root.findViewById(R.id.id_NoteFrag_PopupMenu_Label);
-        label.setText(String.format(Locale.CHINA, getString(R.string.NoteFrag_PopupMenuLabel), LongClickNoteItem.getTitle()));
-
-        m_LongClickNotePopupMenu.show();
-    }
-
-    // endregion 进入笔记
-
-    // region 笔记增删改 文字识别 活动返回 takePhoto OpenOCRAct DeleteNote HandleNewUpdateNote onActivityResult
-
-    private Uri imgUri; // 拍照时返回的uri
-
-    /**
-     * 浮动菜单 OCR
-     */
-    private void takePhoto() {
-
-        // 要保存的图片文件 _PHOTO 格式
-        String filename = SaveNameUtil.getImageFileName(SaveNameUtil.SaveType.PHOTO);
-
-        // 7.0 调用系统相机拍照不再允许使用 Uri 方式，应该替换为 FileProvider
-        // provider 路径
-        imgUri = AppPathUtil.getUriByPath(getContext(), filename);
-
-        Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-        // 权限
-        intent.addFlags(Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION);
-        // 传入新图片名
-        intent.putExtra(MediaStore.EXTRA_OUTPUT, imgUri);
-
+    private void onInitNoteData() {
+        pageData = new Data();
+        ProgressDialog progressDialog = showProgress(getContext(), "加载数据中...", false, null);
         try {
-            startActivityForResult(intent, REQUEST_TAKE_PHOTO);
+            pageData.allNotes = DaoStrategyHelper.getInstance().getNoteDao(getContext()).queryAllNotes();
+            progressDialog.dismiss();
+        } catch (ServerException ex) {
+            progressDialog.dismiss();
+            showAlert(getContext(), "错误", "数据加载错误：" + ex.getMessage(),
+                "重试", (d, w) -> onInitNoteData(), "确定", null);
         }
-        catch (Exception ex) {
-            ex.printStackTrace();
-            new AlertDialog.Builder(getContext())
-                .setTitle(R.string.NoteFrag_CameraNoFoundAlertTitle)
-                .setMessage(R.string.NoteFrag_CameraNoFoundAlertMsg)
-                .setPositiveButton(R.string.NoteFrag_CameraNoFoundAlertPosButton, null)
-                .create().show();
-        }
-
-        // TODO nox_adb 没有相机可以测试
     }
 
     /**
-     * 拍完照后文字识别
-     * @param imgUri 原图片
+     * 更新页面显示为 noteList
      */
-    private void OpenOCRAct(Uri imgUri) {
-        Intent intent = new Intent(getContext(), OCRActivity.class);
+    private void setListContent(List<Note> noteList) {
+        NoteAdapter adapter = (NoteAdapter) m_noteListView.getAdapter();
+        if (adapter == null) return;
 
-        Bundle bundle = new Bundle();
-        bundle.putString(OCRActivity.INT_IMGPATH, imgUri.toString());
-
-        intent.putExtra(OCRActivity.INT_BUNDLE, bundle);
-        startActivity(intent);
+        adapter.setNoteList(noteList);
+        adapter.notifyDataSetChanged();
     }
 
     /**
-     * 图片编辑
+     * 新建笔记
      */
-    private void StartEditImg(Uri uri) {
+    private void newNote() {
+        Note note = new Note();
         try {
-            // 获得源路径
-            String imgPath = AppPathUtil.getFilePathByUri(getContext(), uri);
+            Group defGroup = DaoStrategyHelper.getInstance().getGroupDao(getContext()).queryDefaultGroup();
+            note.setGroup(defGroup);
+        } catch (ServerException ex) {
+            showAlert(getContext(), "错误", "获取默认分组错误：" + ex.getMessage());
+            return;
+        }
 
-            if (imgPath == null || imgPath.isEmpty()) {
-                new AlertDialog.Builder(getContext())
-                    .setTitle("插入图片")
-                    .setMessage("从相册获取的图片或拍照得到的图片不存在，请重试。")
-                    .setNegativeButton("确定", null)
-                    .create()
-                    .show();
-                return;
-            }
+        Intent intent = new Intent(getActivity(), ModifyNoteActivity.class);
+        intent.putExtra(INT_NOTE_DATA, note);
+        intent.putExtra(INT_IS_NEW, true); // NEW
+        startActivityForResult(intent, REQ_NEW_NOTE_INTENT);
+    }
 
-            // Uri uri2 = Uri.fromFile(new File(imgPath));
+    /**
+     * 查看笔记
+     * @param isNew 是否为新笔记 (newNote)
+     */
+    private void openNote(@NonNull Note note, boolean isNew) {
+        Intent intent = new Intent(getActivity(), ViewModifyNoteActivity.class);
+        intent.putExtra(INT_NOTE_DATA, note);
+        intent.putExtra(INT_IS_NEW, isNew);
+        startActivityForResult(intent, REQ_OPEN_NOTE_INTENT);
+    }
 
-            Intent intent = new Intent(getActivity(), IMGEditActivity.class);
+    /**
+     * 查看已经存在的笔记
+     */
+    private void openNote(@NonNull Note note) {
+        openNote(note, false);
+    }
 
-            // intent.putExtra(IMGEditActivity.INT_IMAGE_URI, uri2);
-            intent.putExtra(IMGEditActivity.INT_IMAGE_URI, uri);
-            intent.putExtra(IMGEditActivity.INT_IMAGE_SAVE_URI, SaveNameUtil.getImageFileName(SaveNameUtil.SaveType.EDITED));
-
-            startActivityForResult(intent, REQUEST_CROP);
-        } catch (Exception e) {
-            e.printStackTrace();
+    /**
+     * 删除笔记，更新页面
+     */
+    private void deleteNote(@NonNull Note note) {
+        try {
+            DaoStrategyHelper.getInstance().getNoteDao(getContext()).deleteNote(note.getId());
+            NoteAdapter adapter = (NoteAdapter) m_noteListView.getAdapter();
+            adapter.getNoteList().remove(note);
+            adapter.notifyDataSetChanged();
+        } catch (ServerException ex) {
+            showAlert(getContext(), "错误", "删除笔记错误：" + ex.getMessage());
         }
     }
 
     /**
-     * 删除笔记
-     *
-     * @param view
-     * @param note
-     */
-    private void DeleteNote(final View view, final Note note) {
-        AlertDialog deleteAlert = new AlertDialog
-                .Builder(getContext())
-                .setTitle(R.string.NoteFrag_DeleteAlertTitle)
-                .setMessage(String.format(getResources().getString(R.string.NoteFrag_DeleteAlertMsg), note.getTitle()))
-                .setPositiveButton(R.string.NoteFrag_DeleteAlertPositiveButton, new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-
-                        NoteDao noteDao = new NoteDao(getContext());
-                        new Thread(new Runnable() {
-                            @Override
-                            public void run() {
-
-                                int ret = noteDao.deleteNote(note.getId());
-
-                                getActivity().runOnUiThread(new Runnable() {
-                                    @Override
-                                    public void run() {
-                                        if (ret > 0) {
-                                            NoteList.remove(note);
-                                            noteAdapter.notifyDataSetChanged();
-
-                                            // TODO 一堆垃圾代码待改
-
-                                            new Thread(new Runnable() {
-                                                @Override
-                                                public void run() {
-
-                                                    if (IsSearching)
-                                                        noteAdapter.setNoteList(search(SearchingStr));
-                                                    else if (IsGrouping)
-                                                        noteAdapter.setNoteList(getGroupOfNote(currGroup));
-                                                    else
-                                                        noteAdapter.setNoteList(NoteList);
-
-                                                    getActivity().runOnUiThread(new Runnable() {
-                                                        @Override
-                                                        public void run() {
-                                                            noteAdapter.notifyDataSetChanged();
-
-                                                            Snackbar.make(view, R.string.NoteFrag_DeleteAlertDeleteSuccess, Snackbar.LENGTH_LONG)
-
-                                                                    // TODO !!!!!!!!!!!!
-
-                                                                    // .setAction(R.string.NoteFrag_DeleteAlertUndo, new View.OnClickListener() {
-                                                                    //     @Override
-                                                                    //     public void onClick(View v) {
-                                                                    //         try {
-//
-                                                                    //             long noteId = noteDao.insertNote(note);
-                                                                    //             new Thread(new Runnable() {
-                                                                    //                 @Override
-                                                                    //                 public void run() {
-                                                                    //                     Note note1 = noteDao.queryNoteById((int) noteId);
-//
-                                                                    //                     getActivity().runOnUiThread(new Runnable() {
-                                                                    //                         @Override
-                                                                    //                         public void run() {
-//
-                                                                    //                             NoteList.add(note1);
-                                                                    //                             Collections.sort(NoteList);
-//
-                                                                    //                             new Thread(new Runnable() {
-                                                                    //                                 @Override
-                                                                    //                                 public void run() {
-//
-                                                                    //                                     if (IsSearching)
-                                                                    //                                         noteAdapter.setNoteList(search(SearchingStr));
-                                                                    //                                     else if (IsGrouping)
-                                                                    //                                         noteAdapter.setNoteList(getGroupOfNote(currGroup));
-                                                                    //                                     else
-                                                                    //                                         noteAdapter.setNoteList(NoteList);
-//
-                                                                    //                                     getActivity().runOnUiThread(new Runnable() {
-                                                                    //                                         @Override
-                                                                    //                                         public void run() {
-//
-                                                                    //                                             noteAdapter.notifyDataSetChanged();
-                                                                    //                                         }
-                                                                    //                                     });
-                                                                    //                                 }
-                                                                    //                             }).start();
-                                                                    //                         }
-                                                                    //                     });
-                                                                    //                 }
-                                                                    //             }).start();
-                                                                    //         } catch (Exception ex) {
-                                                                    //             ex.printStackTrace();
-                                                                    //         }
-//
-                                                                    //         Snackbar.make(v, R.string.NoteFrag_DeleteAlertUndoSuccess, Snackbar.LENGTH_SHORT).show();
-                                                                    //     }
-                                                                    // })
-                                                            .show();
-                                                        }
-                                                    });
-                                                }
-                                            }).start();
-
-
-                                        }
-                                    }
-                                });
-                            }
-                        }).start();
-                    }
-                })
-                .setNegativeButton(R.string.NoteFrag_DeleteAlertNegativeButton, null)
-                .create();
-
-        deleteAlert.show();
-    }
-
-    /**
-     * 处理从 fab 新建或者从 list 修改，活动转换
-     *
-     * @param isNew true 表示 新建
-     * @param note  false 时有用，传入原先数据
-     */
-    private void HandleNewUpdateNote(boolean isNew, Note note, boolean noteisnew) {
-        if (isNew) {
-            hasNoteReturned = false;
-            Intent addNote_intent = new Intent(getActivity(), ModifyNoteActivity.class);
-            addNote_intent.putExtra("notedata", new Note("", ""));
-            addNote_intent.putExtra("flag", NOTE_NEW); // NEW
-            startActivityForResult(addNote_intent, REQ_NOTE_NEW); // 2 from FloatingButton
-        } else {
-
-            if (!noteisnew)
-                hasNoteReturned = false;
-
-            Intent modifyNote_intent = new Intent(getContext(), ViewModifyNoteActivity.class);
-            modifyNote_intent.putExtra("notedata", note);
-            modifyNote_intent.putExtra("isModify", noteisnew);
-            modifyNote_intent.putExtra("flag", NOTE_UPDATE); // UPDATE
-            startActivityForResult(modifyNote_intent, REQ_NOTE_UPDATE); // 1 from List
-        }
-
-    }
-
-    boolean hasNoteReturned = false; // 标识是否回退过
-
-    /**
-     * 处理从 View Modify Note Activity 返回的数据
-     *
-     * @param requestCode
-     * @param resultCode
-     * @param data
+     * 活动返回
      */
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
-
         super.onActivityResult(requestCode, resultCode, data);
-        ShowLogE("onActivityResult", "HasReturn");
 
         switch (requestCode) {
-            case REQ_NOTE_NEW:
-            case REQ_NOTE_UPDATE:
-
+            case REQ_NEW_NOTE_INTENT: // 新笔记返回 -> 浏览
                 if (resultCode == RESULT_OK) {
+                    Note note = (Note) data.getSerializableExtra(INT_NOTE_DATA);
+                    openNote(note, true);
+                }
+                break;
+            case REQ_OPEN_NOTE_INTENT: // 笔记浏览返回 -> Toast
+                if (resultCode == RESULT_OK) {
+                    boolean isNew = data.getBooleanExtra(INT_IS_NEW, true);
+                    boolean isModified = data.getBooleanExtra(INT_IS_MODIFIED, true);
+                    Note note = (Note) data.getSerializableExtra(INT_NOTE_DATA);
 
-                    int flag = data.getIntExtra("flag", NOTE_NEW);
-                    Note note = (Note) data.getSerializableExtra("notedata");
+                    if (isNew) {
+                        // 新笔记
+                        showToast(getContext(), "笔记 \"" + note.getTitle() + "\" 新建成功");
+                        NoteAdapter adapter = (NoteAdapter) m_noteListView.getAdapter();
+                        List<Note> notes = adapter.getNoteList();
+                        notes.add(note);
+                        adapter.setNoteList(notes);
+                        adapter.notifyDataSetChanged();
+                    } else if (isModified) {
+                        // 旧的更新过的笔记
+                        showToast(getContext(), "笔记 \"" + note.getTitle() + "\" 更新成功");
+                        NoteAdapter adapter = (NoteAdapter) m_noteListView.getAdapter();
+                        List<Note> notes = adapter.getNoteList();
 
-                    if (flag == NOTE_NEW) {
-                        hasNoteReturned = true;
-                        NoteList.add(NoteList.size(), note);
-                        SelectedNoteItem = NoteList.indexOf(note);
-                        HandleNewUpdateNote(false, NoteList.get(SelectedNoteItem), true);
-                    }
-                    else {
-                        NoteList.set(SelectedNoteItem, note);
+                        for (Note n : notes)
+                            if (n.getId() == note.getId()) {
+                                notes.set(notes.indexOf(n), note);
+                                return;
+                            }
 
-                        //////
-                        Collections.sort(NoteList);
-                        noteAdapter.notifyDataSetChanged();
-
-                        if (IsSearching)
-                            initListView(search(SearchingStr));
-                        else if (IsGrouping)
-                            initListView(getGroupOfNote(currGroup));
-                        else
-                            initListView(NoteList);
-
-                        if (hasNoteReturned)
-                            Toast.makeText(getContext(), String.format(getResources().getString(R.string.NoteFrag_ActivityReturnNewNote), note.getTitle()), Toast.LENGTH_SHORT).show();
-                        else
-                            Toast.makeText(getContext(), String.format(getResources().getString(R.string.NoteFrag_ActivityReturnUpdateNote), note.getTitle()), Toast.LENGTH_SHORT).show();
+                        adapter.setNoteList(notes);
+                        adapter.notifyDataSetChanged();
                     }
                 }
                 break;
-
-            // 拍照获得图片，编辑
-            case REQUEST_TAKE_PHOTO:
-                if (resultCode == RESULT_OK) {
-                    StartEditImg(imgUri);
-                }
+            case REQ_OCR_TAKE_PHOTO: // OCR 拍照 (OCRTakePhoto)
+                // https://zhidao.baidu.com/question/1638421275428158220.html
+                if (resultCode == RESULT_OK)
+                    OCREditPhoto(data.getData()); // photoUri
                 break;
-
-            // 裁剪后文字识别
-            case REQUEST_CROP: // 裁剪
-                if (resultCode == RESULT_OK) {
-                    // _PHOTO
-                    AppPathUtil.deleteFile(AppPathUtil.getFilePathByUri(getContext(), imgUri));
-                    OpenOCRAct(data.getData()); // _small uri
-                }
+            case REQ_OCR_EDIT_PHOTO: // OCR 剪辑 (OCREditPhoto)
+                if (resultCode == RESULT_OK)
+                    OpenOCRActivity(data.getData()); // editedUri
                 break;
         }
     }
 
-    // endregion 笔记增删改
+    // endregion
 
-    // region Auth
+    // region Note Group Search
 
     /**
-     * 订阅登录注销事件
+     * 分组显示
      */
-    private void registerAuthActions() {
-        AuthManager.getInstance().addLoginChangeListener(new AuthManager.OnLoginChangeListener() {
+    private void groupNote(Group group) {
+        pageData.pageState = PageState.GROUPING;
 
-            // TODO
-            public void onLogin(String UserName) {
-                if(getUserVisibleHint()) {
-                    SearchGroupBack();
-                    HasRefreshed = true;
-                }
-                else
-                    HasRefreshed = false;
-            }
+        // 页面显示处理
+        m_toolbar.getMenu().findItem(R.id.action_search_group_back).setVisible(true); // 显示返回
+        m_toolbar.getMenu().findItem(R.id.action_search).setVisible(true); // 显示搜索
+        m_toolbar.getMenu().findItem(R.id.action_group).setVisible(false); // 隐藏分组
 
-            @Override
-            public void onLogout() {
-                if(getUserVisibleHint()) {
-                    SearchGroupBack();
-                    HasRefreshed = true;
-                }
-                else
-                    HasRefreshed = false;
-            }
-        });
+        m_swipeRefresh.setEnabled(false); // 禁止刷新
+        m_fabMenu.setVisibility(View.GONE); // 隐藏 Fab
+        m_drawerLayout.setEnabled(false); // 禁止分组
+
+        m_toolbar.setTitle("\"" + group.getName() + "\" 的分组结果");
+
+        // 数据处理
+        try {
+            List<Note> notes = DaoStrategyHelper.getInstance().getNoteDao(getContext()).queryNotesByGroupId(group.getId());
+            setListContent(notes);
+        } catch (ServerException ex) {
+            showAlert(getContext(), "错误", "数据加载错误：" + ex.getMessage());
+        }
     }
 
-    // endregion Auth
+    /**
+     * 搜索显示
+     */
+    private void searchNote(String searchingStr) {
+        pageData.pageState = PageState.SEARCHING;
+
+        // 页面显示处理
+        m_toolbar.getMenu().findItem(R.id.action_search_group_back).setVisible(true); // 显示返回
+        m_toolbar.getMenu().findItem(R.id.action_search).setVisible(false); // 隐藏搜索
+        m_toolbar.getMenu().findItem(R.id.action_group).setVisible(true); // 允许分组
+
+        m_drawerLayout.setEnabled(true); // 允许分组
+        m_swipeRefresh.setEnabled(false); // 禁止刷新
+        m_fabMenu.setVisibility(View.GONE); // 隐藏 Fab
+
+        m_toolbar.setTitle("\"" + searchingStr + "\" 的搜索结果");
+
+        // 数据处理
+        List<Note> searchResult =
+            SearchUtil.getSearchItems(pageData.allNotes.toArray(new Note[0]), searchingStr);
+        setListContent(searchResult);
+    }
+
+    /**
+     * 正常状态，非搜索非分组
+     */
+    private void toNormal() {
+        pageData.pageState = PageState.NORMAL;
+
+        // 页面显示处理
+        m_toolbar.getMenu().findItem(R.id.action_search_group_back).setVisible(false); // 隐藏返回
+        m_toolbar.getMenu().findItem(R.id.action_search).setVisible(true); // 允许搜索
+        m_toolbar.getMenu().findItem(R.id.action_group).setVisible(true); // 允许分组
+
+        m_swipeRefresh.setEnabled(true); // 允许刷新
+        m_fabMenu.setVisibility(View.VISIBLE); // 显示 Fab
+        m_drawerLayout.setEnabled(true); // 允许分组
+        m_toolbar.setTitle("所有笔记");
+
+        // 数据处理
+        setListContent(pageData.allNotes);
+    }
+
+    // endregion
+
+    // region OCR
+
+    /*
+        拍照 (生成 photoUri) ->
+        编辑 (生成 editedUri) ->
+        识别 (删除 photoUri) -> 保留 editedUri
+     */
+
+    /**
+     * 文字识别之前 拍照
+     */
+    private void OCRTakePhoto() {
+
+        String photoPath = SaveNameUtil.getImageFileName(SaveNameUtil.SaveType.PHOTO);
+
+        // 7.0 调用系统相机拍照不再允许使用 Uri 方式，应该替换为 FileProvider
+        Uri photoUri = AppPathUtil.getUriByPath(getContext(), photoPath);
+
+        Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+        intent.addFlags(Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION);
+        intent.putExtra(MediaStore.EXTRA_OUTPUT, photoUri);
+
+        try {
+            startActivityForResult(intent, REQ_OCR_TAKE_PHOTO);
+        }
+        catch (Exception ex) {
+            ex.printStackTrace();
+            showAlert(getContext(), "错误", "打开设备摄像机错误，请检查。");
+        }
+    }
+
+    /**
+     * 文字识别之前 编辑
+     */
+    private void OCREditPhoto(Uri photoUri) {
+        String imgPath = AppPathUtil.getFilePathByUri(getContext(), photoUri);
+        if (imgPath == null || imgPath.isEmpty())
+            showAlert(getContext(), "错误", "从相册获取的图片或拍照得到的图片不存在，请重试。");
+        else {
+            String editedPath = SaveNameUtil.getImageFileName(SaveNameUtil.SaveType.EDITED);
+
+            Intent intent = new Intent(getActivity(), IMGEditActivity.class);
+            intent.putExtra(IMGEditActivity.INT_IMAGE_URI, photoUri);
+            intent.putExtra(IMGEditActivity.INT_IMAGE_SAVE_URI, editedPath);
+
+            startActivityForResult(intent, REQ_OCR_EDIT_PHOTO);
+        }
+    }
+
+    /**
+     * 拍照 -> 编辑 -> 识别
+     */
+    private void OpenOCRActivity(@Nullable Uri editedUri) {
+        // TODO delete photoUri
+
+        if (editedUri == null) {
+            showAlert(getContext(), "错误", "编辑得到的图片不存在，请重试。");
+            return;
+        }
+
+        Intent intent = new Intent(getContext(), OCRActivity.class);
+
+        Bundle bundle = new Bundle();
+        bundle.putString(OCRActivity.INT_IMGPATH, editedUri.toString());
+        intent.putExtra(OCRActivity.INT_BUNDLE, bundle);
+
+        startActivity(intent);
+    }
+
+    // endregion
 }

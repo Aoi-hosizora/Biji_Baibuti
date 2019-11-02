@@ -43,6 +43,7 @@ import com.baibuti.biji.R;
 import com.baibuti.biji.model.dao.local.GroupDao;
 import com.baibuti.biji.model.dao.local.NoteDao;
 import com.baibuti.biji.ui.dialog.ImagePopupDialog;
+import com.baibuti.biji.ui.fragment.NoteFragment;
 import com.baibuti.biji.util.fileUtil.AppPathUtil;
 import com.baibuti.biji.util.otherUtil.CommonUtil;
 import com.baibuti.biji.util.imgDocUtil.ImageUtil;
@@ -99,13 +100,13 @@ public class ModifyNoteActivity extends AppCompatActivity implements View.OnClic
     
     // region 声明: flag CUT_LENGTH screen
     
-    /**
-     * NOTE_NEW 0
-     * NOTE_UPDATE 1
-     */
-    private int flag; // 0: NEW, 1: UPDATE
-    private static final int NOTE_NEW = 0; // new
-    private static final int NOTE_UPDATE = 1; // modify
+    // /**
+    //  * NOTE_NEW 0
+    //  * NOTE_UPDATE 1
+    //  */
+    // private int flag; // 0: NEW, 1: UPDATE
+    // private static final int NOTE_NEW = 0; // new
+    // private static final int NOTE_UPDATE = 1; // modify
 
     public final int CUT_LENGTH = 17;
     private int screenWidth;
@@ -168,10 +169,10 @@ public class ModifyNoteActivity extends AppCompatActivity implements View.OnClic
             }
         }).start();
 
-        note = (Note) getIntent().getSerializableExtra("notedata");
-        flag = getIntent().getIntExtra("flag", NOTE_NEW);
+        note = (Note) getIntent().getSerializableExtra(NoteFragment.INT_NOTE_DATA);
+        boolean isNew = getIntent().getBooleanExtra(NoteFragment.INT_IS_NEW, true);
 
-        if (flag == NOTE_NEW) {
+        if (isNew) {
             setTitle(R.string.NMoteActivity_TitleForNewNote);
             note.setGroup(groupDao.queryDefaultGroup(), true);
         }
@@ -498,8 +499,11 @@ public class ModifyNoteActivity extends AppCompatActivity implements View.OnClic
                     note.setContent(handleSaveImgToServer(note.getContent(), motoNote));
                 }
 
+                Intent fromIntent = getIntent();
+                boolean isNew = fromIntent.getBooleanExtra(NoteFragment.INT_IS_NEW, true);
+
                 // 处理保存
-                if (flag == NOTE_NEW) {
+                if (isNew) {
 
                     // 从 Note Frag 打开的 新建
                     long noteId = noteDao.insertNote(note);
@@ -510,8 +514,8 @@ public class ModifyNoteActivity extends AppCompatActivity implements View.OnClic
                         public void run() {
 
                             Intent intent_FromNoteFrag = new Intent();
-                            intent_FromNoteFrag.putExtra("notedata", note);
-                            intent_FromNoteFrag.putExtra("flag", NOTE_NEW); // NEW
+                            intent_FromNoteFrag.putExtra(NoteFragment.INT_NOTE_DATA, note);
+                            intent_FromNoteFrag.putExtra(NoteFragment.INT_IS_NEW, true); // NEW
                             setResult(RESULT_OK, intent_FromNoteFrag);
                             finish();
                         }
@@ -530,9 +534,9 @@ public class ModifyNoteActivity extends AppCompatActivity implements View.OnClic
 
                             Intent intent_FromVMNote = new Intent();
 
-                            intent_FromVMNote.putExtra("notedata", note);
-                            intent_FromVMNote.putExtra("flag", NOTE_UPDATE); // UPDATE
-                            intent_FromVMNote.putExtra("isModify", isModify);
+                            intent_FromVMNote.putExtra(NoteFragment.INT_NOTE_DATA, note);
+                            intent_FromVMNote.putExtra(NoteFragment.INT_IS_NEW, false); // UPDATE
+                            intent_FromVMNote.putExtra(NoteFragment.INT_IS_MODIFIED, isModify);
                             setResult(RESULT_OK, intent_FromVMNote);
 
                             finish();

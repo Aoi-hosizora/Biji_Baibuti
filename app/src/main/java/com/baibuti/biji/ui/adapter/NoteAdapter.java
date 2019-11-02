@@ -72,7 +72,8 @@ public class NoteAdapter extends RecyclerViewEmptySupport.Adapter<NoteAdapter.Vi
     @NonNull
     @Override
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(context).inflate(R.layout.modulelayout_notefrag_notelistitem,parent,false);
+        View view = LayoutInflater.from(context)
+            .inflate(R.layout.modulelayout_notefrag_notelistitem, parent,false);
 
         view.setOnClickListener(this);
         view.setOnLongClickListener(this);

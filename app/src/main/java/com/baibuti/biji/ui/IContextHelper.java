@@ -8,6 +8,7 @@ import android.content.Intent;
 import android.net.Uri;
 import android.support.design.widget.Snackbar;
 import android.view.View;
+import android.widget.ListAdapter;
 import android.widget.Toast;
 
 public interface IContextHelper {
@@ -57,6 +58,30 @@ public interface IContextHelper {
             .setMessage(message)
             .setPositiveButton(posText, posListener)
             .setNegativeButton(negText, negListener)
+            .show();
+    }
+
+    /**
+     * AlertDialog: 标题 + 列表
+     */
+    default void showAlert(Context context,
+                           CharSequence title,
+                           CharSequence[] list, DialogInterface.OnClickListener listener) {
+        new AlertDialog.Builder(context)
+            .setTitle(title)
+            .setItems(list, listener)
+            .show();
+    }
+
+    /**
+     * AlertDialog: 标题 + 列表 + 适配器
+     */
+    default void showAlert(Context context,
+                           CharSequence title,
+                           ListAdapter adapter, DialogInterface.OnClickListener listener) {
+        new AlertDialog.Builder(context)
+            .setTitle(title)
+            .setSingleChoiceItems(adapter, 0, listener)
             .show();
     }
 

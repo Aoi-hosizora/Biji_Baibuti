@@ -66,9 +66,9 @@ public class ViewModifyNoteActivity extends AppCompatActivity implements View.On
 
     // region 声明: flag REQ
 
-    private int flag = NOTE_NEW;
-    private static final int NOTE_NEW = 0; // new
-    private static final int NOTE_UPDATE = 1; // modify
+    // private int flag = NOTE_NEW;
+    // private static final int NOTE_NEW = 0; // new
+    // private static final int NOTE_UPDATE = 1; // modify
 
     private static final int REQ_CHOOSE_FOLDER_PATH = 2;
 
@@ -95,7 +95,7 @@ public class ViewModifyNoteActivity extends AppCompatActivity implements View.On
         initPopupMenu();
 
         note = (Note) getIntent().getSerializableExtra("notedata");
-        flag = getIntent().getIntExtra("flag", NOTE_NEW);
+        // flag = getIntent().getIntExtra("flag", NOTE_NEW);
         isModify = getIntent().getBooleanExtra("isModify", true);
 
         TitleEditText_View = (TextView) findViewById(R.id.id_modifynote_viewtitle);
