@@ -1,19 +1,26 @@
 package com.baibuti.biji.util.otherUtil;
 
 import android.annotation.SuppressLint;
+import android.app.Activity;
 import android.app.Dialog;
 import android.content.Context;
+import android.support.annotation.Nullable;
 import android.support.design.internal.BottomNavigationItemView;
 import android.support.design.internal.BottomNavigationMenuView;
 import android.support.design.widget.BottomNavigationView;
+import android.support.design.widget.NavigationView;
+import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
+import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.LinearLayout;
 
 import java.lang.reflect.Field;
+
+import javax.annotation.Nonnull;
 
 public class LayoutUtil {
 
@@ -70,5 +77,20 @@ public class LayoutUtil {
         dialogWindow.setAttributes(lp);
 
         return root;
+    }
+
+    /**
+     * 为 NavigationView 通过 DisplayMetrics 设置宽度
+     * @param activity 当前活动，防止 getActivity() 为 null
+     * @param rate 占页面宽度的百分比
+     */
+    public static void setNavigationViewWidth(@Nullable Activity activity, @Nonnull NavigationView navigationView, double rate) {
+        if (activity == null) return;
+
+        DisplayMetrics metrics = new DisplayMetrics();
+        activity.getWindowManager().getDefaultDisplay().getMetrics(metrics);
+        ViewGroup.LayoutParams params = navigationView.getLayoutParams();
+        params.width = (int) (metrics.widthPixels * rate);
+        navigationView.setLayoutParams(params);
     }
 }

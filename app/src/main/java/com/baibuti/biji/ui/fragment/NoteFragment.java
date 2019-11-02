@@ -12,26 +12,19 @@ import android.provider.MediaStore;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.annotation.WorkerThread;
-import android.support.constraint.ConstraintLayout;
-import android.support.design.widget.AppBarLayout;
 import android.support.design.widget.NavigationView;
 import android.support.design.widget.Snackbar;
-import android.support.v4.app.Fragment;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.Toolbar;
-import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.animation.AccelerateInterpolator;
-import android.view.animation.DecelerateInterpolator;
-import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.ListView;
@@ -51,7 +44,6 @@ import com.baibuti.biji.model.po.Note;
 import com.baibuti.biji.ui.adapter.NoteAdapter;
 import com.baibuti.biji.ui.dialog.GroupDialog;
 import com.baibuti.biji.R;
-import com.baibuti.biji.ui.widget.listView.RecyclerListScrollHelper;
 import com.baibuti.biji.ui.widget.listView.SpacesItemDecoration;
 import com.baibuti.biji.ui.widget.listView.RecyclerViewEmptySupport;
 import com.baibuti.biji.model.dao.local.GroupDao;
@@ -59,7 +51,6 @@ import com.baibuti.biji.model.dao.local.NoteDao;
 import com.baibuti.biji.util.fileUtil.AppPathUtil;
 import com.baibuti.biji.util.fileUtil.SaveNameUtil;
 import com.baibuti.biji.util.otherUtil.LayoutUtil;
-import com.getbase.floatingactionbutton.FloatingActionButton;
 import com.getbase.floatingactionbutton.FloatingActionsMenu;
 import com.wyt.searchbox.SearchFragment;
 import com.baibuti.biji.util.stringUtil.SearchUtil;
@@ -69,35 +60,38 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 
+import butterknife.BindView;
+import butterknife.OnClick;
 import me.kareluo.imaging.IMGEditActivity;
 
 import static android.app.Activity.RESULT_OK;
 
 public class NoteFragment extends BaseFragment implements IContextHelper, View.OnClickListener {
 
-    // region 声明: View UI ProgressDialog Toolbar DrawerLayout
-
     private View view;
 
-    private RecyclerViewEmptySupport mNoteList;
+    @BindView(R.id.note_list)
+    private RecyclerViewEmptySupport m_noteListView;
 
+    @BindView(R.id.note_fabmenu)
     private FloatingActionsMenu m_fabMenu;
+
     private SearchFragment searchFragment;
+
+    @BindView(R.id.note_listsrl)
     private SwipeRefreshLayout mSwipeRefresh;
 
-    private ProgressDialog loadingDialog;
-    private ProgressDialog loadingGroupDialog;
-
+    @BindView(R.id.NoteFrag_Toolbar)
     private Toolbar m_toolbar;
-    private AppBarLayout m_appBarLayout;
 
+    @BindView(R.id.id_noteFrag_drawer_layout)
     private DrawerLayout m_drawerLayout;
+
+    @BindView(R.id.id_NoteFrag_nav_GroupList)
     private ListView m_nav_groupList;
 
     private Dialog m_LongClickNotePopupMenu;
     private Note LongClickNoteItem;
-
-    // endregion 声明: View UI ProgressDialog Toolbar DrawerLayout
 
     // region 声明: flag REQ
 
@@ -120,57 +114,123 @@ public class NoteFragment extends BaseFragment implements IContextHelper, View.O
     private final static int HideGroupPrgSecond = 100;
 
     /**
-     * 滑动列表 隐藏速度 (越小越慢)
-     */
-    private final int ScrollShowHideInterpolator = 1;
-
-    /**
      * 标记登录时是否刷新过
      */
     private boolean HasRefreshed = false;
 
     // endregion 声明: 一些等待的秒数
 
-    // region 创建界面 菜单栏 浮动菜单 等待框 搜索框 右划菜单 onCreateView initToolbar initFabMenu setupProgressAndSR initSearchFrag ShowLogE onClick initRightMenu
-
     @Nullable
     @Override
-    public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         if (null != view) {
             ViewGroup parent = (ViewGroup) view.getParent();
             if (null != parent)
                 parent.removeView(view);
         } else {
             view = inflater.inflate(R.layout.fragment_notetab, container, false);
+            initView();
 
-            m_fabMenu = view.findViewById(R.id.note_fabmenu);
-
-            mNoteList = view.findViewById(R.id.note_list);
-            View ListEmptyView = view.findViewById(R.id.note_emptylist);
-            mNoteList.setEmptyView(ListEmptyView);
-
-            setupProgressAndSR();
-
-            initToolbar(view);
-            initFabMenu(view);
-            initData(); // GetDao & List
-            initAdapter();
-            initListView(NoteList);
-            initSearchFrag();
-            initRightMenu();
-
-            initListScroll();
-
+            // TODO Auth
             registerAuthActions();
         }
-
         return view;
+    }
+
+    /**
+     * inflate 后 初始化界面
+     */
+    private void initView() {
+
+        // List Empty View
+        m_noteListView.setEmptyView(view.findViewById(R.id.note_emptylist));
+
+        // Swipe Refresh
+        mSwipeRefresh.setColorSchemeResources(R.color.colorPrimary);
+        mSwipeRefresh.setOnRefreshListener(() -> refreshData(500));
+
+        // Toolbar
+        m_toolbar.setTitle(R.string.NoteFrag_Header);
+        m_toolbar.inflateMenu(R.menu.notefragment_actionbar);
+        m_toolbar.setNavigationIcon(R.drawable.tab_menu);
+        // TODO
+        m_toolbar.setOnMenuItemClickListener((MenuItem item) -> {
+            switch (item.getItemId()) {
+                case R.id.action_search:
+                    MainActivity activity = (MainActivity) getActivity();
+                    if (activity != null)
+                        searchFragment.show(activity.getSupportFragmentManager(), com.wyt.searchbox.SearchFragment.TAG);
+                    break;
+                case R.id.action_modifygroup:
+                    ModifyGroupMenuClick();
+                    break;
+                case R.id.action_search_back:
+                    SearchGroupBack();
+                    break;
+            }
+            return true;
+        });
+        m_toolbar.setNavigationOnClickListener((View view) -> {
+            MainActivity activity = (MainActivity) getActivity();
+            if (activity != null) activity.openNavMenu();
+        });
+
+        // SearchFrag
+        searchFragment = com.wyt.searchbox.SearchFragment.newInstance();
+        searchFragment.setAllowReturnTransitionOverlap(true);
+        searchFragment.setOnSearchClickListener((String keyword) -> {
+            if (!keyword.trim().isEmpty()) {
+                // TODO
+                // searchNote(keyword);
+
+                IsSearching = true;
+                SearchingStr = keyword;
+
+                initListView(search(keyword));
+
+                m_toolbar.getMenu().findItem(R.id.action_search_back).setVisible(true);
+                mSwipeRefresh.setEnabled(false);
+                m_fabMenu.setVisibility(View.GONE);
+                // m_toolbar.setTitle(String.format(getContext().getString(R.string.NoteFrag_menu_search_content), keyword));
+            }
+        });
+
+        // Fab
+        View back = view.findViewById(R.id.note_fabmenu_back);
+        back.setOnClickListener(v -> m_fabMenu.collapse());
+        m_fabMenu.setOnFloatingActionsMenuUpdateListener(new FloatingActionsMenu.OnFloatingActionsMenuUpdateListener() {
+
+            @Override
+            public void onMenuExpanded() {
+                new Handler().postDelayed(() -> back.setVisibility(View.VISIBLE), 50);
+            }
+
+            @Override
+            public void onMenuCollapsed() {
+                back.setVisibility(View.GONE);
+            }
+        });
+
+        // Right Nav
+        m_drawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED);
+        NavigationView m_navigationView = view.findViewById(R.id.id_noteFrag_Right_nav);
+        m_navigationView.setNavigationItemSelectedListener((@NonNull MenuItem item) -> false);
+        LayoutUtil.setNavigationViewWidth(getActivity(), m_navigationView, 2.0 / 3);
+
+        ImageButton m_groupMgrBackButton = view.findViewById(R.id.id_NoteFrag_nav_BackButton);
+        m_groupMgrBackButton.setOnClickListener(v -> m_drawerLayout.closeDrawer(Gravity.END));
+
+        // Data
+        initData(); // GetDao & List
+        initAdapter();
+        initListView(NoteList);
     }
 
     @Override
     public boolean onBackPressed() {
+
         // 是否打开着Drawer
-        if (getDrawerIsOpen()) {
+        if (m_drawerLayout.isDrawerOpen(Gravity.END)) {
             closeDrawer();
             return true;
         }
@@ -181,8 +241,8 @@ public class NoteFragment extends BaseFragment implements IContextHelper, View.O
             return true;
         }
 
-        if (isFabExpanded()) {
-            collapseFab();
+        if (m_fabMenu.isExpanded()) {
+            m_fabMenu.collapse();
             return true;
         }
 
@@ -190,259 +250,19 @@ public class NoteFragment extends BaseFragment implements IContextHelper, View.O
     }
 
     /**
-     * 初始化菜单栏以及标题
-     *
-     * @param view
+     * 对用户可见时，判断是否需要刷新
      */
-    private void initToolbar(View view) {
-
-        m_appBarLayout = view.findViewById(R.id.NoteFrag_AppbarLayout);
-        m_toolbar = view.findViewById(R.id.NoteFrag_Toolbar);
-        m_toolbar.inflateMenu(R.menu.notefragment_actionbar);
-        m_toolbar.setOnMenuItemClickListener(new Toolbar.OnMenuItemClickListener() {
-            @Override
-            public boolean onMenuItemClick(MenuItem item) {
-                switch (item.getItemId()) {
-                    case R.id.action_search:
-                        searchFragment.show(getActivity().getSupportFragmentManager(), com.wyt.searchbox.SearchFragment.TAG);
-                        break;
-                    case R.id.action_modifygroup:
-                        ModifyGroupMenuClick();
-                        break;
-                    case R.id.action_search_back:
-                        SearchGroupBack();
-                        break;
-                }
-                return true;
-            }
-        });
-        m_toolbar.setNavigationIcon(R.drawable.tab_menu);
-        m_toolbar.setNavigationOnClickListener(new View.OnClickListener() {
-
-            @Override
-            public void onClick(View view) {
-                ((MainActivity) getActivity()).openNavMenu();
-            }
-        });
-        m_toolbar.setTitle(R.string.NoteFrag_Header);
-    }
-
-    /**
-     * 初始化浮动按钮菜单
-     *
-     * @param view
-     */
-    private void initFabMenu(View view) {
-        FloatingActionButton mNotePhoto = view.findViewById(R.id.note_photo);
-        FloatingActionButton mNoteEdit = view.findViewById(R.id.note_edit);
-
-        View back = view.findViewById(R.id.note_fabmenu_back);
-        back.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                m_fabMenu.collapse();
-            }
-        });
-
-        m_fabMenu.setOnFloatingActionsMenuUpdateListener(new FloatingActionsMenu.OnFloatingActionsMenuUpdateListener() {
-            @Override
-            public void onMenuExpanded() {
-                new Handler().postDelayed(new Runnable() {
-                    @Override
-                    public void run() {
-                        back.setVisibility(View.VISIBLE);
-                    }
-                }, 50);
-            }
-
-            @Override
-            public void onMenuCollapsed() {
-                back.setVisibility(View.GONE);
-            }
-        });
-
-        mNotePhoto.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                m_fabMenu.collapse();
-                takePhoto();
-            }
-        });
-        mNoteEdit.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                m_fabMenu.collapse();
-                HandleNewUpdateNote(true, null, false);
-            }
-        });
-    }
-
-    /**
-     * 判断 fab 是否展开
-     * @return
-     */
-    public boolean isFabExpanded() {
-        return m_fabMenu.isExpanded();
-    }
-
-    /**
-     * 隐藏 fab
-     */
-    public void collapseFab() {
-        m_fabMenu.collapse();
-    }
-
-    /**
-     * 设置 SwipeRefresh ProgressDialog
-     */
-    private void setupProgressAndSR() {
-        mSwipeRefresh = view.findViewById(R.id.note_listsrl);
-        mSwipeRefresh.setColorSchemeResources(R.color.colorPrimary);
-        mSwipeRefresh.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
-            @Override
-            public void onRefresh() {
-                refreshData(500);
-            }
-        });
-
-        loadingDialog = new ProgressDialog(getContext());
-        loadingDialog.setMessage(getResources().getString(R.string.NoteFrag_LoadingData));
-        loadingDialog.setCanceledOnTouchOutside(false);
-
-        loadingGroupDialog = new ProgressDialog(getContext());
-        loadingGroupDialog.setMessage(getContext().getString(R.string.NoteFrag_LoadingGroupData));
-        loadingGroupDialog.setCanceledOnTouchOutside(false);
-    }
-
-    /**
-     * 初始化搜索框
-     */
-    private void initSearchFrag() {
-        // 添加搜索框
-        searchFragment = com.wyt.searchbox.SearchFragment.newInstance();
-        searchFragment.setAllowReturnTransitionOverlap(true);
-        searchFragment.setOnSearchClickListener(new com.wyt.searchbox.custom.IOnSearchClickListener() {
-            @Override
-            public void OnSearchClick(String keyword) {
-
-                try {
-                    if (!keyword.isEmpty()) {
-
-                        IsSearching = true;
-                        SearchingStr = keyword;
-
-                        initListView(search(keyword));
-
-                        m_toolbar.getMenu().findItem(R.id.action_search_back).setVisible(true);
-                        mSwipeRefresh.setEnabled(false);
-                        m_fabMenu.setVisibility(View.GONE);
-                        m_toolbar.setTitle(String.format(getContext().getString(R.string.NoteFrag_menu_search_content), keyword));
-                    }
-                } catch (Exception ex) {
-                    ex.printStackTrace();
-                }
-
-            }
-        });
-    }
-
-    /**
-     * 初始化右划菜单
-     */
-    private void initRightMenu() {
-
-        // 布局
-        m_drawerLayout = view.findViewById(R.id.id_noteFrag_drawer_layout);
-        NavigationView m_navigationView = view.findViewById(R.id.id_noteFrag_Right_nav);
-
-        m_drawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED);
-        m_navigationView.setNavigationItemSelectedListener(new NavigationView.OnNavigationItemSelectedListener() {
-            @Override
-            public boolean onNavigationItemSelected(@NonNull MenuItem item) {
-                return false;
-            }
-        });
-
-        DisplayMetrics metrics = new DisplayMetrics();
-        getActivity().getWindowManager().getDefaultDisplay().getMetrics(metrics);
-
-        // 宽度
-        ViewGroup.LayoutParams params = m_navigationView.getLayoutParams();
-        params.width = metrics.widthPixels / 3 * 2;
-        m_navigationView.setLayoutParams(params);
-
-        // 列表
-        m_nav_groupList = view.findViewById(R.id.id_NoteFrag_nav_GroupList);
-
-        // 按钮
-        Button m_groupMgrButton = view.findViewById(R.id.id_NoteFrag_nav_GroupMgrButton);
-        m_groupMgrButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (IsGrouping)
-                    new AlertDialog.Builder(getContext())
-                            .setTitle(R.string.NoteFrag_GroupingMgrAlertTitle)
-                            .setMessage(R.string.NoteFrag_GroupingMgrAlertMsg)
-                            .setPositiveButton(R.string.NoteFrag_GroupingMgrAlertPosDoButton, new DialogInterface.OnClickListener() {
-                                @Override
-                                public void onClick(DialogInterface dialog, int which) {
-                                    SearchGroupBack();
-                                    ShowGroupDialog();
-                                }
-                            })
-                            .setNegativeButton(R.string.NoteFrag_GroupingMgrAlertNegBackButton, null)
-                            .create().show();
-                else
-                    ShowGroupDialog();
-            }
-        });
-
-        ImageButton m_groupMgrBackButton = view.findViewById(R.id.id_NoteFrag_nav_BackButton);
-        m_groupMgrBackButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                m_drawerLayout.closeDrawer(Gravity.END);
-            }
-        });
-    }
-
-    /**
-     * List 滑动隐藏
-     */
-    private void initListScroll() {
-        mNoteList.addOnScrollListener(new RecyclerListScrollHelper(new RecyclerListScrollHelper.OnShowHideScrollListener() {
-
-            @Override
-            public void onHide() {
-                // m_appBarLayout.animate().translationY(-m_appBarLayout.getHeight()).setInterpolator(new AccelerateInterpolator(ScrollShowHideInterpolator));
-
-                ConstraintLayout.LayoutParams layoutParams = (ConstraintLayout.LayoutParams) m_fabMenu.getLayoutParams();
-                m_fabMenu.animate().translationY(m_fabMenu.getHeight()+layoutParams.bottomMargin).setInterpolator(new AccelerateInterpolator(ScrollShowHideInterpolator));
-            }
-
-            @Override
-            public void onShow() {
-                // m_appBarLayout.animate().translationY(0).setInterpolator(new DecelerateInterpolator(ScrollShowHideInterpolator));
-                m_fabMenu.animate().translationY(0).setInterpolator(new DecelerateInterpolator(ScrollShowHideInterpolator));
-            }
-        }));
-    }
-
-    /**
-     * 全局设置 Log 格式
-     *
-     * @param FunctionName
-     * @param Msg
-     */
-    public void ShowLogE(String FunctionName, String Msg) {
-        String ClassName = "NoteFragment";
-        Log.e(getResources().getString(R.string.IShowLog_LogE),
-                ClassName + ": " + FunctionName + "###" + Msg); // MainActivity: initDatas###data=xxx
+    @Override
+    public void onResume() {
+        super.onResume();
+        if(!HasRefreshed) {
+            SearchGroupBack();
+            HasRefreshed = true;
+        }
     }
 
     /**
      * 弹出菜单点击
-     * @param v
      */
     @Override
     public void onClick(View v) {
@@ -469,7 +289,78 @@ public class NoteFragment extends BaseFragment implements IContextHelper, View.O
         }
     }
 
-    // endregion 创建界面 菜单栏 浮动菜单 等待框 搜索框 右划菜单
+    /*
+
+    1. 页面状态：正常，搜索，分组
+    2. 一个列表：setListContent
+    3. 提前设置好 Adapter
+
+     */
+
+    /**
+     * 当前页面 状态与数据
+     */
+    private Data pageData;
+
+    /**
+     * 初始化与刷新 加载数据
+     */
+    private void onRefreshData() {
+        pageData = new Data();
+    }
+
+    /**
+     * 更新页面显示为 noteList
+     */
+    private void setListContent(List<Note> noteList) {
+        NoteAdapter adapter = (NoteAdapter) m_noteListView.getAdapter();
+        if (adapter == null) return;
+
+        adapter.setNoteList(noteList);
+        adapter.notifyDataSetChanged();
+    }
+
+    /**
+     * 分组显示
+     */
+    private void groupNote(Group group) {
+        pageData.pageState = PageState.GROUPING;
+        m_toolbar.setTitle("\"" + group.getName() + "\" 的分组结果");
+        setListContent(null);
+    }
+
+    /**
+     * 搜索显示
+     */
+    private void searchNote(String searchingStr) {
+        pageData.pageState = PageState.SEARCHING;
+        m_toolbar.setTitle("\"" + searchingStr + "\" 的搜索结果");
+        setListContent(null);
+    }
+
+    /**
+     * 正常状态，非搜索非分组
+     */
+    private void toNormal() {
+        pageData.pageState = PageState.NORMAL;
+        m_toolbar.setTitle("所有笔记");
+        setListContent(pageData.allNotes);
+    }
+
+    /**
+     * 当前页面状态
+     */
+    private enum PageState {
+        NORMAL, SEARCHING, GROUPING
+    }
+
+    /**
+     * 当前页面数据
+     */
+    private class Data {
+        List<Note> allNotes = null;
+        PageState pageState = PageState.NORMAL;
+    }
 
     // region 搜索处理 IsSearching IsSearchingNull getIsSearching SearchingStr search SearchGroupBack
 
@@ -599,6 +490,18 @@ public class NoteFragment extends BaseFragment implements IContextHelper, View.O
 
     }
 
+    @OnClick(R.id.note_photo)
+    private void Fab_NoteOCR_Clicked() {
+        m_fabMenu.collapse();
+        takePhoto();
+    }
+
+    @OnClick(R.id.note_edit)
+    private void FAb_NewNote_Clicked() {
+        m_fabMenu.collapse();
+        HandleNewUpdateNote(true, null, false);
+    }
+
     // endregion 搜索处理
 
     // region 列表数据 初始化各种数据和适配器 下拉刷新 initData initAdapter refreshNoteList refreshGroupList refreshData refreshAll
@@ -639,7 +542,7 @@ public class NoteFragment extends BaseFragment implements IContextHelper, View.O
         NoteList = noteDao.queryAllNotes();
         Collections.sort(NoteList);
         noteAdapter = new NoteAdapter();
-        noteAdapter.setmNotes(NoteList);
+        noteAdapter.setNoteList(NoteList);
         noteAdapter.notifyDataSetChanged();
     }
 
@@ -811,14 +714,6 @@ public class NoteFragment extends BaseFragment implements IContextHelper, View.O
     private boolean IsGroupingNull = false;
 
     /**
-     * 判断是否开着,MainAct用
-     * @return
-     */
-    public boolean getDrawerIsOpen() {
-        return m_drawerLayout.isDrawerOpen(Gravity.END);
-    }
-
-    /**
      * 关闭侧边栏
      */
     public void closeDrawer() {
@@ -978,6 +873,25 @@ public class NoteFragment extends BaseFragment implements IContextHelper, View.O
          }).start();
      }
 
+     @OnClick(R.id.id_NoteFrag_nav_GroupMgrButton)
+     private void GroupMgrButton_Clicked() {
+         if (IsGrouping)
+             new AlertDialog.Builder(getContext())
+                 .setTitle(R.string.NoteFrag_GroupingMgrAlertTitle)
+                 .setMessage(R.string.NoteFrag_GroupingMgrAlertMsg)
+                 .setPositiveButton(R.string.NoteFrag_GroupingMgrAlertPosDoButton, new DialogInterface.OnClickListener() {
+                     @Override
+                     public void onClick(DialogInterface dialog, int which) {
+                         SearchGroupBack();
+                         ShowGroupDialog();
+                     }
+                 })
+                 .setNegativeButton(R.string.NoteFrag_GroupingMgrAlertNegBackButton, null)
+                 .create().show();
+         else
+             ShowGroupDialog();
+     }
+
     // endregion 显示分组 分组显示
 
     // region 初始化笔记列表 进入笔记 SelectedNoteItem initListView
@@ -994,16 +908,16 @@ public class NoteFragment extends BaseFragment implements IContextHelper, View.O
      */
     private void initListView(final List<Note> nlist) {
 
-        mNoteList.addItemDecoration(new SpacesItemDecoration(0));//设置item间距
+        m_noteListView.addItemDecoration(new SpacesItemDecoration(0));//设置item间距
 
         LinearLayoutManager layoutManager = new LinearLayoutManager(getContext());
         layoutManager.setOrientation(LinearLayoutManager.VERTICAL);//竖向列表
-        mNoteList.setLayoutManager(layoutManager);
+        m_noteListView.setLayoutManager(layoutManager);
 
         Collections.sort(nlist);
-        noteAdapter.setmNotes(nlist);
+        noteAdapter.setNoteList(nlist);
 
-        mNoteList.setAdapter(noteAdapter);
+        m_noteListView.setAdapter(noteAdapter);
 
         noteAdapter.notifyDataSetChanged();
 
@@ -1173,11 +1087,11 @@ public class NoteFragment extends BaseFragment implements IContextHelper, View.O
                                                 public void run() {
 
                                                     if (IsSearching)
-                                                        noteAdapter.setmNotes(search(SearchingStr));
+                                                        noteAdapter.setNoteList(search(SearchingStr));
                                                     else if (IsGrouping)
-                                                        noteAdapter.setmNotes(getGroupOfNote(currGroup));
+                                                        noteAdapter.setNoteList(getGroupOfNote(currGroup));
                                                     else
-                                                        noteAdapter.setmNotes(NoteList);
+                                                        noteAdapter.setNoteList(NoteList);
 
                                                     getActivity().runOnUiThread(new Runnable() {
                                                         @Override
@@ -1211,11 +1125,11 @@ public class NoteFragment extends BaseFragment implements IContextHelper, View.O
                                                                     //                                 public void run() {
 //
                                                                     //                                     if (IsSearching)
-                                                                    //                                         noteAdapter.setmNotes(search(SearchingStr));
+                                                                    //                                         noteAdapter.setNoteList(search(SearchingStr));
                                                                     //                                     else if (IsGrouping)
-                                                                    //                                         noteAdapter.setmNotes(getGroupOfNote(currGroup));
+                                                                    //                                         noteAdapter.setNoteList(getGroupOfNote(currGroup));
                                                                     //                                     else
-                                                                    //                                         noteAdapter.setmNotes(NoteList);
+                                                                    //                                         noteAdapter.setNoteList(NoteList);
 //
                                                                     //                                     getActivity().runOnUiThread(new Runnable() {
                                                                     //                                         @Override
@@ -1356,6 +1270,8 @@ public class NoteFragment extends BaseFragment implements IContextHelper, View.O
 
     // endregion 笔记增删改
 
+    // region Auth
+
     /**
      * 订阅登录注销事件
      */
@@ -1384,15 +1300,5 @@ public class NoteFragment extends BaseFragment implements IContextHelper, View.O
         });
     }
 
-    /**
-     * 对用户可见时，判断是否需要刷新
-     */
-    @Override
-    public void onResume() {
-        super.onResume();
-        if(!HasRefreshed) {
-            SearchGroupBack();
-            HasRefreshed = true;
-        }
-    }
+    // endregion Auth
 }

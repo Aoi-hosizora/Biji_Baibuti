@@ -1,6 +1,7 @@
 package com.baibuti.biji.ui.adapter;
 
 import android.content.Context;
+import android.support.annotation.NonNull;
 import android.support.v7.widget.CardView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -15,139 +16,102 @@ import com.baibuti.biji.util.otherUtil.DateColorUtil;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * Created by Windows 10 on 016 2019/02/16.
- */
-public class NoteAdapter extends RecyclerViewEmptySupport.Adapter<NoteAdapter.ViewHolder> implements View.OnClickListener, View.OnLongClickListener {
+public class NoteAdapter extends RecyclerViewEmptySupport.Adapter<NoteAdapter.ViewHolder>
+    implements View.OnClickListener, View.OnLongClickListener {
 
-    private Context mContext;
-    private List<Note> mNotes;
-    private OnRecyclerViewItemClickListener mOnItemClickListener ;
-    private OnRecyclerViewItemLongClickListener mOnItemLongClickListener ;
+    private Context context;
+    private List<Note> noteList;
 
+    private OnItemClickListener onItemClickListener;
+    private OnItemLongClickListener onItemLongClickListener;
 
-    private OnItemClickListener mClickListener;
+    public NoteAdapter(Context context) {
+        this.context = context;
+        this.noteList = new ArrayList<>();
+    }
+
+    public void setNoteList(List<Note> noteList) {
+        this.noteList = noteList;
+    }
+
+    public List<Note> getNoteList() {
+        return noteList;
+    }
+
+    ///
 
     public interface OnItemClickListener {
-        public void onItemClick(View view, int postion);
+        void onItemClick(View view, Note note);
     }
 
-    public void setOnItemClickListener(OnItemClickListener listener) {
-        this.mClickListener = listener;
+    public interface OnItemLongClickListener {
+        boolean onItemLongClick(View view, Note note);
     }
 
-
-
-    public NoteAdapter() {
-        mNotes = new ArrayList<>();
+    public void setOnItemClickListener(OnItemClickListener onItemClickListener) {
+        this.onItemClickListener = onItemClickListener;
     }
 
-    public void setmNotes(List<Note> notes) {
-        this.mNotes = notes;
+    public void setOnItemLongClickListener(OnItemLongClickListener onItemLongClickListener) {
+        this.onItemLongClickListener = onItemLongClickListener;
     }
 
     @Override
     public void onClick(View v) {
-        if (mOnItemClickListener != null) {
-            //注意这里使用getTag方法获取数据
-            mOnItemClickListener.onItemClick(v,(Note)v.getTag());
-        }
+        if (onItemClickListener != null)
+            onItemClickListener.onItemClick(v, (Note) v.getTag());
     }
 
     @Override
     public boolean onLongClick(View v) {
-        if (mOnItemLongClickListener != null) {
-            //注意这里使用getTag方法获取数据
-            mOnItemLongClickListener.onItemLongClick(v,(Note)v.getTag());
-        }
-        return true;
+        if (onItemLongClickListener != null)
+            return onItemLongClickListener.onItemLongClick(v, (Note) v.getTag());
+        return false;
     }
 
-    public interface OnRecyclerViewItemClickListener {
-        void onItemClick(View view , Note note);
-    }
-
-    public void setOnItemClickListener(OnRecyclerViewItemClickListener listener) {
-        this.mOnItemClickListener = listener;
-    }
-
-    public interface OnRecyclerViewItemLongClickListener {
-        void onItemLongClick(View view , Note note);
-    }
-
-    public void setOnItemLongClickListener(OnRecyclerViewItemLongClickListener listener) {
-        this.mOnItemLongClickListener = listener;
-    }
-
+    @NonNull
     @Override
-    public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-        //Log.i(TAG, "###onCreateViewHolder: ");
-        //inflate(R.layout.list_item_record,parent,false) 如果不这么写，cardview不能适应宽度
-        mContext = parent.getContext();
-        View view = LayoutInflater.from(mContext).inflate(R.layout.modulelayout_notefrag_notelistitem,parent,false);
-        //将创建的View注册点击事件
+    public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+        View view = LayoutInflater.from(context).inflate(R.layout.modulelayout_notefrag_notelistitem,parent,false);
+
         view.setOnClickListener(this);
         view.setOnLongClickListener(this);
-        return new ViewHolder(view, mClickListener);
+
+        return new ViewHolder(view);
     }
 
     @Override
     public void onBindViewHolder(ViewHolder holder, int position) {
-        //Log.i(TAG, "###onBindViewHolder: ");
-        final Note note = mNotes.get(position);
-        //将数据保存在itemView的Tag中，以便点击时进行获取
+
+        final Note note = noteList.get(position);
         holder.itemView.setTag(note);
-        //Log.e("adapter", "###record="+record);
-        holder.tv_list_title.setText(note.getTitle());
-        holder.tv_list_summary.setText(getShortNoteContent(note));
-        holder.tv_list_time.setText(note.getUpdateTime_ShortString());
-        holder.tv_list_group.setText(note.getGroup().getName());
-        holder.tv_list_group.setTextColor(DateColorUtil.ColorHex_IntEncoding(note.getGroup().getColor()));
+
+        holder.m_titleTextView.setText(note.getTitle());
+        holder.m_contentTextView.setText(note.getContent().replaceAll("<img src=.*" , "[图片]"));
+        holder.n_timeTextView.setText(note.getUpdateTime_ShortString());
+        holder.m_groupTextView.setText(note.getGroup().getName());
+        holder.m_groupTextView.setTextColor(DateColorUtil.ColorHex_IntEncoding(note.getGroup().getColor()));
     }
 
     @Override
     public int getItemCount() {
-        //Log.i(TAG, "###getItemCount: ");
-        if (mNotes != null && mNotes.size() > 0) {
-            return mNotes.size();
-        }
-        return 0;
+        return noteList.size();
     }
 
-    private String getShortNoteContent(Note note) {
-        String motoContent = note.getContent();
-        motoContent = motoContent.replaceAll("<img src=.*" , mContext.getString(R.string.NoteAdapter_ImgStr));
-        return motoContent;
-    }
+    public class ViewHolder extends RecyclerViewEmptySupport.ViewHolder {
 
-    //自定义的ViewHolder，持有每个Item的的所有界面元素
-    public class ViewHolder extends RecyclerViewEmptySupport.ViewHolder implements View.OnClickListener {
-        public TextView tv_list_title;//笔记标题
-        public TextView tv_list_summary;//笔记摘要
-        public TextView tv_list_time;//创建时间
-        public TextView tv_list_group;//笔记分类
-        public CardView card_view_note;
+        TextView m_titleTextView;
+        TextView m_contentTextView;
+        TextView n_timeTextView;
+        TextView m_groupTextView;
 
-        public ViewHolder(View view, OnItemClickListener listener) {
+        ViewHolder(View view) {
             super(view);
 
-            mListener = listener;
-            itemView.setOnClickListener(this);
-
-
-            card_view_note = (CardView) view.findViewById(R.id.card_view_note);
-            tv_list_title = (TextView) view.findViewById(R.id.tv_list_title);
-            tv_list_summary = (TextView) view.findViewById(R.id.tv_list_summary);
-            tv_list_time = (TextView) view.findViewById(R.id.tv_list_time);
-            tv_list_group = (TextView) view.findViewById(R.id.tv_list_group);
-        }
-
-        private OnItemClickListener mListener;
-
-        @Override
-        public void onClick(View v) {
-            // getpostion()为Viewholder自带的一个方法，用来获取RecyclerView当前的位置，将此作为参数，传出去
-            mListener.onItemClick(v, getPosition());
+            m_titleTextView = view.findViewById(R.id.tv_list_title);
+            m_contentTextView = view.findViewById(R.id.tv_list_summary);
+            n_timeTextView = view.findViewById(R.id.tv_list_time);
+            m_groupTextView = view.findViewById(R.id.tv_list_group);
         }
     }
 }

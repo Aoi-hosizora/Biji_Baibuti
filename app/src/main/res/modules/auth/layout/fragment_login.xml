@@ -23,13 +23,13 @@
         android:layout_marginBottom="@dimen/RegLogEditTextMarginBottom">
 
         <android.support.design.widget.TextInputLayout
-            android:id="@+id/id_LoginFrag_UsernameLayout"
+            android:id="@+id/loginFrag_layout_username"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:hint="@string/RegLogAct_UsrHint">
 
             <android.support.design.widget.TextInputEditText
-                android:id="@+id/id_LoginFrag_UsernameText"
+                android:id="@+id/loginFrag_edt_username"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:inputType="textPersonName"
@@ -38,7 +38,7 @@
         </android.support.design.widget.TextInputLayout>
 
         <android.support.design.widget.TextInputLayout
-            android:id="@+id/id_LoginFrag_PasswordLayout"
+            android:id="@+id/loginFrag_layout_password"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:hint="@string/RegLogAct_PsdHint"
@@ -46,7 +46,7 @@
             app:passwordToggleTint="?colorAccent">
 
             <android.support.design.widget.TextInputEditText
-                android:id="@+id/id_LoginFrag_PasswordText"
+                android:id="@+id/loginFrag_edt_password"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:inputType="textPassword"
@@ -57,40 +57,40 @@
     </LinearLayout>
 
     <Button
-        android:id="@+id/id_LoginFrag_LoginButton"
+        android:id="@+id/loginFrag_btn_login"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="@string/RegLogAct_Login"
 
         android:textSize="@dimen/RegLogButtonTextSize"
         android:textColor="@color/white"
-        android:background="@drawable/button_reglog_ripple_bg"
+        android:background="@drawable/btn_auth_ripple_bg"
         android:layout_marginTop="@dimen/RegLogButtonMarginTop"
         android:layout_marginStart="@dimen/RegLogButtonMarginLeftRight"
         android:layout_marginEnd="@dimen/RegLogButtonMarginLeftRight"/>
 
     <Button
-        android:id="@+id/id_LoginFrag_ClearButton"
+        android:id="@+id/loginFrag_btn_clear"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="@string/RegLogAct_Clear"
 
         android:textSize="@dimen/RegLogButtonTextSize"
         android:textColor="@color/white"
-        android:background="@drawable/button_reglog_ripple_bg"
+        android:background="@drawable/btn_auth_ripple_bg"
         android:layout_marginTop="@dimen/RegLogButtonMarginTop"
         android:layout_marginStart="@dimen/RegLogButtonMarginLeftRight"
         android:layout_marginEnd="@dimen/RegLogButtonMarginLeftRight"/>
 
     <Button
-        android:id="@+id/id_LoginFrag_ToRegisterButton"
+        android:id="@+id/loginFrag_btn_toRegister"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="@string/RegLogAct_ToRegister"
 
         android:textSize="@dimen/RegLogButtonTextSize"
         android:textColor="@color/white"
-        android:background="@drawable/button_reglog_ripple_bg"
+        android:background="@drawable/btn_auth_ripple_bg"
         android:layout_marginTop="@dimen/RegLogButtonMarginTop"
         android:layout_marginStart="@dimen/RegLogButtonMarginLeftRight"
         android:layout_marginEnd="@dimen/RegLogButtonMarginLeftRight"/>

@@ -27,10 +27,10 @@ public class RegisterFragment extends Fragment implements IContextHelper {
 
     public View view;
 
-    @BindView(R.id.id_RegisterFrag_UsernameLayout)  private TextInputLayout m_RegisterLayout;
-    @BindView(R.id.id_RegisterFrag_UsernameText)    private TextInputEditText m_RegisterEditText;
-    @BindView(R.id.id_RegisterFrag_PasswordLayout)  private TextInputLayout m_PasswordLayout;
-    @BindView(R.id.id_RegisterFrag_PasswordText)    private TextInputEditText m_PasswordEditText;
+    @BindView(R.id.registerFrag_layout_username)  private TextInputLayout m_RegisterLayout;
+    @BindView(R.id.registerFrag_edt_username)    private TextInputEditText m_RegisterEditText;
+    @BindView(R.id.registerFrag_layout_password)  private TextInputLayout m_PasswordLayout;
+    @BindView(R.id.registerFrag_edt_password)    private TextInputEditText m_PasswordEditText;
 
     @Nullable
     @Override
@@ -57,7 +57,7 @@ public class RegisterFragment extends Fragment implements IContextHelper {
     /**
      * 注册按钮
      */
-    @OnClick(R.id.id_RegisterFrag_RegisterButton)
+    @OnClick(R.id.registerFrag_btn_register)
     private void RegisterButton_Clicked() {
         String username = m_RegisterEditText.getText().toString();
         String password = m_PasswordEditText.getText().toString();
@@ -90,7 +90,7 @@ public class RegisterFragment extends Fragment implements IContextHelper {
     /**
      * 清除按钮
      */
-    @OnClick(R.id.id_RegisterFrag_ClearButton)
+    @OnClick(R.id.registerFrag_btn_clear)
     private void ClearButton_Clicked() {
         m_RegisterEditText.setText("");
         m_PasswordEditText.setText("");
@@ -99,7 +99,7 @@ public class RegisterFragment extends Fragment implements IContextHelper {
     /**
      * 去登录按钮
      */
-    @OnClick(R.id.id_RegisterFrag_ToLoginButton)
+    @OnClick(R.id.registerFrag_btn_toLogin)
     private void ToLoginButton_Clicked() {
         AuthActivity activity = (AuthActivity) getActivity();
         if (activity != null)

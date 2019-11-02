@@ -1,10 +1,10 @@
 <ripple
     xmlns:android="http://schemas.android.com/apk/res/android"
-    android:color="@color/RegLog_btn_BGColor_HighLight">
+    android:color="@color/colorPrimaryLight">
     <item>
         <shape android:shape="rectangle">
             <corners android:radius="5dp" />
-            <solid android:color="@color/RegLog_btn_BGColor" />
+            <solid android:color="@color/colorPrimaryDark" />
         </shape>
     </item>
 </ripple>

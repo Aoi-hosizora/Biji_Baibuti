@@ -18,16 +18,16 @@ import butterknife.BindView;
 
 public class AuthActivity extends AppCompatActivity {
 
-    @BindView(R.id.id_RegLogAct_ViewPager)
+    @BindView(R.id.authAct_view_pager)
     private ViewPager m_viewPager;
 
-    @BindView(R.id.id_RegLogAct_TabLayout)
+    @BindView(R.id.authAct_layout_tab)
     private TabLayout m_tabs;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_reglog);
+        setContentView(R.layout.activity_auth);
 
         ActionBar actionBar = getSupportActionBar();
         if (actionBar != null) {

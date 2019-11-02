@@ -12,7 +12,7 @@
         android:theme="@style/AppTheme.AppBarOverlay">
 
         <android.support.design.widget.TabLayout
-            android:id="@+id/id_RegLogAct_TabLayout"
+            android:id="@+id/authAct_layout_tab"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             app:tabIndicatorHeight="@dimen/tabIndicatorHeight"
@@ -22,7 +22,7 @@
     </android.support.design.widget.AppBarLayout>
 
     <android.support.v4.view.ViewPager
-        android:id="@+id/id_RegLogAct_ViewPager"
+        android:id="@+id/authAct_view_pager"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         app:layout_behavior="@string/appbar_scrolling_view_behavior"
