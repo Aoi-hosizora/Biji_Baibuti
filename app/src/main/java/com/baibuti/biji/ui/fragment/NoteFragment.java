@@ -499,6 +499,7 @@ public class NoteFragment extends BaseFragment implements IContextHelper {
                         notes.add(note);
                         adapter.setNoteList(notes);
                         adapter.notifyDataSetChanged();
+
                     } else if (isModified) {
                         // 旧的更新过的笔记
                         showToast(getContext(), "笔记 \"" + note.getTitle() + "\" 更新成功");

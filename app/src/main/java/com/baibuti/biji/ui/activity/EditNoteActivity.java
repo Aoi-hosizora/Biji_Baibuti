@@ -53,6 +53,10 @@ import rx_activity_result2.RxActivityResult;
  * Intent Extra:
  *      (Object) NoteFragment.INT_NOTE_DATA
  *      (boolean) NoteFragment.INT_IS_NEW
+ * Return:
+ *      (Object) NoteFragment.INT_NOTE_DATA
+ *      (boolean) NoteFragment.INT_IS_NEW
+ *      (boolean) NoteFragment.INT_IS_MODIFIED
  */
 public class EditNoteActivity extends AppCompatActivity implements IContextHelper {
 
@@ -317,7 +321,7 @@ public class EditNoteActivity extends AppCompatActivity implements IContextHelpe
         if (!checkIsNoteModify()) {
             Intent intent = new Intent();
             intent.putExtra(NoteFragment.INT_NOTE_DATA, currNote);
-            intent.putExtra(NoteFragment.INT_IS_NEW, isNew); // <<<
+            intent.putExtra(NoteFragment.INT_IS_NEW, isNew); // <<< false
             intent.putExtra(NoteFragment.INT_IS_MODIFIED, false); // <<<
             setResult(RESULT_OK, intent);
             finish();
@@ -463,7 +467,6 @@ public class EditNoteActivity extends AppCompatActivity implements IContextHelpe
      * m_rich_content.post(new Runnable() -> initRichTextEditor(););
      */
     private void initRichTextEditor(String text) {
-
         m_rich_content.clearAllLayout();
         showRichTextContentAsync(text);
 
@@ -476,18 +479,15 @@ public class EditNoteActivity extends AppCompatActivity implements IContextHelpe
         // 图片点击事件
         m_rich_content.setOnRtImageClickListener((imagePath) -> {
             if (!TextUtils.isEmpty(getRichTextContent(m_rich_content))) {
-
                 List<String> imageList = StringUtil.getTextFromHtml(getRichTextContent(m_rich_content), true);
-                if (!TextUtils.isEmpty(imagePath)) {
-                    int currentPosition = imageList.indexOf(imagePath);
-                    onClickImage(imageList, currentPosition);
-                }
+                int currentPosition = imageList.indexOf(imagePath);
+                onClickImage(imageList, currentPosition);
             }
         });
     }
 
     /**
-     * 点击图片后弹出预览窗口
+     * 图片点击预览
      * TODO 待改
      */
     private void onClickImage(List<String> imageList, int currentPosition) {
