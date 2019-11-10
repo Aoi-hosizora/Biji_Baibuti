@@ -331,11 +331,7 @@ public class ViewNoteActivity extends AppCompatActivity implements IContextHelpe
      */
     private void OCRLongClickImagePopup_Clicked(String imagePath) {
         Intent intent = new Intent(ViewNoteActivity.this, OCRActivity.class);
-
-        Bundle bundle = new Bundle();
-        bundle.putString(OCRActivity.INT_IMGPATH, imagePath);
-
-        intent.putExtra(OCRActivity.INT_BUNDLE, bundle);
+        intent.putExtra(OCRActivity.INT_IMAGE_PATH, imagePath);
         startActivity(intent);
     }
 

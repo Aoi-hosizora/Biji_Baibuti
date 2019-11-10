@@ -1,20 +1,16 @@
 package com.baibuti.biji.ui.activity;
 
-import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.Context;
-import android.content.DialogInterface;
-import android.content.Intent;
 import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.annotation.Nullable;
+import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
-import android.view.MenuItem;
-import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -23,42 +19,51 @@ import com.baibuti.biji.service.ocr.OCRService;
 import com.baibuti.biji.service.ocr.dto.OCRFrame;
 import com.baibuti.biji.service.ocr.dto.OCRPoint;
 import com.baibuti.biji.service.ocr.dto.OCRRegion;
-import com.baibuti.biji.net.ImgUtil;
 import com.baibuti.biji.R;
+import com.baibuti.biji.ui.IContextHelper;
 import com.baibuti.biji.ui.widget.ocrView.OCRRegionGroupLayout;
 import com.baibuti.biji.util.fileUtil.AppPathUtil;
 import com.baibuti.biji.util.fileUtil.SaveNameUtil;
 import com.baibuti.biji.util.imgDocUtil.ImageUtil;
 import com.baibuti.biji.util.otherUtil.CommonUtil;
 
+import butterknife.BindView;
+import butterknife.OnClick;
+import butterknife.OnItemSelected;
+
 /**
  * OCR 用
  *
  * Intent: INT_BUNDLE(Bundle) 传入 Bundle
  *
- * Bundle: INT_IMGPATH(String) 传入 图片路径
+ * Bundle: INT_IMAGE_PATH(String) 传入 图片路径
  */
-public class OCRActivity extends AppCompatActivity implements View.OnClickListener {
+public class OCRActivity extends AppCompatActivity implements IContextHelper {
 
-    public static final String INT_BUNDLE = "INT_BUNDLE";
-    public static final String INT_IMGPATH = "INT_IMGPATH";
+    public static final String INT_IMAGE_PATH = "INT_IMAGE_PATH";
 
-    private ProgressDialog m_ocringProgressDlg;
-    private OCRRegionGroupLayout m_ocrRegionGroupLayout;
-    private TextView m_ocrResultTextView;
-    private TextView m_ocrResultLabelTextView;
-    private Button m_CopyButton;
-    private Button m_SelectAllButton;
+    private ProgressDialog m_ocrProgressDialog;
+    private boolean isOCRCancel = false;
+
+    @BindView(R.id.id_OCRActivity_OCRRegionGroupLayout)
+    private OCRRegionGroupLayout m_layout_region;
+
+    @BindView(R.id.id_OCRActivity_OCRResultTextView)
+    private TextView m_txt_result;
+
+    @BindView(R.id.id_OCRActivity_OCRResultLabelTextView)
+    private TextView m_txt_count;
+
+    @BindView(R.id.id_OCRActivity_CopyButton)
+    private Button m_btn_copy;
+
+    @BindView(R.id.id_OCRActivity_SelectAllButton)
+    private Button m_btn_selectAll;
 
     /**
      * 获取数据延迟
      */
-    private int MS_GETDATA = 1000;
-
-    /**
-     * 是否已经取消识别
-     */
-    private boolean isCanceled = false;
+    private static final int MS_GET_DATA_DELAY = 1000;
 
     private OCRRegion m_region;
 
@@ -66,22 +71,12 @@ public class OCRActivity extends AppCompatActivity implements View.OnClickListen
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_ocr);
+        ActionBar actionBar = getSupportActionBar();
+        if (actionBar != null)
+            actionBar.setDisplayHomeAsUpEnabled(true);
 
-        Intent lastIntent = getIntent();
-        Bundle bundle = lastIntent.getBundleExtra(INT_BUNDLE);
-
-        // 本地/网络地址
-        String ImgPath = bundle.getString(INT_IMGPATH, "");
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-
-        ShowLogE("onCreate", "ImgPath" + ImgPath);
-        initView(ImgPath);
-    }
-
-    public void ShowLogE(String FunctionName, String Msg) {
-        String ClassName = "OCRActivity";
-        Log.e(getResources().getString(R.string.IShowLog_LogE),
-                ClassName + ": " + FunctionName + "###" + Msg);
+        String imgPath = getIntent().getStringExtra(INT_IMAGE_PATH); // 本地 / 网络地址
+        initView(imgPath);
     }
 
     /**
@@ -89,50 +84,29 @@ public class OCRActivity extends AppCompatActivity implements View.OnClickListen
      * @param imgPath 本地 (原始图片) / 网络地址
      */
     private void initView(String imgPath) {
-        setTitle(R.string.OCRActivity_Title);
+        setTitle("文字识别");
 
-        ShowLogE("initView", imgPath);
+        Log.i("", "initView: " + imgPath);
 
-        m_ocringProgressDlg = new ProgressDialog(this);
-        m_ocringProgressDlg.setMessage(getString(R.string.OCRActivity_Loading));
-        m_ocringProgressDlg.setOnCancelListener(new DialogInterface.OnCancelListener() {
+        m_ocrProgressDialog = showProgress(this,
+            "正在识别文字...",
+            true, (dialog) -> showAlert(this,
+                "文字识别", "是否取消操作？",
+                "取消", (dialog1, w1) -> {
+                    isOCRCancel = true;
+                    dialog1.dismiss();
+                    finish();
+                    showToast(this, "操作已取消");
+                },
+                "保留", (dialog1, w1) -> {
+                    isOCRCancel = false;
+                    dialog1.dismiss();
+                }
+            )
+        );
 
-            @Override
-            public void onCancel(DialogInterface dialog) {
-                new AlertDialog.Builder(OCRActivity.this)
-                    .setTitle(R.string.OCRActivity_CancelCheckTitle)
-                    .setMessage(R.string.OCRActivity_CancelCheckMsg)
-                    .setPositiveButton(R.string.OCRActivity_CancelCheckOK, new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int which) {
-                            isCanceled = true;
-                            dialog.dismiss();
-                            finish();
-                            Toast.makeText(OCRActivity.this, R.string.OCRActivity_Canceled, Toast.LENGTH_SHORT).show();
-                        }
-                    })
-                    .setNegativeButton(R.string.OCRActivity_CancelCheckNo, new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int which) {
-                            isCanceled = false;
-                            dialog.dismiss();
-                        }
-                    })
-                    .create().show();
-            }
-        });
-        m_ocringProgressDlg.show();
-
-        m_ocrResultTextView = findViewById(R.id.id_OCRActivity_OCRResultTextView);
-        m_ocrResultLabelTextView = findViewById(R.id.id_OCRActivity_OCRResultLabelTextView);
-        m_ocrRegionGroupLayout = findViewById(R.id.id_OCRActivity_OCRRegionGroupLayout);
-        m_CopyButton = findViewById(R.id.id_OCRActivity_CopyButton);
-        m_SelectAllButton = findViewById(R.id.id_OCRActivity_SelectAllButton);
-
-        m_CopyButton.setOnClickListener(this);
-        m_SelectAllButton.setOnClickListener(this);
-        m_ocrResultTextView.setText(R.string.OCRActivity_PleaseSelectHint);
-        setEnabled(m_CopyButton, false);
+        m_txt_result.setText(R.string.OCRActivity_PleaseSelectHint);
+        setEnabled(m_btn_copy, false);
         setRetLabelText(0, 0);
 
         initBG(imgPath);
@@ -154,26 +128,30 @@ public class OCRActivity extends AppCompatActivity implements View.OnClickListen
 
         Bitmap bg = ImageUtil.getBitmapFromPath(imgPath);
 
-        if (bg == null)
-            new Thread(() ->
-                ImgUtil.GetImgAsync(imgPath, (Bitmap bitmap) ->
-                    runOnUiThread(() -> {
-                        // TODO 保存文件
-                        Bitmap net_bg = ImageUtil.compressImage(bitmap, screenWidth, screenHeight, true);
-                        net_bg = ImageUtil.compressImage(net_bg);
-                        String fileName = SaveNameUtil.getImageFileName(SaveNameUtil.SaveType.OCR);
-                        ImageUtil.saveBitmap(bitmap, fileName);
-                        m_ocrRegionGroupLayout.setImgBG(net_bg);
-                        toOCRHandler(fileName);
-                    })
-                )
-            ).start();
+        if (bg == null) {
+            new Thread(() -> ImageUtil.getImgAsync(this, imgPath, (bitmap) -> {
 
+                if (bitmap == null) {
+                    showAlert(this, "错误", "网络连接错误，请重试", "返回", (dialog, which) -> finish());
+                    return;
+                }
+
+                // TODO 保存文件
+                Bitmap net_bg = ImageUtil.compressImage(bitmap, screenWidth, screenHeight, true);
+                net_bg = ImageUtil.compressImage(net_bg);
+                String fileName = SaveNameUtil.getImageFileName(SaveNameUtil.SaveType.OCR);
+                ImageUtil.saveBitmap(bitmap, fileName);
+
+                m_layout_region.setImgBG(net_bg);
+                toOCRHandler(fileName);
+
+            })).start();
+        }
         else {
             bg = ImageUtil.compressImage(bg, screenWidth, screenHeight, true);
             bg = ImageUtil.compressImage(bg);
 
-            m_ocrRegionGroupLayout.setImgBG(bg);
+            m_layout_region.setImgBG(bg);
             toOCRHandler(imgPath);
         }
     }
@@ -187,24 +165,11 @@ public class OCRActivity extends AppCompatActivity implements View.OnClickListen
         Log.e("", "toOCRHandler: localDir = " + localDir );
 
         // 延迟
-        new Handler().postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                getRetTmp(localDir);
-                // TODO !!!!!
-                // getRet($bitmap);
-            }
-        }, MS_GETDATA); // 1000
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()) {
-            case android.R.id.home:
-                finish();
-                break;
-        }
-        return super.onOptionsItemSelected(item);
+        new Handler().postDelayed(() -> {
+            getRetTmp(localDir);
+            // TODO !!!!!
+            // getRet($bitmap);
+        }, MS_GET_DATA_DELAY); // 1000
     }
 
     /**
@@ -216,90 +181,83 @@ public class OCRActivity extends AppCompatActivity implements View.OnClickListen
         setRetLabelText(0, m_region.getFrames().length);
 
         // 2.OCRRegion
-        m_ocrRegionGroupLayout.setRegion(m_region);
+        m_layout_region.setRegion(m_region);
 
         // 3.Click
-        m_ocrRegionGroupLayout.setOnClickRegionsListener(new OCRRegionGroupLayout.onClickFramesListener() {
+        m_layout_region.setOnClickRegionsListener((OCRFrame[] frames) -> {
+            // 文字更新
+            m_txt_result.setText(OCRFrame.getStrFromFrames(frames));
 
-            @Override
-            public void onClickFrames(OCRFrame[] frames) {
-                // 文字更新
-                m_ocrResultTextView.setText(OCRFrame.getStrFromFrames(frames));
+            // 数目更新
+            int cnt = frames.length;
+            setRetLabelText(cnt, m_layout_region.getRegion().getFrames().length);
 
-                // 数目更新
-                int cnt = frames.length;
-                setRetLabelText(cnt, m_ocrRegionGroupLayout.getRegion().getFrames().length);
+            // 全选
+            if (cnt == m_region.getFrames().length)
+                m_btn_selectAll.setText(getString(R.string.OCRActivity_CancelSelectAllButton));
+            else
+                m_btn_selectAll.setText(getString(R.string.OCRActivity_SelectAllButton));
 
-                // 全选
-                if (cnt == m_region.getFrames().length)
-                    m_SelectAllButton.setText(getString(R.string.OCRActivity_CancelSelectAllButton));
-                else
-                    m_SelectAllButton.setText(getString(R.string.OCRActivity_SelectAllButton));
+            // 复制
+            setEnabled(m_btn_copy, cnt != 0);
 
-                // 复制
-                setEnabled(m_CopyButton, cnt != 0);
-
-                // 文字空
-                if (cnt == 0)
-                    m_ocrResultTextView.setText(R.string.OCRActivity_PleaseSelectHint);
-            }
+            // 文字空
+            if (cnt == 0)
+                m_txt_result.setText(R.string.OCRActivity_PleaseSelectHint);
         });
     }
 
-    private void setEnabled(Button button, boolean en) {
-        button.setEnabled(en);
-        if (en)
-            button.setTextColor(getResources().getColor(R.color.colorAccent));
-        else
-            button.setTextColor(getResources().getColor(R.color.grey_700));
-    }
-
-    @Override
-    public void onClick(View v) {
-        switch (v.getId()) {
-            case R.id.id_OCRActivity_CopyButton:
-                CopyButton_Click();
-            break;
-            case R.id.id_OCRActivity_SelectAllButton:
-                SelectAllButton_Click();
-            break;
-        }
+    /**
+     * 自定义按钮的 setEnabled，手动置灰
+     */
+    private void setEnabled(Button button, boolean enabled) {
+        button.setEnabled(enabled);
+        button.setTextColor(getResources().getColor(enabled ? R.color.colorAccent : R.color.grey_700));
     }
 
     /**
-     * 复制点击
+     * 复制
      */
+    @OnClick(R.id.id_OCRActivity_CopyButton)
     private void CopyButton_Click() {
         ClipboardManager clipboardManager = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
-        ClipData clip = ClipData.newPlainText(getResources().getString(R.string.MNoteActivity_OCRSyncResultAlertCopyClipLabel), m_ocrResultTextView.getText().toString());
+        ClipData clip = ClipData.newPlainText(getResources().getString(R.string.MNoteActivity_OCRSyncResultAlertCopyClipLabel), m_txt_result.getText().toString());
         clipboardManager.setPrimaryClip(clip);
         Toast.makeText(this, R.string.OCRActivity_CopySuccess, Toast.LENGTH_SHORT).show();
     }
 
     /**
-     * 选择全部点击
+     * 全选
      */
+    @OnClick(R.id.id_OCRActivity_SelectAllButton)
     private void SelectAllButton_Click() {
-        boolean isSelectAll = m_SelectAllButton.getText().toString().equals(getString(R.string.OCRActivity_SelectAllButton));
-        m_ocrRegionGroupLayout.setAllFramesChecked(isSelectAll);
+        boolean isSelectAll = m_btn_selectAll.getText().toString().equals(getString(R.string.OCRActivity_SelectAllButton));
+        m_layout_region.setAllFramesChecked(isSelectAll);
         if (isSelectAll)
-            m_SelectAllButton.setText(getString(R.string.OCRActivity_CancelSelectAllButton));
+            m_btn_selectAll.setText(getString(R.string.OCRActivity_CancelSelectAllButton));
         else
-            m_SelectAllButton.setText(getString(R.string.OCRActivity_SelectAllButton));
+            m_btn_selectAll.setText(getString(R.string.OCRActivity_SelectAllButton));
+    }
+
+    /**
+     * 返回
+     */
+    @OnItemSelected(android.R.id.home)
+    private void BackToActivity() {
+        finish();
     }
 
     /**
      * 设置标签提示的数量
-     * @param selectCnt
-     * @param allCnt
+     * @param selectCnt 选择了几项
+     * @param allCnt 共几项
      */
     private void setRetLabelText(int selectCnt, int allCnt) {
-        m_ocrResultLabelTextView.setText(String.format(getString(R.string.OCRActivity_RetLabel), selectCnt, allCnt));
+        m_txt_count.setText(String.format(getString(R.string.OCRActivity_RetLabel), selectCnt, allCnt));
     }
 
     /**
      * 获得 结果，并调用设置布局 (dev env)
-     *
      * @param localDir 本地地址
      */
     private void getRetTmp(String localDir) {
@@ -307,9 +265,9 @@ public class OCRActivity extends AppCompatActivity implements View.OnClickListen
         // OCR 临时存储
         if (localDir.contains(AppPathUtil.getOCRTmpDir()))
             if (AppPathUtil.deleteFile(localDir))
-                Log.e("", "run: delete OCRtmp" + localDir );
+                Log.e("", "run: delete OCR tmp" + localDir );
 
-        OCRRegion ret = new OCRRegion(
+        m_region = new OCRRegion(
             new OCRPoint(600, 400),
             3,
             new OCRFrame[] {
@@ -321,13 +279,13 @@ public class OCRActivity extends AppCompatActivity implements View.OnClickListen
             }
         );
 
-        m_region = ret;
+        if (m_ocrProgressDialog != null && m_ocrProgressDialog.isShowing())
+            m_ocrProgressDialog.dismiss();
 
-        if (m_ocringProgressDlg.isShowing())
-            m_ocringProgressDlg.dismiss();
-
-        if (!isCanceled)
+        if (!isOCRCancel)
             setupOCRLayout();
+        else
+            finish();
     }
 
     /**
@@ -336,43 +294,17 @@ public class OCRActivity extends AppCompatActivity implements View.OnClickListen
      */
     private void getRet(String localDir) {
 
-        // TODO
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                OCRRegion ret = OCRService.getOCRRet(localDir);
+        m_region = OCRService.getOCRRet(localDir);
 
-                // OCR 临时存储
-                if (localDir.contains(AppPathUtil.getOCRTmpDir()))
-                    if (AppPathUtil.deleteFile(localDir))
-                        Log.e("", "run: delete OCRtmp" + localDir );
+        if (m_ocrProgressDialog != null && m_ocrProgressDialog.isShowing())
+            m_ocrProgressDialog.dismiss();
 
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-
-                        if (m_ocringProgressDlg.isShowing())
-                            m_ocringProgressDlg.dismiss();
-
-                        if (m_region == null) { // 错误
-                            new AlertDialog.Builder(OCRActivity.this)
-                                .setTitle(R.string.OCRActivity_ErrorTitle)
-                                .setMessage(R.string.OCRActivity_ErrorMessage)
-                                .setPositiveButton(R.string.OCRActivity_ErrorReturnButton, new DialogInterface.OnClickListener() {
-                                    @Override
-                                    public void onClick(DialogInterface dialog, int which) {
-
-                                        finish();
-                                    }
-                                })
-                                .create().show();
-                        }
-                        else
-                            if (!isCanceled) // 正常 不取消
-                                setupOCRLayout();
-                    }
-                });
-            }
-        }).start();
+        if (m_region == null) {
+            showAlert(this, "错误", "识别失败，请重试。", "返回", (dialog, w) -> finish());
+        }
+        else if (!isOCRCancel)
+            setupOCRLayout();
+        else
+            finish();
     }
 }

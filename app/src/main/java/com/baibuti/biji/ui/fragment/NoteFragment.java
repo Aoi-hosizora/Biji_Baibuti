@@ -447,19 +447,17 @@ public class NoteFragment extends BaseFragment implements IContextHelper {
 
     // endregion
 
-    /*
+    // region !!! new edit
 
+    /*
     1. 新建笔记:
-        打开 MNote Act -> 返回 -> 传递 INT_NOTE_DATA 和 INT_IS_NEW
-        打开 VMNote Act -> 返回 -> 结束
+        传递 INT_NOTE_DATA | INT_IS_NEW: true ->
+        Edit Act -> 返回 INT_NOTE_DATA | INT_IS_NEW: true
+        View Act -> 返回 INT_NOTE_DATA | INT_IS_NEW: true -> 结束
 
     2. 浏览笔记:
-        打开 VMNote Act -> 返回 -> 结束
-
-    3. 返回:
-        MNote Act -> INT_NOTE_DATA, INT_IS_NEW
-        VMNote Act -> INT_NOTE_DATA, INT_IS_NEW, INT_IS_MODIFIED
-
+        传递 INT_NOTE_DATA | INT_IS_NEW: true ->
+        View Act -> 返回 INT_NOTE_DATA | INT_IS_NEW: false | INT_IS_MODIFIED: ? -> 结束
      */
 
     private static final int REQ_NEW_NOTE_INTENT = 0;
@@ -529,40 +527,6 @@ public class NoteFragment extends BaseFragment implements IContextHelper {
         }
     }
 
-    // region Note Init New Modify
-
-    /**
-     * 当前页面 状态与数据
-     */
-    private PageData pageData;
-
-    /**
-     * 初始化与刷新 加载数据
-     */
-    private void onInitNoteData() {
-        pageData = new PageData();
-        ProgressDialog progressDialog = showProgress(getContext(), "加载数据中...", false, null);
-        try {
-            pageData.allNotes = DaoStrategyHelper.getInstance().getNoteDao(getContext()).queryAllNotes();
-            progressDialog.dismiss();
-        } catch (ServerException ex) {
-            progressDialog.dismiss();
-            showAlert(getContext(), "错误", "数据加载错误：" + ex.getMessage(),
-                "重试", (d, w) -> onInitNoteData(), "确定", null);
-        }
-    }
-
-    /**
-     * 更新页面显示为 noteList
-     */
-    private void setListContent(List<Note> noteList) {
-        NoteAdapter adapter = (NoteAdapter) m_noteListView.getAdapter();
-        if (adapter == null) return;
-
-        adapter.setNoteList(noteList);
-        adapter.notifyDataSetChanged();
-    }
-
     /**
      * 新建笔记
      */
@@ -599,6 +563,42 @@ public class NoteFragment extends BaseFragment implements IContextHelper {
      */
     private void openViewNote(@NonNull Note note) {
         openViewNote(note, false);
+    }
+
+    // endregion
+
+    // region PageData initData setContent delete
+
+    /**
+     * 当前页面 状态与数据
+     */
+    private PageData pageData;
+
+    /**
+     * 初始化与刷新 加载数据
+     */
+    private void onInitNoteData() {
+        pageData = new PageData();
+        ProgressDialog progressDialog = showProgress(getContext(), "加载数据中...", false, null);
+        try {
+            pageData.allNotes = DaoStrategyHelper.getInstance().getNoteDao(getContext()).queryAllNotes();
+            progressDialog.dismiss();
+        } catch (ServerException ex) {
+            progressDialog.dismiss();
+            showAlert(getContext(), "错误", "数据加载错误：" + ex.getMessage(),
+                "重试", (d, w) -> onInitNoteData(), "确定", null);
+        }
+    }
+
+    /**
+     * 更新页面显示为 noteList
+     */
+    private void setListContent(List<Note> noteList) {
+        NoteAdapter adapter = (NoteAdapter) m_noteListView.getAdapter();
+        if (adapter == null) return;
+
+        adapter.setNoteList(noteList);
+        adapter.notifyDataSetChanged();
     }
 
     /**
@@ -751,11 +751,7 @@ public class NoteFragment extends BaseFragment implements IContextHelper {
         }
 
         Intent intent = new Intent(getContext(), OCRActivity.class);
-
-        Bundle bundle = new Bundle();
-        bundle.putString(OCRActivity.INT_IMGPATH, editedUri.toString());
-        intent.putExtra(OCRActivity.INT_BUNDLE, bundle);
-
+        intent.putExtra(OCRActivity.INT_IMAGE_PATH, editedUri.toString());
         startActivity(intent);
     }
 

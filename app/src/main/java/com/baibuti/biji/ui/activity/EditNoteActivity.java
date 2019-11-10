@@ -247,11 +247,7 @@ public class EditNoteActivity extends AppCompatActivity implements IContextHelpe
      */
     private void OCRLongClickImagePopup_Clicked(String imgPath) {
         Intent intent = new Intent(EditNoteActivity.this, OCRActivity.class);
-
-        Bundle bundle = new Bundle();
-        bundle.putString(OCRActivity.INT_IMGPATH, imgPath);
-
-        intent.putExtra(OCRActivity.INT_BUNDLE, bundle);
+        intent.putExtra(OCRActivity.INT_IMAGE_PATH, imgPath);
         startActivity(intent);
     }
 

@@ -1,14 +1,30 @@
 package com.baibuti.biji.util.imgDocUtil;
 
+import android.app.Activity;
+import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Matrix;
+import android.support.annotation.Nullable;
+import android.support.annotation.UiThread;
+import android.support.annotation.WorkerThread;
+import android.util.Log;
 import android.util.Size;
+import android.view.View;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+
+import okhttp3.Call;
+import okhttp3.Callback;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.Response;
+import okhttp3.ResponseBody;
+import okhttp3.internal.annotations.EverythingIsNonNull;
 
 /**
  * 读取写入 Bitmap & 压缩图片
@@ -108,6 +124,53 @@ public class ImageUtil {
         else {
             double rateMin = Math.min(rateX, rateY);
             return compressImage(bitmap, rateMin, rateMin);
+        }
+    }
+
+    /**
+     * 异步回调接口
+     */
+    public interface IImageBack {
+        /**
+         * 返回图片或者 null(Error)
+         */
+        @UiThread
+        void onGetImg(@Nullable Bitmap bitmap);
+    }
+
+    /**
+     * ImgPopupDialog OCRActivity 用
+     * 异步获取图片
+     * @param url 网络连接
+     * @param imageBack 异步回调
+     */
+    @WorkerThread
+    public static void getImgAsync(Activity activity, String url, IImageBack imageBack) {
+        Log.e("", "GetImg: " + url);
+        OkHttpClient client = new OkHttpClient();
+        Request request = new Request.Builder().url(url).build();
+        try {
+            client.newCall(request).enqueue(new Callback() {
+
+                @EverythingIsNonNull
+                @Override
+                public void onFailure(Call call, IOException e) { }
+
+                @EverythingIsNonNull
+                @Override
+                public void onResponse(Call call, Response response) {
+                    ResponseBody body = response.body();
+                    if (body != null) {
+                        InputStream in = body.byteStream();
+                        activity.runOnUiThread(() -> imageBack.onGetImg(BitmapFactory.decodeStream(in)));
+                    } else {
+                        activity.runOnUiThread(() -> imageBack.onGetImg(null));
+                    }
+                }
+            });
+        }
+        catch (NullPointerException ex) {
+            ex.printStackTrace();
         }
     }
 }
