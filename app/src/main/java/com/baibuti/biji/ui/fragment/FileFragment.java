@@ -131,7 +131,32 @@ public class FileFragment extends BaseFragment {
             initToolBar(view);
             initSearchResultLayout(view);
             initData();
-            registerAuthActions();
+
+            AuthManager.getInstance().addLoginChangeListener(new AuthManager.OnLoginChangeListener() {
+
+                // TODO
+                public void onLogin(String UserName) {
+                    if(getUserVisibleHint()) {
+                        Log.e("测试", "FileFragment.onLogin: 调用");
+                        refresh();
+                        HasRefreshed = true;
+                    }
+                    else
+                        HasRefreshed = false;
+                }
+
+                @Override
+                public void onLogout() {
+                    if(getUserVisibleHint()) {
+                        refresh();
+                        HasRefreshed = true;
+                    }
+                    else
+                        HasRefreshed = false;
+                }
+            });
+
+
         }
         return view;
     }
@@ -270,13 +295,18 @@ public class FileFragment extends BaseFragment {
                         editDialog.setView(edit);
 
                         //设置按钮
-                        editDialog.setPositiveButton(getString(R.string.FileClassDialog_ConfirmBtn)
-                                , new DialogInterface.OnClickListener() {
+                        editDialog.setPositiveButton(getString(R.string.FileClassDialog_ConfirmBtn) , new DialogInterface.OnClickListener() {
                                     @Override
                                     public void onClick(DialogInterface dialog, int which) {
 
-                                        if(!isLegalName(edit.getText().toString().trim()))
-                                            HandleIllegalName();
+                                        if(!isLegalName(edit.getText().toString().trim())) {
+                                           new android.support.v7.app.AlertDialog
+                                                .Builder(getContext())
+                                                .setTitle(R.string.FileClassDialog_NullTitleAlertTitle)
+                                                .setMessage(R.string.FileClassDialog_IllegalTitleAlertMsg)
+                                                .setPositiveButton(R.string.FileClassDialog_NullTitleAlertPositiveButtonForOK, null)
+                                                .create().show();
+                                        }
                                         else
                                             updateFileClassList(edit.getText().toString().trim(), TAG_RENAME, currentFileClass, lastPositionClicked);
 
@@ -402,6 +432,9 @@ public class FileFragment extends BaseFragment {
         }
     }
 
+    /**
+     * TODO !!!
+     */
     private void shareDocuments(){
 
         if(documentHeader.getText().toString().equals(""))
@@ -468,6 +501,9 @@ public class FileFragment extends BaseFragment {
         return null;
     }
 
+    /**
+     * TODO !!!
+     */
     private void scanShareCode(){
         if(!AuthManager.getInstance().isLogin()){
             Toast.makeText(getContext(), "未登录", Toast.LENGTH_SHORT).show();
@@ -507,6 +543,10 @@ public class FileFragment extends BaseFragment {
         }
     }
 
+    /**
+     * TODO !!!
+     * @param shareCode
+     */
     private void getSharedDocuments(final String shareCode){
         Log.e("测试", "shareCode: "+shareCode);
         try {
@@ -666,7 +706,27 @@ public class FileFragment extends BaseFragment {
         documentAdapter.setOnDocumentLongClickListener(new DocumentAdapter.OnDocumentLongClickListener() {
             @Override
             public void OnDocumentLongClick(int position) {
-                showConfirmDialog(position);
+                final AlertDialog.Builder normalDialog =
+                    new AlertDialog.Builder(getContext());
+                normalDialog.setIcon(R.drawable.ic_error_black_24dp);
+                normalDialog.setTitle("删除资料");
+                normalDialog.setMessage("确认删除?");
+                normalDialog.setPositiveButton("确定",
+                    new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            deleteDocumentFromList(position);
+                        }
+                    });
+                normalDialog.setNegativeButton("取消",
+                    new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            dialog.dismiss();
+                        }
+                    });
+                // 显示
+                normalDialog.show();
             }
         });
         documentRecyclerView.setAdapter(documentAdapter);
@@ -699,8 +759,14 @@ public class FileFragment extends BaseFragment {
                         //Toast.makeText(getContext(),
                         //edit.getText().toString().trim(),Toast.LENGTH_SHORT).show();
 
-                        if(!isLegalName(edit.getText().toString().trim()))
-                            HandleIllegalName();
+                        if(!isLegalName(edit.getText().toString().trim())) {
+                            new android.support.v7.app.AlertDialog
+                                .Builder(getContext())
+                                .setTitle(R.string.FileClassDialog_NullTitleAlertTitle)
+                                .setMessage(R.string.FileClassDialog_IllegalTitleAlertMsg)
+                                .setPositiveButton(R.string.FileClassDialog_NullTitleAlertPositiveButtonForOK, null)
+                                .create().show();
+                        }
                         else
                             updateFileClassList(edit.getText().toString().trim(), TAG_NEW, null, position);
 
@@ -728,14 +794,28 @@ public class FileFragment extends BaseFragment {
         final FileClass newFileClass = new FileClass(newFileClassName, newFileClassOrder);
 
         // 先判断空标题
-        if (newFileClassName.isEmpty())
-            HandleNullTitle();
+        if (newFileClassName.isEmpty()) {
+            android.support.v7.app.AlertDialog emptyDialog = new android.support.v7.app.AlertDialog
+                .Builder(getContext())
+                .setTitle(R.string.FileClassDialog_NullTitleAlertTitle)
+                .setMessage(R.string.FileClassDialog_NullTitleAlertMsg)
+                .setPositiveButton(R.string.FileClassDialog_NullTitleAlertPositiveButtonForOK, null)
+                .create();
+            emptyDialog.show();
+        }
+
 
         else {
             // 标题非空
-            if (fileClassDao.checkDuplicate(newFileClass, null) != 0)
+            if (fileClassDao.checkDuplicate(newFileClass, null) != 0) {
                 // 分组重复
-                HandleDuplicateFileClass(newFileClass);
+                new android.support.v7.app.AlertDialog
+                    .Builder(getContext())
+                    .setTitle(R.string.GroupDialog_DuplicateAlertTitle)
+                    .setMessage(String.format(getContext().getText(R.string.GroupDialog_DuplicateAlertMsg).toString(), newFileClass.getName()))
+                    .setNegativeButton(R.string.GroupDialog_DuplicateAlertOk, null)
+                    .create().show();
+            }
             else {
                 // 分组不重复
                 try {
@@ -812,72 +892,10 @@ public class FileFragment extends BaseFragment {
     }
 
     /**
-     * 空标题提醒对话框
-     */
-    private void HandleNullTitle() {
-        android.support.v7.app.AlertDialog emptyDialog = new android.support.v7.app.AlertDialog
-                .Builder(getContext())
-                .setTitle(R.string.FileClassDialog_NullTitleAlertTitle)
-                .setMessage(R.string.FileClassDialog_NullTitleAlertMsg)
-                .setPositiveButton(R.string.FileClassDialog_NullTitleAlertPositiveButtonForOK, null)
-                .create();
-        emptyDialog.show();
-    }
-
-    /**
      * 非法字符提醒对话框
      */
     private void HandleIllegalName(){
-        android.support.v7.app.AlertDialog emptyDialog = new android.support.v7.app.AlertDialog
-                .Builder(getContext())
-                .setTitle(R.string.FileClassDialog_NullTitleAlertTitle)
-                .setMessage(R.string.FileClassDialog_IllegalTitleAlertMsg)
-                .setPositiveButton(R.string.FileClassDialog_NullTitleAlertPositiveButtonForOK, null)
-                .create();
-        emptyDialog.show();
-    }
 
-    /**
-     * 确认对话框
-     * @param position
-     */
-    private void showConfirmDialog(final int position){
-
-        final AlertDialog.Builder normalDialog =
-                new AlertDialog.Builder(getContext());
-        normalDialog.setIcon(R.drawable.ic_error_black_24dp);
-        normalDialog.setTitle("删除资料");
-        normalDialog.setMessage("确认删除?");
-        normalDialog.setPositiveButton("确定",
-                new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        deleteDocumentFromList(position);
-                    }
-                });
-        normalDialog.setNegativeButton("取消",
-                new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        dialog.dismiss();
-                    }
-                });
-        // 显示
-        normalDialog.show();
-    }
-
-    /**
-     * 重复分组标题对话框
-     * @param newFileClass 添加的分组
-     */
-    private void HandleDuplicateFileClass(FileClass newFileClass) {
-        android.support.v7.app.AlertDialog dupalert = new android.support.v7.app.AlertDialog
-                .Builder(getContext())
-                .setTitle(R.string.GroupDialog_DuplicateAlertTitle)
-                .setMessage(String.format(getContext().getText(R.string.GroupDialog_DuplicateAlertMsg).toString(), newFileClass.getName()))
-                .setNegativeButton(R.string.GroupDialog_DuplicateAlertOk, null)
-                .create();
-        dupalert.show();
     }
 
     /**
@@ -914,9 +932,7 @@ public class FileFragment extends BaseFragment {
      * @return
      */
     private boolean isLegalName(String fileClassName){
-        Pattern p = Pattern.compile("[\\w]+");
-        Matcher m = p.matcher(fileClassName);
-        return m.matches();
+        return Pattern.compile("[\\w]+").matcher(fileClassName).matches();
     }
 
     /**
@@ -1026,35 +1042,6 @@ public class FileFragment extends BaseFragment {
                 }
             }
         }).start();
-    }
-
-    /**
-     * 订阅登录注销事件
-     */
-    private void registerAuthActions() {
-        AuthManager.getInstance().addLoginChangeListener(new AuthManager.OnLoginChangeListener() {
-
-            // TODO
-            public void onLogin(String UserName) {
-                if(getUserVisibleHint()) {
-                    Log.e("测试", "FileFragment.onLogin: 调用");
-                    refresh();
-                    HasRefreshed = true;
-                }
-                else
-                    HasRefreshed = false;
-            }
-
-            @Override
-            public void onLogout() {
-                if(getUserVisibleHint()) {
-                    refresh();
-                    HasRefreshed = true;
-                }
-                else
-                    HasRefreshed = false;
-            }
-        });
     }
 
     /**

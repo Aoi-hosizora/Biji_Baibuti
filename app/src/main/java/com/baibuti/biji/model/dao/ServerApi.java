@@ -2,12 +2,12 @@ package com.baibuti.biji.model.dao;
 
 import com.baibuti.biji.model.dto.DocumentDTO;
 import com.baibuti.biji.model.dto.FileClassDTO;
+import com.baibuti.biji.model.dto.FileUrlDTO;
 import com.baibuti.biji.model.dto.ResponseDTO;
-import com.baibuti.biji.model.po.FileClass;
-import com.baibuti.biji.service.auth.dto.AuthRespDTO;
 import com.baibuti.biji.model.dto.GroupDTO;
 import com.baibuti.biji.model.dto.NoteDTO;
 import com.baibuti.biji.model.dto.SearchItemDTO;
+import com.baibuti.biji.service.auth.dto.AuthRespDTO;
 import com.baibuti.biji.service.auth.dto.LoginDTO;
 import com.baibuti.biji.service.auth.dto.RegisterDTO;
 
@@ -95,10 +95,11 @@ public interface ServerApi {
 
     @Multipart
     @POST("/image/upload")
-    Observable<ResponseDTO<String>> uploadImage(@PartMap Map<String, RequestBody> requestBodyMap);
+    Observable<ResponseDTO<FileUrlDTO>> uploadImage(@PartMap Map<String, RequestBody> requestBodyMap);
 
-    @DELETE("/image/upload")
-    Observable<ResponseDTO<Object>> deleteImage();
+    // TODO DTO 待改
+    @DELETE("/image/delete")
+    Observable<ResponseDTO<FileUrlDTO>> deleteImage(@Body() FileUrlDTO fileUrlDTO);
 
     // endregion
 
