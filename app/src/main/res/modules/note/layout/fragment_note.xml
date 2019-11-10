@@ -137,7 +137,7 @@
         <include
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            layout="@layout/modulelayout_nav_grouplist" />
+            layout="@layout/layout_note_right_group_nav" />
 
     </android.support.design.widget.NavigationView>
 

@@ -35,9 +35,9 @@ import com.baibuti.biji.ui.IContextHelper;
 import com.baibuti.biji.ui.activity.MainActivity;
 import com.baibuti.biji.model.po.Group;
 import com.baibuti.biji.model.po.Note;
-import com.baibuti.biji.ui.activity.ModifyNoteActivity;
+import com.baibuti.biji.ui.activity.EditNoteActivity;
 import com.baibuti.biji.ui.activity.OCRActivity;
-import com.baibuti.biji.ui.activity.ViewModifyNoteActivity;
+import com.baibuti.biji.ui.activity.ViewNoteActivity;
 import com.baibuti.biji.ui.adapter.GroupAdapter;
 import com.baibuti.biji.ui.adapter.GroupRadioAdapter;
 import com.baibuti.biji.ui.adapter.NoteAdapter;
@@ -98,7 +98,7 @@ public class NoteFragment extends BaseFragment implements IContextHelper {
             if (null != parent)
                 parent.removeView(view);
         } else {
-            view = inflater.inflate(R.layout.fragment_notetab, container, false);
+            view = inflater.inflate(R.layout.fragment_note, container, false);
             initView();
 
             AuthManager.getInstance().addLoginChangeListener(new AuthManager.OnLoginChangeListener() {
@@ -283,7 +283,7 @@ public class NoteFragment extends BaseFragment implements IContextHelper {
         if (context == null) return;
 
         m_notePopupMenu = new Dialog(context, R.style.BottomDialog);
-        LinearLayout root = LayoutUtil.initPopupMenu(getContext(), m_notePopupMenu, R.layout.popupmenu_note_longclicknote);
+        LinearLayout root = LayoutUtil.initPopupMenu(getContext(), m_notePopupMenu, R.layout.popup_note_long_click_note);
         m_notePopupMenu.setOnCancelListener((dialog) -> pageData.longClickedNote = null);
 
         TextView label = root.findViewById(R.id.id_NoteFrag_PopupMenu_Label);
@@ -575,7 +575,7 @@ public class NoteFragment extends BaseFragment implements IContextHelper {
             return;
         }
 
-        Intent intent = new Intent(getActivity(), ModifyNoteActivity.class);
+        Intent intent = new Intent(getActivity(), EditNoteActivity.class);
         intent.putExtra(INT_NOTE_DATA, note);
         intent.putExtra(INT_IS_NEW, true); // NEW
 
@@ -587,7 +587,7 @@ public class NoteFragment extends BaseFragment implements IContextHelper {
      * @param isNew 是否为新笔记 (newNote)
      */
     private void openViewNote(@NonNull Note note, boolean isNew) {
-        Intent intent = new Intent(getActivity(), ViewModifyNoteActivity.class);
+        Intent intent = new Intent(getActivity(), ViewNoteActivity.class);
         intent.putExtra(INT_NOTE_DATA, note);
         intent.putExtra(INT_IS_NEW, isNew);
         startActivityForResult(intent, REQ_OPEN_NOTE_INTENT);

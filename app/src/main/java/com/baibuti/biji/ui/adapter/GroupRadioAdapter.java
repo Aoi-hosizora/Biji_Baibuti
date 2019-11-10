@@ -2,7 +2,6 @@ package com.baibuti.biji.ui.adapter;
 
 import android.content.Context;
 import android.graphics.Color;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -74,7 +73,7 @@ public class GroupRadioAdapter extends BaseAdapter {
 
         if (view == null) {
             view = LayoutInflater.from(context)
-                .inflate(R.layout.modulelayout_groupdialog_grouplistradioitem, viewGroup, false);
+                .inflate(R.layout.adapter_group_radio_item, viewGroup, false);
 
             holder = new ViewHolder();
             holder.GroupColor = view.findViewById(R.id.id_adapter_radiogroup_color);

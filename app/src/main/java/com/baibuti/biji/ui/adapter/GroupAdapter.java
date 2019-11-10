@@ -54,7 +54,7 @@ public class GroupAdapter extends BaseAdapter  {
 
         if (view == null) {
 
-            view = LayoutInflater.from(context).inflate(R.layout.modulelayout_groupdialog_grouplistitem, viewGroup, false);
+            view = LayoutInflater.from(context).inflate(R.layout.adapter_group_item, viewGroup, false);
 
             holder = new ViewHolder();
             holder.GroupName = view.findViewById(R.id.id_adapter_group_name);

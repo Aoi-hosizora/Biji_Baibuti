@@ -2,7 +2,6 @@ package com.baibuti.biji.ui.adapter;
 
 import android.content.Context;
 import android.support.annotation.NonNull;
-import android.support.v7.widget.CardView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -73,7 +72,7 @@ public class NoteAdapter extends RecyclerViewEmptySupport.Adapter<NoteAdapter.Vi
     @Override
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(context)
-            .inflate(R.layout.modulelayout_notefrag_notelistitem, parent,false);
+            .inflate(R.layout.adapter_note_item, parent,false);
 
         view.setOnClickListener(this);
         view.setOnLongClickListener(this);

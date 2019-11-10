@@ -52,7 +52,7 @@ public class GroupDialog extends AlertDialog implements OnClickListener {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.dialog_groupdialog);
+        setContentView(R.layout.dialog_group_list);
 
         mButtonEdit = (Button)findViewById(R.id.id_GroupDialog_ButtonEdit);
         mButtonCancel = (Button)findViewById(R.id.id_GroupDialog_ButtonCancel);

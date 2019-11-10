@@ -8,6 +8,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.v7.app.ActionBar;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
@@ -19,8 +20,10 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.baibuti.biji.model.po.Note;
+import com.baibuti.biji.ui.IContextHelper;
 import com.baibuti.biji.ui.dialog.ImagePopupDialog;
 import com.baibuti.biji.R;
+import com.baibuti.biji.ui.fragment.NoteFragment;
 import com.baibuti.biji.util.fileUtil.AppPathUtil;
 import com.baibuti.biji.util.otherUtil.CommonUtil;
 import com.baibuti.biji.util.otherUtil.LayoutUtil;
@@ -29,9 +32,9 @@ import com.baibuti.biji.util.imgDocUtil.DocumentUtil;
 import com.sendtion.xrichtext.RichTextView;
 
 import java.io.File;
-import java.util.ArrayList;
 import java.util.List;
 
+import butterknife.BindView;
 import io.reactivex.Observable;
 import io.reactivex.ObservableEmitter;
 import io.reactivex.ObservableOnSubscribe;
@@ -40,15 +43,27 @@ import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
 
-
-public class ViewModifyNoteActivity extends AppCompatActivity implements View.OnClickListener {
+/**
+ * Intent Extra:
+ *      (Object) NoteFragment.INT_NOTE_DATA
+ *      (boolean) NoteFragment.INT_IS_NEW
+ *      (boolean) NoteFragment.INT_IS_MODIFIED
+ */
+public class ViewNoteActivity extends AppCompatActivity implements View.OnClickListener, IContextHelper {
 
     // region 声明: UI ProgressDialog m_LongClickImgPopupMenu
 
-    private TextView TitleEditText_View;
-    private TextView UpdateTimeTextView_View;
-    private TextView GroupNameTextView_View;
-    private com.sendtion.xrichtext.RichTextView ContentEditText_View;
+    @BindView(R.id.id_modifynote_viewtitle)
+    private TextView m_txt_title;
+
+    @BindView(R.id.id_modifynote_viewcontent)
+    private RichTextView m_rich_content;
+
+    @BindView(R.id.id_modifynote_viewgroup)
+    private TextView m_txt_group;
+
+    @BindView(R.id.id_modifynote_viewupdatetime)
+    private TextView m_txt_time;
 
     private ProgressDialog loadingDialog;
     private ProgressDialog savingDialog;
@@ -59,7 +74,7 @@ public class ViewModifyNoteActivity extends AppCompatActivity implements View.On
 
     // region 声明: Note isModify
 
-    private Note note;
+    private Note currNote;
     private boolean isModify = false;
 
     // endregion 声明: 笔记
@@ -80,9 +95,11 @@ public class ViewModifyNoteActivity extends AppCompatActivity implements View.On
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_viewmodifynote);
+        ActionBar actionBar = getSupportActionBar();
+        if (actionBar != null)
+            actionBar.setDisplayHomeAsUpEnabled(true);
 
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        setTitle(R.string.VMNoteActivity_Title);
+        setTitle("查看笔记");
 
         savingDialog = new ProgressDialog(this);
         savingDialog.setCancelable(true);
@@ -94,23 +111,17 @@ public class ViewModifyNoteActivity extends AppCompatActivity implements View.On
 
         initPopupMenu();
 
-        note = (Note) getIntent().getSerializableExtra("notedata");
-        // flag = getIntent().getIntExtra("flag", NOTE_NEW);
+        currNote = (Note) getIntent().getSerializableExtra(NoteFragment.INT_NOTE_DATA);
         isModify = getIntent().getBooleanExtra("isModify", true);
 
-        TitleEditText_View = (TextView) findViewById(R.id.id_modifynote_viewtitle);
-        UpdateTimeTextView_View = (TextView) findViewById(R.id.id_modifynote_viewupdatetime);
-        GroupNameTextView_View = (TextView) findViewById(R.id.id_modifynote_viewgroup);
-        ContentEditText_View = (com.sendtion.xrichtext.RichTextView) findViewById(R.id.id_modifynote_viewcontent);
-
-        TitleEditText_View.setText(note.getTitle());
-        UpdateTimeTextView_View.setText(note.getUpdateTime_ShortString());
-        GroupNameTextView_View.setText(note.getGroup().getName());
-        GroupNameTextView_View.setTextColor(note.getGroup().getIntColor());
+        m_txt_title.setText(currNote.getTitle());
+        m_txt_time.setText(currNote.getUpdateTime_ShortString());
+        m_txt_group.setText(currNote.getGroup().getName());
+        m_txt_group.setTextColor(currNote.getGroup().getIntColor());
 
         //////////////////////////////////////////////////
 
-        ContentEditText_View.post(new Runnable() {
+        m_rich_content.post(new Runnable() {
             @Override
             public void run() {
                 dealWithContent();
@@ -131,7 +142,7 @@ public class ViewModifyNoteActivity extends AppCompatActivity implements View.On
      */
     private void initPopupMenu() {
         m_LongClickImgPopupMenu = new Dialog(this, R.style.BottomDialog);
-        LinearLayout root = LayoutUtil.initPopupMenu(this, m_LongClickImgPopupMenu, R.layout.popupmenu_vmnote_longclickimg);
+        LinearLayout root = LayoutUtil.initPopupMenu(this, m_LongClickImgPopupMenu, R.layout.popup_view_note_long_click_image);
 
         root.findViewById(R.id.id_VMNoteAct_PopupMenu_OCR).setOnClickListener(this);
         root.findViewById(R.id.id_VMNoteAct_PopupMenu_Cancel).setOnClickListener(this);
@@ -171,13 +182,13 @@ public class ViewModifyNoteActivity extends AppCompatActivity implements View.On
                     if (isModify) {
 
                         // 使用新的笔记数据
-                        note = new Note(newnote);
+                        currNote = new Note(newnote);
 
-                        TitleEditText_View.setText(note.getTitle());
-                        UpdateTimeTextView_View.setText(note.getUpdateTime_ShortString());
-                        GroupNameTextView_View.setText(note.getGroup().getName());
-                        GroupNameTextView_View.setTextColor(note.getGroup().getIntColor());
-                        ContentEditText_View.post(new Runnable() {
+                        m_txt_title.setText(currNote.getTitle());
+                        m_txt_time.setText(currNote.getUpdateTime_ShortString());
+                        m_txt_group.setText(currNote.getGroup().getName());
+                        m_txt_group.setTextColor(currNote.getGroup().getIntColor());
+                        m_rich_content.post(new Runnable() {
                             @Override
                             public void run() {
                                 // 处理显示数据
@@ -212,7 +223,7 @@ public class ViewModifyNoteActivity extends AppCompatActivity implements View.On
      * @param Msg
      */
     public void ShowLogE(String FunctionName, String Msg) {
-        String ClassName = "ViewModifyNoteActivity";
+        String ClassName = "ViewNoteActivity";
         Log.e(getResources().getString(R.string.IShowLog_LogE),
                 ClassName + ": " + FunctionName + "###" + Msg); // MainActivity: initDatas###data=xxx
     }
@@ -274,9 +285,9 @@ public class ViewModifyNoteActivity extends AppCompatActivity implements View.On
      * 打开 ModifyNote 活动
      */
     private void ShowModifyNoteActivity() {
-        Intent intent=new Intent(ViewModifyNoteActivity.this, ModifyNoteActivity.class);
+        Intent intent=new Intent(ViewNoteActivity.this, EditNoteActivity.class);
 
-        intent.putExtra("notedata",note);
+        intent.putExtra("notedata", currNote);
         intent.putExtra("flag",flag);
 
         startActivityForResult(intent,1); // 1 from CardView
@@ -289,12 +300,12 @@ public class ViewModifyNoteActivity extends AppCompatActivity implements View.On
         Intent motointent = new Intent();
 
         if (flag == NOTE_NEW) { // Frag -> MN ----> VMN
-            motointent.putExtra("notedata", note);
+            motointent.putExtra("notedata", currNote);
             motointent.putExtra("flag", NOTE_NEW);
         }
         else {
             if (isModify) { // Frag -> VMN -> MN ----> VMN
-                motointent.putExtra("notedata", note);
+                motointent.putExtra("notedata", currNote);
                 motointent.putExtra("flag", NOTE_UPDATE);
                 setResult(RESULT_OK,motointent);
             }
@@ -317,7 +328,7 @@ public class ViewModifyNoteActivity extends AppCompatActivity implements View.On
         savefile_intent.putExtra("isSaving", true);
         savefile_intent.putExtra("FileType", ".docx");
         savefile_intent.putExtra("CurrentDir", AppPathUtil.getFileNoteDir());
-        savefile_intent.putExtra("FileName", note.getTitle());
+        savefile_intent.putExtra("FileName", currNote.getTitle());
         savefile_intent.putExtra("FileFilterType", "docx|pdf");
 
         // 返回含后缀名的文件名，并且单独返回后缀名
@@ -372,7 +383,7 @@ public class ViewModifyNoteActivity extends AppCompatActivity implements View.On
                 .setPositiveButton(R.string.VMNoteActivity_CreateFileAsNotePositiveForOK, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        SavingFileAsNote(isSaveAsDocx, note, path);
+                        SavingFileAsNote(isSaveAsDocx, currNote, path);
                     }
                 })
                 .setNegativeButton(R.string.VMNoteActivity_CreateFileAsNoteNegativeForCancel, null).create();
@@ -463,7 +474,7 @@ public class ViewModifyNoteActivity extends AppCompatActivity implements View.On
                     if (savingDialog != null)
                         savingDialog.dismiss();
 
-                    Toast.makeText(ViewModifyNoteActivity.this,
+                    Toast.makeText(ViewNoteActivity.this,
                         "文件 " + Path + " 保存" + (isOk ? "成功" : "失败"), Toast.LENGTH_SHORT).show();
                 } else {
                     ShowLogE("SavingDocxPdfAsNote", "Saning is HasDismiss");
@@ -483,10 +494,10 @@ public class ViewModifyNoteActivity extends AppCompatActivity implements View.On
      * 显示笔记详细信息
      */
     private void showDetailInfo() {
-        final String Info = getResources().getString(R.string.VMNoteActivity_InfoTitle) + note.getTitle() + "\n" +
-                getResources().getString(R.string.VMNoteActivity_InfoCreateTime) + note.getCreateTime_FullString() + "\n" +
-                getResources().getString(R.string.VMNoteActivity_InfoUpdateTime) + note.getUpdateTime_FullString() + "\n\n" +
-                getResources().getString(R.string.VMNoteActivity_InfoGroupLabelTitle) + note.getGroup().getName();
+        final String Info = getResources().getString(R.string.VMNoteActivity_InfoTitle) + currNote.getTitle() + "\n" +
+                getResources().getString(R.string.VMNoteActivity_InfoCreateTime) + currNote.getCreateTime_FullString() + "\n" +
+                getResources().getString(R.string.VMNoteActivity_InfoUpdateTime) + currNote.getUpdateTime_FullString() + "\n\n" +
+                getResources().getString(R.string.VMNoteActivity_InfoGroupLabelTitle) + currNote.getGroup().getName();
 
         AlertDialog dialog = new AlertDialog.Builder(this)
                 .setTitle(R.string.VMNoteActivity_InfoAlertTitle)
@@ -497,7 +508,7 @@ public class ViewModifyNoteActivity extends AppCompatActivity implements View.On
                         ClipboardManager clipboardManager = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
                         ClipData clip = ClipData.newPlainText(getResources().getString(R.string.VMNoteActivity_InfoAlertClipDataLabel), Info);
                         clipboardManager.setPrimaryClip(clip);
-                        Toast.makeText(ViewModifyNoteActivity.this, R.string.VMNoteActivity_InfoAlertCopySuccess, Toast.LENGTH_SHORT).show();
+                        Toast.makeText(ViewNoteActivity.this, R.string.VMNoteActivity_InfoAlertCopySuccess, Toast.LENGTH_SHORT).show();
                         dialog.dismiss();
                     }
                 })
@@ -523,7 +534,7 @@ public class ViewModifyNoteActivity extends AppCompatActivity implements View.On
      * @param imageList
      * @param currentPosition
      */
-    private void ShowClickImg(ArrayList<String> imageList, int currentPosition) {
+    private void ShowClickImg(List<String> imageList, int currentPosition) {
         try {
             String[] imgs = imageList.toArray(new String[imageList.size()]);
             ImagePopupDialog dialog = new ImagePopupDialog(this, imgs, currentPosition);
@@ -547,7 +558,7 @@ public class ViewModifyNoteActivity extends AppCompatActivity implements View.On
      * @param imgPath 可能是 网络图片
      */
     private void openOCRAct(String imgPath) {
-        Intent intent = new Intent(ViewModifyNoteActivity.this, OCRActivity.class);
+        Intent intent = new Intent(ViewNoteActivity.this, OCRActivity.class);
 
         Bundle bundle = new Bundle();
         bundle.putString(OCRActivity.INT_IMGPATH, imgPath);
@@ -560,12 +571,12 @@ public class ViewModifyNoteActivity extends AppCompatActivity implements View.On
      * 分享笔记，待修改
      */
     private void ShareNoteContent() {
-        CommonUtil.shareTextAndImage(this, note.getTitle(), note.getContent(), null); //分享图文
+        CommonUtil.shareTextAndImage(this, currNote.getTitle(), currNote.getContent(), null); //分享图文
     }
 
     // endregion 其他功能
 
-    // region 文字图片显示处理 dealWithContent showDataSync showEditData
+    // region 文字图片显示处理 dealWithContent showRichTextContentAsync showEditData
 
     /**
      * 处理内容，重要
@@ -573,16 +584,16 @@ public class ViewModifyNoteActivity extends AppCompatActivity implements View.On
      */
     private void dealWithContent() {
         //showEditData(myContent);
-        ContentEditText_View.clearAllLayout();
-        showDataSync(note.getContent());
+        m_rich_content.clearAllLayout();
+        showRichTextContentAsync(currNote.getContent());
 
         final AppCompatActivity app = this;
 
         // 图片点击事件
-        ContentEditText_View.setOnRtImageClickListener(new RichTextView.OnRtImageClickListener() {
+        m_rich_content.setOnRtImageClickListener(new RichTextView.OnRtImageClickListener() {
             @Override
             public void onRtImageClick(String imagePath) {
-                ArrayList<String> imageList = StringUtil.getTextFromHtml(note.getContent(), true);
+                List<String> imageList = StringUtil.getTextFromHtml(currNote.getContent(), true);
                 int currentPosition = imageList.indexOf(imagePath);
                 ShowClickImg(imageList, currentPosition);
             }
@@ -593,7 +604,7 @@ public class ViewModifyNoteActivity extends AppCompatActivity implements View.On
      * 异步方式显示数据
      * @param html
      */
-    private void showDataSync(final String html){
+    private void showRichTextContentAsync(final String html){
 
         Observable.create(new ObservableOnSubscribe<String>() {
             @Override
@@ -616,7 +627,7 @@ public class ViewModifyNoteActivity extends AppCompatActivity implements View.On
                 if (loadingDialog != null) {
                     loadingDialog.dismiss();
                 }
-                // Toast.makeText(ViewModifyNoteActivity.this, R.string.VMNoteActivity_showDataSyncError, Toast.LENGTH_SHORT).show();
+                // Toast.makeText(ViewNoteActivity.this, R.string.VMNoteActivity_showDataSyncError, Toast.LENGTH_SHORT).show();
             }
 
             @Override
@@ -627,18 +638,18 @@ public class ViewModifyNoteActivity extends AppCompatActivity implements View.On
             @Override
             public void onNext(String text) {
                 try {
-                    if (ContentEditText_View != null) {
+                    if (m_rich_content != null) {
                         if (text.contains("<img") && text.contains("src=")) {
                             // imagePath可能是本地路径，也可能是网络地址
                             String imagePath = StringUtil.getImgSrc(text);
-                            ContentEditText_View.addImageViewAtIndex(ContentEditText_View.getLastIndex(), imagePath);
+                            m_rich_content.addImageViewAtIndex(m_rich_content.getLastIndex(), imagePath);
                         } else {
-                            ContentEditText_View.addTextViewAtIndex(ContentEditText_View.getLastIndex(), text);
+                            m_rich_content.addTextViewAtIndex(m_rich_content.getLastIndex(), text);
                         }
                     }
                 }
                 catch (Exception ex) {
-                    Toast.makeText(ViewModifyNoteActivity.this, "笔记中图片显示错误，可能由于源文件被删除。", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(ViewNoteActivity.this, "笔记中图片显示错误，可能由于源文件被删除。", Toast.LENGTH_SHORT).show();
                 }
             }
         });

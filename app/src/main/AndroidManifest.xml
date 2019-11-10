@@ -34,8 +34,8 @@
 
         <activity android:name=".ui.activity.AuthActivity" android:screenOrientation="portrait" />
 
-        <activity android:name=".ui.activity.ModifyNoteActivity" android:screenOrientation="portrait" />
-        <activity android:name=".ui.activity.ViewModifyNoteActivity" android:screenOrientation="portrait" />
+        <activity android:name=".ui.activity.EditNoteActivity" android:screenOrientation="portrait" />
+        <activity android:name=".ui.activity.ViewNoteActivity" android:screenOrientation="portrait" />
         <activity android:name=".ui.activity.OpenSaveFileActivity" android:screenOrientation="portrait" />
 
         <activity android:name=".ui.activity.OCRActivity" android:screenOrientation="portrait" />

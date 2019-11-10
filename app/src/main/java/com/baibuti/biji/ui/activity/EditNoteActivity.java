@@ -54,9 +54,12 @@ import rx_activity_result2.RxActivityResult;
  *      (Object) NoteFragment.INT_NOTE_DATA
  *      (boolean) NoteFragment.INT_IS_NEW
  */
-public class ModifyNoteActivity extends AppCompatActivity implements IContextHelper {
+public class EditNoteActivity extends AppCompatActivity implements IContextHelper {
 
-    private static final int CUT_LENGTH = 17;
+    /**
+     * 笔记标题长度
+     */
+    private static final int CUT_LENGTH = 15;
 
     @BindView(R.id.id_modifynote_title)
     private EditText m_txt_title;
@@ -113,13 +116,15 @@ public class ModifyNoteActivity extends AppCompatActivity implements IContextHel
         ToolbarCancelSaveBack_Clicked();
     }
 
+    // region Popup Image OCR
+
     /**
      * 插入图片显示弹出菜单
      */
     @OnItemSelected(R.id.id_menu_modifynote_img)
     private void ToolbarInsertImage_Clicked() {
         m_InsertImgPopupMenu = new Dialog(this, R.style.BottomDialog);
-        LinearLayout root = LayoutUtil.initPopupMenu(this, m_InsertImgPopupMenu, R.layout.popupmenu_mnote_insertimg);
+        LinearLayout root = LayoutUtil.initPopupMenu(this, m_InsertImgPopupMenu, R.layout.popup_edit_note_insert_image);
         m_InsertImgPopupMenu.setOnCancelListener(null);
 
         root.findViewById(R.id.id_popmenu_choose_img).setOnClickListener((view) -> ChooseImgPopup_Clicked());
@@ -134,7 +139,7 @@ public class ModifyNoteActivity extends AppCompatActivity implements IContextHel
      */
     private void imagePopup_LongClicked(String LongClickImgPath) {
         m_LongClickImgPopupMenu = new Dialog(this, R.style.BottomDialog);
-        LinearLayout root = LayoutUtil.initPopupMenu(this, m_LongClickImgPopupMenu, R.layout.popupmenu_mnote_longclickimg);
+        LinearLayout root = LayoutUtil.initPopupMenu(this, m_LongClickImgPopupMenu, R.layout.popup_edit_note_long_click_image);
         m_LongClickImgPopupMenu.setOnCancelListener(null);
 
         root.findViewById(R.id.id_MNoteAct_PopupMenu_OCR).setOnClickListener((view) -> OCRLongClickImagePopup_Clicked(LongClickImgPath));
@@ -237,7 +242,7 @@ public class ModifyNoteActivity extends AppCompatActivity implements IContextHel
      * 文字识别图片
      */
     private void OCRLongClickImagePopup_Clicked(String imgPath) {
-        Intent intent = new Intent(ModifyNoteActivity.this, OCRActivity.class);
+        Intent intent = new Intent(EditNoteActivity.this, OCRActivity.class);
 
         Bundle bundle = new Bundle();
         bundle.putString(OCRActivity.INT_IMGPATH, imgPath);
@@ -245,6 +250,10 @@ public class ModifyNoteActivity extends AppCompatActivity implements IContextHel
         intent.putExtra(OCRActivity.INT_BUNDLE, bundle);
         startActivity(intent);
     }
+
+    // endregion
+
+    // region Save
 
     /**
      * 判断是否修改
@@ -306,10 +315,10 @@ public class ModifyNoteActivity extends AppCompatActivity implements IContextHel
 
         // 判断是否修改
         if (!checkIsNoteModify()) {
-
             Intent intent = new Intent();
             intent.putExtra(NoteFragment.INT_NOTE_DATA, currNote);
             intent.putExtra(NoteFragment.INT_IS_NEW, isNew); // <<<
+            intent.putExtra(NoteFragment.INT_IS_MODIFIED, false); // <<<
             setResult(RESULT_OK, intent);
             finish();
 
@@ -317,7 +326,6 @@ public class ModifyNoteActivity extends AppCompatActivity implements IContextHel
         }
 
         // 设置内容
-
         currNote.setTitle(m_txt_title.getText().toString());
         currNote.setContent(Content);
 
@@ -348,7 +356,6 @@ public class ModifyNoteActivity extends AppCompatActivity implements IContextHel
         if (!isContinue[0]) return;
 
         // 保存操作
-
         try {
             INoteDao noteDao = DaoStrategyHelper.getInstance().getNoteDao(this);
             if (isNew) {
@@ -361,6 +368,7 @@ public class ModifyNoteActivity extends AppCompatActivity implements IContextHel
             Intent intent = new Intent();
             intent.putExtra(NoteFragment.INT_NOTE_DATA, currNote);
             intent.putExtra(NoteFragment.INT_IS_NEW, isNew); // <<<
+            intent.putExtra(NoteFragment.INT_IS_MODIFIED, true);
             setResult(RESULT_OK, intent);
             finish();
 
@@ -372,6 +380,10 @@ public class ModifyNoteActivity extends AppCompatActivity implements IContextHel
             );
         }
     }
+
+    // endregion
+
+    // region Info Group
 
     /**
      * 显示笔记详细信息
@@ -441,24 +453,9 @@ public class ModifyNoteActivity extends AppCompatActivity implements IContextHel
         );
     }
 
-    /**
-     * 获取 RichTextEditor 内容
-     * @param richTextEditor RichTextEditor
-     * @return 笔记内容
-     */
-    private String getRichTextContent(RichTextEditor richTextEditor) {
-        if (richTextEditor == null) return "";
+    // endregion
 
-        List<RichTextEditor.EditData> editList = richTextEditor.buildEditData();
-        StringBuilder content = new StringBuilder();
-        for (RichTextEditor.EditData itemData : editList) {
-            if (itemData.inputStr != null)
-                content.append(itemData.inputStr);
-            else if (itemData.imagePath != null)
-                content.append("<img src=\"").append(itemData.imagePath).append("\"/>");
-        }
-        return content.toString();
-    }
+    // region RichText ClickImage
 
     /**
      * 初始化富文本框，加载数据，图片点击...
@@ -473,7 +470,7 @@ public class ModifyNoteActivity extends AppCompatActivity implements IContextHel
         m_rich_content.setOnRtImageDeleteListener((imagePath) -> {
             if (!TextUtils.isEmpty(imagePath))
                 if (AppPathUtil.deleteFile(imagePath))
-                    Toast.makeText(ModifyNoteActivity.this, "图片删除成功", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(EditNoteActivity.this, "图片删除成功", Toast.LENGTH_SHORT).show();
         });
 
         // 图片点击事件
@@ -503,6 +500,28 @@ public class ModifyNoteActivity extends AppCompatActivity implements IContextHel
         catch (Exception ex) {
             ex.printStackTrace();
         }
+    }
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    /**
+     * 获取 RichTextEditor 内容
+     * @param richTextEditor RichTextEditor
+     * @return 笔记内容
+     */
+    private String getRichTextContent(RichTextEditor richTextEditor) {
+        if (richTextEditor == null) return "";
+
+        List<RichTextEditor.EditData> editList = richTextEditor.buildEditData();
+        StringBuilder content = new StringBuilder();
+        for (RichTextEditor.EditData itemData : editList) {
+            if (itemData.inputStr != null)
+                content.append(itemData.inputStr);
+            else if (itemData.imagePath != null)
+                content.append("<img src=\"").append(itemData.imagePath).append("\"/>");
+        }
+        return content.toString();
     }
 
     /**
@@ -604,13 +623,15 @@ public class ModifyNoteActivity extends AppCompatActivity implements IContextHel
             (throwable) -> {
                 if (progressDialog != null && progressDialog.isShowing())
                     progressDialog.dismiss();
-                Toast.makeText(ModifyNoteActivity.this, "图片插入失败", Toast.LENGTH_SHORT).show();
+                Toast.makeText(EditNoteActivity.this, "图片插入失败", Toast.LENGTH_SHORT).show();
             },
             () -> {
                 if (progressDialog != null && progressDialog.isShowing())
                     progressDialog.dismiss();
-                Toast.makeText(ModifyNoteActivity.this, "图片插入成功", Toast.LENGTH_SHORT).show();
+                Toast.makeText(EditNoteActivity.this, "图片插入成功", Toast.LENGTH_SHORT).show();
             }
         ).isDisposed();
     }
+
+    // endregion
 }

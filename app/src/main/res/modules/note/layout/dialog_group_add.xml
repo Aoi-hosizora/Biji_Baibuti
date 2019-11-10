@@ -47,7 +47,7 @@
             <!--android:layout_gravity="center"-->
             <!--app:center_circle_defcolor="#0511FB"/>-->
 
-        <include layout="@layout/modulelayout_colorpicker"
+        <include layout="@layout/layout_group_color_picker"
             android:layout_marginTop="10dp"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"

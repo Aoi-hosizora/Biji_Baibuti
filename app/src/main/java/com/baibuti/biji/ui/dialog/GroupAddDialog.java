@@ -62,7 +62,7 @@ public class GroupAddDialog extends AlertDialog implements OnClickListener {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.dialog_groupadddialog);
+        setContentView(R.layout.dialog_group_add);
 
         editText = (EditText) findViewById(R.id.id_addgroup_name);
         colorText = (TextView) findViewById(R.id.id_addgroup_colortext);
