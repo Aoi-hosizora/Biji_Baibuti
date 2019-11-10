@@ -304,7 +304,7 @@ http://blog.csdn.net/remote_roamer/article/details/14105999
                         <div class="pull-left" style="margin-left: 10px; margin-top: 10px;">
                             <i class="blue bigger-150 glyphicon glyphicon-cog" style="cursor:pointer" id="kbcong" data-original-title="" title=""></i>
                         </div>
-                        <div class="btn-toolbar pull-right" role="toolbar" id="tb" style="z-index: auto; position: static; top: auto;">
+                        <div class="btn-toolbar pull-right" role="toolbar" id="tb" style="z-currIndex: auto; position: static; top: auto;">
                             <button type="button" class="btn btn-default" id="shcPDF" data-type="table"><span class="bigger-120 glyphicon glyphicon-print"> 输出PDF</span></button>
                             <button type="button" class="btn btn-default btn-primary" href="#table1" role="tab" data-toggle="tab" data-type="table"><span class="bigger-120 glyphicon glyphicon-th-large"></span> 表格</button>
                             <button type="button" class="btn btn-default" href="#table2" role="tab" data-toggle="tab" data-type="list"><span class="bigger-120 glyphicon glyphicon-align-justify"></span> 列表</button>
@@ -1041,10 +1041,10 @@ http://blog.csdn.net/remote_roamer/article/details/14105999
                 <!-- table-start  -->
                 <div class="ui-jqgrid ui-widget ui-widget-content ui-corner-all" id="gbox_sycjlrtabGrid" dir="ltr" style="width: 1348px; display: none;">
                     <div class="ui-widget-overlay jqgrid-overlay" id="lui_sycjlrtabGrid"></div>
-                    <div class="loading ui-state-default ui-state-active" id="load_sycjlrtabGrid" style="display: none; z-index: 101; position: absolute; top: 40.5875px;">正在请求数据...</div>
+                    <div class="loading ui-state-default ui-state-active" id="load_sycjlrtabGrid" style="display: none; z-currIndex: 101; position: absolute; top: 40.5875px;">正在请求数据...</div>
                     <div class="ui-jqgrid-view" id="gview_sycjlrtabGrid" style="width: 1348px;">
                         <div class="ui-jqgrid-titlebar ui-jqgrid-caption ui-widget-header ui-corner-top ui-helper-clearfix"><span class="ui-jqgrid-title">实验课表</span></div>
-                        <div class="ui-state-default ui-jqgrid-hdiv scroll-to-fixed-fixed" style="z-index: 1000; position: fixed; top: 0px; margin-left: 0px; width: 0px; left: 0px;">
+                        <div class="ui-state-default ui-jqgrid-hdiv scroll-to-fixed-fixed" style="z-currIndex: 1000; position: fixed; top: 0px; margin-left: 0px; width: 0px; left: 0px;">
                             <div class="ui-jqgrid-hbox">
                                 <table class="ui-jqgrid-htable" style="width:1380px" role="grid" aria-labelledby="gbox_sycjlrtabGrid" cellspacing="0" cellpadding="0" border="0">
                                     <thead>
@@ -1120,7 +1120,7 @@ http://blog.csdn.net/remote_roamer/article/details/14105999
                         </div>
                     </div>
                     <div class="ui-jqgrid-resize-mark" id="rs_msycjlrtabGrid">&nbsp;</div>
-                    <div id="sycjlrpager" class="ui-state-default ui-jqgrid-pager ui-corner-bottom scroll-to-fixed-fixed" dir="ltr" style="z-index: 1000; position: fixed; top: 0px; margin-left: 0px; width: 0px; left: 0px;">
+                    <div id="sycjlrpager" class="ui-state-default ui-jqgrid-pager ui-corner-bottom scroll-to-fixed-fixed" dir="ltr" style="z-currIndex: 1000; position: fixed; top: 0px; margin-left: 0px; width: 0px; left: 0px;">
                         <div id="pg_sycjlrpager" class="ui-pager-control" role="group">
                             <table cellspacing="0" cellpadding="0" border="0" class="ui-pg-table" style="width:100%;table-layout:fixed;height:100%;" role="row">
                                 <tbody>
@@ -1212,7 +1212,7 @@ http://blog.csdn.net/remote_roamer/article/details/14105999
             </div>
         </div>
     </div>
-    <div class="ui-widget ui-widget-content ui-corner-all ui-jqdialog" id="alertmod_sycjlrtabGrid" dir="ltr" tabindex="-1" role="dialog" aria-labelledby="alerthd_sycjlrtabGrid" aria-hidden="true" style="width: 200px; height: auto; z-index: 950; overflow: hidden; top: 340.5px; left: 668px;">
+    <div class="ui-widget ui-widget-content ui-corner-all ui-jqdialog" id="alertmod_sycjlrtabGrid" dir="ltr" tabindex="-1" role="dialog" aria-labelledby="alerthd_sycjlrtabGrid" aria-hidden="true" style="width: 200px; height: auto; z-currIndex: 950; overflow: hidden; top: 340.5px; left: 668px;">
         <div class="ui-jqdialog-titlebar ui-widget-header ui-corner-all ui-helper-clearfix" id="alerthd_sycjlrtabGrid" style="cursor: move;"><span class="ui-jqdialog-title" style="float: left;">注意</span><a class="ui-jqdialog-titlebar-close ui-corner-all" style="right: 0.3em;"><span class="ui-icon ui-icon-closethick"></span></a></div>
         <div class="ui-jqdialog-content ui-widget-content" id="alertcnt_sycjlrtabGrid">
             <div>请选择记录</div><span tabindex="0"><span tabindex="-1" id="jqg_alrt"></span></span>
@@ -1286,8 +1286,8 @@ http://blog.csdn.net/remote_roamer/article/details/14105999
         display: none;
     }
     </style>
-    <div class="widget-backdrop in" style="display: none; width: 710px; height: 2247px; top: 206.4px; left: 127.4px; z-index: 1045;"></div>
-    <div class="widget-backdrop-loading" style="display: none; width: 710px; height: 2247px; top: 206.4px; left: 127.4px; z-index: 1046;">
+    <div class="widget-backdrop in" style="display: none; width: 710px; height: 2247px; top: 206.4px; left: 127.4px; z-currIndex: 1045;"></div>
+    <div class="widget-backdrop-loading" style="display: none; width: 710px; height: 2247px; top: 206.4px; left: 127.4px; z-currIndex: 1046;">
         <div class="image header smaller lighter" style="margin-top: 262px;"><i class="icon-spinner icon-spin orange  bigger-160 "></i></div>
         <div class="msg">加载中...</div>
     </div>

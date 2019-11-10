@@ -220,10 +220,8 @@ public class OCRActivity extends AppCompatActivity implements IContextHelper {
      */
     @OnClick(R.id.id_OCRActivity_CopyButton)
     private void CopyButton_Click() {
-        ClipboardManager clipboardManager = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
-        ClipData clip = ClipData.newPlainText(getResources().getString(R.string.MNoteActivity_OCRSyncResultAlertCopyClipLabel), m_txt_result.getText().toString());
-        clipboardManager.setPrimaryClip(clip);
-        Toast.makeText(this, R.string.OCRActivity_CopySuccess, Toast.LENGTH_SHORT).show();
+        if (CommonUtil.copyText(this, m_txt_result.getText().toString()))
+            Toast.makeText(this, R.string.OCRActivity_CopySuccess, Toast.LENGTH_SHORT).show();
     }
 
     /**

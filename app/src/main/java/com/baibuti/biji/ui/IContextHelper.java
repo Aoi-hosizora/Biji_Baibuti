@@ -11,8 +11,6 @@ import android.view.View;
 import android.widget.ListAdapter;
 import android.widget.Toast;
 
-import java.util.function.Consumer;
-
 public interface IContextHelper {
 
     /**

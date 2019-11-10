@@ -25,7 +25,7 @@ import com.baibuti.biji.ui.IContextHelper;
 import com.baibuti.biji.ui.adapter.GroupAdapter;
 import com.baibuti.biji.model.po.Note;
 import com.baibuti.biji.R;
-import com.baibuti.biji.ui.dialog.ImagePopupDialog;
+import com.baibuti.biji.ui.dialog.ImagePreviewDialog;
 import com.baibuti.biji.ui.fragment.NoteFragment;
 import com.baibuti.biji.util.fileUtil.AppPathUtil;
 import com.baibuti.biji.util.otherUtil.CommonUtil;
@@ -489,7 +489,7 @@ public class EditNoteActivity extends AppCompatActivity implements IContextHelpe
     private void onClickImage(List<String> imageList, int currentPosition) {
         try {
             String[] imagePaths = imageList.toArray(new String[0]);
-            ImagePopupDialog dialog = new ImagePopupDialog(this, imagePaths, currentPosition);
+            ImagePreviewDialog dialog = new ImagePreviewDialog(this, imagePaths, currentPosition);
             dialog.setOnLongClickImageListener((v, index) -> imagePopup_LongClicked(imagePaths[index]));
             dialog.show();
         }
