@@ -16,12 +16,19 @@ import java.util.List;
 
 public class GroupAdapter extends BaseAdapter  {
 
-    public List<Group> list;
-    LayoutInflater inflater;
+    private Context context;
+    private List<Group> list;
 
-    public GroupAdapter(Context context, List<Group> list) {
+    public GroupAdapter(Context context) {
+        this.context = context;
+    }
+
+    public List<Group> getList() {
+        return list;
+    }
+
+    public void setList(List<Group> list) {
         this.list = list;
-        inflater = LayoutInflater.from(context);
     }
 
     @Override
@@ -31,9 +38,8 @@ public class GroupAdapter extends BaseAdapter  {
 
     @Override
     public Group getItem(int i) {
-        if (i == getCount() || list == null) {
+        if (i == getCount() || list == null)
             return null;
-        }
         return list.get(i);
     }
 
@@ -43,29 +49,30 @@ public class GroupAdapter extends BaseAdapter  {
     }
 
     @Override
-    public View getView(int position, View convertView, ViewGroup viewGroup) {
+    public View getView(int position, View view, ViewGroup viewGroup) {
         ViewHolder holder;
-        if (convertView == null) {
+
+        if (view == null) {
+
+            view = LayoutInflater.from(context).inflate(R.layout.modulelayout_groupdialog_grouplistitem, viewGroup, false);
+
             holder = new ViewHolder();
-            convertView = inflater.inflate(R.layout.modulelayout_groupdialog_grouplistitem, null);
+            holder.GroupName = view.findViewById(R.id.id_adapter_group_name);
+            holder.GroupColor = view.findViewById(R.id.id_adapter_group_color);
 
-            holder.GroupName = (TextView) convertView.findViewById(R.id.id_adapter_group_name);
-            holder.GroupColor = (ImageView) convertView.findViewById(R.id.id_adapter_group_color);
-
-            convertView.setTag(holder);
+            view.setTag(holder);
         }
-        else {
-            holder = (ViewHolder) convertView.getTag();
-        }
+        else
+            holder = (ViewHolder) view.getTag();
 
         holder.GroupName.setText(getItem(position).getName());
         holder.GroupColor.setBackgroundColor(Color.parseColor(getItem(position).getColor()));
 
-        return convertView;
+        return view;
     }
 
     public static class ViewHolder {
-        public TextView GroupName;
-        public ImageView GroupColor;
+        TextView GroupName;
+        ImageView GroupColor;
     }
 }

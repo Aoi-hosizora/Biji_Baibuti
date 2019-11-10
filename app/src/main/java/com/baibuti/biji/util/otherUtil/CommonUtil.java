@@ -1,6 +1,8 @@
 package com.baibuti.biji.util.otherUtil;
 
 import android.app.Activity;
+import android.content.ClipData;
+import android.content.ClipboardManager;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
@@ -22,6 +24,21 @@ public class CommonUtil {
         // boolean isOpen = imm.isActive();
         if (imm != null && imm.isActive() && activity.getCurrentFocus() != null)
             imm.hideSoftInputFromWindow(activity.getCurrentFocus().getWindowToken(), InputMethodManager.HIDE_NOT_ALWAYS);
+    }
+
+    /**
+     * 复制文本
+     * @return 是否存在 CLIPBOARD_SERVICE 服务
+     */
+    public static boolean copyText(Context context, String text) {
+        ClipboardManager clipboardManager = (ClipboardManager) context.getSystemService(Context.CLIPBOARD_SERVICE);
+        ClipData clip = ClipData.newPlainText("", text);
+
+        if (clipboardManager != null) {
+            clipboardManager.setPrimaryClip(clip);
+            return true;
+        }
+        return false;
     }
 
     // /**

@@ -9,6 +9,7 @@ import android.database.sqlite.SQLiteStatement;
 
 import com.baibuti.biji.model.dao.DbOpenHelper;
 import com.baibuti.biji.model.dao.daoInterface.IGroupDao;
+import com.baibuti.biji.model.dto.ServerException;
 import com.baibuti.biji.model.po.Group;
 
 import java.util.ArrayList;
@@ -83,6 +84,40 @@ public class GroupDao implements IGroupDao {
         SQLiteDatabase db = helper.getWritableDatabase();
         Cursor cursor = null;
         String sql = "select * from " + TBL_NAME + " where " + COL_ID + " = " + groupId;
+
+        try {
+            cursor = db.rawQuery(sql, null);
+
+            if (cursor.moveToFirst()) {
+
+                int id = cursor.getInt(cursor.getColumnIndex(COL_ID));
+                String name = cursor.getString(cursor.getColumnIndex(COL_NAME));
+                int order = cursor.getInt(cursor.getColumnIndex(COL_ORDER));
+                String color = cursor.getString(cursor.getColumnIndex(COL_COLOR));
+
+                return new Group(id, name, order, color);
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            if (cursor != null && !cursor.isClosed()) cursor.close();
+            if (db != null && db.isOpen()) db.close();
+        }
+
+        return null;
+    }
+
+    /**
+     * 根据分组名查询
+     * @param groupName 分组名
+     * @return 指定分组
+     */
+    @Override
+    public Group queryGroupByName(String groupName) {
+        SQLiteDatabase db = helper.getWritableDatabase();
+        Cursor cursor = null;
+        String sql = "select * from " + TBL_NAME + " where " + COL_NAME + " = " + groupName;
 
         try {
             cursor = db.rawQuery(sql, null);

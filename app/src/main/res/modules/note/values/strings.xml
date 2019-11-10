@@ -124,12 +124,6 @@
     <string name="MNoteActivity_GroupSetAlertTitle">笔记分类</string>
     <string name="MNoteActivity_GroupSetAlertNegativeButtonForCancel">返回</string>
 
-    <!-- Cancel Save Note Data -->
-    <string name="MNoteActivity_CancelSaveAlertTitle">提醒</string>
-    <string name="MNoteActivity_CancelSaveAlertMsg">确定要取消编辑吗？您的修改将不会保存。</string>
-    <string name="MNoteActivity_CancelSaveAlertNegativeButtonForLeave">离开</string>
-    <string name="MNoteActivity_CancelSaveAlertPositiveButtonForCancel">取消</string>
-
     <!-- Save Note Data -->
     <string name="MNoteActivity_SaveAlertTitle">提醒</string>
     <string name="MNoteActivity_SaveAlertMsg">没有输入内容，请补全笔记内容。</string>

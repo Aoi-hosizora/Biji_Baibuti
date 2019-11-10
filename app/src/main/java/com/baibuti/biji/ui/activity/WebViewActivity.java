@@ -14,7 +14,7 @@ import android.widget.Button;
 
 import com.baibuti.biji.R;
 
-public class WebviewActivity extends AppCompatActivity {
+public class WebViewActivity extends AppCompatActivity {
 
 
     private String htmlStr;

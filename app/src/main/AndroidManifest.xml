@@ -13,91 +13,57 @@
     <uses-permission android:name="android.permission.CAMERA" />
 
     <application
-        android:allowBackup="true"
+        android:name=".MyApplication"
+        android:allowBackup="false"
         android:icon="@mipmap/app_icon"
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
         tools:ignore="GoogleAppIndexingWarning">
-        <activity android:name=".ui.activity.WebviewActivity" />
-        <activity android:name=".ui.activity.QrCodeActivity" /> <!-- Main Activity -->
+
         <activity
             android:name=".ui.activity.MainActivity"
             android:screenOrientation="portrait"
             android:windowSoftInputMode="adjustPan">
+
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
+                <action android:name="android.intent.action.VIEW" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
-        </activity> <!-- MNote Activity -->
-        <activity
-            android:name=".ui.activity.ModifyNoteActivity"
-            android:screenOrientation="portrait">
-            <intent-filter>
-                <action android:name="activitytest.example.com.activitytest.ModifyNoteActivity" />
+        </activity>
 
-                <category android:name="android.intent.category.DEFAULT" />
-            </intent-filter>
-        </activity> <!-- VMNote Activity -->
-        <activity
-            android:name=".ui.activity.ViewModifyNoteActivity"
-            android:screenOrientation="portrait">
-            <intent-filter>
-                <action android:name="activitytest.example.com.activitytest.ViewModifyNoteActivity" />
+        <activity android:name=".ui.activity.AuthActivity" android:screenOrientation="portrait" />
 
-                <category android:name="android.intent.category.DEFAULT" />
-            </intent-filter>
-        </activity> <!-- OpenSaveFile Activity -->
-        <activity
-            android:name=".ui.activity.OpenSaveFileActivity"
-            android:screenOrientation="portrait">
-            <intent-filter>
-                <action android:name="activitytest.example.com.activitytest.OpenSaveFileActivity" />
+        <activity android:name=".ui.activity.ModifyNoteActivity" android:screenOrientation="portrait" />
+        <activity android:name=".ui.activity.ViewModifyNoteActivity" android:screenOrientation="portrait" />
+        <activity android:name=".ui.activity.OpenSaveFileActivity" android:screenOrientation="portrait" />
 
-                <category android:name="android.intent.category.DEFAULT" />
-            </intent-filter>
-        </activity> <!-- StarSearchItem Activity -->
-        <activity
-            android:name=".ui.activity.StarSearchItemActivity"
-            android:screenOrientation="portrait">
-            <intent-filter>
-                <action android:name="activitytest.example.com.activitytest.StarSearchItemActivity" />
+        <activity android:name=".ui.activity.OCRActivity" android:screenOrientation="portrait" />
 
-                <category android:name="android.intent.category.DEFAULT" />
-            </intent-filter>
-        </activity> <!-- OCR Activity -->
-        <activity
-            android:name=".ui.activity.OCRActivity"
-            android:screenOrientation="portrait">
-            <intent-filter>
-                <action android:name="activitytest.example.com.activitytest.OCRActivity" />
+        <activity android:name=".ui.activity.StarSearchItemActivity" android:screenOrientation="portrait" />
 
-                <category android:name="android.intent.category.DEFAULT" />
-            </intent-filter>
-        </activity> <!-- RegLog Activity -->
-        <activity
-            android:name=".ui.activity.AuthActivity"
-            android:screenOrientation="portrait">
-            <intent-filter>
-                <action android:name="activitytest.example.com.activitytest.RegLogActivity" />
+        <activity android:name=".ui.activity.WebViewActivity" android:screenOrientation="portrait" />
+        <activity android:name=".ui.activity.QrCodeActivity" android:screenOrientation="portrait" />
 
-                <category android:name="android.intent.category.DEFAULT" />
-            </intent-filter>
-        </activity> <!-- PreLoaded Font -->
+        <!-- PreLoad Font -->
         <meta-data
             android:name="preloaded_fonts"
-            android:resource="@array/preloaded_fonts" /> <!-- File Provider -->
+            android:resource="@array/preloaded_fonts" />
+
+        <!-- File Provider -->
         <provider
             android:name="android.support.v4.content.FileProvider"
             android:authorities="com.baibuti.biji.FileProvider"
             android:exported="false"
             android:grantUriPermissions="true"
             tools:replace="android:authorities">
+
             <meta-data
                 android:name="android.support.FILE_PROVIDER_PATHS"
                 android:resource="@xml/public_file_path"
                 tools:replace="android:resource" />
         </provider>
+
     </application>
 
 </manifest>

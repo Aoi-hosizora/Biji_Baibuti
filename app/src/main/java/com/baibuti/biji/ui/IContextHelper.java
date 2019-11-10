@@ -11,6 +11,8 @@ import android.view.View;
 import android.widget.ListAdapter;
 import android.widget.Toast;
 
+import java.util.function.Consumer;
+
 public interface IContextHelper {
 
     /**
@@ -149,4 +151,19 @@ public interface IContextHelper {
             }
         }
     }
+
+    // @FunctionalInterface
+    // interface ThrowingConsumer<T, E extends Exception> {
+    //     void accept(T t) throws E;
+    // }
+    //
+    // default <T> Consumer<T> throwingConsumerWrapper(ThrowingConsumer<T, Exception> throwingConsumer) {
+    //     return i -> {
+    //         try {
+    //             throwingConsumer.accept(i);
+    //         } catch (Exception ex) {
+    //             throw new RuntimeException(ex);
+    //         }
+    //     };
+    // }
 }

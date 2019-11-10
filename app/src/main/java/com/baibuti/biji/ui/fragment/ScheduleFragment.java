@@ -10,7 +10,6 @@ import android.content.res.AssetManager;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.constraint.ConstraintLayout;
-import android.support.v4.app.Fragment;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -27,7 +26,7 @@ import com.baibuti.biji.service.auth.AuthManager;
 import com.baibuti.biji.net.module.file.DocumentUtil;
 import com.baibuti.biji.R;
 import com.baibuti.biji.ui.activity.MainActivity;
-import com.baibuti.biji.ui.activity.WebviewActivity;
+import com.baibuti.biji.ui.activity.WebViewActivity;
 import com.zhuangfei.timetable.TimetableView;
 import com.zhuangfei.timetable.listener.ISchedule;
 import com.zhuangfei.timetable.listener.IWeekView;
@@ -161,7 +160,7 @@ public class ScheduleFragment extends BaseFragment {
 
                 switch (item.getItemId()){
                     case R.id.action_import_schedule:
-                        Intent intent = new Intent(getContext(), WebviewActivity.class);
+                        Intent intent = new Intent(getContext(), WebViewActivity.class);
                         startActivityForResult(intent, REQUEST_CODE_FOR_WEBAC);
                         break;
                     case R.id.action_refresh_schedule:

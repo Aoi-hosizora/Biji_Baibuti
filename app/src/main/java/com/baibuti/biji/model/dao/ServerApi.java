@@ -76,6 +76,10 @@ public interface ServerApi {
     Observable<ResponseDTO<GroupDTO>> getGroupById(@Path("id") int id);
 
     // TODO 接口待加
+    @GET("/group/one/{name}")
+    Observable<ResponseDTO<GroupDTO>> getGroupByName(@Path("name") String name);
+
+    // TODO 接口待加
     @GET("/group/default")
     Observable<ResponseDTO<GroupDTO>> getDefaultGroup();
 

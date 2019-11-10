@@ -10,6 +10,7 @@ public interface IGroupDao {
     // 查
     List<Group> queryAllGroups() throws ServerException;
     Group queryGroupById(int groupId) throws ServerException;
+    Group queryGroupByName(String name) throws ServerException;
     Group queryDefaultGroup() throws ServerException;
 
     // 增删改

@@ -18,6 +18,8 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.Toolbar;
 import android.view.Gravity;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
@@ -50,8 +52,6 @@ import com.baibuti.biji.util.stringUtil.SearchUtil;
 import com.getbase.floatingactionbutton.FloatingActionsMenu;
 import com.wyt.searchbox.SearchFragment;
 
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 import java.util.Locale;
 
@@ -114,6 +114,14 @@ public class NoteFragment extends BaseFragment implements IContextHelper {
             });
         }
         return view;
+    }
+
+    /**
+     * 创建菜单
+     */
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        inflater.inflate(R.menu.notefragment_actionbar, menu);
     }
 
     /**
@@ -185,7 +193,7 @@ public class NoteFragment extends BaseFragment implements IContextHelper {
         noteAdapter.setOnItemLongClickListener(this::NoteItem_LongClicked);
         m_noteListView.setAdapter(noteAdapter);
 
-        // Data
+        // PageData
         onInitNoteData();
     }
 
@@ -281,9 +289,9 @@ public class NoteFragment extends BaseFragment implements IContextHelper {
         TextView label = root.findViewById(R.id.id_NoteFrag_PopupMenu_Label);
         label.setText(String.format(Locale.CHINA, "当前选中：%s", note.getTitle()));
 
-        root.findViewById(R.id.id_NoteFrag_PopupMenu_ViewNote).setOnClickListener(this::ViewNotePopup_Clicked);
-        root.findViewById(R.id.id_NoteFrag_PopupMenu_ChangeGroup).setOnClickListener(this::ChangeGroupPopup_Clicked);
-        root.findViewById(R.id.id_NoteFrag_PopupMenu_DeleteNote).setOnClickListener(this::DeleteNotePopup_Clicked);
+        root.findViewById(R.id.id_NoteFrag_PopupMenu_ViewNote).setOnClickListener((view) -> ViewNotePopup_Clicked());
+        root.findViewById(R.id.id_NoteFrag_PopupMenu_ChangeGroup).setOnClickListener((view) -> ChangeGroupPopup_Clicked());
+        root.findViewById(R.id.id_NoteFrag_PopupMenu_DeleteNote).setOnClickListener((view) -> DeleteNotePopup_Clicked());
         root.findViewById(R.id.id_NoteFrag_PopupMenu_Cancel).setOnClickListener((view) -> m_notePopupMenu.cancel());
 
         m_notePopupMenu.show();
@@ -292,18 +300,18 @@ public class NoteFragment extends BaseFragment implements IContextHelper {
     /**
      * 弹出菜单 打开笔记
      */
-    private void ViewNotePopup_Clicked(View view) {
+    private void ViewNotePopup_Clicked() {
         m_notePopupMenu.cancel();
         Note note = pageData.longClickedNote;
         if (note == null) return;
 
-        openNote(note);
+        openViewNote(note);
     }
 
     /**
      * 弹出菜单 修改分组
      */
-    private void ChangeGroupPopup_Clicked(View view) {
+    private void ChangeGroupPopup_Clicked() {
         m_notePopupMenu.cancel();
         Note note = pageData.longClickedNote;
         if (note == null) return;
@@ -311,7 +319,9 @@ public class NoteFragment extends BaseFragment implements IContextHelper {
         ProgressDialog progressDialog = showProgress(getContext(), "分组信息加载中...", false, null);
         try {
             List<Group> groups = DaoStrategyHelper.getInstance().getGroupDao(getContext()).queryAllGroups();
-            GroupAdapter groupAdapter = new GroupAdapter(getContext(), groups);
+            progressDialog.dismiss();
+            GroupAdapter groupAdapter = new GroupAdapter(getContext());
+            groupAdapter.setList(groups);
 
             showAlert(getContext(), "修改分组", groupAdapter,
                 (d, w) -> note.setGroup(groups.get(w)));
@@ -337,7 +347,7 @@ public class NoteFragment extends BaseFragment implements IContextHelper {
     /**
      * 弹出菜单 删除笔记
      */
-    private void DeleteNotePopup_Clicked(View view) {
+    private void DeleteNotePopup_Clicked() {
         m_notePopupMenu.cancel();
         Note note = pageData.longClickedNote;
         if (note == null) return;
@@ -406,7 +416,7 @@ public class NoteFragment extends BaseFragment implements IContextHelper {
      * 单击列表项
      */
     private void NoteItem_Clicked(View v, Note note) {
-        openNote(note);
+        openViewNote(note);
     }
 
     /**
@@ -428,7 +438,7 @@ public class NoteFragment extends BaseFragment implements IContextHelper {
     /**
      * 当前页面数据
      */
-    private class Data {
+    private class PageData {
         List<Note> allNotes = null;
         PageState pageState = PageState.NORMAL;
 
@@ -461,91 +471,6 @@ public class NoteFragment extends BaseFragment implements IContextHelper {
     public static final String INT_IS_NEW = "is_new";
     public static final String INT_IS_MODIFIED = "is_modified";
 
-    // region Note Init New Modify
-
-    /**
-     * 当前页面 状态与数据
-     */
-    private Data pageData;
-
-    /**
-     * 初始化与刷新 加载数据
-     */
-    private void onInitNoteData() {
-        pageData = new Data();
-        ProgressDialog progressDialog = showProgress(getContext(), "加载数据中...", false, null);
-        try {
-            pageData.allNotes = DaoStrategyHelper.getInstance().getNoteDao(getContext()).queryAllNotes();
-            progressDialog.dismiss();
-        } catch (ServerException ex) {
-            progressDialog.dismiss();
-            showAlert(getContext(), "错误", "数据加载错误：" + ex.getMessage(),
-                "重试", (d, w) -> onInitNoteData(), "确定", null);
-        }
-    }
-
-    /**
-     * 更新页面显示为 noteList
-     */
-    private void setListContent(List<Note> noteList) {
-        NoteAdapter adapter = (NoteAdapter) m_noteListView.getAdapter();
-        if (adapter == null) return;
-
-        adapter.setNoteList(noteList);
-        adapter.notifyDataSetChanged();
-    }
-
-    /**
-     * 新建笔记
-     */
-    private void newNote() {
-        Note note = new Note();
-        try {
-            Group defGroup = DaoStrategyHelper.getInstance().getGroupDao(getContext()).queryDefaultGroup();
-            note.setGroup(defGroup);
-        } catch (ServerException ex) {
-            showAlert(getContext(), "错误", "获取默认分组错误：" + ex.getMessage());
-            return;
-        }
-
-        Intent intent = new Intent(getActivity(), ModifyNoteActivity.class);
-        intent.putExtra(INT_NOTE_DATA, note);
-        intent.putExtra(INT_IS_NEW, true); // NEW
-        startActivityForResult(intent, REQ_NEW_NOTE_INTENT);
-    }
-
-    /**
-     * 查看笔记
-     * @param isNew 是否为新笔记 (newNote)
-     */
-    private void openNote(@NonNull Note note, boolean isNew) {
-        Intent intent = new Intent(getActivity(), ViewModifyNoteActivity.class);
-        intent.putExtra(INT_NOTE_DATA, note);
-        intent.putExtra(INT_IS_NEW, isNew);
-        startActivityForResult(intent, REQ_OPEN_NOTE_INTENT);
-    }
-
-    /**
-     * 查看已经存在的笔记
-     */
-    private void openNote(@NonNull Note note) {
-        openNote(note, false);
-    }
-
-    /**
-     * 删除笔记，更新页面
-     */
-    private void deleteNote(@NonNull Note note) {
-        try {
-            DaoStrategyHelper.getInstance().getNoteDao(getContext()).deleteNote(note.getId());
-            NoteAdapter adapter = (NoteAdapter) m_noteListView.getAdapter();
-            adapter.getNoteList().remove(note);
-            adapter.notifyDataSetChanged();
-        } catch (ServerException ex) {
-            showAlert(getContext(), "错误", "删除笔记错误：" + ex.getMessage());
-        }
-    }
-
     /**
      * 活动返回
      */
@@ -557,7 +482,7 @@ public class NoteFragment extends BaseFragment implements IContextHelper {
             case REQ_NEW_NOTE_INTENT: // 新笔记返回 -> 浏览
                 if (resultCode == RESULT_OK) {
                     Note note = (Note) data.getSerializableExtra(INT_NOTE_DATA);
-                    openNote(note, true);
+                    openViewNote(note, true);
                 }
                 break;
             case REQ_OPEN_NOTE_INTENT: // 笔记浏览返回 -> Toast
@@ -600,6 +525,92 @@ public class NoteFragment extends BaseFragment implements IContextHelper {
                 if (resultCode == RESULT_OK)
                     OpenOCRActivity(data.getData()); // editedUri
                 break;
+        }
+    }
+
+    // region Note Init New Modify
+
+    /**
+     * 当前页面 状态与数据
+     */
+    private PageData pageData;
+
+    /**
+     * 初始化与刷新 加载数据
+     */
+    private void onInitNoteData() {
+        pageData = new PageData();
+        ProgressDialog progressDialog = showProgress(getContext(), "加载数据中...", false, null);
+        try {
+            pageData.allNotes = DaoStrategyHelper.getInstance().getNoteDao(getContext()).queryAllNotes();
+            progressDialog.dismiss();
+        } catch (ServerException ex) {
+            progressDialog.dismiss();
+            showAlert(getContext(), "错误", "数据加载错误：" + ex.getMessage(),
+                "重试", (d, w) -> onInitNoteData(), "确定", null);
+        }
+    }
+
+    /**
+     * 更新页面显示为 noteList
+     */
+    private void setListContent(List<Note> noteList) {
+        NoteAdapter adapter = (NoteAdapter) m_noteListView.getAdapter();
+        if (adapter == null) return;
+
+        adapter.setNoteList(noteList);
+        adapter.notifyDataSetChanged();
+    }
+
+    /**
+     * 新建笔记
+     */
+    private void newNote() {
+        Note note = new Note();
+        try {
+            Group defGroup = DaoStrategyHelper.getInstance().getGroupDao(getContext()).queryDefaultGroup();
+            note.setGroup(defGroup);
+        } catch (ServerException ex) {
+            showAlert(getContext(), "错误", "获取默认分组错误：" + ex.getMessage());
+            return;
+        }
+
+        Intent intent = new Intent(getActivity(), ModifyNoteActivity.class);
+        intent.putExtra(INT_NOTE_DATA, note);
+        intent.putExtra(INT_IS_NEW, true); // NEW
+
+        startActivityForResult(intent, REQ_NEW_NOTE_INTENT);
+    }
+
+    /**
+     * 查看笔记
+     * @param isNew 是否为新笔记 (newNote)
+     */
+    private void openViewNote(@NonNull Note note, boolean isNew) {
+        Intent intent = new Intent(getActivity(), ViewModifyNoteActivity.class);
+        intent.putExtra(INT_NOTE_DATA, note);
+        intent.putExtra(INT_IS_NEW, isNew);
+        startActivityForResult(intent, REQ_OPEN_NOTE_INTENT);
+    }
+
+    /**
+     * 查看已经存在的笔记
+     */
+    private void openViewNote(@NonNull Note note) {
+        openViewNote(note, false);
+    }
+
+    /**
+     * 删除笔记，更新页面
+     */
+    private void deleteNote(@NonNull Note note) {
+        try {
+            DaoStrategyHelper.getInstance().getNoteDao(getContext()).deleteNote(note.getId());
+            NoteAdapter adapter = (NoteAdapter) m_noteListView.getAdapter();
+            adapter.getNoteList().remove(note);
+            adapter.notifyDataSetChanged();
+        } catch (ServerException ex) {
+            showAlert(getContext(), "错误", "删除笔记错误：" + ex.getMessage());
         }
     }
 
