@@ -117,14 +117,6 @@ public class NoteFragment extends BaseFragment implements IContextHelper {
     }
 
     /**
-     * 创建菜单
-     */
-    @Override
-    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-        inflater.inflate(R.menu.notefragment_actionbar, menu);
-    }
-
-    /**
      * inflate 后 初始化界面
      */
     private void initView() {

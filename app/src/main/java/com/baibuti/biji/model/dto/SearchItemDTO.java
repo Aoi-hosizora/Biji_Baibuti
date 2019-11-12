@@ -62,12 +62,12 @@ public class SearchItemDTO implements Serializable {
     //  * SearchItem[] -> SearchItemNetDao[]
     //  * @return
     //  */
-    // public static SearchItemNetDao[] toSearchItemsDTO(SearchItem[] searchItems) {
-    //     if (searchItems == null) return null;
+    // public static SearchItemNetDao[] toSearchItemsDTO(SearchItem[] searchList) {
+    //     if (searchList == null) return null;
     //
-    //     SearchItemNetDao[] searchItemsDTO = new SearchItemNetDao[searchItems.length];
-    //     for (int i = 0; i < searchItems.length; i++)
-    //         searchItemsDTO[i] = toSearchItemDTO(searchItems[i]);
+    //     SearchItemNetDao[] searchItemsDTO = new SearchItemNetDao[searchList.length];
+    //     for (int i = 0; i < searchList.length; i++)
+    //         searchItemsDTO[i] = toSearchItemDTO(searchList[i]);
     //     return searchItemsDTO;
     // }
 

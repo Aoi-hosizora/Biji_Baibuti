@@ -1,41 +1,27 @@
 package com.baibuti.biji.model.po;
 
+import com.baibuti.biji.ui.adapter.SearchItemAdapter;
+
 import java.io.Serializable;
 
+import lombok.Data;
+
+@Data
 public class SearchItem implements Serializable, ISearchEntity {
 
     private String title;
     private String url;
     private String content;
 
+    /**
+     * 加载更多
+     */
+    public static SearchItem MORE_ITEM = new SearchItem("加载更多...", "", SearchItemAdapter.ITEM_MORE_URL);
+
     public SearchItem(String title, String content, String url) {
         this.title = title;
         this.url = url;
         this.content = content;
-    }
-
-    public String getTitle() {
-        return title;
-    }
-
-    public void setTitle(String title) {
-        this.title = title;
-    }
-
-    public String getUrl() {
-        return url;
-    }
-
-    public void setUrl(String url) {
-        this.url = url;
-    }
-
-    public String getContent() {
-        return content;
-    }
-
-    public void setContent(String keyWord) {
-        this.content = keyWord;
     }
 
     @Override
@@ -45,6 +31,6 @@ public class SearchItem implements Serializable, ISearchEntity {
 
     @Override
     public String getSearchContent() {
-        return this.title + this.content + this.url;
+        return this.title + " " + this.content + " " + this.url;
     }
 }

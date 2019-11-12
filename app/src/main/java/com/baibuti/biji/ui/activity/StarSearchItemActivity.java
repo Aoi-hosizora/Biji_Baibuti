@@ -517,8 +517,8 @@ public class StarSearchItemActivity extends AppCompatActivity implements View.On
     //         public void run() {
     //             try {
     //                 SearchItemDao searchItemDao = new SearchItemDao(StarSearchItemActivity.this);
-    //                 List<SearchItem> searchItems = searchItemDao.queryAllSearchItems();
-    //                 for (SearchItem searchItem: searchItems)
+    //                 List<SearchItem> searchList = searchItemDao.queryAllSearchItems();
+    //                 for (SearchItem searchItem: searchList)
     //                     StarUtil.insertStar(searchItem);
     //             }
     //             catch (ServerException ex) {
