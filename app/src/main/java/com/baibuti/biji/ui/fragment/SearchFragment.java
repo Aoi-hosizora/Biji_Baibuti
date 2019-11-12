@@ -10,7 +10,6 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.support.annotation.Nullable;
-import android.support.v4.app.Fragment;
 import android.support.v7.widget.StaggeredGridLayoutManager;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
@@ -36,7 +35,7 @@ import com.baibuti.biji.ui.widget.listView.SpacesItemDecoration;
 import com.baibuti.biji.ui.widget.listView.RecyclerViewEmptySupport;
 import com.baibuti.biji.util.otherUtil.CommonUtil;
 import com.baibuti.biji.util.otherUtil.LayoutUtil;
-import com.baibuti.biji.service.searchng.SearchEngineService;
+import com.baibuti.biji.service.search.SearchEngineService;
 
 import java.util.ArrayList;
 import java.util.Locale;

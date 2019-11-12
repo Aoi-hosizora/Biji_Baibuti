@@ -1,4 +1,4 @@
-package com.baibuti.biji.service.searchng;
+package com.baibuti.biji.service.search;
 
 import android.util.Log;
 
@@ -157,7 +157,7 @@ public class SearchEngineService {
         try {
             Request request = new Request.Builder()
                 .url(baiduUrl)
-                .addHeader("User-Agent", NetHelper.DEF_UserAgent)
+                .addHeader("User-Agent", DEF_UserAgent)
                 .build();
 
             Response response = okHttpClient.newCall(request).execute();

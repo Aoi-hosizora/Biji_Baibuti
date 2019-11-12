@@ -16,7 +16,7 @@
         tools:layout_editor_absoluteY="10dp">
 
         <TextView
-            android:id="@+id/id_addgroup_title"
+            android:id="@+id/id_txt_label"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
@@ -27,34 +27,44 @@
             android:textColor="#000000"/>
 
         <EditText
-            android:id="@+id/id_addgroup_name"
+            android:id="@+id/id_edt_title"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="0dp"
             android:hint="@string/GroupAdapter_GroupTitle"/>
 
         <TextView
-            android:id="@+id/id_addgroup_colortext"
+            android:id="@+id/id_txt_color"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="5dp"
             android:text="@string/GroupAdapter_GroupColor" />
-
-        <!--<com.baibuti.biji.UI.Widget.OtherView.RainbowPalette-->
-            <!--android:id="@+id/id_addgroup_colorpalettle"-->
-            <!--android:layout_width="wrap_content"-->
-            <!--android:layout_height="wrap_content"-->
-            <!--android:layout_gravity="center"-->
-            <!--app:center_circle_defcolor="#0511FB"/>-->
-
-        <include layout="@layout/layout_group_color_picker"
-            android:layout_marginTop="10dp"
+      
+        <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_gravity="center|center_vertical"
-            />
+            android:layout_marginTop="10dp"
+            android:orientation="vertical"
+            android:layout_gravity="center|center_vertical">
 
+            <com.larswerkman.holocolorpicker.ColorPicker
+                android:id="@+id/id_ColorPicker_Picker"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
 
+            <com.larswerkman.holocolorpicker.SVBar
+                android:id="@+id/id_ColorPicker_SVBar"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_margin="5dp" />
+
+            <com.larswerkman.holocolorpicker.SaturationBar
+                android:id="@+id/id_ColorPicker_SaturationBar"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_margin="5dp" />
+
+        </LinearLayout>
 
     </LinearLayout>
 
@@ -66,7 +76,7 @@
         android:layout_marginBottom="@dimen/groupDlgActionLayoutBottomMargin">
 
         <Button
-            android:id="@+id/id_AddGroupDialog_ButtonDelete"
+            android:id="@+id/id_btn_delete"
             android:layout_width="@dimen/groupDlgButtonLargeWidth"
             android:layout_height="match_parent"
             android:layout_marginStart="@dimen/groupDlgStartEndMargin"
@@ -80,7 +90,7 @@
             android:layout_weight="1"/>
 
         <Button
-            android:id="@+id/id_AddGroupDialog_ButtonCancel"
+            android:id="@+id/id_btn_cancel"
             android:layout_width="@dimen/groupDlgButtonLargeWidth"
             android:layout_height="match_parent"
             android:layout_marginEnd="@dimen/groupDlgButtonMargin"
@@ -88,7 +98,7 @@
             android:text="@string/GroupDialog_AddAlertReturn"
             android:theme="@style/DlgFlatButton"/>
         <Button
-            android:id="@+id/id_AddGroupDialog_ButtonUpdate"
+            android:id="@+id/id_btn_ok"
             android:layout_width="@dimen/groupDlgButtonLargeWidth"
             android:layout_height="match_parent"
             android:layout_marginEnd="@dimen/groupDlgStartEndMargin"

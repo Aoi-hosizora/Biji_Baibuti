@@ -14,7 +14,7 @@ public class OCRFrame implements Serializable {
     private double scores;
     private String ocr;
 
-    public OCRFrame(OCRPoint[] points, double scores, String ocr) {
+    private OCRFrame(OCRPoint[] points, double scores, String ocr) {
         if (points.length > 4)
             this.points = new OCRPoint[] {points[0], points[1], points[2], points[3]};
         else if (points.length < 4)

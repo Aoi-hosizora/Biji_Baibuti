@@ -13,6 +13,7 @@ public class AuthManager {
 
     private AuthManager() {}
     private static AuthManager Instance;
+
     public static AuthManager getInstance() {
         if (Instance == null)
             Instance = new AuthManager();

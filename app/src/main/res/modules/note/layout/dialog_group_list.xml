@@ -29,7 +29,7 @@
         android:layout_marginBottom="@dimen/groupDlgActionLayoutBottomMargin">
 
         <Button
-            android:id="@+id/id_GroupDialog_ButtonUE"
+            android:id="@+id/id_GroupDialog_ButtonUp"
             android:layout_width="@dimen/groupDlgButtonSmallWidth"
             android:layout_height="match_parent"
             android:layout_marginStart="@dimen/groupDlgStartEndMargin"
@@ -39,7 +39,7 @@
             />
 
         <Button
-            android:id="@+id/id_GroupDialog_ButtonSHITA"
+            android:id="@+id/id_GroupDialog_ButtonDown"
             android:layout_width="@dimen/groupDlgButtonSmallWidth"
             android:layout_height="match_parent"
             android:layout_marginStart="@dimen/groupDlgButtonMargin"

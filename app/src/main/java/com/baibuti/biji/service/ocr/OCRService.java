@@ -48,7 +48,7 @@ public class OCRService {
         try {
             return observable.toFuture().get();
         }
-        catch (InterruptedException | ExecutionException ex) {
+        catch (Exception ex) {
             ex.printStackTrace();
             return null;
         }

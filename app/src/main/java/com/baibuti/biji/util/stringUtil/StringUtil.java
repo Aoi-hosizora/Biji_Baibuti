@@ -13,7 +13,7 @@ public class StringUtil {
      */
     public static List<String> cutStringByImgTag(String targetStr) {
         List<String> splitTextList = new ArrayList<>();
-        Pattern pattern = Pattern.compile("<img.*?src=\\\"(.*?)\\\".*?>");
+        Pattern pattern = Pattern.compile("<img.*?src=\"(.*?)\".*?>");
         Matcher matcher = pattern.matcher(targetStr);
         int lastIndex = 0;
         while (matcher.find()) {
@@ -40,7 +40,7 @@ public class StringUtil {
         if (result_img) {
             while (result_img) {
                 String str_img = m_img.group(2);
-                Pattern p_src = Pattern.compile("(src|SRC)=(\"|\')(.*?)(\"|\')");
+                Pattern p_src = Pattern.compile("(src|SRC)=([\"\'])(.*?)([\"\'])");
                 Matcher m_src = p_src.matcher(str_img);
                 if (m_src.find()) {
                     str_src = m_src.group(3);

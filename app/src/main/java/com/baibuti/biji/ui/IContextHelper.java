@@ -62,6 +62,23 @@ public interface IContextHelper {
     }
 
     /**
+     * AlertDialog: 标题 + 信息 + Pos + Neg + Neu
+     */
+    default void showAlert(Context context,
+                           CharSequence title, CharSequence message,
+                           CharSequence posText, DialogInterface.OnClickListener posListener,
+                           CharSequence negText, DialogInterface.OnClickListener negListener,
+                           CharSequence neuText, DialogInterface.OnClickListener neuListener) {
+        new AlertDialog.Builder(context)
+            .setTitle(title)
+            .setMessage(message)
+            .setPositiveButton(posText, posListener)
+            .setNegativeButton(negText, negListener)
+            .setNeutralButton(neuText, neuListener)
+            .show();
+    }
+
+    /**
      * AlertDialog: 标题 + 列表
      */
     default void showAlert(Context context,

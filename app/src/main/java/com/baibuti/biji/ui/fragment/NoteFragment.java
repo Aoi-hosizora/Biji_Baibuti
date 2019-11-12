@@ -394,12 +394,12 @@ public class NoteFragment extends BaseFragment implements IContextHelper {
         GroupDialog dialog = new GroupDialog(getActivity(), new GroupDialog.OnUpdateGroupListener() {
 
             @Override
-            public void OnUICreateFinished() {
+            public void onLoaded() {
                 new Handler().postDelayed(progressDialog::dismiss, 100);
             }
 
             @Override
-            public void UpdateGroupFinished() {
+            public void onUpdated() {
                 onInitNoteData();
             }
         });

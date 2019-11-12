@@ -41,6 +41,10 @@ public class Group implements Serializable, Comparable<Group> {
         this(0, name, order, color);
     }
 
+    public Group(String name, String color) {
+        this(0, name, 0, color);
+    }
+
     public Group(int id, String name, int order, String color) {
         this.id = id;
         this.name = name;

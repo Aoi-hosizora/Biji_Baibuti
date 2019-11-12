@@ -1,7 +1,6 @@
 package com.baibuti.biji.util.imgDocUtil;
 
 import android.app.Activity;
-import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Matrix;
@@ -10,7 +9,6 @@ import android.support.annotation.UiThread;
 import android.support.annotation.WorkerThread;
 import android.util.Log;
 import android.util.Size;
-import android.view.View;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;

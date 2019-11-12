@@ -21,7 +21,7 @@ import java.io.File;
  */
 public class AppPathUtil {
 
-    public static final String SDCardRoot = Environment.getExternalStorageDirectory().getAbsolutePath() + File.separator;
+    private static final String SDCardRoot = Environment.getExternalStorageDirectory().getAbsolutePath() + File.separator;
     private static final String APP_ROOT = SDCardRoot + "Biji" + File.separator;
     private static final String SUB_PATH_NOTE_IMAGE = "NoteImage" + File.separator;
     private static final String SUB_PATH_NOTE_FILE = "NoteFile" + File.separator;
