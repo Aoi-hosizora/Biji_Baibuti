@@ -5,7 +5,6 @@ import android.app.Dialog;
 import android.os.Bundle;
 import android.widget.Button;
 import android.view.View;
-import android.widget.EditText;
 import android.widget.ListView;
 
 import com.baibuti.biji.model.dao.DaoStrategyHelper;
@@ -47,10 +46,8 @@ public class GroupDialog extends Dialog implements IContextHelper {
     @BindView(R.id.id_GroupDialog_GroupListView)
     private ListView m_list_group;
 
-    /**
-     * 当前被选中的项
-     */
-    private int GroupListViewClickId = 0;
+    private GroupRadioAdapter groupAdapter;
+    private List<Group> groupList;
 
     private OnUpdateGroupListener m_listener;
 
@@ -59,6 +56,7 @@ public class GroupDialog extends Dialog implements IContextHelper {
          * 数据加载完成
          */
         void onLoaded();
+
         /**
          * 修改完成
          */
@@ -103,7 +101,7 @@ public class GroupDialog extends Dialog implements IContextHelper {
      */
     @OnClick(R.id.id_GroupDialog_ButtonAdd)
     private void ButtonAdd_Clicked() {
-        editGroup(null);
+        addGroup();
     }
 
     /**
@@ -111,7 +109,7 @@ public class GroupDialog extends Dialog implements IContextHelper {
      */
     @OnClick(R.id.id_GroupDialog_ButtonEdit)
     private void ButtonEdit_Clicked() {
-        editGroup(groupList.get(GroupListViewClickId));
+        editGroup(groupList.get(groupAdapter.getCurrentItemIndex()));
     }
 
     /**
@@ -119,7 +117,7 @@ public class GroupDialog extends Dialog implements IContextHelper {
      */
     @OnClick(R.id.id_GroupDialog_ButtonDelete)
     private void ButtonDelete_Clicked() {
-        deleteGroup(groupList.get(GroupListViewClickId));
+        deleteGroup(groupList.get(groupAdapter.getCurrentItemIndex()));
     }
 
     /**
@@ -127,7 +125,7 @@ public class GroupDialog extends Dialog implements IContextHelper {
      */
     @OnClick(R.id.id_GroupDialog_ButtonCancel)
     private void ButtonDismiss_Clicked() {
-        DismissAndReturn(true);
+        dismiss();
     }
 
     /**
@@ -135,7 +133,7 @@ public class GroupDialog extends Dialog implements IContextHelper {
      */
     @OnClick(R.id.id_GroupDialog_ButtonUp)
     private void ButtonUp_Clicked() {
-        moveGroupOrder(groupList.get(GroupListViewClickId), true);
+        moveGroupOrder(groupList.get(groupAdapter.getCurrentItemIndex()), true);
     }
 
     /**
@@ -143,21 +141,12 @@ public class GroupDialog extends Dialog implements IContextHelper {
      */
     @OnClick(R.id.id_GroupDialog_ButtonDown)
     private void ButtonDown_Clicked() {
-        moveGroupOrder(groupList.get(GroupListViewClickId), false);
+        moveGroupOrder(groupList.get(groupAdapter.getCurrentItemIndex()), false);
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    private GroupRadioAdapter groupAdapter;
-    private List<Group> groupList;
-
-    /**
-     * 刷新列表
-     */
-    private void refreshGroupList() {
-
-    }
 
     private void setEnabled(Button button, boolean en) {
         button.setEnabled(en);
@@ -199,180 +188,42 @@ public class GroupDialog extends Dialog implements IContextHelper {
      */
     private void editGroup(Group inputGroup) {
         GroupEditDialog dialog = new GroupEditDialog(activity, inputGroup, () -> {
-
-                new Thread(new Runnable() {
-                    @Override
-                    public void run() {
-
-                        refreshGroupList();
-
-                        activity.runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-
-                                if (inputGroup == null)  // 新分组
-                                    GroupListViewClickId = groupList.size() - 1; // 选择最后一项
-
-                                groupAdapter.setChecked(GroupListViewClickId);
-                                m_list_group.setAdapter(groupAdapter); // 必要
-
-                                DismissAndReturn(false);
-
-                            }
-                        });
-
-                }).start();
-            }
+            if (inputGroup == null)
+                groupAdapter.setChecked(groupList.size() - 1);
+            groupAdapter.notifyDataSetChanged();
         });
-        dialog.setView(new EditText(getContext()));
-        dialog.show();
     }
 
     /**
      * 删除指定分组
      */
     private void deleteGroup(Group inputGroup) {
-        GroupDeleteDialog groupDeleteDialog = new GroupDeleteDialog(activity, inputGroup, new GroupDeleteDialog.OnDeleteGroupListener() {
-            @Override
-            public void DeleteGroupFinished() {
-
-                new Thread(new Runnable() {
-                    @Override
-                    public void run() {
-
-                        refreshGroupList();
-
-                        activity.runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-
-                                GroupListViewClickId--;
-                                groupAdapter.setChecked(GroupListViewClickId);
-                                m_list_group.setAdapter(groupAdapter); // 必要
-
-                                DismissAndReturn(false);
-                            }
-                        });
-                    }
-                }).start();
-            }
-        });
-        groupDeleteDialog.showDialog();
+        GroupEditDialog dialog = new GroupEditDialog(activity, inputGroup, null);
+        dialog.DeleteButton_Clicked();
     }
-
-    private int currentPos;
 
     /**
-     * 移动分组 Order，不同步
-     * @param currentGroup 当前分组
-     * @param isUP
-     *          true: Order--
-     *          false: Order++
+     * 移动分组
      */
-    private void moveGroupOrder(Group currentGroup, boolean isUP) {
-
-        currentPos = GroupListViewClickId;
-
+    private void moveGroupOrder(Group group, boolean isUP) {
+        int currentPos = groupAdapter.getCurrentItemIndex();
         if (isUP && currentPos != 1 && currentPos != 0) { // 上移
-            new Thread(new Runnable() {
-                @Override
-                public void run() {
-
-                    int motoorder = currentGroup.getOrder();
-
-                    currentGroup.setOrder(motoorder - 1);
-                    Group upGroup = groupDao.queryGroupByOrder(motoorder - 1);
-                    if (upGroup != null) {
-                        upGroup.setOrder(motoorder);
-                        groupDao.updateGroup(upGroup, false);
-                    }
-
-                    currentPos--;
-
-                    groupDao.updateGroup(currentGroup, false); // 更新数据库
-
-                    activity.runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            moveGroupOrderRe();
-                        }
-                    });
-                }
-            }).start();
+            Group upGroup = groupList.get(currentPos - 1);
+;           group.setOrder(currentPos - 1);
+            upGroup.setOrder(currentPos);
         }
         else if (!isUP && currentPos != groupList.size() - 1 && currentPos != 0) { // 下移
-            new Thread(new Runnable() {
-                @Override
-                public void run() {
-                    ShowLogE("moveGroupOrder", "DOWN");
-                    int motoorder = currentGroup.getOrder();
-
-                    currentGroup.setOrder(motoorder + 1);
-                    Group downGroup = groupDao.queryGroupByOrder(motoorder + 1); // 向下交换
-                    if (downGroup != null) {
-                        downGroup.setOrder(motoorder);
-                        groupDao.updateGroup(downGroup, false);
-                    }
-
-                    currentPos++;
-
-                    groupDao.updateGroup(currentGroup, false); // 更新数据库
-
-                    activity.runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            moveGroupOrderRe();
-                        }
-                    });
-                }
-            }).start();
-
+            Group downGroup = groupList.get(currentPos + 1);
+            group.setOrder(currentPos + 1);
+            downGroup.setOrder(currentPos);
         }
-    }
-
-    /////////////////////////////////////////////////////
-
-    private void DismissAndReturn(boolean isReturn) {
-
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-
-                activity.runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-
-                        // 不允许 back
-                        if (m_listener != null)
-                            m_listener.onUpdated(); // 同时令 Note Frac 更新分组信息
-
-                        if (isReturn)
-                            dismiss();
-                    }
-                });
-            }
-        }).start();
-
+        groupAdapter.notifyDataSetChanged();
     }
 
     @Override
     public void dismiss() {
-
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-
-                // 最后同步
-                groupDao.pushpull();
-
-                activity.runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-
-                        GroupDialog.super.dismiss();
-                    }
-                });
-            }
-        }).start();
+        if (m_listener != null)
+            m_listener.onUpdated();
+        super.dismiss();
     }
 }

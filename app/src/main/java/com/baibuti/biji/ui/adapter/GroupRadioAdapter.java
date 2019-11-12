@@ -47,6 +47,29 @@ public class GroupRadioAdapter extends BaseAdapter {
 
     //////
 
+    private int currentItemIndex;
+
+    /**
+     * 选择项
+     */
+    public void setChecked(int position) {
+        states.put(list.get(position), true);
+    }
+
+    /**
+     * 选择项
+     */
+    public void setChecked(Group group) {
+        states.put(group, true);
+    }
+
+    /**
+     * 当前选择项
+     */
+    public int getCurrentItemIndex() {
+        return currentItemIndex;
+    }
+
     @Override
     public int getCount() {
         return list.size();
@@ -97,6 +120,7 @@ public class GroupRadioAdapter extends BaseAdapter {
             states.put(list.get(position), raButton.isChecked());
             GroupRadioAdapter.this.notifyDataSetChanged();
 
+            currentItemIndex = position;
             if (onRadioButtonClickListener != null)
                 onRadioButtonClickListener.onSelect(position);
         });
@@ -109,20 +133,6 @@ public class GroupRadioAdapter extends BaseAdapter {
         }
 
         return view;
-    }
-
-    /**
-     * 选择项
-     */
-    public void setChecked(int position) {
-        states.put(list.get(position), true);
-    }
-
-    /**
-     * 选择项
-     */
-    public void setChecked(Group group) {
-        states.put(group, true);
     }
 
     public static class ViewHolder {

@@ -81,19 +81,14 @@ public class GroupEditDialog extends Dialog implements IContextHelper {
             m_txt_color.setText(String.format(Locale.CHINA, "分组颜色：%s", DateColorUtil.ColorInt_HexEncoding(color)))
         );
 
-        refreshDisplay(); // 处理显示问题
-    }
-
-    /**
-     * 更新控件显示
-     */
-    private void refreshDisplay() {
+        // 处理问题
         Group displayGroup = currGroup;
         if (displayGroup == null) {
             displayGroup = new Group();
             displayGroup.setName("");
         }
 
+        // 界面更新
         m_edt_title.setText(displayGroup.getName());
         m_txt_color.setText(String.format(Locale.CHINA, "分组颜色：%s", displayGroup.getStringColor()));
 
@@ -161,7 +156,7 @@ public class GroupEditDialog extends Dialog implements IContextHelper {
      * 弹出删除判断
      */
     @OnClick(R.id.id_btn_delete)
-    private void DeleteButton_Clicked() {
+    void DeleteButton_Clicked() {
         try {
             INoteDao noteDao = DaoStrategyHelper.getInstance().getNoteDao(activity);
             IGroupDao groupDao = DaoStrategyHelper.getInstance().getGroupDao(activity);
@@ -200,8 +195,8 @@ public class GroupEditDialog extends Dialog implements IContextHelper {
             } else {
                 // 不包含笔记
                 showAlert(activity,
-                    "删除", "该分组有相关联的笔记，是否更改与该分组对应的笔记？",
-                    "删除分组并修改为默认分组", (d, w) -> {
+                    "删除", String.format("是否删除分组 %s？", currGroup.getName()),
+                    "删除", (d, w) -> {
                         try {
                             groupDao.deleteGroup(currGroup.getId());
                         } catch (ServerException ex) {
@@ -209,7 +204,7 @@ public class GroupEditDialog extends Dialog implements IContextHelper {
                             showAlert(activity, "错误", ex.getMessage());
                         }
                     },
-                    "不删除分组", null
+                    "返回", null
                 );
             }
         }
