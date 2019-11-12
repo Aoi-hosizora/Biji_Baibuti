@@ -1,4 +1,4 @@
-package com.baibuti.biji.util.stringUtil;
+package com.baibuti.biji.util.imgTextUtil;
 
 import android.content.Context;
 

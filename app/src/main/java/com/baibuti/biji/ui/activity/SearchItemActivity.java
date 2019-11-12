@@ -23,7 +23,7 @@ import com.baibuti.biji.R;
 import com.baibuti.biji.ui.widget.listView.SpacesItemDecoration;
 import com.baibuti.biji.ui.widget.listView.RecyclerViewEmptySupport;
 import com.baibuti.biji.util.otherUtil.LayoutUtil;
-import com.baibuti.biji.util.stringUtil.SearchUtil;
+import com.baibuti.biji.util.imgTextUtil.SearchUtil;
 
 import java.util.List;
 import java.util.Locale;

@@ -1,8 +1,7 @@
-package com.baibuti.biji.util.imgDocUtil;
+package com.baibuti.biji.util.imgTextUtil;
 
 import android.util.Size;
 
-import com.baibuti.biji.util.stringUtil.StringUtil;
 import com.itextpdf.text.Document;
 import com.itextpdf.text.DocumentException;
 import com.itextpdf.text.Element;

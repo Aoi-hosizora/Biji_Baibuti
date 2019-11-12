@@ -19,9 +19,9 @@ import com.baibuti.biji.service.ocr.dto.OCRRegion;
 import com.baibuti.biji.R;
 import com.baibuti.biji.ui.IContextHelper;
 import com.baibuti.biji.ui.widget.ocrView.OCRRegionGroupLayout;
-import com.baibuti.biji.util.fileUtil.AppPathUtil;
-import com.baibuti.biji.util.fileUtil.SaveNameUtil;
-import com.baibuti.biji.util.imgDocUtil.ImageUtil;
+import com.baibuti.biji.util.filePathUtil.AppPathUtil;
+import com.baibuti.biji.util.filePathUtil.SaveNameUtil;
+import com.baibuti.biji.util.imgTextUtil.ImageUtil;
 import com.baibuti.biji.util.otherUtil.CommonUtil;
 
 import butterknife.BindView;

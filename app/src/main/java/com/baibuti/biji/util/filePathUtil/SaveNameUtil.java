@@ -1,4 +1,4 @@
-package com.baibuti.biji.util.fileUtil;
+package com.baibuti.biji.util.filePathUtil;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;

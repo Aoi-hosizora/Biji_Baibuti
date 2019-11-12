@@ -15,11 +15,11 @@ import com.baibuti.biji.ui.IContextHelper;
 import com.baibuti.biji.ui.dialog.ImagePreviewDialog;
 import com.baibuti.biji.R;
 import com.baibuti.biji.ui.fragment.NoteFragment;
-import com.baibuti.biji.util.fileUtil.AppPathUtil;
+import com.baibuti.biji.util.filePathUtil.AppPathUtil;
 import com.baibuti.biji.util.otherUtil.CommonUtil;
 import com.baibuti.biji.util.otherUtil.LayoutUtil;
-import com.baibuti.biji.util.stringUtil.StringUtil;
-import com.baibuti.biji.util.imgDocUtil.DocumentUtil;
+import com.baibuti.biji.util.imgTextUtil.StringUtil;
+import com.baibuti.biji.util.imgTextUtil.DocumentUtil;
 import com.sendtion.xrichtext.RichTextView;
 
 import java.io.File;

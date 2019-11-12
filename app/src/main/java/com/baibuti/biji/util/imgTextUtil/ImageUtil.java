@@ -1,4 +1,4 @@
-package com.baibuti.biji.util.imgDocUtil;
+package com.baibuti.biji.util.imgTextUtil;
 
 import android.app.Activity;
 import android.graphics.Bitmap;

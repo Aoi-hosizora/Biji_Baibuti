@@ -15,7 +15,7 @@ import android.widget.TextView;
 
 import com.baibuti.biji.R;
 import com.baibuti.biji.ui.widget.imageView.PhotoView;
-import com.baibuti.biji.util.imgDocUtil.ImageUtil;
+import com.baibuti.biji.util.imgTextUtil.ImageUtil;
 
 import java.util.ArrayList;
 import java.util.Locale;

@@ -27,12 +27,12 @@ import com.baibuti.biji.model.po.Note;
 import com.baibuti.biji.R;
 import com.baibuti.biji.ui.dialog.ImagePreviewDialog;
 import com.baibuti.biji.ui.fragment.NoteFragment;
-import com.baibuti.biji.util.fileUtil.AppPathUtil;
+import com.baibuti.biji.util.filePathUtil.AppPathUtil;
 import com.baibuti.biji.util.otherUtil.CommonUtil;
-import com.baibuti.biji.util.imgDocUtil.ImageUtil;
+import com.baibuti.biji.util.imgTextUtil.ImageUtil;
 import com.baibuti.biji.util.otherUtil.LayoutUtil;
-import com.baibuti.biji.util.fileUtil.SaveNameUtil;
-import com.baibuti.biji.util.stringUtil.StringUtil;
+import com.baibuti.biji.util.filePathUtil.SaveNameUtil;
+import com.baibuti.biji.util.imgTextUtil.StringUtil;
 import com.sendtion.xrichtext.RichTextEditor;
 
 

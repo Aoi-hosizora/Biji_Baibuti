@@ -36,7 +36,7 @@ import com.baibuti.biji.ui.fragment.SearchFragment;
 import com.baibuti.biji.ui.fragment.FileFragment;
 import com.baibuti.biji.R;
 import com.baibuti.biji.util.otherUtil.LayoutUtil;
-import com.baibuti.biji.util.stringUtil.SearchUtil;
+import com.baibuti.biji.util.imgTextUtil.SearchUtil;
 import com.facebook.stetho.Stetho;
 
 import java.util.ArrayList;
