@@ -40,7 +40,7 @@
 
         <activity android:name=".ui.activity.OCRActivity" android:screenOrientation="portrait" />
 
-        <activity android:name=".ui.activity.StarSearchItemActivity" android:screenOrientation="portrait" />
+        <activity android:name=".ui.activity.SearchItemActivity" android:screenOrientation="portrait" />
 
         <activity android:name=".ui.activity.WebViewActivity" android:screenOrientation="portrait" />
         <activity android:name=".ui.activity.QrCodeActivity" android:screenOrientation="portrait" />

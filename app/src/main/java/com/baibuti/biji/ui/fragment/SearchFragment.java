@@ -26,7 +26,7 @@ import com.baibuti.biji.ui.adapter.SearchItemAdapter;
 import com.baibuti.biji.model.po.SearchItem;
 import com.baibuti.biji.R;
 import com.baibuti.biji.ui.activity.MainActivity;
-import com.baibuti.biji.ui.activity.StarSearchItemActivity;
+import com.baibuti.biji.ui.activity.SearchItemActivity;
 import com.baibuti.biji.ui.widget.listView.SpacesItemDecoration;
 import com.baibuti.biji.ui.widget.listView.RecyclerViewEmptySupport;
 import com.baibuti.biji.util.otherUtil.LayoutUtil;
@@ -57,8 +57,8 @@ public class SearchFragment extends BaseFragment implements IContextHelper {
      * 页面数据记录
      */
     private PageData pageData = new PageData();
-    private static class PageData {
 
+    private static class PageData {
         /**
          * 当前所有列表
          */
@@ -153,7 +153,7 @@ public class SearchFragment extends BaseFragment implements IContextHelper {
                 MoreSearchButton_Click();
             }
         });
-        searchItemAdapter.setOnItemLongClickListener((View view, SearchItem searchItem) -> ShowItemLongClickPopupMenu(searchItem));
+        searchItemAdapter.setOnItemLongClickListener((View view, SearchItem searchItem) -> ListItem_LongClicked(searchItem));
 
         m_list_result.setAdapter(searchItemAdapter);
     }
@@ -163,7 +163,7 @@ public class SearchFragment extends BaseFragment implements IContextHelper {
      */
     @OnItemSelected(R.id.action_SearchStar)
     private void ActionBar_Star_Click() {
-        Intent intent = new Intent(getActivity(), StarSearchItemActivity.class);
+        Intent intent = new Intent(getActivity(), SearchItemActivity.class);
         startActivity(intent);
     }
 
@@ -243,7 +243,7 @@ public class SearchFragment extends BaseFragment implements IContextHelper {
      * 显示长按菜单
      * @param searchItem 长按项
      */
-    private void ShowItemLongClickPopupMenu(SearchItem searchItem) {
+    private void ListItem_LongClicked(SearchItem searchItem) {
         MainActivity activity = (MainActivity) getActivity();
         if (activity == null) return;
 
