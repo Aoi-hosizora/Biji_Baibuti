@@ -190,7 +190,7 @@ public class OpenSaveFileActivity extends AppCompatActivity implements View.OnCl
                 @Override
                 public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                     Selected_File_Type = FileType[position];
-                    ShowLogE("setupSpinner", "Selected_File_Type=" + Selected_File_Type);
+                    // ShowLogE("setupSpinner", "Selected_File_Type=" + Selected_File_Type);
                 }
 
                 @Override
@@ -252,12 +252,6 @@ public class OpenSaveFileActivity extends AppCompatActivity implements View.OnCl
                 updateDirectory();
             }
         });
-    }
-
-    public void ShowLogE(String FunctionName, String Msg) {
-        String ClassName = "OpenSaveFileActivity";
-        Log.e(getResources().getString(R.string.IShowLog_LogE),
-                ClassName + ": " + FunctionName + "###" + Msg); // MainActivity: initDatas###data=xxx
     }
 
     // endregion 界面 选择菜单 文件列表

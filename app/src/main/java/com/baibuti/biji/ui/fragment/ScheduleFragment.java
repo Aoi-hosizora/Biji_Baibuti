@@ -23,7 +23,6 @@ import com.alibaba.fastjson.JSON;
 import com.baibuti.biji.model.dao.local.ScheduleDao;
 import com.baibuti.biji.model.po.MySubject;
 import com.baibuti.biji.service.auth.AuthManager;
-import com.baibuti.biji.net.module.file.DocumentUtil;
 import com.baibuti.biji.R;
 import com.baibuti.biji.ui.activity.MainActivity;
 import com.baibuti.biji.ui.activity.WebViewActivity;

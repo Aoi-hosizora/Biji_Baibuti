@@ -14,7 +14,6 @@ import android.os.Bundle;
 import android.provider.MediaStore;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.v4.app.Fragment;
 import android.support.v4.content.FileProvider;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -39,6 +38,7 @@ import android.widget.Toast;
 
 import com.baibuti.biji.model.dto.ServerException;
 import com.baibuti.biji.service.auth.AuthManager;
+import com.baibuti.biji.ui.IContextHelper;
 import com.baibuti.biji.ui.adapter.DocumentAdapter;
 import com.baibuti.biji.ui.adapter.FileClassAdapter;
 import com.baibuti.biji.model.dao.local.DocumentDao;
@@ -46,13 +46,12 @@ import com.baibuti.biji.model.dao.local.FileClassDao;
 import com.baibuti.biji.model.po.Document;
 import com.baibuti.biji.model.po.FileClass;
 import com.baibuti.biji.model.po.FileItem;
-import com.baibuti.biji.net.module.file.DocumentUtil;
-import com.baibuti.biji.net.module.file.FileClassUtil;
 import com.baibuti.biji.R;
 import com.baibuti.biji.ui.activity.MainActivity;
-import com.baibuti.biji.ui.activity.QrCodeActivity;
 import com.baibuti.biji.ui.dialog.FileImportDialog;
 import com.baibuti.biji.util.otherUtil.DefineString;
+import com.jwsd.libzxing.OnQRCodeScanCallback;
+import com.jwsd.libzxing.QRCodeManager;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -61,10 +60,9 @@ import java.io.File;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class FileFragment extends BaseFragment {
+public class FileFragment extends BaseFragment implements IContextHelper {
 
     private Activity activity;
 
@@ -109,9 +107,6 @@ public class FileFragment extends BaseFragment {
      * 标记是否已经初始化界面
      */
     private boolean HasInitedView = false;
-
-    private static final int REQUEST_CODE_FOR_QA = 100;
-    private static final int RESULT_CODE_FOR_QA = 101;
 
     @Nullable
     @Override
@@ -504,43 +499,35 @@ public class FileFragment extends BaseFragment {
     /**
      * TODO !!!
      */
-    private void scanShareCode(){
+    private void scanShareCode() {
         if(!AuthManager.getInstance().isLogin()){
             Toast.makeText(getContext(), "未登录", Toast.LENGTH_SHORT).show();
             return;
         }
-        Intent intent = new Intent(getActivity(), QrCodeActivity.class);
-        startActivityForResult(intent, REQUEST_CODE_FOR_QA);
-    }
 
-    /**
-     * 共享码扫描结果处理
-     */
-    @Override
-    public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
+        QRCodeManager.getInstance()
+            .with(getActivity())
+            .scanningQRCode(new OnQRCodeScanCallback() {
 
-        if(requestCode == REQUEST_CODE_FOR_QA && resultCode == RESULT_CODE_FOR_QA){
-            final String shareCode = data.getStringExtra("resultJson");
-            AlertDialog alertDialog = new AlertDialog.Builder(getContext())
-                    .setIcon(R.drawable.ic_help_outline_black_24dp)
-                    .setTitle("扫描结果")
-                    .setMessage("添加共享文件？")
-                    .setPositiveButton("确认", new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int which) {
-                            getSharedDocuments(shareCode);
-                        }
-                    })
-                    .setNegativeButton("取消", new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int which) {
-                            dialog.dismiss();
-                        }
-                    })
-                    .create();
-            alertDialog.show();
-        }
+                @Override
+                public void onCompleted(String shareCode) {
+                    showAlert(getActivity(),
+                        "扫描结果", "添加共享文件？",
+                        "确认", (d, v) -> getSharedDocuments(shareCode),
+                        "取消", null
+                    );
+                }
+
+                @Override
+                public void onError(Throwable throwable) {
+                    showToast(getActivity(), throwable.getMessage());
+                }
+
+                @Override
+                public void onCancel() {
+                    showToast(getActivity(), "操作已取消");
+                }
+            });
     }
 
     /**

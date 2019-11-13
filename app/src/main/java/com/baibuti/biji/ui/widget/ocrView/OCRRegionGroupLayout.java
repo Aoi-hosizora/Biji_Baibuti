@@ -5,7 +5,6 @@ import android.content.res.TypedArray;
 import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
@@ -62,9 +61,6 @@ public class OCRRegionGroupLayout extends ViewGroup {
 
     /**
      * 获取属性集
-     * @param context
-     * @param attributeSet
-     * @param defStyle
      */
     public OCRRegionGroupLayout(Context context, AttributeSet attributeSet, int defStyle) {
         super(context, attributeSet, defStyle);
@@ -74,28 +70,22 @@ public class OCRRegionGroupLayout extends ViewGroup {
      * 保存子视图的位置
      */
     public class LayoutParams extends ViewGroup.LayoutParams {
-        int x;
-        int y;
+        // int x;
+        // int y;
 
-        public LayoutParams(Context c, AttributeSet attrs) {
+        LayoutParams(Context c, AttributeSet attrs) {
             super(c, attrs);
         }
 
-        public LayoutParams(int width, int height) {
+        LayoutParams(int width, int height) {
             super(width, height);
         }
 
-        public LayoutParams(ViewGroup.LayoutParams source, int x, int y) {
-            super(source);
-            this.x = x;
-            this.y = y;
-        }
-    }
-
-    public void ShowLogE(String FunctionName, String Msg) {
-        String ClassName = "OCRRegionGroupLayout";
-        Log.e(getResources().getString(R.string.IShowLog_LogE),
-                ClassName + ": " + FunctionName + "###" + Msg);
+        // public LayoutParams(ViewGroup.LayoutParams source, int x, int y) {
+        //     super(source);
+        //     this.x = x;
+        //     this.y = y;
+        // }
     }
 
     @Override
@@ -151,8 +141,6 @@ public class OCRRegionGroupLayout extends ViewGroup {
 
     /**
      * 设置布局和旋转 推导重要!!
-     * @param child
-     * @param point4
      */
     private void setRotationAndLayoutOfOCRRegion(OCRRegionView child, OCRPoint[] point4) {
 
@@ -208,7 +196,6 @@ public class OCRRegionGroupLayout extends ViewGroup {
 
     /**
      * 设置区域数据
-     * @param region
      */
     public void setRegion(OCRRegion region) {
         this.region = region;
@@ -241,13 +228,13 @@ public class OCRRegionGroupLayout extends ViewGroup {
 
                 @Override
                 public void onClickAfterUp(OCRFrame frame) {
-                    ShowLogE("onClickAfterDown", "Up: " + frame.getOcr());
+                    // ShowLogE("onClickAfterDown", "Up: " + frame.getOcr());
                     onChangeChecked();
                 }
 
                 @Override
                 public void onClickAfterDown(OCRFrame frame) {
-                    ShowLogE("onClickAfterDown", "Down: " + frame.getOcr());
+                    // ShowLogE("onClickAfterDown", "Down: " + frame.getOcr());
                     onChangeChecked();
                 }
             });
@@ -262,7 +249,6 @@ public class OCRRegionGroupLayout extends ViewGroup {
 
     /**
      * 当选择修改时，通知订阅
-     * @return
      */
     private void onChangeChecked() {
         if (m_onClickFramesListener != null) {
@@ -284,7 +270,6 @@ public class OCRRegionGroupLayout extends ViewGroup {
 
     /**
      * 设置背景
-     * @param imgBG
      */
     public void setImgBG(Bitmap imgBG) {
         this.imgBG = imgBG;
@@ -303,7 +288,6 @@ public class OCRRegionGroupLayout extends ViewGroup {
 
     /**
      * 选择全部区域或者取消选择全部区域
-     * @param isSelect
      */
     public void setAllFramesChecked(boolean isSelect) {
         for (int i = 0; i < getChildCount(); i++) {

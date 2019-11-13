@@ -84,6 +84,7 @@ public class NoteNetDao implements INoteDao {
 
     @Override
     public long insertNote(Note note) throws ServerException {
+
         // TODO 同时上传图片
 
         // TODO
@@ -175,7 +176,9 @@ public class NoteNetDao implements INoteDao {
 
     @Override
     public boolean updateNote(Note note) throws ServerException {
+
         // TODO 同时上传图片
+
         Observable<ResponseDTO<NoteDTO>> observable = RetrofitFactory.getInstance()
             .createRequest(AuthManager.getInstance().getAuthorizationHead())
             .updateNote(NoteDTO.toNoteDTO(note))
@@ -197,7 +200,9 @@ public class NoteNetDao implements INoteDao {
 
     @Override
     public boolean deleteNote(int id) throws ServerException {
+
         // TODO 同时判断，删除图片
+
         Observable<ResponseDTO<NoteDTO>> observable = RetrofitFactory.getInstance()
             .createRequest(AuthManager.getInstance().getAuthorizationHead())
             .deleteNote(id)

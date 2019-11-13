@@ -184,4 +184,3 @@ public class DocumentDao implements IDocumentDao {
         return ret > 0;
     }
 }
-

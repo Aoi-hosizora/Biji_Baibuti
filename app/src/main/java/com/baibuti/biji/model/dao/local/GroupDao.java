@@ -9,7 +9,6 @@ import android.database.sqlite.SQLiteStatement;
 
 import com.baibuti.biji.model.dao.DbOpenHelper;
 import com.baibuti.biji.model.dao.daoInterface.IGroupDao;
-import com.baibuti.biji.model.dto.ServerException;
 import com.baibuti.biji.model.po.Group;
 
 import java.util.ArrayList;
@@ -290,5 +289,4 @@ public class GroupDao implements IGroupDao {
             }
         }
     }
-
 }

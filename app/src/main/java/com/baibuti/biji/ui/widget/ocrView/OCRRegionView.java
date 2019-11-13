@@ -6,12 +6,10 @@ import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.PaintFlagsDrawFilter;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 
 import com.baibuti.biji.service.ocr.dto.OCRFrame;
-import com.baibuti.biji.R;
 
 public class OCRRegionView extends View {
 
@@ -55,21 +53,13 @@ public class OCRRegionView extends View {
     public interface onClickRegionListener {
         /**
          * 点击区域后取消选中时的事件
-         * @param frame
          */
         void onClickAfterUp(OCRFrame frame);
 
         /**
          * 点击区域后选中时的事件
-         * @param frame
          */
         void onClickAfterDown(OCRFrame frame);
-    }
-
-    public void ShowLogE(String FunctionName, String Msg) {
-        String ClassName = "OCRRegionView";
-        Log.e(getResources().getString(R.string.IShowLog_LogE),
-                ClassName + ": " + FunctionName + "###" + Msg);
     }
 
     public OCRRegionView(Context context) {
@@ -103,11 +93,9 @@ public class OCRRegionView extends View {
 
     /**
      * 绘制边框
-     * @param canvas
      */
     @Override
     protected void onDraw(Canvas canvas) {
-//        canvas.save();
         mPaint.setColor(BorderColor);
         mPaint.setStyle(Paint.Style.STROKE);
         mPaint.setStrokeWidth(BorderWidth);
@@ -133,7 +121,6 @@ public class OCRRegionView extends View {
 
     /**
      * 点击后更新背景
-     * @param isChecked
      */
     private void refreshLayoutBG(boolean isChecked) {
         if (getBackground() == null)
