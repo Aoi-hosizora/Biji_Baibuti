@@ -3,11 +3,17 @@
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <item android:id="@+id/action_import_schedule"
-        android:title="@string/Schedulefragment_Item_Import"
-        app:showAsAction="never"/>
+        android:title="导入"
+        android:icon="@drawable/ic_load_data_white_24dp"
+        app:showAsAction="always" />
 
     <item android:id="@+id/action_refresh_schedule"
-        android:title="@string/Schedulefragment_Item_Refresh"
+        android:title="刷新"
+        android:icon="@drawable/ic_refresh_white_24dp"
+        app:showAsAction="always"/>
+
+    <item android:id="@+id/action_delete_schedule"
+        android:title="删除"
         app:showAsAction="never"/>
 
 </menu>

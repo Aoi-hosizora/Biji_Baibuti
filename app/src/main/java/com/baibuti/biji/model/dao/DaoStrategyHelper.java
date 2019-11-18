@@ -46,9 +46,9 @@ public class DaoStrategyHelper {
             return new SearchItemNetDao();
     }
 
-    public IScheduleDao getScheduleDao() {
+    public IScheduleDao getScheduleDao(Context context) {
         if (!AuthManager.getInstance().isLogin())
-            return new ScheduleDao();
+            return new ScheduleDao(context);
         else
             return new ScheduleNetDao();
     }

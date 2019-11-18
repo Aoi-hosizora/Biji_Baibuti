@@ -1,5 +1,7 @@
 package com.baibuti.biji.model.dao.local;
 
+import android.content.Context;
+
 import com.baibuti.biji.model.dao.daoInterface.IScheduleDao;
 import com.baibuti.biji.util.filePathUtil.SaveNameUtil;
 import com.baibuti.biji.util.imgTextUtil.StringUtil;
@@ -9,7 +11,7 @@ import java.io.IOException;
 
 public class ScheduleDao implements IScheduleDao {
 
-    public ScheduleDao() { }
+    public ScheduleDao(Context context) { }
 
     /**
      * 查询本地课表
@@ -28,7 +30,7 @@ public class ScheduleDao implements IScheduleDao {
      * @return 是否新建 / 更新成功
      */
     @Override
-    public boolean newSchedule(String json) {
+    public boolean updateSchedule(String json) {
         String filename = SaveNameUtil.getScheduleFileName(SaveNameUtil.LOCAL);
         return StringUtil.writeIntoFile(filename, json);
     }

@@ -5,6 +5,6 @@ import com.baibuti.biji.model.dto.ServerException;
 public interface IScheduleDao {
 
     String querySchedule() throws ServerException;
-    boolean newSchedule(String schedule) throws ServerException;
+    boolean updateSchedule(String schedule) throws ServerException;
     boolean deleteSchedule() throws ServerException;
 }

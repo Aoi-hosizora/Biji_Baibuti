@@ -38,7 +38,7 @@ public class ScheduleNetDao implements IScheduleDao {
     }
 
     @Override
-    public boolean newSchedule(String schedule) throws ServerException {
+    public boolean updateSchedule(String schedule) throws ServerException {
         Observable<ResponseDTO<OneFieldDTO.ScheduleDTO>> observable = RetrofitFactory.getInstance()
             .createRequest(AuthManager.getInstance().getAuthorizationHead())
             .updateSchedule()

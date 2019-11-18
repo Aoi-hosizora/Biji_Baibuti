@@ -30,37 +30,4 @@ public class Urls {
      */
     public static final String OCRServerEndPoint = BaseServerEndPoint + ":1627/ocr/upload/";
 
-    //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-    /**
-     * 后端图片 URL
-     */
-    @Deprecated
-    public static final String ImageUrl = BaseServerEndPoint + ":8001/note/img";
-
-    /**
-     * 后端日志 URL
-     */
-    @Deprecated
-    public static final String LogUrl = BaseServerEndPoint + ":8001/log";
-
-    /**
-     * 后端文件分类 URL
-     */
-    @Deprecated
-    public static final String FileClassUrl = BaseServerEndPoint + ":8001/fileclass";
-
-    /**
-     * 后端文件 URL
-     */
-    @Deprecated
-    public static final String FileUrl = BaseServerEndPoint + ":8001/file";
-
-    /**
-     * 后端课表 URL
-     */
-    @Deprecated
-    public static final String Schedule = BaseServerEndPoint + ":8001/schedule";
-
 }
