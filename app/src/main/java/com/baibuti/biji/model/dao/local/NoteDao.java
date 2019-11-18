@@ -9,11 +9,13 @@ import android.database.sqlite.SQLiteStatement;
 
 import com.baibuti.biji.model.dao.DbOpenHelper;
 import com.baibuti.biji.model.dao.daoInterface.INoteDao;
+import com.baibuti.biji.model.dto.ServerException;
 import com.baibuti.biji.model.po.Group;
 import com.baibuti.biji.model.po.Note;
 import com.baibuti.biji.util.otherUtil.DateColorUtil;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
@@ -58,7 +60,7 @@ public class NoteDao implements INoteDao {
 
         SQLiteDatabase db = helper.getWritableDatabase();
         Cursor cursor = null;
-        String sql = "select * from " + TBL_NAME + ((groupId < 0) ? "" : " where " + COL_GROUP_ID + " = " + groupId);
+        String sql = "select * from " + TBL_NAME + ((groupId == -1) ? "" : " where " + COL_GROUP_ID + " = " + groupId);
 
         List<Note> noteList = new ArrayList<>();
         try {
@@ -195,7 +197,6 @@ public class NoteDao implements INoteDao {
      */
     @Override
     public boolean deleteNote(int id) {
-
         SQLiteDatabase db = helper.getWritableDatabase();
 
         int ret = 0;
@@ -210,5 +211,26 @@ public class NoteDao implements INoteDao {
         }
 
         return ret > 0;
+    }
+
+    @Override
+    public int deleteNotes(int[] ids) {
+        SQLiteDatabase db = helper.getWritableDatabase();
+        String[] id_str = new String[ids.length];
+        for (int i = 0; i < id_str.length; i++)
+            id_str[i] = String.valueOf(ids[i]);
+
+        int ret = 0;
+        try {
+            ret = db.delete(TBL_NAME, COL_ID + " = ?", id_str);
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+        }
+        finally {
+            if (db != null && db.isOpen()) db.close();
+        }
+
+        return ret;
     }
 }

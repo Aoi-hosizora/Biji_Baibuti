@@ -9,10 +9,10 @@ public interface ISearchItemDao {
 
     // 查
     List<SearchItem> queryAllSearchItems() throws ServerException;
-    SearchItem querySearchItemByUrl(String url) throws ServerException;
+    SearchItem querySearchItemById(int id) throws ServerException;
 
     // 增删改
     long insertSearchItem(SearchItem searchItem) throws ServerException;
-    boolean deleteSearchItem(String url) throws ServerException;
+    boolean deleteSearchItem(int id) throws ServerException;
     int deleteSearchItems(List<SearchItem> searchItems) throws ServerException;
 }

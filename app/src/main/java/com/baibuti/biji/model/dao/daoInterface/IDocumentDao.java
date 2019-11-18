@@ -9,7 +9,7 @@ public interface IDocumentDao {
 
     // 查
     List<Document> queryAllDocuments() throws ServerException;
-    List<Document> queryDocumentsByClassName(String className) throws ServerException;
+    List<Document> queryDocumentByClassId(String className) throws ServerException;
     Document queryDocumentById(int id) throws ServerException;
 
     // 增删改

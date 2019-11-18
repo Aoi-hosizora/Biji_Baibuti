@@ -1,10 +1,9 @@
 package com.baibuti.biji.service.auth;
 
+import com.baibuti.biji.model.dto.OneFieldDTO;
 import com.baibuti.biji.model.dto.ResponseDTO;
 import com.baibuti.biji.model.dto.ServerException;
-import com.baibuti.biji.service.auth.dto.LoginDTO;
 import com.baibuti.biji.service.auth.dto.AuthRespDTO;
-import com.baibuti.biji.service.auth.dto.RegisterDTO;
 import com.baibuti.biji.service.retrofit.RetrofitFactory;
 import com.baibuti.biji.service.retrofit.ServerErrorHandle;
 
@@ -17,6 +16,29 @@ import retrofit2.Response;
 
 public class AuthService {
 
+    /**
+     * 获取当前登录用户
+     */
+    private synchronized static AuthRespDTO currentAuth() throws ServerException {
+        Observable<ResponseDTO<AuthRespDTO>> observable = RetrofitFactory.getInstance()
+            .createRequest(RetrofitFactory.getHeader())
+            .currentUser()
+            .subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread());
+
+        try {
+            ResponseDTO<AuthRespDTO> response = observable.toFuture().get();
+            if (response.getCode() != ServerErrorHandle.SUCCESS)
+                throw ServerErrorHandle.parseErrorMessage(response);
+
+            return response.getData();
+        }
+        catch (InterruptedException | ExecutionException ex) {
+            ex.printStackTrace();
+            throw ServerErrorHandle.getClientError(ex);
+        }
+    }
+
     public synchronized static AuthRespDTO login(String username, String password) throws ServerException {
         return login(username, password, 0);
     }
@@ -24,7 +46,7 @@ public class AuthService {
     private synchronized static AuthRespDTO login(String username, String password, int expiration) throws ServerException {
         Observable<Response<ResponseDTO<AuthRespDTO>>> observable = RetrofitFactory.getInstance()
             .createRequest(RetrofitFactory.getHeader())
-            .login(new LoginDTO(username, password, expiration))
+            .login(username, password, expiration)
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread());
 
@@ -44,29 +66,10 @@ public class AuthService {
         }
     }
 
-    public synchronized static void logout() throws ServerException {
-        Observable<ResponseDTO<AuthRespDTO>> observable = RetrofitFactory.getInstance()
-            .createRequest(AuthManager.getInstance().getAuthorizationHead())
-            .logout()
-            .subscribeOn(Schedulers.io())
-            .observeOn(AndroidSchedulers.mainThread());
-
-        try {
-            ResponseDTO<AuthRespDTO> response = observable.toFuture().get();
-            if (response.getCode() != ServerErrorHandle.SUCCESS) {
-                throw ServerErrorHandle.parseErrorMessage(response);
-            }
-        }
-        catch (InterruptedException | ExecutionException ex) {
-            ex.printStackTrace();
-            throw ServerErrorHandle.getClientError(ex);
-        }
-    }
-
     public synchronized static AuthRespDTO register(String username, String password) throws ServerException {
         Observable<ResponseDTO<AuthRespDTO>> observable = RetrofitFactory.getInstance()
             .createRequest(RetrofitFactory.getHeader())
-            .register(new RegisterDTO(username, password))
+            .register(username, password)
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread());
 
@@ -76,6 +79,25 @@ public class AuthService {
                 throw ServerErrorHandle.parseErrorMessage(response);
 
             return response.getData();
+        }
+        catch (InterruptedException | ExecutionException ex) {
+            ex.printStackTrace();
+            throw ServerErrorHandle.getClientError(ex);
+        }
+    }
+
+    public synchronized static void logout() throws ServerException {
+        Observable<ResponseDTO<OneFieldDTO.CountDTO>> observable = RetrofitFactory.getInstance()
+            .createRequest(AuthManager.getInstance().getAuthorizationHead())
+            .logout()
+            .subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread());
+
+        try {
+            ResponseDTO<OneFieldDTO.CountDTO> response = observable.toFuture().get();
+            if (response.getCode() != ServerErrorHandle.SUCCESS) {
+                throw ServerErrorHandle.parseErrorMessage(response);
+            }
         }
         catch (InterruptedException | ExecutionException ex) {
             ex.printStackTrace();

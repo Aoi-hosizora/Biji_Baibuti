@@ -33,14 +33,14 @@ public class NoteDTO implements Serializable {
          return new Note(id, title, content, group.toGroup(), create_time, update_time);
      }
 
-    /**
-     * Note -> NoteDTO
-     */
-    public static NoteDTO toNoteDTO(Note note) {
-        if (note == null) return null;
-        return
-            new NoteDTO(note.getId(), note.getTitle(), note.getContent(), GroupDTO.toGroupDTO(note.getGroup()), note.getCreateTime(), note.getUpdateTime());
-    }
+    // /**
+    //  * Note -> NoteDTO
+    //  */
+    // public static NoteDTO toNoteDTO(Note note) {
+    //     if (note == null) return null;
+    //     return
+    //         new NoteDTO(note.getId(), note.getTitle(), note.getContent(), GroupDTO.toGroupDTO(note.getGroup()), note.getCreateTime(), note.getUpdateTime());
+    // }
 
     /**
      * NoteDTO[] -> Note[]

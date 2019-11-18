@@ -9,7 +9,7 @@ import lombok.Data;
 @Data
 public class SearchItem implements Serializable, ISearchEntity {
 
-    public int id;
+    private int id;
     private String title;
     private String url;
     private String content;
@@ -19,6 +19,16 @@ public class SearchItem implements Serializable, ISearchEntity {
      */
     public static SearchItem MORE_ITEM = new SearchItem(-1, "加载更多...", "", SearchItemAdapter.ITEM_MORE_URL);
 
+    /**
+     * BO
+     */
+    public SearchItem(String title, String content, String url) {
+        this(-1, title, content, url);
+    }
+
+    /**
+     * PO
+     */
     public SearchItem(int id, String title, String content, String url) {
         this.id = id;
         this.title = title;

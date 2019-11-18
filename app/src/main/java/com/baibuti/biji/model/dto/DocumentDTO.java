@@ -23,14 +23,7 @@ public class DocumentDTO implements Serializable {
      * DocumentDTO -> Document
      */
     public Document toDocument() {
-        return new Document(id, filename, docClass);
-    }
-
-    /**
-     * Document -> DocumentDTO
-     */
-    public static DocumentDTO toDocument(Document document) {
-        return new DocumentDTO(document.getId(), document.getFilename(), document.getClassName());
+        return new Document(id, filename, docClass.toFileClass());
     }
 
     /**

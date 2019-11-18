@@ -142,4 +142,5 @@ dependencies {
 
     // json解析
     implementation 'com.alibaba:fastjson:1.1.71.android'
+    implementation 'org.jetbrains:annotations:15.0'
 }

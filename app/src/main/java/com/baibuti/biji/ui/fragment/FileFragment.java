@@ -43,7 +43,7 @@ import com.baibuti.biji.ui.IContextHelper;
 import com.baibuti.biji.ui.adapter.DocumentAdapter;
 import com.baibuti.biji.ui.adapter.FileClassAdapter;
 import com.baibuti.biji.model.dao.local.DocumentDao;
-import com.baibuti.biji.model.dao.local.FileClassDao;
+import com.baibuti.biji.model.dao.local.DocClassDao;
 import com.baibuti.biji.model.po.Document;
 import com.baibuti.biji.model.po.FileItem;
 import com.baibuti.biji.R;
@@ -68,7 +68,7 @@ public class FileFragment extends BaseFragment implements IContextHelper {
 
     private List<DocClass> docClassListItems = new ArrayList<>();
     private ListView fileClassList;
-    private FileClassDao fileClassDao;
+    private DocClassDao docClassDao;
     private FileClassAdapter fileClassAdapter;
     private View view;
     private int TAG_NEW = 0;
@@ -276,7 +276,7 @@ public class FileFragment extends BaseFragment implements IContextHelper {
             public void run() {
                 //重命名分组
                 String currentFileClassName = documentHeader.getText().toString();
-                final DocClass currentDocClass = fileClassDao.queryFileClassByName(currentFileClassName, false);
+                final DocClass currentDocClass = docClassDao.queryFileClassByName(currentFileClassName, false);
 
                 activity.runOnUiThread(new Runnable() {
                     @Override
@@ -338,7 +338,7 @@ public class FileFragment extends BaseFragment implements IContextHelper {
                     });
 
                     Log.e("测试", "run: " + lastPositionClicked);
-                    fileClassDao.deleteFileClass(docClassListItems.get(lastPositionClicked).getId());
+                    docClassDao.deleteDocClass(docClassListItems.get(lastPositionClicked).getId());
                     documentDao.deleteDocumentByClass(docClassListItems.get(lastPositionClicked).getName(), true);
                     activity.runOnUiThread(new Runnable() {
                         @Override
@@ -612,16 +612,16 @@ public class FileFragment extends BaseFragment implements IContextHelper {
         new Thread(new Runnable() {
             @Override
             public void run() {
-                if (fileClassDao == null)
-                    fileClassDao = new FileClassDao(activity);
+                if (docClassDao == null)
+                    docClassDao = new DocClassDao(activity);
 
                 if(documentDao == null)
                     documentDao = new DocumentDao(activity);
-                docClassListItems = fileClassDao.queryAllFileClasses();
+                docClassListItems = docClassDao.queryAllDocClasses();
                 documentDao.pushpull();
                 for(DocClass f: docClassListItems){
                     if(!f.getName().equals("+")) {
-                        List<Document> l = documentDao.queryDocumentsByClassName(f.getName(), false);
+                        List<Document> l = documentDao.queryDocumentByClassId(f.getName(), false);
                         documentListsByClass.add(l);
                     }
                 }
@@ -794,7 +794,7 @@ public class FileFragment extends BaseFragment implements IContextHelper {
 
         else {
             // 标题非空
-            if (fileClassDao.checkDuplicate(newDocClass, null) != 0) {
+            if (docClassDao.checkDuplicate(newDocClass, null) != 0) {
                 // 分组重复
                 new android.support.v7.app.AlertDialog
                     .Builder(getContext())
@@ -818,7 +818,7 @@ public class FileFragment extends BaseFragment implements IContextHelper {
                                     }
                                 });
 
-                                long ret = fileClassDao.insertFileClass(newDocClass);
+                                long ret = docClassDao.insertDocClass(newDocClass);
                                 newDocClass.setId((int)ret);
                                 activity.runOnUiThread(new Runnable() {
                                     @Override
@@ -826,7 +826,7 @@ public class FileFragment extends BaseFragment implements IContextHelper {
                                         docClassListItems.add(fileClassAdapter.getCount() - 1, newDocClass);
                                     }
                                 });
-                                List<Document> l = documentDao.queryDocumentsByClassName(newDocClass.getName());
+                                List<Document> l = documentDao.queryDocumentByClassId(newDocClass.getName());
                                 activity.runOnUiThread(new Runnable() {
                                     @Override
                                     public void run() {
@@ -854,7 +854,7 @@ public class FileFragment extends BaseFragment implements IContextHelper {
                                 });
 
                                 currentDocClass.setName(newFileClassName);
-                                fileClassDao.updateFileClass(currentDocClass);
+                                docClassDao.updateDocClass(currentDocClass);
                                 activity.runOnUiThread(new Runnable() {
                                     @Override
                                     public void run() {
@@ -1048,14 +1048,14 @@ public class FileFragment extends BaseFragment implements IContextHelper {
                 documentListItems.clear();
                 documentListsByClass.clear();
 
-                fileClassDao = new FileClassDao(activity);
+                docClassDao = new DocClassDao(activity);
                 documentDao = new DocumentDao(activity);
 
-                docClassListItems.addAll(fileClassDao.queryAllFileClasses());
+                docClassListItems.addAll(docClassDao.queryAllDocClasses());
                 documentDao.pushpull();
                 for(DocClass f: docClassListItems){
                     if(!f.getName().equals("+")) {
-                        List<Document> l = documentDao.queryDocumentsByClassName(f.getName(), false);
+                        List<Document> l = documentDao.queryDocumentByClassId(f.getName(), false);
                         if(null != l && l.size() != 0) {
                             for (Document document : l)
                                 Log.e("测试", "refresh: " + document.getId() + ' ' +

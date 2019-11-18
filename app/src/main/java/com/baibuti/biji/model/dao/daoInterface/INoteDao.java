@@ -16,4 +16,5 @@ public interface INoteDao {
     long insertNote(Note note) throws ServerException;
     boolean updateNote(Note note) throws ServerException;
     boolean deleteNote(int id) throws ServerException;
+    int deleteNotes(int[] id) throws ServerException;
 }

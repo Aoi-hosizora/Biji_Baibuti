@@ -29,13 +29,6 @@ public class GroupDTO implements Serializable {
     }
 
     /**
-     * Group -> GroupDTO
-     */
-    public static GroupDTO toGroupDTO(Group group) {
-        return new GroupDTO(group.getId(), group.getName(), group.getOrder(), group.getColor());
-    }
-
-    /**
      * GroupDTO[] -> Group[]
      */
     public static Group[] toGroups(GroupDTO[] groupsDTO) {

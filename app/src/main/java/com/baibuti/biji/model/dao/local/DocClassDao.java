@@ -8,32 +8,28 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteStatement;
 
 import com.baibuti.biji.model.dao.DbOpenHelper;
-import com.baibuti.biji.model.dao.daoInterface.IFileClassDao;
+import com.baibuti.biji.model.dao.daoInterface.IDocClassDao;
+import com.baibuti.biji.model.dto.ServerException;
 import com.baibuti.biji.model.po.DocClass;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
-public class FileClassDao implements IFileClassDao {
+public class DocClassDao implements IDocClassDao {
 
     private static final String TBL_NAME = "tbl_file_class";
 
     private static final String COL_ID = "f_id";
     private static final String COL_NAME = "f_name";
-    private static final String COL_ORDER = "f_order";
 
     private DbOpenHelper helper;
 
-    public FileClassDao(Context context) {
+    public DocClassDao(Context context) {
         helper = new DbOpenHelper(context);
 
         // 处理默认
-        if (queryAllFileClasses().isEmpty())
-            insertFileClass(new DocClass()); // DEF_CLASS_NAME
-
-        // 预处理顺序
-        precessOrder();
+        if (queryAllDocClasses().isEmpty())
+            insertDocClass(new DocClass()); // DEF_CLASS_NAME
     }
 
     /**
@@ -41,7 +37,7 @@ public class FileClassDao implements IFileClassDao {
      * @return 文件分类列表
      */
     @Override
-    public List<DocClass> queryAllFileClasses() {
+    public List<DocClass> queryAllDocClasses() {
 
         SQLiteDatabase db = helper.getWritableDatabase();
         String sql = "select * from " + TBL_NAME;
@@ -54,9 +50,8 @@ public class FileClassDao implements IFileClassDao {
             while (cursor.moveToNext()) {
                 int id = cursor.getInt(cursor.getColumnIndex(COL_ID));
                 String className = cursor.getString(cursor.getColumnIndex(COL_NAME));
-                int order = cursor.getInt(cursor.getColumnIndex(COL_ORDER));
 
-                docClassList.add(new DocClass(id, className, order));
+                docClassList.add(new DocClass(id, className));
             }
 
         } catch (Exception e) {
@@ -75,7 +70,7 @@ public class FileClassDao implements IFileClassDao {
      * @return 一个分类
      */
     @Override
-    public DocClass queryFileClassById(int id) {
+    public DocClass queryDocClassById(int id) {
 
         SQLiteDatabase db = helper.getWritableDatabase();
         String sql = "select * from " + TBL_NAME + " where " + COL_ID + " = " + id;
@@ -86,9 +81,33 @@ public class FileClassDao implements IFileClassDao {
 
             if (cursor.moveToFirst()) {
                 String name = cursor.getString(cursor.getColumnIndex(COL_NAME));
-                int order = cursor.getInt(cursor.getColumnIndex(COL_ORDER));
 
-                return new DocClass(id, name, order);
+                return new DocClass(id, name);
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            if (cursor != null && !cursor.isClosed()) cursor.close();
+            if (db != null && db.isOpen()) db.close();
+        }
+
+        return null;
+    }
+
+    @Override
+    public DocClass queryDocClassByName(String name) {
+        SQLiteDatabase db = helper.getWritableDatabase();
+        String sql = "select * from " + TBL_NAME + " where " + COL_NAME + " = \"" + name + "\"";
+        Cursor cursor = null;
+
+        try {
+            cursor = db.rawQuery(sql, null);
+
+            if (cursor.moveToFirst()) {
+                int id = cursor.getInt(cursor.getColumnIndex(COL_ID));
+
+                return new DocClass(id, name);
             }
 
         } catch (Exception e) {
@@ -106,7 +125,7 @@ public class FileClassDao implements IFileClassDao {
      * @return 返回数据库中的默认分类
      */
     @Override
-    public DocClass queryDefaultFileClass() {
+    public DocClass queryDefaultDocClass() {
 
         SQLiteDatabase db = helper.getWritableDatabase();
         Cursor cursor = null;
@@ -121,7 +140,6 @@ public class FileClassDao implements IFileClassDao {
                 docClass = new DocClass();
                 docClass.setId(cursor.getInt(cursor.getColumnIndex(COL_ID)));
                 docClass.setName(cursor.getString(cursor.getColumnIndex(COL_NAME)));
-                docClass.setOrder(cursor.getInt(cursor.getColumnIndex(COL_ORDER)));
             }
 
         } catch (Exception e) {
@@ -140,21 +158,18 @@ public class FileClassDao implements IFileClassDao {
      * @return 分类 id
      */
     @Override
-    public long insertFileClass(DocClass docClass) {
+    public long insertDocClass(DocClass docClass) {
 
         SQLiteDatabase db = helper.getWritableDatabase();
         String sql = "insert into " + TBL_NAME +
-            "(" + COL_NAME + ", " + COL_ORDER + ") " +
-            "values(?, ?)";
+            "(" + COL_NAME + ") " +
+            "values(?)";
         SQLiteStatement stat = db.compileStatement(sql);
         db.beginTransaction();
 
         long ret_id = 0;
         try {
-            docClass.setOrder(queryAllFileClasses().size()); // 插入到最后
-
             stat.bindString(1, docClass.getName()); // COL_NAME
-            stat.bindLong(2, docClass.getOrder()); // COL_ORDER
 
             ret_id = stat.executeInsert();
             db.setTransactionSuccessful();
@@ -174,19 +189,15 @@ public class FileClassDao implements IFileClassDao {
      * @return 是否成功更新
      */
     @Override
-    public boolean updateFileClass(DocClass docClass) {
+    public boolean updateDocClass(DocClass docClass) {
 
         SQLiteDatabase db = helper.getWritableDatabase();
         ContentValues values = new ContentValues();
 
         values.put(COL_NAME, docClass.getName());
-        values.put(COL_ORDER, docClass.getOrder());
 
         int ret = db.update(TBL_NAME, values, COL_ID + " = ?", new String[] { String.valueOf(docClass.getId()) });
         db.close();
-
-        // 更新后刷新 Order
-        precessOrder();
         return ret > 0;
     }
 
@@ -196,7 +207,7 @@ public class FileClassDao implements IFileClassDao {
      * @return 是否成功删除
      */
     @Override
-    public boolean deleteFileClass(int id) {
+    public boolean deleteDocClass(int id) {
 
         SQLiteDatabase db = helper.getWritableDatabase();
 
@@ -211,27 +222,6 @@ public class FileClassDao implements IFileClassDao {
             if (db != null && db.isOpen())
                 db.close();
         }
-
-        // 删除后刷新 Order
-        precessOrder();
         return ret > 0;
-    }
-
-    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-    /**
-     * 处理顺序 (所有操作前 以及 删除操作后)
-     */
-    private void precessOrder() {
-        List<DocClass> docClasses = queryAllFileClasses();
-        Collections.sort(docClasses);
-
-        for (int i = 0; i < docClasses.size(); i++) {
-            if (docClasses.get(i).getOrder() != i) {
-                docClasses.get(i).setOrder(i);
-                updateFileClass(docClasses.get(i));
-            }
-        }
     }
 }

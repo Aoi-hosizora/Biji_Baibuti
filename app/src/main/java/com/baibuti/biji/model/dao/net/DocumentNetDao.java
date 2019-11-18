@@ -9,6 +9,7 @@ import com.baibuti.biji.service.auth.AuthManager;
 import com.baibuti.biji.service.retrofit.RetrofitFactory;
 import com.baibuti.biji.service.retrofit.ServerErrorHandle;
 
+import java.io.File;
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
@@ -41,7 +42,7 @@ public class DocumentNetDao implements IDocumentDao {
     }
 
     @Override
-    public List<Document> queryDocumentsByClassName(String className) throws ServerException {
+    public List<Document> queryDocumentByClassId(String className) throws ServerException {
         Observable<ResponseDTO<DocumentDTO[]>> observable = RetrofitFactory.getInstance()
             .createRequest(AuthManager.getInstance().getAuthorizationHead())
             .getDocumentByClassId(className)
@@ -84,9 +85,19 @@ public class DocumentNetDao implements IDocumentDao {
 
     @Override
     public long insertDocument(Document document) throws ServerException {
+
+        /*
+
+        File img = new File(path);
+        HashMap<String, RequestBody> requestBodyHashMap = new HashMap<>();
+        RequestBody requestBody = RequestBody.create(MediaType.parse("image/*"), img);
+        requestBodyHashMap.put("img", requestBody);
+
+         */
+
         Observable<ResponseDTO<DocumentDTO>> observable = RetrofitFactory.getInstance()
             .createRequest(AuthManager.getInstance().getAuthorizationHead())
-            .insertDocument(DocumentDTO.toDocument(document))
+            .insertDocument(new File(document.getFilename()), document.getDocClass().getId())
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread());
 
@@ -107,7 +118,7 @@ public class DocumentNetDao implements IDocumentDao {
     public boolean updateDocument(Document document) throws ServerException {
         Observable<ResponseDTO<DocumentDTO>> observable = RetrofitFactory.getInstance()
             .createRequest(AuthManager.getInstance().getAuthorizationHead())
-            .updateDocument(DocumentDTO.toDocument(document))
+            .updateDocument(document.getId(), document.getFilename(), document.getDocClass().getId())
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread());
 

@@ -29,13 +29,6 @@ public class SearchItemDTO implements Serializable {
     }
 
     /**
-     * SearchItem -> SearchItemNetDao
-     */
-    public static SearchItemDTO toSearchItemDTO(SearchItem searchItem) {
-        return new SearchItemDTO(searchItem.getId(), searchItem.getTitle(), searchItem.getUrl(), searchItem.getContent());
-    }
-
-    /**
      * SearchItemNetDao[] -> SearchItem[]
      */
     public static SearchItem[] toSearchItems(SearchItemDTO[] searchItemsDTO) {

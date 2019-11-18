@@ -40,6 +40,7 @@ public class RetrofitFactory {
     }
 
     /**
+     * !!!!!!
      * 重载 EndPoint，使用默认 API 地址，与 ServerApi 接口连接
      * @param kv 委托设置请求头
      * @return Retrofit 实例
@@ -49,6 +50,7 @@ public class RetrofitFactory {
     }
 
     /**
+     * !!!!!!
      * 公开接口，与 ServerApi 接口连接
      * @param kv 委托设置请求头
      * @param endPoint 接口地址
@@ -60,6 +62,7 @@ public class RetrofitFactory {
     }
 
     /**
+     * !!!!!!
      * 设置序列化和回调处理
      * @param kv 委托设置请求头
      * @return Retrofit.Builder().build()
@@ -74,6 +77,7 @@ public class RetrofitFactory {
     }
 
     /**
+     * !!!!!!
      * 设置请求头和 OkHttpClient 配置
      * @param kv 请求头
      * @return OkHttpClient.Builder().build()

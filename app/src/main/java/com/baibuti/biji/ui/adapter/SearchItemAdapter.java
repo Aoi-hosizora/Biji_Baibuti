@@ -201,7 +201,7 @@ public class SearchItemAdapter extends RecyclerView.Adapter<SearchItemAdapter.Vi
             m_content.setText(searchItem.getContent());
             m_url.setText(searchItem.getUrl());
 
-            if (searchItemDao.querySearchItemByUrl(searchItem.getUrl()) == null) {
+            if (searchItemDao.querySearchItemById(searchItem.getUrl()) == null) {
                 // not star
                 m_stared.setImageDrawable(m_view.getContext().getDrawable(R.drawable.ic_star_border_theme_24dp));
             }

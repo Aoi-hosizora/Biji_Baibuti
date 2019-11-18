@@ -105,13 +105,13 @@ public interface ServerApi {
     @NeedAuth
     @Multipart
     @DELETE("/note/delete/")
-    Observable<ResponseDTO<NoteDTO>> deleteNotes(
+    Observable<ResponseDTO<OneFieldDTO.CountDTO>> deleteNotes(
         @Part("id") int[] id
     );
 
     // endregion Note
 
-    // region Group (6)
+    // region Group (7)
 
     @NeedAuth
     @GET("/group/")
@@ -178,7 +178,7 @@ public interface ServerApi {
     @NeedAuth
     @Multipart
     @DELETE("/star/")
-    Observable<ResponseDTO<SearchItemDTO[]>> deleteStars(
+    Observable<ResponseDTO<OneFieldDTO.CountDTO>> deleteStars(
         @Part("id") int[] id
     );
 
@@ -200,7 +200,7 @@ public interface ServerApi {
 
     // endregion Schedule
 
-    // region DocClass (7)
+    // region DocClass (7+)
 
     @NeedAuth
     @GET("/docclass/")
@@ -212,7 +212,7 @@ public interface ServerApi {
 
     @NeedAuth
     @GET("/docclass/}")
-    Observable<ResponseDTO<DocClassDTO>> getDocClassByNane(@Query("name") String name);
+    Observable<ResponseDTO<DocClassDTO>> getDocClassByName(@Query("name") String name);
 
     @NeedAuth
     @GET("/docclass/default")
@@ -243,7 +243,7 @@ public interface ServerApi {
 
     // endregion DocClass
 
-    // region Document (7)
+    // region Document (6+)
 
     @NeedAuth
     @GET("/document/")

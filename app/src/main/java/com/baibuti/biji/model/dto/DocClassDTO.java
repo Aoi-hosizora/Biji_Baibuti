@@ -24,12 +24,6 @@ public class DocClassDTO implements Serializable {
         return new DocClass(id, name);
     }
 
-    /**
-     * DocClass -> DocClassDTO
-     */
-    public static DocClassDTO toFileClassDTO(DocClass docClass) {
-        return new DocClassDTO(docClass.getId(), docClass.getName());
-    }
 
     /**
      * DocClassDTO[] -> DocClass[]

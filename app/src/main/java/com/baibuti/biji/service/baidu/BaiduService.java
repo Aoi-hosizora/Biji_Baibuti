@@ -1,4 +1,4 @@
-package com.baibuti.biji.service.search;
+package com.baibuti.biji.service.baidu;
 
 import android.util.Log;
 
@@ -21,7 +21,7 @@ import okhttp3.Request;
 import okhttp3.Response;
 import okhttp3.ResponseBody;
 
-public class SearchEngineService {
+public class BaiduService {
 
     /**
      * 百度搜索页

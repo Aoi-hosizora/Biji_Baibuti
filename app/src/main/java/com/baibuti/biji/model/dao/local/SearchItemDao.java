@@ -16,6 +16,7 @@ public class SearchItemDao implements ISearchItemDao {
 
     private final static String TBL_NAME = "tbl_search_item";
 
+    private final static String COL_ID = "sis_id";
     private final static String COL_URL = "sis_url";
     private final static String COL_TITLE = "sis_title";
     private final static String COL_CONTENT = "sis_content";
@@ -42,11 +43,12 @@ public class SearchItemDao implements ISearchItemDao {
             cursor = db.rawQuery(sql, null);
 
             while (cursor.moveToNext()) {
+                int id = cursor.getInt(cursor.getColumnIndex(COL_ID));
                 String url = cursor.getString(cursor.getColumnIndex(COL_URL));
                 String title = cursor.getString(cursor.getColumnIndex(COL_TITLE));
                 String content = cursor.getString(cursor.getColumnIndex(COL_CONTENT));
 
-                searchItems.add(new SearchItem(title, content, url));
+                searchItems.add(new SearchItem(id, title, content, url));
             }
         }
         catch (Exception ex) {
@@ -61,13 +63,13 @@ public class SearchItemDao implements ISearchItemDao {
 
     /**
      * 根据 url 查询收藏项
-     * @param Url 记录连接
+     * @param id 记录连接
      * @return 指定收藏项
      */
     @Override
-    public SearchItem querySearchItemByUrl(String Url) {
+    public SearchItem querySearchItemById(int id) {
         SQLiteDatabase db = helper.getWritableDatabase();
-        String sql = "select * from " + TBL_NAME + " where " + COL_URL + " = \"" + Url + "\"";
+        String sql = "select * from " + TBL_NAME + " where " + COL_ID + " = " + id;
         Cursor cursor = null;
 
         try {
@@ -78,7 +80,7 @@ public class SearchItemDao implements ISearchItemDao {
                 String title = cursor.getString(cursor.getColumnIndex(COL_TITLE));
                 String content = cursor.getString(cursor.getColumnIndex(COL_CONTENT));
 
-                return new SearchItem(title, content, url);
+                return new SearchItem(id, title, content, url);
             }
         }
         catch (Exception ex) {
@@ -95,7 +97,7 @@ public class SearchItemDao implements ISearchItemDao {
     /**
      * 插入收藏项
      * @param searchItem 新收藏
-     * @return 收藏的记录 ID (无用)
+     * @return 收藏的记录 ID
      */
     public long insertSearchItem(SearchItem searchItem) {
 
@@ -113,6 +115,7 @@ public class SearchItemDao implements ISearchItemDao {
             stat.bindString(3, searchItem.getContent()); // COL_CONTENT
 
             ret_id = stat.executeInsert();
+            searchItem.setId((int) ret_id);
             db.setTransactionSuccessful();
         }
         catch (Exception ex) {
@@ -128,17 +131,17 @@ public class SearchItemDao implements ISearchItemDao {
 
     /**
      * 删除收藏项
-     * @param url 收藏的链接
+     * @param id 收藏的链接
      * @return 是否成功删除
      */
     @Override
-    public boolean deleteSearchItem(String url) {
+    public boolean deleteSearchItem(int id) {
 
         SQLiteDatabase db = helper.getWritableDatabase();
 
         int ret = 0;
         try {
-            ret = db.delete(TBL_NAME, COL_URL + " = ?", new String[] { url });
+            ret = db.delete(TBL_NAME, COL_ID + " = ?", new String[] { String.valueOf(id) });
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -164,8 +167,8 @@ public class SearchItemDao implements ISearchItemDao {
             db.beginTransaction();
             try {
                 for (SearchItem searchItem : searchItems)
-                    ret_num += db.delete(TBL_NAME, COL_URL + " = ?",
-                        new String[] { searchItem.getUrl() } );
+                    ret_num += db.delete(TBL_NAME, COL_ID + " = ?",
+                        new String[] { String.valueOf(searchItem.getId()) } );
 
                 db.setTransactionSuccessful();
             }

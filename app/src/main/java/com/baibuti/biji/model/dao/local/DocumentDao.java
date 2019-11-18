@@ -9,6 +9,7 @@ import android.database.sqlite.SQLiteStatement;
 
 import com.baibuti.biji.model.dao.DbOpenHelper;
 import com.baibuti.biji.model.dao.daoInterface.IDocumentDao;
+import com.baibuti.biji.model.po.DocClass;
 import com.baibuti.biji.model.po.Document;
 
 import java.util.ArrayList;
@@ -20,12 +21,14 @@ public class DocumentDao implements IDocumentDao {
 
     private final static String COL_ID = "doc_id";
     private final static String COL_PATH = "doc_path";
-    private final static String COL_CLASS_NAME = "doc_class_name";
+    private final static String COL_DOCCLASS_ID = "doc_class_name";
 
     private DbOpenHelper helper;
+    private DocClassDao docClassDao;
 
     public DocumentDao(Context context) {
         helper = new DbOpenHelper(context);
+        docClassDao = new DocClassDao(context);
     }
 
     /**
@@ -34,7 +37,7 @@ public class DocumentDao implements IDocumentDao {
      */
     @Override
     public List<Document> queryAllDocuments() {
-        return queryDocumentsByClassName(null);
+        return queryDocumentByClassId(null);
     }
 
     /**
@@ -43,12 +46,12 @@ public class DocumentDao implements IDocumentDao {
      * @return 文件分类列表
      */
     @Override
-    public List<Document> queryDocumentsByClassName(String className) {
+    public List<Document> queryDocumentByClassId(String className) {
 
         SQLiteDatabase db = helper.getWritableDatabase();
         Cursor cursor = null;
         String sql = "select * from " + TBL_NAME +
-            ((className == null) ? "" : " where " + COL_CLASS_NAME + " = " + className);
+            ((className == null) ? "" : " where " + COL_DOCCLASS_ID + " = " + className);
 
         List<Document> documentList = new ArrayList<>();
         try {
@@ -58,9 +61,10 @@ public class DocumentDao implements IDocumentDao {
 
                 int id = cursor.getInt(cursor.getColumnIndex(COL_ID));
                 String path = cursor.getString(cursor.getColumnIndex(COL_PATH));
-                String queryClassName = cursor.getString(cursor.getColumnIndex(COL_CLASS_NAME));
+                int classId = cursor.getInt(cursor.getColumnIndex(COL_DOCCLASS_ID));
 
-                documentList.add(new Document(id, path, queryClassName));
+                DocClass docClass = docClassDao.queryDocClassById(classId);
+                documentList.add(new Document(id, path, docClass));
             }
 
         } catch (Exception e) {
@@ -91,9 +95,10 @@ public class DocumentDao implements IDocumentDao {
             while (cursor.moveToNext()) {
 
                 String path = cursor.getString(cursor.getColumnIndex(COL_PATH));
-                String className = cursor.getString(cursor.getColumnIndex(COL_CLASS_NAME));
+                int classId = cursor.getInt(cursor.getColumnIndex(COL_DOCCLASS_ID));
 
-                document = new Document(id, path, className);
+                DocClass docClass = docClassDao.queryDocClassById(classId);
+                document = new Document(id, path, docClass);
             }
 
         } catch (Exception e) {
@@ -116,7 +121,7 @@ public class DocumentDao implements IDocumentDao {
         SQLiteDatabase db = helper.getWritableDatabase();
         String sql =
             "insert into " + TBL_NAME +
-            "(" + COL_PATH + ", " + COL_CLASS_NAME + ") " +
+            "(" + COL_PATH + ", " + COL_DOCCLASS_ID + ") " +
             "values (?, ?)";
         SQLiteStatement stat = db.compileStatement(sql);
         db.beginTransaction();
@@ -124,7 +129,7 @@ public class DocumentDao implements IDocumentDao {
         long ret_id = 0;
         try {
             stat.bindString(1, document.getFilename() == null ? "" : document.getFilename()); // COL_PATH
-            stat.bindString(2, document.getClassName()); // COL_CLASS_NAME
+            stat.bindLong(2, document.getDocClass().getId());
 
             ret_id = stat.executeInsert();
             db.setTransactionSuccessful();
@@ -148,7 +153,7 @@ public class DocumentDao implements IDocumentDao {
         SQLiteDatabase db = helper.getWritableDatabase();
         ContentValues values = new ContentValues();
 
-        values.put(COL_CLASS_NAME, document.getClassName());
+        values.put(COL_DOCCLASS_ID, document.getDocClass().getId());
         values.put(COL_PATH, document.getFilename());
 
         int ret = db.update(TBL_NAME, values, COL_ID + " = ?",

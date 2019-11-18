@@ -107,7 +107,7 @@ public class GroupNetDao implements IGroupDao {
     public long insertGroup(Group group) throws ServerException {
         Observable<ResponseDTO<GroupDTO>> observable = RetrofitFactory.getInstance()
             .createRequest(AuthManager.getInstance().getAuthorizationHead())
-            .insertGroup(GroupDTO.toGroupDTO(group))
+            .insertGroup(group.getName(), group.getColor())
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread());
 
@@ -128,7 +128,7 @@ public class GroupNetDao implements IGroupDao {
     public boolean updateGroup(Group group) throws ServerException {
         Observable<ResponseDTO<GroupDTO>> observable = RetrofitFactory.getInstance()
             .createRequest(AuthManager.getInstance().getAuthorizationHead())
-            .updateGroup(GroupDTO.toGroupDTO(group))
+            .updateGroup(group.getId(), group.getName(), group.getOrder(), group.getColor())
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread());
 

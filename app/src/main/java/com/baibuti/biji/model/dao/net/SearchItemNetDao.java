@@ -1,5 +1,6 @@
 package com.baibuti.biji.model.dao.net;
 
+import com.baibuti.biji.model.dto.OneFieldDTO;
 import com.baibuti.biji.model.dto.ResponseDTO;
 import com.baibuti.biji.model.dto.ServerException;
 import com.baibuti.biji.service.auth.AuthManager;
@@ -40,22 +41,32 @@ public class SearchItemNetDao implements ISearchItemDao {
         }
     }
 
-    // TODO 接口待改
     @Override
-    public SearchItem querySearchItemByUrl(String url) throws ServerException {
-        List<SearchItem> searchItems = queryAllSearchItems();
+    public SearchItem querySearchItemById(int id) throws ServerException {
+        Observable<ResponseDTO<SearchItemDTO>> observable = RetrofitFactory.getInstance()
+            .createRequest(AuthManager.getInstance().getAuthorizationHead())
+            .getStarById(id)
+            .subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread());
 
-        for (SearchItem searchItem : searchItems)
-            if (searchItem.getUrl().equals(url))
-                return searchItem;
-        return null;
+        try {
+            ResponseDTO<SearchItemDTO> response = observable.toFuture().get();
+            if (response.getCode() != ServerErrorHandle.SUCCESS)
+                throw ServerErrorHandle.parseErrorMessage(response);
+
+            return response.getData().toSearchItem();
+        }
+        catch (ServerException | InterruptedException | ExecutionException ex) {
+            ex.printStackTrace();
+            throw ServerErrorHandle.getClientError(ex);
+        }
     }
 
     @Override
     public long insertSearchItem(SearchItem searchItem) throws ServerException {
         Observable<ResponseDTO<SearchItemDTO>> observable = RetrofitFactory.getInstance()
             .createRequest(AuthManager.getInstance().getAuthorizationHead())
-            .insertStar(SearchItemDTO.toSearchItemDTO(searchItem))
+            .insertStar(searchItem.getTitle(), searchItem.getUrl(), searchItem.getContent())
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread());
 
@@ -74,10 +85,10 @@ public class SearchItemNetDao implements ISearchItemDao {
     }
 
     @Override
-    public boolean deleteSearchItem(String url) throws ServerException {
+    public boolean deleteSearchItem(int id) throws ServerException {
         Observable<ResponseDTO<SearchItemDTO>> observable = RetrofitFactory.getInstance()
             .createRequest(AuthManager.getInstance().getAuthorizationHead())
-            .deleteStar(url)
+            .deleteStar(id)
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread());
 
@@ -94,21 +105,25 @@ public class SearchItemNetDao implements ISearchItemDao {
         }
     }
 
-    // TODO 接口待改
     @Override
     public int deleteSearchItems(List<SearchItem> searchItems) throws ServerException {
-        Observable<ResponseDTO<SearchItemDTO[]>> observable = RetrofitFactory.getInstance()
+
+        int[] ids = new int[searchItems.size()];
+        for (int i = 0; i < ids.length; i++)
+            ids[i] = searchItems.get(i).getId();
+
+        Observable<ResponseDTO<OneFieldDTO.CountDTO>> observable = RetrofitFactory.getInstance()
             .createRequest(AuthManager.getInstance().getAuthorizationHead())
-            .deleteStars(SearchItemDTO.toSearchItemUrls(searchItems))
+            .deleteStars(ids)
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread());
 
         try {
-            ResponseDTO<SearchItemDTO[]> response = observable.toFuture().get();
+            ResponseDTO<OneFieldDTO.CountDTO> response = observable.toFuture().get();
             if (response.getCode() != ServerErrorHandle.SUCCESS)
                 throw ServerErrorHandle.parseErrorMessage(response);
 
-            return response.getData().length;
+            return response.getData().getCount();
         }
         catch (ServerException | InterruptedException | ExecutionException ex) {
             ex.printStackTrace();

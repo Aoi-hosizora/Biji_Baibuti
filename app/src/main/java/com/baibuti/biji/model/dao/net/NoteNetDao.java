@@ -1,6 +1,7 @@
 package com.baibuti.biji.model.dao.net;
 
 import com.baibuti.biji.model.dao.daoInterface.INoteDao;
+import com.baibuti.biji.model.dto.OneFieldDTO;
 import com.baibuti.biji.model.dto.ResponseDTO;
 import com.baibuti.biji.model.dto.ServerException;
 import com.baibuti.biji.model.po.Note;
@@ -157,7 +158,7 @@ public class NoteNetDao implements INoteDao {
 
         Observable<ResponseDTO<NoteDTO>> observable = RetrofitFactory.getInstance()
             .createRequest(AuthManager.getInstance().getAuthorizationHead())
-            .insertNote(NoteDTO.toNoteDTO(note))
+            .insertNote(note.getTitle(), note.getContent(), note.getGroup().getId())
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread());
 
@@ -181,7 +182,7 @@ public class NoteNetDao implements INoteDao {
 
         Observable<ResponseDTO<NoteDTO>> observable = RetrofitFactory.getInstance()
             .createRequest(AuthManager.getInstance().getAuthorizationHead())
-            .updateNote(NoteDTO.toNoteDTO(note))
+            .updateNote(note.getId(), note.getTitle(), note.getContent(), note.getGroup().getId())
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread());
 
@@ -215,6 +216,30 @@ public class NoteNetDao implements INoteDao {
                 throw ServerErrorHandle.parseErrorMessage(response);
 
             return true;
+        }
+        catch (ServerException | InterruptedException | ExecutionException ex) {
+            ex.printStackTrace();
+            throw ServerErrorHandle.getClientError(ex);
+        }
+    }
+
+    @Override
+    public int deleteNotes(int[] ids) throws ServerException {
+
+        // TODO 同时判断，删除图片
+
+        Observable<ResponseDTO<OneFieldDTO.CountDTO>> observable = RetrofitFactory.getInstance()
+            .createRequest(AuthManager.getInstance().getAuthorizationHead())
+            .deleteNotes(ids)
+            .subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread());
+
+        try {
+            ResponseDTO<OneFieldDTO.CountDTO> response = observable.toFuture().get();
+            if (response.getCode() != ServerErrorHandle.SUCCESS)
+                throw ServerErrorHandle.parseErrorMessage(response);
+
+            return response.getData().getCount();
         }
         catch (ServerException | InterruptedException | ExecutionException ex) {
             ex.printStackTrace();

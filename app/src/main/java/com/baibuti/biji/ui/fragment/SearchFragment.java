@@ -30,7 +30,7 @@ import com.baibuti.biji.ui.activity.SearchItemActivity;
 import com.baibuti.biji.ui.widget.listView.SpacesItemDecoration;
 import com.baibuti.biji.ui.widget.listView.RecyclerViewEmptySupport;
 import com.baibuti.biji.util.otherUtil.LayoutUtil;
-import com.baibuti.biji.service.search.SearchEngineService;
+import com.baibuti.biji.service.baidu.BaiduService;
 
 import java.util.List;
 import java.util.Locale;
@@ -186,7 +186,7 @@ public class SearchFragment extends BaseFragment implements IContextHelper {
             true, (d) -> isSearching[0] = false);
 
         new Thread(() -> {
-            pageData.searchList = SearchEngineService.getBaiduSearchResult(pageData.currentQuestion, 1);
+            pageData.searchList = BaiduService.getBaiduSearchResult(pageData.currentQuestion, 1);
             MainActivity activity = (MainActivity) getActivity();
             if (activity != null) {
                 activity.runOnUiThread(() -> {
@@ -228,7 +228,7 @@ public class SearchFragment extends BaseFragment implements IContextHelper {
 
             if (!isSearching[0]) return;
 
-            List<SearchItem> newSearchItems = SearchEngineService.getBaiduSearchResult(pageData.currentQuestion, ++pageData.currentPage);
+            List<SearchItem> newSearchItems = BaiduService.getBaiduSearchResult(pageData.currentQuestion, ++pageData.currentPage);
             pageData.searchList.addAll(newSearchItems);
 
             showToast(getActivity(), String.format(Locale.CHINA, "共新增了 %d 条搜索结果", pageData.searchList.size()));
@@ -263,7 +263,7 @@ public class SearchFragment extends BaseFragment implements IContextHelper {
         ((Button) root.findViewById(R.id.id_SearchFrag_PopupMenu_Star)).setText("收藏");
         ISearchItemDao searchItemDao = DaoStrategyHelper.getInstance().getSearchDao(getActivity());
         try {
-            if (searchItemDao.querySearchItemByUrl(searchItem.getUrl()) != null)
+            if (searchItemDao.querySearchItemById(searchItem.getUrl()) != null)
                 ((Button) root.findViewById(R.id.id_SearchFrag_PopupMenu_Star)).setText("取消收藏");
         } catch (ServerException ex) {
             ex.printStackTrace();
@@ -279,7 +279,7 @@ public class SearchFragment extends BaseFragment implements IContextHelper {
 
         ISearchItemDao searchItemDao = DaoStrategyHelper.getInstance().getSearchDao(getActivity());
         try {
-            if (searchItemDao.querySearchItemByUrl(searchItem.getUrl()) == null) {
+            if (searchItemDao.querySearchItemById(searchItem.getUrl()) == null) {
                 // 收藏
                 if (searchItemDao.insertSearchItem(searchItem) != 0)
                     showToast(getActivity(), String.format(Locale.CHINA, "收藏 %s 成功", searchItem.getTitle()));

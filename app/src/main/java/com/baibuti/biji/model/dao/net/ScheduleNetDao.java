@@ -1,6 +1,7 @@
 package com.baibuti.biji.model.dao.net;
 
 import com.baibuti.biji.model.dao.daoInterface.IScheduleDao;
+import com.baibuti.biji.model.dto.OneFieldDTO;
 import com.baibuti.biji.model.dto.ResponseDTO;
 import com.baibuti.biji.model.dto.ServerException;
 import com.baibuti.biji.service.auth.AuthManager;
@@ -17,18 +18,18 @@ public class ScheduleNetDao implements IScheduleDao {
 
     @Override
     public String querySchedule() throws ServerException {
-        Observable<ResponseDTO<String>> observable = RetrofitFactory.getInstance()
+        Observable<ResponseDTO<OneFieldDTO.ScheduleDTO>> observable = RetrofitFactory.getInstance()
             .createRequest(AuthManager.getInstance().getAuthorizationHead())
             .getSchedule()
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread());
 
         try {
-            ResponseDTO<String> response = observable.toFuture().get();
+            ResponseDTO<OneFieldDTO.ScheduleDTO> response = observable.toFuture().get();
             if (response.getCode() != ServerErrorHandle.SUCCESS)
                 throw ServerErrorHandle.parseErrorMessage(response);
 
-            return response.getData();
+            return response.getData().getSchedule();
         }
         catch (ServerException | InterruptedException | ExecutionException ex) {
             ex.printStackTrace();
@@ -38,14 +39,14 @@ public class ScheduleNetDao implements IScheduleDao {
 
     @Override
     public boolean newSchedule(String schedule) throws ServerException {
-        Observable<ResponseDTO<Object>> observable = RetrofitFactory.getInstance()
+        Observable<ResponseDTO<OneFieldDTO.ScheduleDTO>> observable = RetrofitFactory.getInstance()
             .createRequest(AuthManager.getInstance().getAuthorizationHead())
             .updateSchedule()
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread());
 
         try {
-            ResponseDTO<Object> response = observable.toFuture().get();
+            ResponseDTO<OneFieldDTO.ScheduleDTO> response = observable.toFuture().get();
             if (response.getCode() != ServerErrorHandle.SUCCESS)
                 throw ServerErrorHandle.parseErrorMessage(response);
 
@@ -59,14 +60,14 @@ public class ScheduleNetDao implements IScheduleDao {
 
     @Override
     public boolean deleteSchedule() throws ServerException {
-        Observable<ResponseDTO<Object>> observable = RetrofitFactory.getInstance()
+        Observable<ResponseDTO<OneFieldDTO.ScheduleDTO>> observable = RetrofitFactory.getInstance()
             .createRequest(AuthManager.getInstance().getAuthorizationHead())
             .deleteSchedule()
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread());
 
         try {
-            ResponseDTO<Object> response = observable.toFuture().get();
+            ResponseDTO<OneFieldDTO.ScheduleDTO> response = observable.toFuture().get();
             if (response.getCode() != ServerErrorHandle.SUCCESS)
                 throw ServerErrorHandle.parseErrorMessage(response);
 
