@@ -222,7 +222,7 @@ public class ViewNoteActivity extends AppCompatActivity implements IContextHelpe
 
                     Intent returnIntent = result.data();
 
-                    String path = returnIntent.getStringExtra("filePath"); // 包含后缀名
+                    String path = returnIntent.getStringExtra("filename"); // 包含后缀名
                     String type = returnIntent.getStringExtra("type");
 
                     // 确认保存格式与路径

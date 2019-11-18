@@ -9,7 +9,7 @@ import android.database.sqlite.SQLiteStatement;
 
 import com.baibuti.biji.model.dao.DbOpenHelper;
 import com.baibuti.biji.model.dao.daoInterface.IFileClassDao;
-import com.baibuti.biji.model.po.FileClass;
+import com.baibuti.biji.model.po.DocClass;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -30,7 +30,7 @@ public class FileClassDao implements IFileClassDao {
 
         // 处理默认
         if (queryAllFileClasses().isEmpty())
-            insertFileClass(new FileClass()); // DEF_CLASS_NAME
+            insertFileClass(new DocClass()); // DEF_CLASS_NAME
 
         // 预处理顺序
         precessOrder();
@@ -41,13 +41,13 @@ public class FileClassDao implements IFileClassDao {
      * @return 文件分类列表
      */
     @Override
-    public List<FileClass> queryAllFileClasses() {
+    public List<DocClass> queryAllFileClasses() {
 
         SQLiteDatabase db = helper.getWritableDatabase();
         String sql = "select * from " + TBL_NAME;
         Cursor cursor = null;
 
-        List<FileClass> fileClassList = new ArrayList<>();
+        List<DocClass> docClassList = new ArrayList<>();
         try {
             cursor = db.rawQuery(sql, null);
 
@@ -56,7 +56,7 @@ public class FileClassDao implements IFileClassDao {
                 String className = cursor.getString(cursor.getColumnIndex(COL_NAME));
                 int order = cursor.getInt(cursor.getColumnIndex(COL_ORDER));
 
-                fileClassList.add(new FileClass(id, className, order));
+                docClassList.add(new DocClass(id, className, order));
             }
 
         } catch (Exception e) {
@@ -66,7 +66,7 @@ public class FileClassDao implements IFileClassDao {
             if (db != null && db.isOpen()) db.close();
         }
 
-        return fileClassList;
+        return docClassList;
     }
 
     /**
@@ -75,7 +75,7 @@ public class FileClassDao implements IFileClassDao {
      * @return 一个分类
      */
     @Override
-    public FileClass queryFileClassById(int id) {
+    public DocClass queryFileClassById(int id) {
 
         SQLiteDatabase db = helper.getWritableDatabase();
         String sql = "select * from " + TBL_NAME + " where " + COL_ID + " = " + id;
@@ -88,7 +88,7 @@ public class FileClassDao implements IFileClassDao {
                 String name = cursor.getString(cursor.getColumnIndex(COL_NAME));
                 int order = cursor.getInt(cursor.getColumnIndex(COL_ORDER));
 
-                return new FileClass(id, name, order);
+                return new DocClass(id, name, order);
             }
 
         } catch (Exception e) {
@@ -106,22 +106,22 @@ public class FileClassDao implements IFileClassDao {
      * @return 返回数据库中的默认分类
      */
     @Override
-    public FileClass queryDefaultFileClass() {
+    public DocClass queryDefaultFileClass() {
 
         SQLiteDatabase db = helper.getWritableDatabase();
         Cursor cursor = null;
-        String sql = "select * from " + TBL_NAME + " where " + COL_NAME + " = \"" + FileClass.DEF_CLASS_NAME + "\"";
+        String sql = "select * from " + TBL_NAME + " where " + COL_NAME + " = \"" + DocClass.DEF_CLASS_NAME + "\"";
 
-        FileClass fileClass = null;
+        DocClass docClass = null;
         try {
             cursor = db.rawQuery(sql, null);
 
             if (cursor.moveToFirst()) {
 
-                fileClass = new FileClass();
-                fileClass.setId(cursor.getInt(cursor.getColumnIndex(COL_ID)));
-                fileClass.setName(cursor.getString(cursor.getColumnIndex(COL_NAME)));
-                fileClass.setOrder(cursor.getInt(cursor.getColumnIndex(COL_ORDER)));
+                docClass = new DocClass();
+                docClass.setId(cursor.getInt(cursor.getColumnIndex(COL_ID)));
+                docClass.setName(cursor.getString(cursor.getColumnIndex(COL_NAME)));
+                docClass.setOrder(cursor.getInt(cursor.getColumnIndex(COL_ORDER)));
             }
 
         } catch (Exception e) {
@@ -131,16 +131,16 @@ public class FileClassDao implements IFileClassDao {
             if (db != null && db.isOpen()) db.close();
         }
 
-        return fileClass;
+        return docClass;
     }
 
     /**
      * 添加分组 (添加在末尾，不更新 Order)
-     * @param fileClass 新分类，自动编码
+     * @param docClass 新分类，自动编码
      * @return 分类 id
      */
     @Override
-    public long insertFileClass(FileClass fileClass) {
+    public long insertFileClass(DocClass docClass) {
 
         SQLiteDatabase db = helper.getWritableDatabase();
         String sql = "insert into " + TBL_NAME +
@@ -151,10 +151,10 @@ public class FileClassDao implements IFileClassDao {
 
         long ret_id = 0;
         try {
-            fileClass.setOrder(queryAllFileClasses().size()); // 插入到最后
+            docClass.setOrder(queryAllFileClasses().size()); // 插入到最后
 
-            stat.bindString(1, fileClass.getName()); // COL_NAME
-            stat.bindLong(2, fileClass.getOrder()); // COL_ORDER
+            stat.bindString(1, docClass.getName()); // COL_NAME
+            stat.bindLong(2, docClass.getOrder()); // COL_ORDER
 
             ret_id = stat.executeInsert();
             db.setTransactionSuccessful();
@@ -170,19 +170,19 @@ public class FileClassDao implements IFileClassDao {
 
     /**
      * 更新分类 (刷新 Order)
-     * @param fileClass 覆盖更新
+     * @param docClass 覆盖更新
      * @return 是否成功更新
      */
     @Override
-    public boolean updateFileClass(FileClass fileClass) {
+    public boolean updateFileClass(DocClass docClass) {
 
         SQLiteDatabase db = helper.getWritableDatabase();
         ContentValues values = new ContentValues();
 
-        values.put(COL_NAME, fileClass.getName());
-        values.put(COL_ORDER, fileClass.getOrder());
+        values.put(COL_NAME, docClass.getName());
+        values.put(COL_ORDER, docClass.getOrder());
 
-        int ret = db.update(TBL_NAME, values, COL_ID + " = ?", new String[] { String.valueOf(fileClass.getId()) });
+        int ret = db.update(TBL_NAME, values, COL_ID + " = ?", new String[] { String.valueOf(docClass.getId()) });
         db.close();
 
         // 更新后刷新 Order
@@ -224,13 +224,13 @@ public class FileClassDao implements IFileClassDao {
      * 处理顺序 (所有操作前 以及 删除操作后)
      */
     private void precessOrder() {
-        List<FileClass> fileClasses = queryAllFileClasses();
-        Collections.sort(fileClasses);
+        List<DocClass> docClasses = queryAllFileClasses();
+        Collections.sort(docClasses);
 
-        for (int i = 0; i < fileClasses.size(); i++) {
-            if (fileClasses.get(i).getOrder() != i) {
-                fileClasses.get(i).setOrder(i);
-                updateFileClass(fileClasses.get(i));
+        for (int i = 0; i < docClasses.size(); i++) {
+            if (docClasses.get(i).getOrder() != i) {
+                docClasses.get(i).setOrder(i);
+                updateFileClass(docClasses.get(i));
             }
         }
     }

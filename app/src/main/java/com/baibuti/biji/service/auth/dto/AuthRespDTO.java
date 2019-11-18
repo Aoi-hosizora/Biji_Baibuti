@@ -6,9 +6,9 @@ import lombok.Setter;
 @Getter
 public class AuthRespDTO {
 
+    private int id;
     private String username;
-    private String status;
 
     @Setter
-    private String token;
+    private String token = "";
 }

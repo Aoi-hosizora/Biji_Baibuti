@@ -135,8 +135,8 @@ public class AppPathUtil {
     }
 
     /** !!!!
-     * Uri -> Path, uri.getFilePath() / handle Path
-     * Uri.getFilePath() 的返回情况
+     * Uri -> Path, uri.getFilename() / handle Path
+     * Uri.getFilename() 的返回情况
      *      file:///
      *      content://package
      */

@@ -3,47 +3,36 @@ package com.baibuti.biji.model.dto;
 import com.baibuti.biji.model.po.SearchItem;
 
 import java.io.Serializable;
-import java.util.List;
 
 import lombok.Data;
 
 @Data
 public class SearchItemDTO implements Serializable {
 
+    private int id;
     private String title;
     private String url;
     private String content;
 
-    private SearchItemDTO(String title, String url, String content) {
+    private SearchItemDTO(int id, String title, String url, String content) {
+        this.id = id;
         this.title = title;
         this.url = url;
         this.content = content.replaceAll("[\n|\r]", " ");
-    }
-
-    @Data
-    public static class SearchItemUrls implements Serializable {
-
-        private List<String> urls;
-
-        SearchItemUrls() { }
-
-        void addUrl(String url) {
-            urls.add(url);
-        }
     }
 
     /**
      * SearchItemNetDao -> SearchItem
      */
     public SearchItem toSearchItem() {
-        return new SearchItem(title, content, url);
+        return new SearchItem(id, title, content, url);
     }
 
     /**
      * SearchItem -> SearchItemNetDao
      */
     public static SearchItemDTO toSearchItemDTO(SearchItem searchItem) {
-        return new SearchItemDTO(searchItem.getTitle(), searchItem.getUrl(), searchItem.getContent());
+        return new SearchItemDTO(searchItem.getId(), searchItem.getTitle(), searchItem.getUrl(), searchItem.getContent());
     }
 
     /**
@@ -56,26 +45,5 @@ public class SearchItemDTO implements Serializable {
         for (int i = 0; i < searchItemsDTO.length; i++)
             searchItems[i] = searchItemsDTO[i].toSearchItem();
         return searchItems;
-    }
-
-    // /**
-    //  * SearchItem[] -> SearchItemNetDao[]
-    //  * @return
-    //  */
-    // public static SearchItemNetDao[] toSearchItemsDTO(SearchItem[] searchList) {
-    //     if (searchList == null) return null;
-    //
-    //     SearchItemNetDao[] searchItemsDTO = new SearchItemNetDao[searchList.length];
-    //     for (int i = 0; i < searchList.length; i++)
-    //         searchItemsDTO[i] = toSearchItemDTO(searchList[i]);
-    //     return searchItemsDTO;
-    // }
-
-    public static SearchItemUrls toSearchItemUrls(List<SearchItem> searchItems) {
-        SearchItemUrls urls = new SearchItemUrls();
-        for (SearchItem searchItem : searchItems)
-            urls.addUrl(searchItem.getUrl());
-
-        return urls;
     }
 }

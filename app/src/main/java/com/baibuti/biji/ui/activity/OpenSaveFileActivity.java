@@ -362,7 +362,7 @@ public class OpenSaveFileActivity extends AppCompatActivity implements View.OnCl
                 String filename = m_dir + "/" + m_FileNameEditText.getText();
 
 
-                BackIntent.putExtra("filePath", filename + Selected_File_Type);
+                BackIntent.putExtra("filename", filename + Selected_File_Type);
 
                 if (isReturnType) // 单独返回类型
                     BackIntent.putExtra("type", Selected_File_Type);

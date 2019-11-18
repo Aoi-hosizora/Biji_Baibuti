@@ -44,7 +44,7 @@ public class UploadFileNetDao {
 
         Observable<ResponseDTO<FileUrlDTO>> observable = RetrofitFactory.getInstance()
             .createRequest(AuthManager.getInstance().getAuthorizationHead())
-            .deleteImage(new FileUrlDTO(filename))
+            .deleteImages(new FileUrlDTO(filename))
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread());
 

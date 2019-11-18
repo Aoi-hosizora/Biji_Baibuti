@@ -147,32 +147,7 @@ public class GroupDao implements IGroupDao {
      */
     @Override
     public Group queryDefaultGroup() {
-
-        SQLiteDatabase db = helper.getWritableDatabase();
-        Cursor cursor = null;
-        String sql = "select * from " + TBL_NAME + " where " + COL_NAME + " = \"" + Group.DEF_GROUP.getName() + "\"";
-
-        Group group = null;
-        try {
-            cursor = db.rawQuery(sql, null);
-
-            if (cursor.moveToFirst()) {
-
-                group = new Group();
-                group.setId(cursor.getInt(cursor.getColumnIndex(COL_ID)));
-                group.setName(cursor.getString(cursor.getColumnIndex(COL_NAME)));
-                group.setOrder(cursor.getInt(cursor.getColumnIndex(COL_ORDER)));
-                group.setColor(cursor.getString(cursor.getColumnIndex(COL_COLOR)));
-            }
-
-        } catch (Exception e) {
-            e.printStackTrace();
-        } finally {
-            if (cursor != null && !cursor.isClosed()) cursor.close();
-            if (db != null && db.isOpen()) db.close();
-        }
-
-        return group;
+        return queryGroupByName(Group.DEF_GROUP.getName());
     }
 
     /**

@@ -46,16 +46,4 @@ public class GroupDTO implements Serializable {
             groups[i] = groupsDTO[i].toGroup();
         return groups;
     }
-
-    // /**
-    //  * Group[] -> GroupDTO[]
-    //  */
-    // public static GroupDTO[] toGroupsDTO(Group[] groups) {
-    //     if (groups == null)
-    //         return null;
-    //     GroupDTO[] groupsDTO = new GroupDTO[groups.length];
-    //     for (int i = 0; i < groups.length; i++)
-    //         groupsDTO[i] = toGroupDTO(groups[i]);
-    //     return groupsDTO;
-    // }
 }

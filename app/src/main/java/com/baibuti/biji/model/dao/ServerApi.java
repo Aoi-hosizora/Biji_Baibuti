@@ -1,200 +1,307 @@
 package com.baibuti.biji.model.dao;
 
+import com.baibuti.biji.model.dto.DocClassDTO;
 import com.baibuti.biji.model.dto.DocumentDTO;
-import com.baibuti.biji.model.dto.FileClassDTO;
-import com.baibuti.biji.model.dto.FileUrlDTO;
+import com.baibuti.biji.model.dto.OneFieldDTO;
 import com.baibuti.biji.model.dto.ResponseDTO;
 import com.baibuti.biji.model.dto.GroupDTO;
 import com.baibuti.biji.model.dto.NoteDTO;
 import com.baibuti.biji.model.dto.SearchItemDTO;
 import com.baibuti.biji.service.auth.dto.AuthRespDTO;
-import com.baibuti.biji.service.auth.dto.LoginDTO;
-import com.baibuti.biji.service.auth.dto.RegisterDTO;
 
-import java.util.Map;
+import java.io.File;
+import java.lang.annotation.Documented;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
 import io.reactivex.Observable;
-import okhttp3.RequestBody;
 import retrofit2.Response;
-import retrofit2.http.Body;
 import retrofit2.http.DELETE;
-import retrofit2.http.Field;
 import retrofit2.http.FormUrlEncoded;
 import retrofit2.http.GET;
 import retrofit2.http.Multipart;
 import retrofit2.http.POST;
 import retrofit2.http.PUT;
-import retrofit2.http.PartMap;
+import retrofit2.http.Part;
 import retrofit2.http.Path;
+import retrofit2.http.Query;
+
+/**
+ * 标注需要 Authorization 头
+ */
+@Documented
+@Retention(RetentionPolicy.SOURCE)
+@Target({ElementType.METHOD})
+@interface NeedAuth { }
 
 public interface ServerApi {
 
-    // region Auth (3)
+    // region Auth (4)
 
-    // TODO Authorization 响应头
+    @Multipart
     @POST("/auth/login")
-    Observable<Response<ResponseDTO<AuthRespDTO>>> login(@Body() LoginDTO loginDTO);
+    Observable<Response<ResponseDTO<AuthRespDTO>>> login(
+        @Part("username") String username,
+        @Part("password") String password,
+        @Part("expiration") int expiration
+    );
 
-    @POST("/auth/logout")
-    Observable<ResponseDTO<AuthRespDTO>> logout();
-
+    @Multipart
     @POST("/auth/register")
-    Observable<ResponseDTO<AuthRespDTO>> register(@Body() RegisterDTO registerDTO);
+    Observable<ResponseDTO<AuthRespDTO>> register(
+        @Part("username") String username,
+        @Part("password") String password
+    );
+
+    @NeedAuth
+    @GET("/auth/")
+    Observable<ResponseDTO<AuthRespDTO>> currentUser();
+
+    @NeedAuth
+    @POST("/auth/logout")
+    Observable<ResponseDTO<OneFieldDTO.CountDTO>> logout();
 
     // endregion Auth
 
-    // region Note (6)
+    // region Note (7)
 
-    @GET("/note/all")
+    @NeedAuth
+    @GET("/note/")
     Observable<ResponseDTO<NoteDTO[]>> getAllNotes();
 
-    // TODO 接口待加
-    @GET("/note/group/{id}")
-    Observable<ResponseDTO<NoteDTO[]>> getNotesByGroupId(@Path("id") int id);
+    @NeedAuth
+    @GET("/note/group/{gid}")
+    Observable<ResponseDTO<NoteDTO[]>> getNotesByGroupId(@Path("gid") int id);
 
-    @GET("/note/one/{id}")
-    Observable<ResponseDTO<NoteDTO>> getNoteById(@Path("id") int id);
+    @NeedAuth
+    @GET("/note/{nid}")
+    Observable<ResponseDTO<NoteDTO>> getNoteById(@Path("nid") int id);
 
-    @POST("/note/insert")
-    Observable<ResponseDTO<NoteDTO>> insertNote(@Body() NoteDTO noteDTO);
+    @NeedAuth
+    @Multipart
+    @POST("/note/")
+    Observable<ResponseDTO<NoteDTO>> insertNote(
+        @Part("title") String title,
+        @Part("content") String content,
+        @Part("group_id") int groupId
+    );
 
-    @PUT("/note/update")
-    Observable<ResponseDTO<NoteDTO>> updateNote(@Body() NoteDTO noteDTO);
+    @NeedAuth
+    @Multipart
+    @PUT("/note/")
+    Observable<ResponseDTO<NoteDTO>> updateNote(
+        @Part("id") int id,
+        @Part("title") String title,
+        @Part("content") String content,
+        @Part("group_id") int groupId
+    );
 
-    // TODO 接口待改
+    @NeedAuth
     @DELETE("/note/delete/{id}")
     Observable<ResponseDTO<NoteDTO>> deleteNote(@Path("id") int id);
+
+    @NeedAuth
+    @Multipart
+    @DELETE("/note/delete/")
+    Observable<ResponseDTO<NoteDTO>> deleteNotes(
+        @Part("id") int[] id
+    );
 
     // endregion Note
 
     // region Group (6)
 
-    @GET("/group/all")
+    @NeedAuth
+    @GET("/group/")
     Observable<ResponseDTO<GroupDTO[]>> getAllGroups();
 
-    @GET("/group/one/{id}")
-    Observable<ResponseDTO<GroupDTO>> getGroupById(@Path("id") int id);
+    @NeedAuth
+    @GET("/group/{gid}")
+    Observable<ResponseDTO<GroupDTO>> getGroupById(@Path("gid") int id);
 
-    // TODO 接口待加
-    @GET("/group/one/{name}")
-    Observable<ResponseDTO<GroupDTO>> getGroupByName(@Path("name") String name);
+    @NeedAuth
+    @GET("/group/")
+    Observable<ResponseDTO<GroupDTO>> getGroupByName(@Query("name") String name);
 
-    // TODO 接口待加
+    @NeedAuth
     @GET("/group/default")
     Observable<ResponseDTO<GroupDTO>> getDefaultGroup();
 
-    @POST("/group/insert")
-    Observable<ResponseDTO<GroupDTO>> insertGroup(@Body() GroupDTO groupDTO);
+    @NeedAuth
+    @POST("/group/")
+    Observable<ResponseDTO<GroupDTO>> insertGroup(
+        @Part("name") String name,
+        @Part("color") String color
+    );
 
-    @PUT("/group/update")
-    Observable<ResponseDTO<GroupDTO>> updateGroup(@Body() GroupDTO groupDTO);
+    @NeedAuth
+    @PUT("/group/")
+    Observable<ResponseDTO<GroupDTO>> updateGroup(
+        @Part("id") int id,
+        @Part("name") String name,
+        @Part("order") int order,
+        @Part("color") String color
+    );
 
-    // TODO 接口待改
-    @DELETE("/group/delete/{id}")
-    Observable<ResponseDTO<GroupDTO>> deleteGroup(@Path("id") int id);
+    @NeedAuth
+    @DELETE("/group/{gid}")
+    Observable<ResponseDTO<GroupDTO>> deleteGroup(@Path("gid") int id);
 
     // endregion Group
 
-    // region Image
+    // region SearchItem (5)
 
-    @Multipart
-    @POST("/image/upload")
-    Observable<ResponseDTO<FileUrlDTO>> uploadImage(@PartMap Map<String, RequestBody> requestBodyMap);
-
-    // TODO DTO 待改
-    @DELETE("/image/delete")
-    Observable<ResponseDTO<FileUrlDTO>> deleteImage(@Body() FileUrlDTO fileUrlDTO);
-
-    // endregion
-
-    // region SearchItem (4)
-
-    @GET("/star/all")
+    @NeedAuth
+    @GET("/star/")
     Observable<ResponseDTO<SearchItemDTO[]>> getAllStars();
 
+    @NeedAuth
+    @GET("/star/{sid}")
+    Observable<ResponseDTO<SearchItemDTO>> getStarById(@Path("sid") int id);
+
+    @NeedAuth
+    @Multipart
     @POST("/star/insert")
-    Observable<ResponseDTO<SearchItemDTO>> insertStar(@Body() SearchItemDTO searchItemDTO);
+    Observable<ResponseDTO<SearchItemDTO>> insertStar(
+        @Part("title") String title,
+        @Part("url") String url,
+        @Part("content") String content
+    );
 
-    // TODO 接口待改
-    @DELETE("/star/delete")
+    @NeedAuth
+    @DELETE("/star/{sid}")
     @FormUrlEncoded
-    Observable<ResponseDTO<SearchItemDTO>> deleteStar(@Field("url") String url);
+    Observable<ResponseDTO<SearchItemDTO>> deleteStar(@Path("sid") int id);
 
-    // TODO 接口待改
-    @DELETE("/star/deletes")
-    Observable<ResponseDTO<SearchItemDTO[]>> deleteStars(@Body() SearchItemDTO.SearchItemUrls urls);
+    @NeedAuth
+    @Multipart
+    @DELETE("/star/")
+    Observable<ResponseDTO<SearchItemDTO[]>> deleteStars(
+        @Part("id") int[] id
+    );
 
     // endregion SearchItem
 
     // region Schedule (3)
 
-    @GET("/schedule/download")
-    Observable<ResponseDTO<String>> getSchedule();
+    @NeedAuth
+    @GET("/schedule/")
+    Observable<ResponseDTO<OneFieldDTO.ScheduleDTO>> getSchedule();
 
-    @POST("/schedule/new")
-    Observable<ResponseDTO<Object>> newSchedule();
+    @NeedAuth
+    @PUT("/schedule/")
+    Observable<ResponseDTO<OneFieldDTO.ScheduleDTO>> updateSchedule();
 
-    @DELETE("/schedule/delete")
-    Observable<ResponseDTO<Object>> deleteSchedule();
+    @NeedAuth
+    @DELETE("/schedule/")
+    Observable<ResponseDTO<OneFieldDTO.ScheduleDTO>> deleteSchedule();
 
     // endregion Schedule
 
-    // region FileClass (7)
+    // region DocClass (7)
 
-    @GET("/fileclass/all")
-    Observable<ResponseDTO<FileClassDTO[]>> getAllFileClasses();
+    @NeedAuth
+    @GET("/docclass/")
+    Observable<ResponseDTO<DocClassDTO[]>> getAllDocClasses();
 
-    // TODO 接口待加
-    @GET("/fileclass/one/{id}")
-    Observable<ResponseDTO<FileClassDTO>> getFileClassById(@Path("id") int id);
+    @NeedAuth
+    @GET("/docclass/{cid}")
+    Observable<ResponseDTO<DocClassDTO>> getDocClassById(@Path("cid") int id);
 
-    // TODO 接口待加
-    @GET("/group/default")
-    Observable<ResponseDTO<FileClassDTO>> getDefaultFileClass();
+    @NeedAuth
+    @GET("/docclass/}")
+    Observable<ResponseDTO<DocClassDTO>> getDocClassByNane(@Query("name") String name);
 
-    @POST("/fileclass/insert")
-    Observable<ResponseDTO<FileClassDTO>> insertFileClass(@Body() FileClassDTO fileClassDTO);
+    @NeedAuth
+    @GET("/docclass/default")
+    Observable<ResponseDTO<DocClassDTO>> getDefaultDocClass();
 
-    @PUT("/fileclass/update")
-    Observable<ResponseDTO<FileClassDTO>> updateFileClass(@Body() FileClassDTO fileClassDTO);
+    @NeedAuth
+    @Multipart
+    @POST("/docclass/")
+    Observable<ResponseDTO<DocClassDTO>> insertDocClass(
+        @Part("name") String name
+    );
+
+    @NeedAuth
+    @Multipart
+    @PUT("/docclass/")
+    Observable<ResponseDTO<DocClassDTO>> updateDocClass(
+        @Part("id") int id,
+        @Part("name") String name
+    );
+
+    @NeedAuth
+    @DELETE("/docclass/{cid}")
+    Observable<ResponseDTO<DocClassDTO>> deleteDocClass(@Path("cid") int id);
 
     // TODO 接口待改
-    @DELETE("/fileclass/delete/{id}")
-    Observable<ResponseDTO<FileClassDTO>> deleteFileClass(@Path("id") int id);
-
-    // TODO 接口待改
-    // @GET("/fileclass/share")
+    // @GET("/docclass/share")
     // Observable<ResponseDTO<>> getShareCode(@Path("id") int id);
 
-    // endregion FileClass
+    // endregion DocClass
 
     // region Document (7)
 
-    @GET("/file/all")
+    @NeedAuth
+    @GET("/document/")
     Observable<ResponseDTO<DocumentDTO[]>> getAllDocuments();
 
-    // TODO 接口待加
-    @GET("/file/class/{class}")
-    Observable<ResponseDTO<DocumentDTO[]>> getDocumentsByFileClass(@Path("class") String fileClass);
+    @NeedAuth
+    @GET("/document/class/{cid}")
+    Observable<ResponseDTO<DocumentDTO[]>> getDocumentByClassId(@Path("cid") String fileClass);
 
-    // TODO 接口待改
-    @GET("/file/{id}")
-    Observable<ResponseDTO<DocumentDTO>> getDocumentById(@Path("id") int id);
+    @NeedAuth
+    @GET("/document/{did}")
+    Observable<ResponseDTO<DocumentDTO>> getDocumentById(@Path("did") int id);
 
-    @POST("/file/insert")
-    Observable<ResponseDTO<DocumentDTO>> insertDocument(@Body() DocumentDTO documentDTO);
+    @NeedAuth
+    @Multipart
+    @POST("/document/")
+    Observable<ResponseDTO<DocumentDTO>> insertDocument(
+        @Part("file") File file,
+        @Part("doc_class_id") int classId
+    );
 
-    @PUT("/file/update")
-    Observable<ResponseDTO<DocumentDTO>> updateDocument(@Body() DocumentDTO documentDTO);
+    @NeedAuth
+    @Multipart
+    @PUT("/document/")
+    Observable<ResponseDTO<DocumentDTO>> updateDocument(
+        @Part("id") int id,
+        @Part("filename") String filename,
+        @Part("doc_class_id") int classId
+    );
 
-    // TODO 接口待改
-    @DELETE("/file/delete/{id}")
-    Observable<ResponseDTO<DocumentDTO>> deleteDocument(@Path("id") int id);
+    @NeedAuth
+    @DELETE("/document/{did}")
+    Observable<ResponseDTO<DocumentDTO>> deleteDocument(@Path("did") int id);
 
     // TODO 接口待改
     // @GET("/file/get_share")
     // Observable<ResponseDTO<>> getShareCode(@Path("id") int id);
 
     // endregion Document
+
+    // region Raw (2)
+
+    @NeedAuth
+    @Multipart
+    @POST("/raw/image")
+    Observable<ResponseDTO<OneFieldDTO.FilenameDTO>> uploadImage(
+        @Part("image") File image,
+        @Part("type") String type
+    );
+
+    @NeedAuth
+    @Multipart
+    @DELETE("/rae/image")
+    Observable<ResponseDTO<OneFieldDTO.CountDTO>> deleteImages(
+        @Part("urls") String[] urls,
+        @Part("type") String type
+    );
+
+    // endregion Raw
 
 }

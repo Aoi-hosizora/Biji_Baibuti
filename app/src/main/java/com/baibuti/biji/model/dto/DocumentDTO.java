@@ -10,27 +10,27 @@ import lombok.Data;
 public class DocumentDTO implements Serializable {
 
     private int id;
-    private String filePath;
-    private String className;
+    private String filename;
+    private DocClassDTO docClass;
 
-    private DocumentDTO(int id, String filePath, String className) {
+    private DocumentDTO(int id, String filename, DocClassDTO docClass) {
         this.id = id;
-        this.filePath = filePath;
-        this.className = className;
+        this.filename = filename;
+        this.docClass = docClass;
     }
 
     /**
      * DocumentDTO -> Document
      */
     public Document toDocument() {
-        return new Document(id, filePath, className);
+        return new Document(id, filename, docClass);
     }
 
     /**
      * Document -> DocumentDTO
      */
     public static DocumentDTO toDocument(Document document) {
-        return new DocumentDTO(document.getId(), document.getFilePath(), document.getClassName());
+        return new DocumentDTO(document.getId(), document.getFilename(), document.getClassName());
     }
 
     /**
@@ -44,16 +44,4 @@ public class DocumentDTO implements Serializable {
             documents[i] = documentsDTO[i].toDocument();
         return documents;
     }
-
-    // /**
-    //  * Document[] -> DocumentDTO[]
-    //  */
-    // public static DocumentDTO[] toDocumentsDTO(Document[] documents) {
-    //     if (documents == null)
-    //         return null;
-    //     DocumentDTO[] documentsDTO = new DocumentDTO[documents.length];
-    //     for (int i = 0; i < documents.length; i++)
-    //         documentsDTO[i] = toDocument(documents[i]);
-    //     return documentsDTO;
-    // }
 }

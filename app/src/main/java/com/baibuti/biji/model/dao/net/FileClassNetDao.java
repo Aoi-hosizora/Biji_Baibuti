@@ -1,10 +1,10 @@
 package com.baibuti.biji.model.dao.net;
 
 import com.baibuti.biji.model.dao.daoInterface.IFileClassDao;
-import com.baibuti.biji.model.dto.FileClassDTO;
+import com.baibuti.biji.model.dto.DocClassDTO;
 import com.baibuti.biji.model.dto.ResponseDTO;
 import com.baibuti.biji.model.dto.ServerException;
-import com.baibuti.biji.model.po.FileClass;
+import com.baibuti.biji.model.po.DocClass;
 import com.baibuti.biji.service.auth.AuthManager;
 import com.baibuti.biji.service.retrofit.RetrofitFactory;
 import com.baibuti.biji.service.retrofit.ServerErrorHandle;
@@ -20,19 +20,19 @@ import io.reactivex.schedulers.Schedulers;
 public class FileClassNetDao implements IFileClassDao {
 
     @Override
-    public List<FileClass> queryAllFileClasses() throws ServerException {
-        Observable<ResponseDTO<FileClassDTO[]>> observable = RetrofitFactory.getInstance()
+    public List<DocClass> queryAllFileClasses() throws ServerException {
+        Observable<ResponseDTO<DocClassDTO[]>> observable = RetrofitFactory.getInstance()
             .createRequest(AuthManager.getInstance().getAuthorizationHead())
-            .getAllFileClasses()
+            .getAllDocClasses()
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread());
 
         try {
-            ResponseDTO<FileClassDTO[]> response = observable.toFuture().get();
+            ResponseDTO<DocClassDTO[]> response = observable.toFuture().get();
             if (response.getCode() != ServerErrorHandle.SUCCESS)
                 throw ServerErrorHandle.parseErrorMessage(response);
 
-            return Arrays.asList(FileClassDTO.toFileClasses(response.getData()));
+            return Arrays.asList(DocClassDTO.toFileClasses(response.getData()));
         }
         catch (ServerException | InterruptedException | ExecutionException ex) {
             ex.printStackTrace();
@@ -41,36 +41,15 @@ public class FileClassNetDao implements IFileClassDao {
     }
 
     @Override
-    public FileClass queryFileClassById(int id) throws ServerException {
-        Observable<ResponseDTO<FileClassDTO>> observable = RetrofitFactory.getInstance()
+    public DocClass queryFileClassById(int id) throws ServerException {
+        Observable<ResponseDTO<DocClassDTO>> observable = RetrofitFactory.getInstance()
             .createRequest(AuthManager.getInstance().getAuthorizationHead())
-            .getFileClassById(id)
+            .getDocClassById(id)
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread());
 
         try {
-            ResponseDTO<FileClassDTO> response = observable.toFuture().get();
-            if (response.getCode() != ServerErrorHandle.SUCCESS)
-                throw ServerErrorHandle.parseErrorMessage(response);
-
-            return response.getData().toFileClass();
-        }
-        catch (ServerException | InterruptedException | ExecutionException ex) {
-            ex.printStackTrace();
-            throw ServerErrorHandle.getClientError(ex);
-        }
-    }
-
-    @Override
-    public FileClass queryDefaultFileClass() throws ServerException {
-        Observable<ResponseDTO<FileClassDTO>> observable = RetrofitFactory.getInstance()
-            .createRequest(AuthManager.getInstance().getAuthorizationHead())
-            .getDefaultFileClass()
-            .subscribeOn(Schedulers.io())
-            .observeOn(AndroidSchedulers.mainThread());
-
-        try {
-            ResponseDTO<FileClassDTO> response = observable.toFuture().get();
+            ResponseDTO<DocClassDTO> response = observable.toFuture().get();
             if (response.getCode() != ServerErrorHandle.SUCCESS)
                 throw ServerErrorHandle.parseErrorMessage(response);
 
@@ -83,15 +62,36 @@ public class FileClassNetDao implements IFileClassDao {
     }
 
     @Override
-    public long insertFileClass(FileClass fileClass) throws ServerException {
-        Observable<ResponseDTO<FileClassDTO>> observable = RetrofitFactory.getInstance()
+    public DocClass queryDefaultFileClass() throws ServerException {
+        Observable<ResponseDTO<DocClassDTO>> observable = RetrofitFactory.getInstance()
             .createRequest(AuthManager.getInstance().getAuthorizationHead())
-            .insertFileClass(FileClassDTO.toFileClassDTO(fileClass))
+            .getDefaultDocClass()
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread());
 
         try {
-            ResponseDTO<FileClassDTO> response = observable.toFuture().get();
+            ResponseDTO<DocClassDTO> response = observable.toFuture().get();
+            if (response.getCode() != ServerErrorHandle.SUCCESS)
+                throw ServerErrorHandle.parseErrorMessage(response);
+
+            return response.getData().toFileClass();
+        }
+        catch (ServerException | InterruptedException | ExecutionException ex) {
+            ex.printStackTrace();
+            throw ServerErrorHandle.getClientError(ex);
+        }
+    }
+
+    @Override
+    public long insertFileClass(DocClass docClass) throws ServerException {
+        Observable<ResponseDTO<DocClassDTO>> observable = RetrofitFactory.getInstance()
+            .createRequest(AuthManager.getInstance().getAuthorizationHead())
+            .insertDocClass(DocClassDTO.toFileClassDTO(docClass))
+            .subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread());
+
+        try {
+            ResponseDTO<DocClassDTO> response = observable.toFuture().get();
             if (response.getCode() != ServerErrorHandle.SUCCESS)
                 throw ServerErrorHandle.parseErrorMessage(response);
 
@@ -104,15 +104,15 @@ public class FileClassNetDao implements IFileClassDao {
     }
 
     @Override
-    public boolean updateFileClass(FileClass fileClass) throws ServerException {
-        Observable<ResponseDTO<FileClassDTO>> observable = RetrofitFactory.getInstance()
+    public boolean updateFileClass(DocClass docClass) throws ServerException {
+        Observable<ResponseDTO<DocClassDTO>> observable = RetrofitFactory.getInstance()
             .createRequest(AuthManager.getInstance().getAuthorizationHead())
-            .updateFileClass(FileClassDTO.toFileClassDTO(fileClass))
+            .updateDocClass(DocClassDTO.toFileClassDTO(docClass))
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread());
 
         try {
-            ResponseDTO<FileClassDTO> response = observable.toFuture().get();
+            ResponseDTO<DocClassDTO> response = observable.toFuture().get();
             if (response.getCode() != ServerErrorHandle.SUCCESS)
                 throw ServerErrorHandle.parseErrorMessage(response);
 
@@ -126,14 +126,14 @@ public class FileClassNetDao implements IFileClassDao {
 
     @Override
     public boolean deleteFileClass(int id) throws ServerException {
-        Observable<ResponseDTO<FileClassDTO>> observable = RetrofitFactory.getInstance()
+        Observable<ResponseDTO<DocClassDTO>> observable = RetrofitFactory.getInstance()
             .createRequest(AuthManager.getInstance().getAuthorizationHead())
-            .deleteFileClass(id)
+            .deleteDocClass(id)
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread());
 
         try {
-            ResponseDTO<FileClassDTO> response = observable.toFuture().get();
+            ResponseDTO<DocClassDTO> response = observable.toFuture().get();
             if (response.getCode() != ServerErrorHandle.SUCCESS)
                 throw ServerErrorHandle.parseErrorMessage(response);
 
@@ -151,7 +151,7 @@ public class FileClassNetDao implements IFileClassDao {
     public static File getShareCode(String fileClassName){
 
         return NetHelper.httpGetFileSync(
-                GetShareCodeUrl + "?className=" + fileClassName,
+                GetShareCodeUrl + "?docClass=" + fileClassName,
                 "Share",
                 fileClassName + ".png",
                 NetHelper.getOneHeader("Authorization", AuthManager.getInstance().getToken())

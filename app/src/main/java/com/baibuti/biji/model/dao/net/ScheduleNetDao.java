@@ -40,7 +40,7 @@ public class ScheduleNetDao implements IScheduleDao {
     public boolean newSchedule(String schedule) throws ServerException {
         Observable<ResponseDTO<Object>> observable = RetrofitFactory.getInstance()
             .createRequest(AuthManager.getInstance().getAuthorizationHead())
-            .newSchedule()
+            .updateSchedule()
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread());
 

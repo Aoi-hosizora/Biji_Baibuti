@@ -37,6 +37,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.baibuti.biji.model.dto.ServerException;
+import com.baibuti.biji.model.po.DocClass;
 import com.baibuti.biji.service.auth.AuthManager;
 import com.baibuti.biji.ui.IContextHelper;
 import com.baibuti.biji.ui.adapter.DocumentAdapter;
@@ -44,7 +45,6 @@ import com.baibuti.biji.ui.adapter.FileClassAdapter;
 import com.baibuti.biji.model.dao.local.DocumentDao;
 import com.baibuti.biji.model.dao.local.FileClassDao;
 import com.baibuti.biji.model.po.Document;
-import com.baibuti.biji.model.po.FileClass;
 import com.baibuti.biji.model.po.FileItem;
 import com.baibuti.biji.R;
 import com.baibuti.biji.ui.activity.MainActivity;
@@ -66,7 +66,7 @@ public class FileFragment extends BaseFragment implements IContextHelper {
 
     private Activity activity;
 
-    private List<FileClass> fileClassListItems  = new ArrayList<>();
+    private List<DocClass> docClassListItems = new ArrayList<>();
     private ListView fileClassList;
     private FileClassDao fileClassDao;
     private FileClassAdapter fileClassAdapter;
@@ -276,7 +276,7 @@ public class FileFragment extends BaseFragment implements IContextHelper {
             public void run() {
                 //重命名分组
                 String currentFileClassName = documentHeader.getText().toString();
-                final FileClass currentFileClass = fileClassDao.queryFileClassByName(currentFileClassName, false);
+                final DocClass currentDocClass = fileClassDao.queryFileClassByName(currentFileClassName, false);
 
                 activity.runOnUiThread(new Runnable() {
                     @Override
@@ -303,7 +303,7 @@ public class FileFragment extends BaseFragment implements IContextHelper {
                                                 .create().show();
                                         }
                                         else
-                                            updateFileClassList(edit.getText().toString().trim(), TAG_RENAME, currentFileClass, lastPositionClicked);
+                                            updateFileClassList(edit.getText().toString().trim(), TAG_RENAME, currentDocClass, lastPositionClicked);
 
                                         dialog.dismiss();
                                     }
@@ -338,12 +338,12 @@ public class FileFragment extends BaseFragment implements IContextHelper {
                     });
 
                     Log.e("测试", "run: " + lastPositionClicked);
-                    fileClassDao.deleteFileClass(fileClassListItems.get(lastPositionClicked).getId());
-                    documentDao.deleteDocumentByClass(fileClassListItems.get(lastPositionClicked).getName(), true);
+                    fileClassDao.deleteFileClass(docClassListItems.get(lastPositionClicked).getId());
+                    documentDao.deleteDocumentByClass(docClassListItems.get(lastPositionClicked).getName(), true);
                     activity.runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
-                            fileClassListItems.remove(lastPositionClicked);
+                            docClassListItems.remove(lastPositionClicked);
                             documentListItems.clear();
                             documentListsByClass.remove(lastPositionClicked);
                             fileClassAdapter.lastButton = null;
@@ -544,7 +544,7 @@ public class FileFragment extends BaseFragment implements IContextHelper {
                 @Override
                 public void run() {
                     try {
-                        DocumentUtil.getSharedFiles("?username=" + username + "&className="+foldername);
+                        DocumentUtil.getSharedFiles("?username=" + username + "&docClass="+foldername);
                         activity.runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
@@ -617,9 +617,9 @@ public class FileFragment extends BaseFragment implements IContextHelper {
 
                 if(documentDao == null)
                     documentDao = new DocumentDao(activity);
-                fileClassListItems = fileClassDao.queryAllFileClasses();
+                docClassListItems = fileClassDao.queryAllFileClasses();
                 documentDao.pushpull();
-                for(FileClass f: fileClassListItems){
+                for(DocClass f: docClassListItems){
                     if(!f.getName().equals("+")) {
                         List<Document> l = documentDao.queryDocumentsByClassName(f.getName(), false);
                         documentListsByClass.add(l);
@@ -629,7 +629,7 @@ public class FileFragment extends BaseFragment implements IContextHelper {
                 activity.runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
-                        fileClassAdapter = new FileClassAdapter(getContext(), fileClassListItems);
+                        fileClassAdapter = new FileClassAdapter(getContext(), docClassListItems);
                         fileClassList = (ListView) view.findViewById(R.id.filefragment_fileclasses);
                         fileClassList.setAdapter(fileClassAdapter);
                         fileClassList.setVerticalScrollBarEnabled(false);
@@ -642,9 +642,9 @@ public class FileFragment extends BaseFragment implements IContextHelper {
                                     unSelectedText.setVisibility(View.GONE);
                                 if(position != fileClassList.getCount() - 1) {
                                     lastPositionClicked = position;
-                                    FileClass currentFileClass = (FileClass) fileClassListItems.get(position);
+                                    DocClass currentDocClass = (DocClass) docClassListItems.get(position);
                                     //更改文件列表标题
-                                    documentHeader.setText(currentFileClass.getName());
+                                    documentHeader.setText(currentDocClass.getName());
                                     //获取分类下的文件
                                     updateDocumentRecyclerview(position);
                                 }
@@ -653,9 +653,9 @@ public class FileFragment extends BaseFragment implements IContextHelper {
                             }
                         });
 
-                        if(!fileClassListItems.get(fileClassListItems.size() - 1).getName().equals("+")) {
-                            FileClass temp = new FileClass("+", 0);
-                            fileClassListItems.add(fileClassAdapter.getCount(), temp);
+                        if(!docClassListItems.get(docClassListItems.size() - 1).getName().equals("+")) {
+                            DocClass temp = new DocClass("+", 0);
+                            docClassListItems.add(fileClassAdapter.getCount(), temp);
                             fileClassAdapter.notifyDataSetChanged();
                         }
 
@@ -774,11 +774,11 @@ public class FileFragment extends BaseFragment implements IContextHelper {
     /**
      * 修改分组信息提交
      */
-    private void updateFileClassList(final String newFileClassName, int tag, FileClass currentFileClass, int position) {
+    private void updateFileClassList(final String newFileClassName, int tag, DocClass currentDocClass, int position) {
 
         int newFileClassOrder = 0;
         // 更改好的分组信息
-        final FileClass newFileClass = new FileClass(newFileClassName, newFileClassOrder);
+        final DocClass newDocClass = new DocClass(newFileClassName, newFileClassOrder);
 
         // 先判断空标题
         if (newFileClassName.isEmpty()) {
@@ -794,12 +794,12 @@ public class FileFragment extends BaseFragment implements IContextHelper {
 
         else {
             // 标题非空
-            if (fileClassDao.checkDuplicate(newFileClass, null) != 0) {
+            if (fileClassDao.checkDuplicate(newDocClass, null) != 0) {
                 // 分组重复
                 new android.support.v7.app.AlertDialog
                     .Builder(getContext())
                     .setTitle(R.string.GroupDialog_DuplicateAlertTitle)
-                    .setMessage(String.format(getContext().getText(R.string.GroupDialog_DuplicateAlertMsg).toString(), newFileClass.getName()))
+                    .setMessage(String.format(getContext().getText(R.string.GroupDialog_DuplicateAlertMsg).toString(), newDocClass.getName()))
                     .setNegativeButton(R.string.GroupDialog_DuplicateAlertOk, null)
                     .create().show();
             }
@@ -818,15 +818,15 @@ public class FileFragment extends BaseFragment implements IContextHelper {
                                     }
                                 });
 
-                                long ret = fileClassDao.insertFileClass(newFileClass);
-                                newFileClass.setId((int)ret);
+                                long ret = fileClassDao.insertFileClass(newDocClass);
+                                newDocClass.setId((int)ret);
                                 activity.runOnUiThread(new Runnable() {
                                     @Override
                                     public void run() {
-                                        fileClassListItems.add(fileClassAdapter.getCount() - 1, newFileClass);
+                                        docClassListItems.add(fileClassAdapter.getCount() - 1, newDocClass);
                                     }
                                 });
-                                List<Document> l = documentDao.queryDocumentsByClassName(newFileClass.getName());
+                                List<Document> l = documentDao.queryDocumentsByClassName(newDocClass.getName());
                                 activity.runOnUiThread(new Runnable() {
                                     @Override
                                     public void run() {
@@ -853,13 +853,13 @@ public class FileFragment extends BaseFragment implements IContextHelper {
                                     }
                                 });
 
-                                currentFileClass.setName(newFileClassName);
-                                fileClassDao.updateFileClass(currentFileClass);
+                                currentDocClass.setName(newFileClassName);
+                                fileClassDao.updateFileClass(currentDocClass);
                                 activity.runOnUiThread(new Runnable() {
                                     @Override
                                     public void run() {
-                                        fileClassListItems.remove(position);
-                                        fileClassListItems.add(position, currentFileClass);
+                                        docClassListItems.remove(position);
+                                        docClassListItems.add(position, currentDocClass);
                                         documentHeader.setText(newFileClassName);
                                         fileClassAdapter.notifyDataSetChanged();
 
@@ -894,8 +894,8 @@ public class FileFragment extends BaseFragment implements IContextHelper {
         String name;
         for(List<Document> l: documentListsByClass){
             for(Document d: l){
-                if(!d.getFilePath().equals("")) {
-                    file = new File(d.getFilePath());
+                if(!d.getFilename().equals("")) {
+                    file = new File(d.getFilename());
                     name = file.getName();
                     d.setDocName(name);
                 }
@@ -932,7 +932,7 @@ public class FileFragment extends BaseFragment implements IContextHelper {
             new Thread(new Runnable() {
                 @Override
                 public void run() {
-                    File file = new File(document.getFilePath());
+                    File file = new File(document.getFilename());
                     if(!file.exists()){
                         activity.runOnUiThread(new Runnable() {
                             @Override
@@ -1013,7 +1013,7 @@ public class FileFragment extends BaseFragment implements IContextHelper {
                         }
                     });
                     String name = documentListItems.get(position).getDocName();
-                    String path = documentListItems.get(position).getFilePath();
+                    String path = documentListItems.get(position).getFilename();
                     documentDao.deleteDocument(name, path, true);
                     documentListItems.remove(position);
                     documentListsByClass.get(lastPositionClicked).remove(position);
@@ -1044,16 +1044,16 @@ public class FileFragment extends BaseFragment implements IContextHelper {
 
                 while(!HasInitedView);
                 //清除旧数据
-                fileClassListItems.clear();
+                docClassListItems.clear();
                 documentListItems.clear();
                 documentListsByClass.clear();
 
                 fileClassDao = new FileClassDao(activity);
                 documentDao = new DocumentDao(activity);
 
-                fileClassListItems.addAll(fileClassDao.queryAllFileClasses());
+                docClassListItems.addAll(fileClassDao.queryAllFileClasses());
                 documentDao.pushpull();
-                for(FileClass f: fileClassListItems){
+                for(DocClass f: docClassListItems){
                     if(!f.getName().equals("+")) {
                         List<Document> l = documentDao.queryDocumentsByClassName(f.getName(), false);
                         if(null != l && l.size() != 0) {
@@ -1066,9 +1066,9 @@ public class FileFragment extends BaseFragment implements IContextHelper {
                     }
                 }
 
-                if(!fileClassListItems.get(fileClassListItems.size() - 1).getName().equals("+")) {
-                    FileClass temp = new FileClass("+", 0);
-                    fileClassListItems.add(fileClassAdapter.getCount(), temp);
+                if(!docClassListItems.get(docClassListItems.size() - 1).getName().equals("+")) {
+                    DocClass temp = new DocClass("+", 0);
+                    docClassListItems.add(fileClassAdapter.getCount(), temp);
                 }
 
                 activity.runOnUiThread(new Runnable() {

@@ -44,7 +44,7 @@ public class DocumentNetDao implements IDocumentDao {
     public List<Document> queryDocumentsByClassName(String className) throws ServerException {
         Observable<ResponseDTO<DocumentDTO[]>> observable = RetrofitFactory.getInstance()
             .createRequest(AuthManager.getInstance().getAuthorizationHead())
-            .getDocumentsByFileClass(className)
+            .getDocumentByClassId(className)
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread());
 
@@ -193,12 +193,12 @@ public class DocumentNetDao implements IDocumentDao {
 
     public static File writeBytesToFile(byte[] bFile, String foldername, String filename) {
 
-        try (FileOutputStream fileOutputStream = new FileOutputStream(getFilePath(foldername) + filename)) {
+        try (FileOutputStream fileOutputStream = new FileOutputStream(getFilename(foldername) + filename)) {
             fileOutputStream.write(bFile);
         } catch (IOException e) {
             e.printStackTrace();
         }
-        return new File(getFilePath(foldername) + filename);
+        return new File(getFilename(foldername) + filename);
     }
 
  */

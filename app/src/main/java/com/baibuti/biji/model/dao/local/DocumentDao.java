@@ -123,7 +123,7 @@ public class DocumentDao implements IDocumentDao {
 
         long ret_id = 0;
         try {
-            stat.bindString(1, document.getFilePath() == null ? "" : document.getFilePath()); // COL_PATH
+            stat.bindString(1, document.getFilename() == null ? "" : document.getFilename()); // COL_PATH
             stat.bindString(2, document.getClassName()); // COL_CLASS_NAME
 
             ret_id = stat.executeInsert();
@@ -149,7 +149,7 @@ public class DocumentDao implements IDocumentDao {
         ContentValues values = new ContentValues();
 
         values.put(COL_CLASS_NAME, document.getClassName());
-        values.put(COL_PATH, document.getFilePath());
+        values.put(COL_PATH, document.getFilename());
 
         int ret = db.update(TBL_NAME, values, COL_ID + " = ?",
             new String[] { String.valueOf(document.getId()) } );

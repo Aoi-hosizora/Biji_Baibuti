@@ -25,7 +25,7 @@ public class Group implements Serializable, Comparable<Group> {
     /**
      * 默认分组
      */
-    public static Group DEF_GROUP = new Group(0, DEF_GROUP_NAME, 0, DEF_GROUP_COLOR);
+    public static Group DEF_GROUP = new Group(1, DEF_GROUP_NAME, 0, DEF_GROUP_COLOR);
 
     public static final Group AllGroups = new Group("所有分组", -1, "#00000000");
 

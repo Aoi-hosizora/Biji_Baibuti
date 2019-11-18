@@ -11,14 +11,14 @@ import android.widget.Button;
 import android.widget.ListView;
 import android.widget.Toast;
 
-import com.baibuti.biji.model.po.FileClass;
+import com.baibuti.biji.model.po.DocClass;
 import com.baibuti.biji.R;
 
 import java.util.List;
 
 public class FileClassAdapter extends BaseAdapter {
 
-    public List<FileClass> list;
+    public List<DocClass> list;
     LayoutInflater inflater;
     Context context;
     private boolean firstStart = true;
@@ -27,7 +27,7 @@ public class FileClassAdapter extends BaseAdapter {
 
     public boolean isDeleting = false;
 
-    public FileClassAdapter(Context context, List<FileClass> list) {
+    public FileClassAdapter(Context context, List<DocClass> list) {
         this.list = list;
         inflater = LayoutInflater.from(context);
         this.context = context;
@@ -39,7 +39,7 @@ public class FileClassAdapter extends BaseAdapter {
     }
 
     @Override
-    public FileClass getItem(int i) {
+    public DocClass getItem(int i) {
         if (i == getCount() || list == null) {
             return null;
         }

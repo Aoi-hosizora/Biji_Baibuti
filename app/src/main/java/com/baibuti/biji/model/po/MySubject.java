@@ -9,7 +9,7 @@ import java.util.List;
 import lombok.Data;
 
 /**
- * 自定义实体类需要实现ScheduleEnable接口并实现getSchedule()
+ * 自定义实体类需要实现 ScheduleEnable 接口并实现 getSchedule()
  *
  * @see ScheduleEnable#getSchedule()
  */
