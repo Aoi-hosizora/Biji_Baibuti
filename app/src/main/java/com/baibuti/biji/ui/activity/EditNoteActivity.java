@@ -11,6 +11,7 @@ import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.text.TextUtils;
 import android.view.Menu;
+import android.view.MenuItem;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -31,7 +32,7 @@ import com.baibuti.biji.util.filePathUtil.AppPathUtil;
 import com.baibuti.biji.util.otherUtil.CommonUtil;
 import com.baibuti.biji.util.imgTextUtil.ImageUtil;
 import com.baibuti.biji.util.otherUtil.LayoutUtil;
-import com.baibuti.biji.util.filePathUtil.SaveNameUtil;
+import com.baibuti.biji.util.filePathUtil.FileNameUtil;
 import com.baibuti.biji.util.imgTextUtil.StringUtil;
 import com.sendtion.xrichtext.RichTextEditor;
 
@@ -40,7 +41,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import butterknife.BindView;
-import butterknife.OnItemSelected;
+import butterknife.ButterKnife;
 import io.reactivex.Observable;
 import io.reactivex.ObservableEmitter;
 import io.reactivex.android.schedulers.AndroidSchedulers;
@@ -66,13 +67,13 @@ public class EditNoteActivity extends AppCompatActivity implements IContextHelpe
     private static final int CUT_LENGTH = 15;
 
     @BindView(R.id.id_modifynote_title)
-    private EditText m_txt_title;
+    EditText m_txt_title;
 
     @BindView(R.id.id_modifynote_group)
-    private TextView m_txt_group;
+    TextView m_txt_group;
 
     @BindView(R.id.id_modifynote_content)
-    private RichTextEditor m_rich_content;
+    RichTextEditor m_rich_content;
 
     private Dialog m_InsertImgPopupMenu;
     private Dialog m_LongClickImgPopupMenu;
@@ -83,6 +84,7 @@ public class EditNoteActivity extends AppCompatActivity implements IContextHelpe
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_edit_note);
+        ButterKnife.bind(this);
         ActionBar actionBar = getSupportActionBar();
         if (actionBar != null)
             actionBar.setDisplayHomeAsUpEnabled(true);
@@ -123,9 +125,34 @@ public class EditNoteActivity extends AppCompatActivity implements IContextHelpe
     // region Popup Image OCR
 
     /**
+     * 菜单点击事件
+     */
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.id_menu_modifynote_img:
+                ToolbarInsertImage_Clicked();
+                break;
+            case R.id.id_menu_modifynote_cancel:
+            case android.R.id.home:
+                ToolbarCancelSaveBack_Clicked();
+                break;
+            case R.id.id_menu_modifynote_finish:
+                ToolbarSaveNote_Clicked();
+                break;
+            case R.id.id_menu_modifynote_info:
+                ToolbarShowInfo_Clicked();
+                break;
+            case R.id.id_menu_modifynote_group:
+                ToolbarGroupSetting_Clicked();
+                break;
+        }
+        return true;
+    }
+
+    /**
      * 插入图片显示弹出菜单
      */
-    @OnItemSelected(R.id.id_menu_modifynote_img)
     private void ToolbarInsertImage_Clicked() {
         m_InsertImgPopupMenu = new Dialog(this, R.style.BottomDialog);
         LinearLayout root = LayoutUtil.initPopupMenu(this, m_InsertImgPopupMenu, R.layout.popup_edit_note_insert_image);
@@ -175,7 +202,7 @@ public class EditNoteActivity extends AppCompatActivity implements IContextHelpe
 
                     Intent imgEditIntent = new Intent(this, IMGEditActivity.class);
                     imgEditIntent.putExtra(IMGEditActivity.INT_IMAGE_URI, uri);
-                    imgEditIntent.putExtra(IMGEditActivity.INT_IMAGE_SAVE_URI, SaveNameUtil.getImageFileName(SaveNameUtil.SaveType.EDITED));
+                    imgEditIntent.putExtra(IMGEditActivity.INT_IMAGE_SAVE_URI, FileNameUtil.getImageFileName(FileNameUtil.SaveType.EDITED));
 
                     RxActivityResult.on(this).startIntent(imgEditIntent)
                         .map(Result::data)
@@ -198,7 +225,7 @@ public class EditNoteActivity extends AppCompatActivity implements IContextHelpe
         m_InsertImgPopupMenu.cancel();
 
         // 要保存的图片文件 _PHOTO 格式
-        String filename = SaveNameUtil.getImageFileName(SaveNameUtil.SaveType.PHOTO);
+        String filename = FileNameUtil.getImageFileName(FileNameUtil.SaveType.PHOTO);
 
         // 拍照时返回的uri
         Uri imgUri = AppPathUtil.getUriByPath(this, filename);
@@ -222,7 +249,7 @@ public class EditNoteActivity extends AppCompatActivity implements IContextHelpe
 
                     Intent imgEditIntent = new Intent(this, IMGEditActivity.class);
                     imgEditIntent.putExtra(IMGEditActivity.INT_IMAGE_URI, uri);
-                    imgEditIntent.putExtra(IMGEditActivity.INT_IMAGE_SAVE_URI, SaveNameUtil.getImageFileName(SaveNameUtil.SaveType.EDITED));
+                    imgEditIntent.putExtra(IMGEditActivity.INT_IMAGE_SAVE_URI, FileNameUtil.getImageFileName(FileNameUtil.SaveType.EDITED));
 
                     RxActivityResult.on(this).startIntent(imgEditIntent)
                         .map(Result::data)
@@ -268,7 +295,6 @@ public class EditNoteActivity extends AppCompatActivity implements IContextHelpe
     /**
      * 取消保存文件退出
      */
-    @OnItemSelected({R.id.id_menu_modifynote_cancel, android.R.id.home})
     private void ToolbarCancelSaveBack_Clicked() {
         if (checkIsNoteModify())
             showAlert(this,
@@ -282,7 +308,6 @@ public class EditNoteActivity extends AppCompatActivity implements IContextHelpe
     /**
      * 文件保存活动处理
      */
-    @OnItemSelected(R.id.id_menu_modifynote_finish)
     private void ToolbarSaveNote_Clicked() {
         boolean[] isContinue = new boolean[] { true };
 
@@ -388,7 +413,6 @@ public class EditNoteActivity extends AppCompatActivity implements IContextHelpe
     /**
      * 显示笔记详细信息
      */
-    @OnItemSelected(R.id.id_menu_modifynote_info)
     private void ToolbarShowInfo_Clicked() {
         Intent fromIntent = getIntent();
         boolean isNew = fromIntent.getBooleanExtra(NoteFragment.INT_IS_NEW, true);
@@ -424,7 +448,6 @@ public class EditNoteActivity extends AppCompatActivity implements IContextHelpe
     /**
      * 显示分组设置
      */
-    @OnItemSelected(R.id.id_menu_modifynote_group)
     private void ToolbarGroupSetting_Clicked() {
         boolean[] isContinue = new boolean[] { true };
 
@@ -592,7 +615,7 @@ public class EditNoteActivity extends AppCompatActivity implements IContextHelpe
                 bitmap = ImageUtil.compressImage(bitmap, screenWidth, screenHeight, true); // 等屏幕大小 压缩图片
                 bitmap = ImageUtil.compressImage(bitmap); // 质量 压缩图片
 
-                String smallImagePath = SaveNameUtil.getImageFileName(SaveNameUtil.SaveType.SMALL);
+                String smallImagePath = FileNameUtil.getImageFileName(FileNameUtil.SaveType.SMALL);
                 ImageUtil.saveBitmap(bitmap, smallImagePath);
 
                 // smallImagePath: _Small

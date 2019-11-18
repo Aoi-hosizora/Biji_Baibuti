@@ -8,6 +8,7 @@ import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -29,15 +30,15 @@ import java.util.List;
 import java.util.Locale;
 
 import butterknife.BindView;
-import butterknife.OnItemSelected;
+import butterknife.ButterKnife;
 
 public class SearchItemActivity extends AppCompatActivity implements IContextHelper {
 
     @BindView(R.id.id_StarSearchItemActivity_StarListView)
-    private RecyclerViewEmptySupport m_list_star;
+    RecyclerViewEmptySupport m_list_star;
 
     @BindView(R.id.id_StarSearchItemActivity_Srl)
-    private SwipeRefreshLayout m_srl;
+    SwipeRefreshLayout m_srl;
 
     // com.wyt.searchbox.SearchFragment.newInstance()
     private com.wyt.searchbox.SearchFragment m_searchFragment;
@@ -77,6 +78,7 @@ public class SearchItemActivity extends AppCompatActivity implements IContextHel
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_star);
+        ButterKnife.bind(this);
         ActionBar actionBar = getSupportActionBar();
         if (actionBar != null)
             actionBar.setDisplayHomeAsUpEnabled(true);
@@ -108,7 +110,7 @@ public class SearchItemActivity extends AppCompatActivity implements IContextHel
         layoutManager.setOrientation(LinearLayoutManager.VERTICAL);
         m_list_star.setLayoutManager(layoutManager);
 
-        searchItemAdapter = new SearchItemAdapter();
+        searchItemAdapter = new SearchItemAdapter(this);
         searchItemAdapter.setSearchItems(pageData.currentList);
         searchItemAdapter.setOnItemClickListener(new SearchItemAdapter.OnRecyclerViewItemClickListener() {
             @Override
@@ -175,10 +177,16 @@ public class SearchItemActivity extends AppCompatActivity implements IContextHel
             setTitle(String.format(Locale.CHINA, "已收藏搜索结果 (共 %d 项)", pageData.currentList.size()));
     }
 
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        if (item.getItemId() == R.id.action_FindSearchStar)
+            FindSearch_Clicked();
+        return true;
+    }
+
     /**
      * 菜单 搜索
      */
-    @OnItemSelected(R.id.action_FindSearchStar)
     private void FindSearch_Clicked() {
         m_searchFragment.show(getSupportFragmentManager(), com.wyt.searchbox.SearchFragment.TAG);
     }

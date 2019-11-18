@@ -44,7 +44,7 @@ import com.baibuti.biji.ui.dialog.GroupDialog;
 import com.baibuti.biji.ui.widget.listView.RecyclerViewEmptySupport;
 import com.baibuti.biji.ui.widget.listView.SpacesItemDecoration;
 import com.baibuti.biji.util.filePathUtil.AppPathUtil;
-import com.baibuti.biji.util.filePathUtil.SaveNameUtil;
+import com.baibuti.biji.util.filePathUtil.FileNameUtil;
 import com.baibuti.biji.util.otherUtil.LayoutUtil;
 import com.baibuti.biji.util.imgTextUtil.SearchUtil;
 import com.getbase.floatingactionbutton.FloatingActionsMenu;
@@ -54,8 +54,8 @@ import java.util.List;
 import java.util.Locale;
 
 import butterknife.BindView;
+import butterknife.ButterKnife;
 import butterknife.OnClick;
-import butterknife.OnItemSelected;
 import me.kareluo.imaging.IMGEditActivity;
 
 import static android.app.Activity.RESULT_OK;
@@ -65,25 +65,25 @@ public class NoteFragment extends BaseFragment implements IContextHelper {
     private View view;
 
     @BindView(R.id.note_list)
-    private RecyclerViewEmptySupport m_noteListView;
+    RecyclerViewEmptySupport m_noteListView;
 
     @BindView(R.id.id_NoteFrag_nav_GroupList)
-    private ListView m_groupListView;
+    ListView m_groupListView;
 
     @BindView(R.id.note_fabmenu)
-    private FloatingActionsMenu m_fabMenu;
+    FloatingActionsMenu m_fabMenu;
 
     // SearchFragment.newInstance()
     private SearchFragment m_searchFragment;
 
     @BindView(R.id.note_listsrl)
-    private SwipeRefreshLayout m_swipeRefresh;
+    SwipeRefreshLayout m_swipeRefresh;
 
     @BindView(R.id.NoteFrag_Toolbar)
-    private Toolbar m_toolbar;
+    Toolbar m_toolbar;
 
     @BindView(R.id.id_noteFrag_drawer_layout)
-    private DrawerLayout m_drawerLayout;
+    DrawerLayout m_drawerLayout;
 
     // new Dialog(getContext(), R.style.BottomDialog)
     private Dialog m_notePopupMenu;
@@ -97,6 +97,8 @@ public class NoteFragment extends BaseFragment implements IContextHelper {
                 parent.removeView(view);
         } else {
             view = inflater.inflate(R.layout.fragment_note, container, false);
+            ButterKnife.bind(this, view);
+
             initView();
 
             AuthManager.getInstance().addLoginChangeListener(new AuthManager.OnLoginChangeListener() {
@@ -134,6 +136,7 @@ public class NoteFragment extends BaseFragment implements IContextHelper {
             MainActivity activity = (MainActivity) getActivity();
             if (activity != null) activity.openNavMenu();
         });
+        m_toolbar.setOnMenuItemClickListener(menuItemClickListener);
 
         // SearchFrag
         m_searchFragment = SearchFragment.newInstance();
@@ -179,8 +182,11 @@ public class NoteFragment extends BaseFragment implements IContextHelper {
         m_noteListView.setLayoutManager(layoutManager);
 
         NoteAdapter noteAdapter = new NoteAdapter(getContext());
-        noteAdapter.setOnItemClickListener(this::NoteItem_Clicked);
-        noteAdapter.setOnItemLongClickListener(this::NoteItem_LongClicked);
+        noteAdapter.setOnItemClickListener((v, note) -> openViewNote(note));
+        noteAdapter.setOnItemLongClickListener((v, note) -> {
+            showPopupMenu(note);
+            return true;
+        });
         m_noteListView.setAdapter(noteAdapter);
 
         // PageData
@@ -221,10 +227,24 @@ public class NoteFragment extends BaseFragment implements IContextHelper {
 
     // region Toolbar Fab Popup
 
+    Toolbar.OnMenuItemClickListener menuItemClickListener = (item) -> {
+        switch (item.getItemId()) {
+            case R.id.action_search:
+                ToolbarSearch_Clicked();
+                break;
+            case R.id.action_group:
+                ToolbarGroup_Clicked();
+                break;
+            case R.id.action_search_group_back:
+                ToolbarBack_Clicked();
+                break;
+        }
+        return true;
+    };
+
     /**
      * 工具栏 搜索
      */
-    @OnItemSelected(R.id.action_search)
     private void ToolbarSearch_Clicked() {
         MainActivity activity = (MainActivity) getActivity();
         if (activity != null)
@@ -234,7 +254,6 @@ public class NoteFragment extends BaseFragment implements IContextHelper {
     /**
      * 工具栏 分组
      */
-    @OnItemSelected(R.id.action_group)
     private void ToolbarGroup_Clicked() {
         m_drawerLayout.openDrawer(Gravity.END);
     }
@@ -242,7 +261,6 @@ public class NoteFragment extends BaseFragment implements IContextHelper {
     /**
      * 工具栏 返回
      */
-    @OnItemSelected(R.id.action_search_group_back)
     private void ToolbarBack_Clicked() {
         toNormal();
     }
@@ -251,7 +269,7 @@ public class NoteFragment extends BaseFragment implements IContextHelper {
      * Tab 新建笔记
      */
     @OnClick(R.id.note_edit)
-    private void NewNoteFab_Clicked() {
+    void NewNoteFab_Clicked() {
         m_fabMenu.collapse();
         newNote();
     }
@@ -260,7 +278,7 @@ public class NoteFragment extends BaseFragment implements IContextHelper {
      * Tab OCR 拍照
      */
     @OnClick(R.id.note_photo)
-    private void OCRFab_Clicked() {
+    void OCRFab_Clicked() {
         m_fabMenu.collapse();
         OCRTakePhoto();
     }
@@ -274,14 +292,14 @@ public class NoteFragment extends BaseFragment implements IContextHelper {
 
         m_notePopupMenu = new Dialog(context, R.style.BottomDialog);
         LinearLayout root = LayoutUtil.initPopupMenu(getContext(), m_notePopupMenu, R.layout.popup_note_long_click_note);
-        m_notePopupMenu.setOnCancelListener((dialog) -> pageData.longClickedNote = null);
+        // m_notePopupMenu.setOnCancelListener((dialog) -> pageData.longClickedNote = null);
 
         TextView label = root.findViewById(R.id.id_NoteFrag_PopupMenu_Label);
         label.setText(String.format(Locale.CHINA, "当前选中：%s", note.getTitle()));
 
-        root.findViewById(R.id.id_NoteFrag_PopupMenu_ViewNote).setOnClickListener((view) -> ViewNotePopup_Clicked());
-        root.findViewById(R.id.id_NoteFrag_PopupMenu_ChangeGroup).setOnClickListener((view) -> ChangeGroupPopup_Clicked());
-        root.findViewById(R.id.id_NoteFrag_PopupMenu_DeleteNote).setOnClickListener((view) -> DeleteNotePopup_Clicked());
+        root.findViewById(R.id.id_NoteFrag_PopupMenu_ViewNote).setOnClickListener((view) -> ViewNotePopup_Clicked(note));
+        root.findViewById(R.id.id_NoteFrag_PopupMenu_ChangeGroup).setOnClickListener((view) -> ChangeGroupPopup_Clicked(note));
+        root.findViewById(R.id.id_NoteFrag_PopupMenu_DeleteNote).setOnClickListener((view) -> DeleteNotePopup_Clicked(note));
         root.findViewById(R.id.id_NoteFrag_PopupMenu_Cancel).setOnClickListener((view) -> m_notePopupMenu.cancel());
 
         m_notePopupMenu.show();
@@ -290,9 +308,8 @@ public class NoteFragment extends BaseFragment implements IContextHelper {
     /**
      * 弹出菜单 打开笔记
      */
-    private void ViewNotePopup_Clicked() {
+    private void ViewNotePopup_Clicked(Note note) {
         m_notePopupMenu.cancel();
-        Note note = pageData.longClickedNote;
         if (note == null) return;
 
         openViewNote(note);
@@ -301,9 +318,8 @@ public class NoteFragment extends BaseFragment implements IContextHelper {
     /**
      * 弹出菜单 修改分组
      */
-    private void ChangeGroupPopup_Clicked() {
+    private void ChangeGroupPopup_Clicked(Note note) {
         m_notePopupMenu.cancel();
-        Note note = pageData.longClickedNote;
         if (note == null) return;
 
         ProgressDialog progressDialog = showProgress(getContext(), "分组信息加载中...", false, null);
@@ -337,9 +353,8 @@ public class NoteFragment extends BaseFragment implements IContextHelper {
     /**
      * 弹出菜单 删除笔记
      */
-    private void DeleteNotePopup_Clicked() {
+    private void DeleteNotePopup_Clicked(Note note) {
         m_notePopupMenu.cancel();
-        Note note = pageData.longClickedNote;
         if (note == null) return;
 
         showAlert(getContext(), "删除笔记", "确定删除笔记 \"" + note.getTitle() + "\" 吗？",
@@ -355,7 +370,7 @@ public class NoteFragment extends BaseFragment implements IContextHelper {
      * 右边栏 分组管理
      */
     @OnClick(R.id.id_NoteFrag_nav_GroupMgrButton)
-    private void GroupMgrButton_Click() {
+    void GroupMgrButton_Click() {
         if (pageData.pageState == PageState.GROUPING) {
             showAlert(getContext(), "分组管理", "进行分组管理需要退出分组显示，是否继续？",
                 "继续", (DialogInterface dialog, int which) -> ShowGroupDialog(),
@@ -403,22 +418,6 @@ public class NoteFragment extends BaseFragment implements IContextHelper {
     // region List PageData
 
     /**
-     * 单击列表项
-     */
-    private void NoteItem_Clicked(View v, Note note) {
-        openViewNote(note);
-    }
-
-    /**
-     * 长按列表项
-     */
-    private boolean NoteItem_LongClicked(View v, Note note) {
-        pageData.longClickedNote = note;
-        showPopupMenu(note);
-        return true;
-    }
-
-    /**
      * 当前页面状态
      */
     private enum PageState {
@@ -431,8 +430,6 @@ public class NoteFragment extends BaseFragment implements IContextHelper {
     private class PageData {
         List<Note> allNotes = null;
         PageState pageState = PageState.NORMAL;
-
-        Note longClickedNote = null;
     }
 
     // endregion
@@ -693,7 +690,7 @@ public class NoteFragment extends BaseFragment implements IContextHelper {
      */
     private void OCRTakePhoto() {
 
-        String photoPath = SaveNameUtil.getImageFileName(SaveNameUtil.SaveType.PHOTO);
+        String photoPath = FileNameUtil.getImageFileName(FileNameUtil.SaveType.PHOTO);
 
         // 7.0 调用系统相机拍照不再允许使用 Uri 方式，应该替换为 FileProvider
         Uri photoUri = AppPathUtil.getUriByPath(getContext(), photoPath);
@@ -719,7 +716,7 @@ public class NoteFragment extends BaseFragment implements IContextHelper {
         if (imgPath == null || imgPath.isEmpty())
             showAlert(getContext(), "错误", "从相册获取的图片或拍照得到的图片不存在，请重试。");
         else {
-            String editedPath = SaveNameUtil.getImageFileName(SaveNameUtil.SaveType.EDITED);
+            String editedPath = FileNameUtil.getImageFileName(FileNameUtil.SaveType.EDITED);
 
             Intent intent = new Intent(getActivity(), IMGEditActivity.class);
             intent.putExtra(IMGEditActivity.INT_IMAGE_URI, photoUri);

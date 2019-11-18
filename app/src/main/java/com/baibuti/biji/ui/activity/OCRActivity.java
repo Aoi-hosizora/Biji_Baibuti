@@ -8,6 +8,7 @@ import android.support.annotation.Nullable;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
+import android.view.MenuItem;
 import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -20,13 +21,13 @@ import com.baibuti.biji.R;
 import com.baibuti.biji.ui.IContextHelper;
 import com.baibuti.biji.ui.widget.ocrView.OCRRegionGroupLayout;
 import com.baibuti.biji.util.filePathUtil.AppPathUtil;
-import com.baibuti.biji.util.filePathUtil.SaveNameUtil;
+import com.baibuti.biji.util.filePathUtil.FileNameUtil;
 import com.baibuti.biji.util.imgTextUtil.ImageUtil;
 import com.baibuti.biji.util.otherUtil.CommonUtil;
 
 import butterknife.BindView;
+import butterknife.ButterKnife;
 import butterknife.OnClick;
-import butterknife.OnItemSelected;
 
 /**
  * OCR 用
@@ -43,19 +44,19 @@ public class OCRActivity extends AppCompatActivity implements IContextHelper {
     private boolean isOCRCancel = false;
 
     @BindView(R.id.id_OCRActivity_OCRRegionGroupLayout)
-    private OCRRegionGroupLayout m_layout_region;
+    OCRRegionGroupLayout m_layout_region;
 
     @BindView(R.id.id_OCRActivity_OCRResultTextView)
-    private TextView m_txt_result;
+    TextView m_txt_result;
 
     @BindView(R.id.id_OCRActivity_OCRResultLabelTextView)
-    private TextView m_txt_count;
+    TextView m_txt_count;
 
     @BindView(R.id.id_OCRActivity_CopyButton)
-    private Button m_btn_copy;
+    Button m_btn_copy;
 
     @BindView(R.id.id_OCRActivity_SelectAllButton)
-    private Button m_btn_selectAll;
+    Button m_btn_selectAll;
 
     /**
      * 获取数据延迟
@@ -68,6 +69,7 @@ public class OCRActivity extends AppCompatActivity implements IContextHelper {
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_ocr);
+        ButterKnife.bind(this);
         ActionBar actionBar = getSupportActionBar();
         if (actionBar != null)
             actionBar.setDisplayHomeAsUpEnabled(true);
@@ -136,7 +138,7 @@ public class OCRActivity extends AppCompatActivity implements IContextHelper {
                 // TODO 保存文件
                 Bitmap net_bg = ImageUtil.compressImage(bitmap, screenWidth, screenHeight, true);
                 net_bg = ImageUtil.compressImage(net_bg);
-                String fileName = SaveNameUtil.getImageFileName(SaveNameUtil.SaveType.OCR);
+                String fileName = FileNameUtil.getImageFileName(FileNameUtil.SaveType.OCR);
                 ImageUtil.saveBitmap(bitmap, fileName);
 
                 m_layout_region.setImgBG(net_bg);
@@ -216,7 +218,7 @@ public class OCRActivity extends AppCompatActivity implements IContextHelper {
      * 复制
      */
     @OnClick(R.id.id_OCRActivity_CopyButton)
-    private void CopyButton_Click() {
+    void CopyButton_Click() {
         if (CommonUtil.copyText(this, m_txt_result.getText().toString()))
             Toast.makeText(this, R.string.OCRActivity_CopySuccess, Toast.LENGTH_SHORT).show();
     }
@@ -225,7 +227,7 @@ public class OCRActivity extends AppCompatActivity implements IContextHelper {
      * 全选
      */
     @OnClick(R.id.id_OCRActivity_SelectAllButton)
-    private void SelectAllButton_Click() {
+    void SelectAllButton_Click() {
         boolean isSelectAll = m_btn_selectAll.getText().toString().equals(getString(R.string.OCRActivity_SelectAllButton));
         m_layout_region.setAllFramesChecked(isSelectAll);
         if (isSelectAll)
@@ -235,11 +237,13 @@ public class OCRActivity extends AppCompatActivity implements IContextHelper {
     }
 
     /**
-     * 返回
+     * 菜单 返回
      */
-    @OnItemSelected(android.R.id.home)
-    private void BackToActivity() {
-        finish();
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        if (item.getItemId() == android.R.id.home)
+            finish();
+        return true;
     }
 
     /**

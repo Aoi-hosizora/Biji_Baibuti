@@ -21,15 +21,16 @@ import java.util.ArrayList;
 import java.util.Locale;
 
 import butterknife.BindView;
+import butterknife.ButterKnife;
 import okhttp3.internal.annotations.EverythingIsNonNull;
 
 public class ImagePreviewDialog extends Dialog {
 
     @BindView(R.id.id_image_popup_dialog_pager)
-    private ViewPager m_view_pager;
+    ViewPager m_view_pager;
 
     @BindView(R.id.id_image_popup_dialog_index)
-    private TextView m_txt_page_idx;
+    TextView m_txt_page_idx;
 
     private PagerAdapter m_pager_adapter;
 
@@ -98,6 +99,7 @@ public class ImagePreviewDialog extends Dialog {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.dialog_image_popup);
+        ButterKnife.bind(this);
 
         if (getWindow() != null) {
             WindowManager.LayoutParams lp = getWindow().getAttributes();

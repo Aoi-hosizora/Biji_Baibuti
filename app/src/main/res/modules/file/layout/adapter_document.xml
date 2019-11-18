@@ -14,7 +14,7 @@
         android:layout_marginStart="12dp"
         android:layout_marginTop="12dp"
         android:layout_marginBottom="12dp"
-        android:contentDescription="@string/tudo"
+        android:contentDescription="@string/todo"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"

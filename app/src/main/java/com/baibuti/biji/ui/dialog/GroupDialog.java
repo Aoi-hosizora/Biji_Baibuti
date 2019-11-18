@@ -19,32 +19,21 @@ import java.util.ArrayList;
 import java.util.List;
 
 import butterknife.BindView;
+import butterknife.ButterKnife;
 import butterknife.OnClick;
 
 public class GroupDialog extends Dialog implements IContextHelper {
 
     private Activity activity;
 
-    @BindView(R.id.id_GroupDialog_ButtonAdd)
-    private Button m_btn_add;
-
-    @BindView(R.id.id_GroupDialog_ButtonEdit)
-    private Button m_btn_edit;
-
-    @BindView(R.id.id_GroupDialog_ButtonDelete)
-    private Button m_btn_delete;
-
-    @BindView(R.id.id_GroupDialog_ButtonCancel)
-    private Button m_btn_dismiss;
-
     @BindView(R.id.id_GroupDialog_ButtonUp)
-    private Button m_btn_up;
+    Button m_btn_up;
 
     @BindView(R.id.id_GroupDialog_ButtonDown)
-    private Button m_btn_down;
+    Button m_btn_down;
 
     @BindView(R.id.id_GroupDialog_GroupListView)
-    private ListView m_list_group;
+    ListView m_list_group;
 
     private GroupRadioAdapter groupAdapter;
     private List<Group> groupList;
@@ -73,6 +62,7 @@ public class GroupDialog extends Dialog implements IContextHelper {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.dialog_group_list);
+        ButterKnife.bind(this);
 
         refreshBtnPositionEnabled(0);
 
@@ -100,7 +90,7 @@ public class GroupDialog extends Dialog implements IContextHelper {
      * 新建分组
      */
     @OnClick(R.id.id_GroupDialog_ButtonAdd)
-    private void ButtonAdd_Clicked() {
+    void ButtonAdd_Clicked() {
         addGroup();
     }
 
@@ -108,7 +98,7 @@ public class GroupDialog extends Dialog implements IContextHelper {
      * 编辑分组
      */
     @OnClick(R.id.id_GroupDialog_ButtonEdit)
-    private void ButtonEdit_Clicked() {
+    void ButtonEdit_Clicked() {
         editGroup(groupList.get(groupAdapter.getCurrentItemIndex()));
     }
 
@@ -116,7 +106,7 @@ public class GroupDialog extends Dialog implements IContextHelper {
      * 删除分组
      */
     @OnClick(R.id.id_GroupDialog_ButtonDelete)
-    private void ButtonDelete_Clicked() {
+    void ButtonDelete_Clicked() {
         deleteGroup(groupList.get(groupAdapter.getCurrentItemIndex()));
     }
 
@@ -124,7 +114,7 @@ public class GroupDialog extends Dialog implements IContextHelper {
      * 关闭对话框
      */
     @OnClick(R.id.id_GroupDialog_ButtonCancel)
-    private void ButtonDismiss_Clicked() {
+    void ButtonDismiss_Clicked() {
         dismiss();
     }
 
@@ -132,7 +122,7 @@ public class GroupDialog extends Dialog implements IContextHelper {
      * 上移
      */
     @OnClick(R.id.id_GroupDialog_ButtonUp)
-    private void ButtonUp_Clicked() {
+    void ButtonUp_Clicked() {
         moveGroupOrder(groupList.get(groupAdapter.getCurrentItemIndex()), true);
     }
 
@@ -140,7 +130,7 @@ public class GroupDialog extends Dialog implements IContextHelper {
      * 下移
      */
     @OnClick(R.id.id_GroupDialog_ButtonDown)
-    private void ButtonDown_Clicked() {
+    void ButtonDown_Clicked() {
         moveGroupOrder(groupList.get(groupAdapter.getCurrentItemIndex()), false);
     }
 

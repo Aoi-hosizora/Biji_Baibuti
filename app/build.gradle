@@ -68,9 +68,10 @@ dependencies {
     // RXJava
     implementation 'io.reactivex.rxjava2:rxjava:2.2.3'
     implementation 'io.reactivex.rxjava2:rxandroid:2.1.0'
-    implementation 'com.github.VictorAlbertos:RxActivityResult:0.5.0-2.x'
+    implementation 'com.github.VictorAlbertos:RxActivityResult:0.4.5-2.x'
+    // implementation 'com.github.VictorAlbertos:RxActivityResult:0.5.0-2.x'
 
-    // @BindView
+    // ButterKnife
     implementation 'com.jakewharton:butterknife:8.8.1'
     annotationProcessor 'com.jakewharton:butterknife-compiler:8.8.1'
 

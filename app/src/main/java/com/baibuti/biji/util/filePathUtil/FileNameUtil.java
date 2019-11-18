@@ -7,7 +7,7 @@ import java.util.Locale;
 /**
  * 统一设置 保存文件名
  */
-public class SaveNameUtil {
+public class FileNameUtil {
 
     /**
      * 获得当前时间序列
@@ -72,5 +72,24 @@ public class SaveNameUtil {
 
         String dir = AppPathUtil.getScheduleDir();
         return dir + userName + ".json";
+    }
+
+    /**
+     * 获取文件名的后缀名
+     * @return "" for no ext
+     */
+    public static String getFilenameExt(String filename) {
+        String[] parts = filename.split(".");
+        if (parts.length <= 1) return "";
+        return parts[parts.length - 1];
+    }
+
+    /**
+     * 获取文件的文件名
+     * @return "" for no ext
+     */
+    public static String getFilepath(String filename) {
+        String[] parts = filename.split("/");
+        return parts[parts.length - 1];
     }
 }

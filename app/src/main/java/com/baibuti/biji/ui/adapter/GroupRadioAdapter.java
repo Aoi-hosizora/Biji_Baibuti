@@ -37,10 +37,6 @@ public class GroupRadioAdapter extends BaseAdapter {
         void onSelect(int position);
     }
 
-    public OnRadioButtonClickListener getOnRadioButtonClickListener() {
-        return onRadioButtonClickListener;
-    }
-
     public void setOnRadioButtonClickListener(OnRadioButtonClickListener onRadioButtonClickListener) {
         this.onRadioButtonClickListener = onRadioButtonClickListener;
     }
@@ -56,12 +52,12 @@ public class GroupRadioAdapter extends BaseAdapter {
         states.put(list.get(position), true);
     }
 
-    /**
-     * 选择项
-     */
-    public void setChecked(Group group) {
-        states.put(group, true);
-    }
+    // /**
+    //  * 选择项
+    //  */
+    // public void setChecked(Group group) {
+    //     states.put(group, true);
+    // }
 
     /**
      * 当前选择项
@@ -72,6 +68,8 @@ public class GroupRadioAdapter extends BaseAdapter {
 
     @Override
     public int getCount() {
+        if (list == null)
+            return 0;
         return list.size();
     }
 

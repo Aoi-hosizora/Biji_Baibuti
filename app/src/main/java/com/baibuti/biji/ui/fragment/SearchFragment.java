@@ -36,18 +36,18 @@ import java.util.List;
 import java.util.Locale;
 
 import butterknife.BindView;
+import butterknife.ButterKnife;
 import butterknife.OnClick;
-import butterknife.OnItemSelected;
 
 public class SearchFragment extends BaseFragment implements IContextHelper {
 
     private View view;
 
     @BindView(R.id.id_SearchFrag_QuestionEditText)
-    private EditText m_edt_question;
+    EditText m_edt_question;
 
     @BindView(R.id.id_SearchFrag_SearchRetList)
-    private RecyclerViewEmptySupport m_list_result;
+    RecyclerViewEmptySupport m_list_result;
 
     private Dialog m_itemPopupMenu;
 
@@ -87,6 +87,8 @@ public class SearchFragment extends BaseFragment implements IContextHelper {
         }
         else {
             view = inflater.inflate(R.layout.fragment_search, container, false);
+            ButterKnife.bind(this, view);
+
             initView();
 
             AuthManager.getInstance().addLoginChangeListener(new AuthManager.OnLoginChangeListener() {
@@ -121,6 +123,7 @@ public class SearchFragment extends BaseFragment implements IContextHelper {
             MainActivity activity = (MainActivity) getActivity();
             if (activity != null) activity.openNavMenu();
         });
+        m_toolbar.setOnMenuItemClickListener(menuItemClickListener);
 
         m_edt_question = view.findViewById(R.id.id_SearchFrag_QuestionEditText);
         m_list_result = view.findViewById(R.id.id_SearchFrag_SearchRetList);
@@ -137,7 +140,7 @@ public class SearchFragment extends BaseFragment implements IContextHelper {
         m_list_result.setEmptyView(ListEmptyView);
 
         // Adapter:
-        searchItemAdapter = new SearchItemAdapter();
+        searchItemAdapter = new SearchItemAdapter(getContext());
         searchItemAdapter.setSearchItems(pageData.searchList);
         searchItemAdapter.notifyDataSetChanged();
         searchItemAdapter.setOnItemClickListener(new SearchItemAdapter.OnRecyclerViewItemClickListener() {
@@ -159,9 +162,17 @@ public class SearchFragment extends BaseFragment implements IContextHelper {
     }
 
     /**
+     * ActionBar 菜单
+     */
+    private Toolbar.OnMenuItemClickListener menuItemClickListener = (item) -> {
+        if (item.getItemId() == R.id.action_SearchStar)
+            ActionBar_Star_Click();
+        return true;
+    };
+
+    /**
      * Action 打开收藏活动
      */
-    @OnItemSelected(R.id.action_SearchStar)
     private void ActionBar_Star_Click() {
         Intent intent = new Intent(getActivity(), SearchItemActivity.class);
         startActivity(intent);
@@ -171,7 +182,7 @@ public class SearchFragment extends BaseFragment implements IContextHelper {
      * 搜索按钮点击
      */
     @OnClick(R.id.id_SearchFrag_SearchButton)
-    private void SearchButton_Click() {
+    void SearchButton_Click() {
 
         if (m_edt_question.getText().toString().trim().isEmpty()) {
             showAlert(getActivity(), "搜索", "未输入查找内容");

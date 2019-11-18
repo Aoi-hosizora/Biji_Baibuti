@@ -1,5 +1,6 @@
 package com.baibuti.biji.ui.adapter;
 
+import android.content.Context;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
 import android.view.Gravity;
@@ -22,6 +23,7 @@ import java.util.List;
 public class SearchItemAdapter extends RecyclerView.Adapter<SearchItemAdapter.ViewHolder>
     implements View.OnClickListener, View.OnLongClickListener {
 
+    private Context context;
     private List<SearchItem> m_searchItems;
 
     public static final String ITEM_MORE_URL = "$more";
@@ -29,7 +31,8 @@ public class SearchItemAdapter extends RecyclerView.Adapter<SearchItemAdapter.Vi
     private OnRecyclerViewItemClickListener m_OnItemClickListener;
     private OnRecyclerViewItemLongClickListener m_OnItemLongClickListener;
 
-    public SearchItemAdapter() {
+    public SearchItemAdapter(Context context) {
+        this.context = context;
         m_searchItems = new ArrayList<>();
     }
 
@@ -81,7 +84,7 @@ public class SearchItemAdapter extends RecyclerView.Adapter<SearchItemAdapter.Vi
     @NonNull
     @Override
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(parent.getContext())
+        View view = LayoutInflater.from(context)
             .inflate(R.layout.adapter_search_item, parent, false);
 
         view.setOnClickListener(this);

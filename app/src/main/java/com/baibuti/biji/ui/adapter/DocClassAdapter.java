@@ -35,6 +35,8 @@ public class DocClassAdapter extends BaseAdapter {
 
     @Override
     public int getCount() {
+        if (list == null)
+            return 0;
         return list.size();
     }
 

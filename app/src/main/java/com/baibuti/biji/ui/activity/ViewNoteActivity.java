@@ -7,6 +7,7 @@ import android.os.Bundle;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.view.Menu;
+import android.view.MenuItem;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
@@ -27,7 +28,7 @@ import java.util.List;
 import java.util.Locale;
 
 import butterknife.BindView;
-import butterknife.OnItemSelected;
+import butterknife.ButterKnife;
 import io.reactivex.Observable;
 import io.reactivex.ObservableEmitter;
 import io.reactivex.android.schedulers.AndroidSchedulers;
@@ -46,16 +47,16 @@ import rx_activity_result2.RxActivityResult;
 public class ViewNoteActivity extends AppCompatActivity implements IContextHelper {
 
     @BindView(R.id.id_modifynote_viewtitle)
-    private TextView m_txt_title;
+    TextView m_txt_title;
 
     @BindView(R.id.id_modifynote_viewcontent)
-    private RichTextView m_rich_content;
+    RichTextView m_rich_content;
 
     @BindView(R.id.id_modifynote_viewgroup)
-    private TextView m_txt_group;
+    TextView m_txt_group;
 
     @BindView(R.id.id_modifynote_viewupdatetime)
-    private TextView m_txt_time;
+    TextView m_txt_time;
 
     private Dialog m_LongClickImgPopupMenu;
 
@@ -69,6 +70,7 @@ public class ViewNoteActivity extends AppCompatActivity implements IContextHelpe
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_view_note);
+        ButterKnife.bind(this);
         ActionBar actionBar = getSupportActionBar();
         if (actionBar != null)
             actionBar.setDisplayHomeAsUpEnabled(true);
@@ -106,10 +108,32 @@ public class ViewNoteActivity extends AppCompatActivity implements IContextHelpe
 
     // region Edit Back
 
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.id_menu_modifynote_viewmodify:
+                ToolbarEditNote_Clicked();
+                break;
+            case R.id.id_menu_modifynote_viewcancel:
+            case android.R.id.home:
+                ToolbarCancelSaveBack_Clicked();
+                break;
+            case R.id.id_menu_modifynote_info:
+                ToolbarShowInfo_Clicked();
+                break;
+            case R.id.id_menu_modifynote_sharenote:
+                ToolbarShare_Clicked();
+                break;
+            case R.id.id_menu_modifynote_turntofile:
+                ToolbarSaveDocument_Clicked();
+                break;
+        }
+        return true;
+    }
+
     /**
      * 编辑笔记
      */
-    @OnItemSelected(R.id.id_menu_modifynote_viewmodify)
     private void ToolbarEditNote_Clicked() {
 
         Intent intent = new Intent(ViewNoteActivity.this, EditNoteActivity.class);
@@ -141,7 +165,6 @@ public class ViewNoteActivity extends AppCompatActivity implements IContextHelpe
     /**
      * 返回主界面 修改或未修改
      */
-    @OnItemSelected({R.id.id_menu_modifynote_viewcancel, android.R.id.home})
     private void ToolbarCancelSaveBack_Clicked() {
         Intent motoIntent = getIntent();
         Intent intent = new Intent();
@@ -170,7 +193,6 @@ public class ViewNoteActivity extends AppCompatActivity implements IContextHelpe
     /**
      * 显示笔记详细信息
      */
-    @OnItemSelected(R.id.id_menu_modifynote_info)
     private void ToolbarShowInfo_Clicked() {
         final String info =
             "笔记标题：" + currNote.getTitle() + "\n" +
@@ -193,7 +215,6 @@ public class ViewNoteActivity extends AppCompatActivity implements IContextHelpe
      * 分享笔记
      * TODO
      */
-    @OnItemSelected(R.id.id_menu_modifynote_sharenote)
     private void ToolbarShare_Clicked() {
         CommonUtil.shareTextAndImage(this, currNote.getTitle(), currNote.getContent(), null); //分享图文
     }
@@ -201,7 +222,6 @@ public class ViewNoteActivity extends AppCompatActivity implements IContextHelpe
     /**
      * 打开保存为文件的路径选择活动
      */
-    @OnItemSelected(R.id.id_menu_modifynote_turntofile)
     private void ToolbarSaveDocument_Clicked() {
         Intent choosePathIntent=new Intent(this, OpenSaveFileActivity.class);
 

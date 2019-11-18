@@ -117,6 +117,8 @@ public class FileAdapter extends RecyclerView.Adapter<FileAdapter.ViewHolder> {
 
     @Override
     public int getItemCount() {
+        if (mFiles == null)
+            return 0;
         return mFiles.size();
     }
 

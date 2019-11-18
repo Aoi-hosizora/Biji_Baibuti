@@ -24,16 +24,24 @@ import com.baibuti.biji.ui.IContextHelper;
 import java.util.Locale;
 
 import butterknife.BindView;
+import butterknife.ButterKnife;
 import butterknife.OnClick;
 
 public class LoginFragment extends Fragment implements IContextHelper {
 
     public View view;
 
-    @BindView(R.id.loginFrag_layout_username)     private TextInputLayout m_LoginLayout;
-    @BindView(R.id.loginFrag_edt_username)       private TextInputEditText m_LoginEditText;
-    @BindView(R.id.loginFrag_layout_password)     private TextInputLayout m_PasswordLayout;
-    @BindView(R.id.loginFrag_edt_password)       private TextInputEditText m_PasswordEditText;
+    @BindView(R.id.loginFrag_layout_username)
+    TextInputLayout m_LoginLayout;
+
+    @BindView(R.id.loginFrag_edt_username)
+    TextInputEditText m_LoginEditText;
+
+    @BindView(R.id.loginFrag_layout_password)
+    TextInputLayout m_PasswordLayout;
+
+    @BindView(R.id.loginFrag_edt_password)
+    TextInputEditText m_PasswordEditText;
 
     @Nullable
     @Override
@@ -45,6 +53,7 @@ public class LoginFragment extends Fragment implements IContextHelper {
         }
         else {
             view = inflater.inflate(R.layout.fragment_login, container, false);
+            ButterKnife.bind(this, view);
 
             initView();
         }
@@ -64,7 +73,7 @@ public class LoginFragment extends Fragment implements IContextHelper {
      * 登录按钮
      */
     @OnClick(R.id.loginFrag_btn_login)
-    private void LoginButton_Clicked() {
+    void LoginButton_Clicked() {
         String username = m_LoginEditText.getText().toString();
         String password = m_PasswordEditText.getText().toString();
 
@@ -105,7 +114,7 @@ public class LoginFragment extends Fragment implements IContextHelper {
      * 清空按钮
      */
     @OnClick(R.id.loginFrag_btn_clear)
-    private void ClearButton_Clicked() {
+    void ClearButton_Clicked() {
         m_LoginEditText.setText("");
         m_PasswordEditText.setText("");
     }
@@ -114,7 +123,7 @@ public class LoginFragment extends Fragment implements IContextHelper {
      * 去注册按钮
      */
     @OnClick(R.id.loginFrag_btn_toRegister)
-    private void ToRegisterButton_Clicked() {
+    void ToRegisterButton_Clicked() {
         AuthActivity activity = (AuthActivity) getActivity();
         if (activity != null)
             activity.openRegister();

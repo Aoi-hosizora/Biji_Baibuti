@@ -23,6 +23,7 @@ import java.util.List;
 import java.util.Locale;
 
 import butterknife.BindView;
+import butterknife.ButterKnife;
 import butterknife.OnClick;
 
 public class GroupEditDialog extends Dialog implements IContextHelper {
@@ -30,19 +31,19 @@ public class GroupEditDialog extends Dialog implements IContextHelper {
     private Activity activity;
 
     @BindView(R.id.id_txt_label)
-    private TextView m_txt_label;
+    TextView m_txt_label;
 
     @BindView(R.id.id_txt_color)
-    private TextView m_txt_color;
+    TextView m_txt_color;
 
     @BindView(R.id.id_edt_title)
-    private EditText m_edt_title;
+    EditText m_edt_title;
 
     @BindView(R.id.id_ColorPicker_Picker)
-    private ColorPicker m_color_picker;
+    ColorPicker m_color_picker;
 
     @BindView(R.id.id_btn_delete)
-    private Button m_btn_delete;
+    Button m_btn_delete;
 
     /**
      * 输入的分组，用于判断新建还是更新
@@ -70,6 +71,7 @@ public class GroupEditDialog extends Dialog implements IContextHelper {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.dialog_group_add);
+        ButterKnife.bind(this);
 
         m_color_picker.addSaturationBar(findViewById(R.id.id_ColorPicker_SaturationBar));
         m_color_picker.addSVBar(findViewById(R.id.id_ColorPicker_SVBar));
@@ -117,7 +119,7 @@ public class GroupEditDialog extends Dialog implements IContextHelper {
      * 修改分组信息提交
      */
     @OnClick(R.id.id_btn_ok)
-    private void UpdateGroup_Clicked() {
+    void UpdateGroup_Clicked() {
 
         String newGroupName = m_edt_title.getText().toString();
         if (newGroupName.isEmpty()) {
@@ -218,7 +220,7 @@ public class GroupEditDialog extends Dialog implements IContextHelper {
      * 退出对话框
      */
     @OnClick(R.id.id_btn_cancel)
-    private void CancelButton_Clicked() {
+    void CancelButton_Clicked() {
         dismiss();
     }
 }

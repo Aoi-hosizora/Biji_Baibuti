@@ -9,13 +9,11 @@ import android.database.sqlite.SQLiteStatement;
 
 import com.baibuti.biji.model.dao.DbOpenHelper;
 import com.baibuti.biji.model.dao.daoInterface.INoteDao;
-import com.baibuti.biji.model.dto.ServerException;
 import com.baibuti.biji.model.po.Group;
 import com.baibuti.biji.model.po.Note;
 import com.baibuti.biji.util.otherUtil.DateColorUtil;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 

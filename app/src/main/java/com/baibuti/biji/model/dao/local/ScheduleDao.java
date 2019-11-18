@@ -3,7 +3,7 @@ package com.baibuti.biji.model.dao.local;
 import android.content.Context;
 
 import com.baibuti.biji.model.dao.daoInterface.IScheduleDao;
-import com.baibuti.biji.util.filePathUtil.SaveNameUtil;
+import com.baibuti.biji.util.filePathUtil.FileNameUtil;
 import com.baibuti.biji.util.imgTextUtil.StringUtil;
 
 import java.io.File;
@@ -19,7 +19,7 @@ public class ScheduleDao implements IScheduleDao {
      */
     @Override
     public String querySchedule() {
-        String filename = SaveNameUtil.getScheduleFileName(SaveNameUtil.LOCAL);
+        String filename = FileNameUtil.getScheduleFileName(FileNameUtil.LOCAL);
         String content = StringUtil.readFromFile(filename);
         return content == null ? "" : content;
     }
@@ -31,7 +31,7 @@ public class ScheduleDao implements IScheduleDao {
      */
     @Override
     public boolean updateSchedule(String json) {
-        String filename = SaveNameUtil.getScheduleFileName(SaveNameUtil.LOCAL);
+        String filename = FileNameUtil.getScheduleFileName(FileNameUtil.LOCAL);
         return StringUtil.writeIntoFile(filename, json);
     }
 
@@ -41,7 +41,7 @@ public class ScheduleDao implements IScheduleDao {
      */
     @Override
     public boolean deleteSchedule() {
-        String filename = SaveNameUtil.getScheduleFileName(SaveNameUtil.LOCAL);
+        String filename = FileNameUtil.getScheduleFileName(FileNameUtil.LOCAL);
         try {
             File file = new File(filename);
             if (file.exists() && !file.delete())

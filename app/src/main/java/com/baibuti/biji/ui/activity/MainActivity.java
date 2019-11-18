@@ -43,18 +43,18 @@ import java.util.ArrayList;
 import java.util.List;
 
 import butterknife.BindView;
-import butterknife.OnItemSelected;
+import butterknife.ButterKnife;
 
 public class MainActivity extends FragmentActivity implements IContextHelper, AuthManager.OnLoginChangeListener {
 
     @BindView(R.id.mainAct_view_pager)
-    private ViewPager m_viewPager;
+    ViewPager m_viewPager;
 
     @BindView(R.id.mainAct_layout_drawer)
-    private DrawerLayout m_drawerLayout;
+    DrawerLayout m_drawerLayout;
 
     @BindView(R.id.mainAct_view_left_nav)
-    private NavigationView m_navigationView;
+    NavigationView m_navigationView;
 
     // 权限请求：读写，网络，摄像机，震动
     private static final String[] ALL_PERMISSION = {
@@ -73,6 +73,7 @@ public class MainActivity extends FragmentActivity implements IContextHelper, Au
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        ButterKnife.bind(this);
 
         // Android 6.0 以上版本 -> 动态申请权限
         if (Build.VERSION.SDK_INT > Build.VERSION_CODES.LOLLIPOP) {
@@ -259,6 +260,7 @@ public class MainActivity extends FragmentActivity implements IContextHelper, Au
 
         // 默认选中
         m_navigationView.setCheckedItem(R.id.nav_left_main);
+        m_navigationView.setNavigationItemSelectedListener(navigationItemSelectedListener);
     }
 
     /**
@@ -276,9 +278,26 @@ public class MainActivity extends FragmentActivity implements IContextHelper, Au
     }
 
     /**
+     * 侧边栏菜单
+     */
+    private NavigationView.OnNavigationItemSelectedListener navigationItemSelectedListener = (@NonNull MenuItem item) -> {
+        switch (item.getItemId()) {
+            case R.id.nav_left_login:
+                Nav_Login_Selected();
+                break;
+            case R.id.nav_left_about:
+                Nav_About_Selected();
+                break;
+            case R.id.nav_left_feedback:
+                Nav_Feedback_Selected();
+                break;
+        }
+        return true;
+    };
+
+    /**
      * 侧边栏 登录注销
      */
-    @OnItemSelected(R.id.nav_left_login)
     private void Nav_Login_Selected() {
         closeNavMenu();
 
@@ -308,7 +327,6 @@ public class MainActivity extends FragmentActivity implements IContextHelper, Au
     /**
      * 侧边栏 关于
      */
-    @OnItemSelected(R.id.nav_left_about)
     private void Nav_About_Selected() {
         closeNavMenu();
 
@@ -323,7 +341,6 @@ public class MainActivity extends FragmentActivity implements IContextHelper, Au
     /**
      * 侧边栏 反馈
      */
-    @OnItemSelected(R.id.nav_left_feedback)
     private void Nav_Feedback_Selected() {
         closeNavMenu();
 

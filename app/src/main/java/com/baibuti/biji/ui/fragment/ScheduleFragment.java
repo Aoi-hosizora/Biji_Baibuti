@@ -11,12 +11,12 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
-import com.alibaba.fastjson.JSON;
 import com.baibuti.biji.model.dao.DaoStrategyHelper;
 import com.baibuti.biji.model.dao.daoInterface.IScheduleDao;
 import com.baibuti.biji.model.dto.ServerException;
 import com.baibuti.biji.model.po.MySubject;
 import com.baibuti.biji.R;
+import com.baibuti.biji.service.auth.AuthManager;
 import com.baibuti.biji.service.scut.ScheduleService;
 import com.baibuti.biji.ui.IContextHelper;
 import com.baibuti.biji.ui.activity.MainActivity;
@@ -29,21 +29,22 @@ import java.util.List;
 import java.util.Locale;
 
 import butterknife.BindView;
+import butterknife.ButterKnife;
 import butterknife.OnClick;
-import butterknife.OnItemSelected;
 
 public class ScheduleFragment extends BaseFragment implements IContextHelper {
 
     private View view;
 
     @BindView(R.id.schedulefragment_weekview)
-    private WeekView m_weekView;
+    WeekView m_weekView;
 
     @BindView(R.id.schedulefragment_timetableView)
-    private TimetableView m_timetableView;
+    TimetableView m_timetableView;
 
     @BindView(R.id.schedulefragment_week_textview)
-    private TextView m_titleTextView;
+    TextView m_titleTextView;
+
     private static final int REQ_BROWSER = 100;
 
     @Nullable
@@ -55,8 +56,21 @@ public class ScheduleFragment extends BaseFragment implements IContextHelper {
                 parent.removeView(view);
         } else {
             view = inflater.inflate(R.layout.fragment_schedule, container, false);
+            ButterKnife.bind(this, view);
 
             initView(view);
+
+            AuthManager.getInstance().addLoginChangeListener(new AuthManager.OnLoginChangeListener() {
+                @Override
+                public void onLogin(String username) {
+                    ActionRefresh_Clicked();
+                }
+
+                @Override
+                public void onLogout() {
+                    ActionRefresh_Clicked();
+                }
+            });
         }
         return view;
     }
@@ -78,6 +92,7 @@ public class ScheduleFragment extends BaseFragment implements IContextHelper {
             MainActivity activity = (MainActivity) getActivity();
             if (activity != null) activity.openNavMenu();
         });
+        m_toolbar.setOnMenuItemClickListener(menuItemClickListener);
         // m_toolbar.setPopupTheme(R.style.popup_theme);
 
         // WeekView
@@ -110,7 +125,7 @@ public class ScheduleFragment extends BaseFragment implements IContextHelper {
      * 主界面点击 点现周次界面
      */
     @OnClick(R.id.schedulefragment_layout)
-    private void MainLayout_Clicked() {
+    void MainLayout_Clicked() {
         if (m_weekView.isShowing()) {
             m_weekView.isShow(false);
             // 返回当前周
@@ -149,9 +164,25 @@ public class ScheduleFragment extends BaseFragment implements IContextHelper {
     }
 
     /**
+     * ActionBar 点击事件
+     */
+    private Toolbar.OnMenuItemClickListener menuItemClickListener = (menu) -> {
+        switch (menu.getItemId()) {
+            case R.id.action_import_schedule:
+                ActionImportSchedule_Clicked();
+                break;
+            case R.id.action_refresh_schedule:
+                ActionRefresh_Clicked();
+                break;
+            case R.id.action_delete_schedule:
+                ActionDeleteSchedule_Clicked();
+        }
+        return true;
+    };
+
+    /**
      * ActionBar 导入课程表
      */
-    @OnItemSelected(R.id.action_import_schedule)
     private void ActionImportSchedule_Clicked() {
         Intent intent = new Intent(getContext(), WebViewActivity.class);
         startActivityForResult(intent, REQ_BROWSER);
@@ -184,7 +215,6 @@ public class ScheduleFragment extends BaseFragment implements IContextHelper {
     /**
      * ActionBar 刷新课程表
      */
-    @OnItemSelected(R.id.action_refresh_schedule)
     private void ActionRefresh_Clicked() {
         ProgressDialog progressDialog = showProgress(getActivity(), "加載中...", false, null);
 
@@ -220,7 +250,6 @@ public class ScheduleFragment extends BaseFragment implements IContextHelper {
     /**
      * ActionBar 删除课程表
      */
-    @OnItemSelected(R.id.action_delete_schedule)
     private void ActionDeleteSchedule_Clicked() {
         showAlert(getActivity(),
             "删除", "是否删除课程表？",

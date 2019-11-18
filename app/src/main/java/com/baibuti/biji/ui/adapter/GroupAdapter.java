@@ -14,7 +14,7 @@ import com.baibuti.biji.R;
 
 import java.util.List;
 
-public class GroupAdapter extends BaseAdapter  {
+public class GroupAdapter extends BaseAdapter {
 
     private Context context;
     private List<Group> list;
@@ -33,6 +33,8 @@ public class GroupAdapter extends BaseAdapter  {
 
     @Override
     public int getCount() {
+        if (list == null)
+            return 0;
         return list.size();
     }
 

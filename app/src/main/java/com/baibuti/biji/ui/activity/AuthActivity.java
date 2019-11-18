@@ -15,19 +15,21 @@ import com.baibuti.biji.R;
 import java.util.Locale;
 
 import butterknife.BindView;
+import butterknife.ButterKnife;
 
 public class AuthActivity extends AppCompatActivity {
 
     @BindView(R.id.authAct_view_pager)
-    private ViewPager m_viewPager;
+    ViewPager m_viewPager;
 
     @BindView(R.id.authAct_layout_tab)
-    private TabLayout m_tabs;
+    TabLayout m_tabs;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_auth);
+        ButterKnife.bind(this);
 
         ActionBar actionBar = getSupportActionBar();
         if (actionBar != null) {
