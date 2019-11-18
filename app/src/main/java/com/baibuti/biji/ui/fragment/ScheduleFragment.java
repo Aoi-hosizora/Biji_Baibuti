@@ -162,16 +162,19 @@ public class ScheduleFragment extends BaseFragment implements IContextHelper {
      */
     private void CbImportSchedule(String html) {
         List<MySubject> mySubjects = ScheduleService.parseHtml(html);
+        if (mySubjects.size() == 0) {
+            showAlert(getActivity(), "错误", "返回的课程表数据无法解析。");
+            return;
+        }
 
         // show
         m_weekView.source(mySubjects).showView();
         m_timetableView.source(mySubjects).updateView();
 
         // save
-        final String subjectsJsonStr = JSON.toJSONString(mySubjects);
         IScheduleDao scheduleDao = DaoStrategyHelper.getInstance().getScheduleDao(getActivity());
         try {
-            scheduleDao.updateSchedule(subjectsJsonStr);
+            scheduleDao.updateSchedule(MySubject.toJsons(mySubjects));
         } catch (ServerException ex) {
             ex.printStackTrace();
             showAlert(getActivity(), "错误", ex.getMessage());
@@ -205,7 +208,7 @@ public class ScheduleFragment extends BaseFragment implements IContextHelper {
         MainActivity activity = (MainActivity) getActivity();
         if (activity == null) return;
 
-        List<MySubject> mySubjects = JSON.parseArray(scheduleJson, MySubject.class);
+        List<MySubject> mySubjects = MySubject.fromJson(scheduleJson);
         m_weekView.source(mySubjects).showView();
         m_timetableView.source(mySubjects).updateView();
 

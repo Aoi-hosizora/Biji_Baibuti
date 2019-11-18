@@ -1,72 +1,63 @@
 package com.baibuti.biji.model.po;
 
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.annotation.JSONField;
 import com.zhuangfei.timetable.model.Schedule;
 import com.zhuangfei.timetable.model.ScheduleEnable;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import lombok.Data;
 
-/**
- * 自定义实体类需要实现 ScheduleEnable 接口并实现 getSchedule()
- *
- * @see ScheduleEnable#getSchedule()
- */
 @Data
 public class MySubject implements ScheduleEnable {
 
-    private static final String EXTRAS_ID = "extras_id";
-
-    @JSONField(name = "id")
-    private int id = 0;
+    @JSONField(name = "id")         private int id = 0;
 
     // 信息
-
-    @JSONField(name = "docName")
-    private String name;
-
-    @JSONField(name = "time")
-    private String time;
-
-    @JSONField(name = "room")
-    private String room;
-
-    @JSONField(name = "teacher")
-    private String teacher;
+    @JSONField(name = "docName")    private String name;            // 课程名
+    @JSONField(name = "time")       private String time;            // 周学时
+    @JSONField(name = "room")       private String room;            // 教室
+    @JSONField(name = "teacher")    private String teacher;         // 教师
 
     // 时间
-
-    @JSONField(name = "start")
-    private int start;
-
-    @JSONField(name = "step")
-    private int step;
+    @JSONField(name = "start")      private int start;              // 开始上课 <<<
+    @JSONField(name = "step")       private int step;               // 上课节数 <<<
 
     // 日期
+    @JSONField(name = "day")        private int day;                // 周几上
+    @JSONField(name = "weekList")   private List<Integer> weekList; // 上课周次 <<<
 
-    @JSONField(name = "day")
-    private int day;
+    //////////////////
 
-    /**
-     * 上课周次
-     */
-    @JSONField(name = "weekList")
-    private List<Integer> weekList;
+    public static String toJsons(List<MySubject> list) {
+        try {
+            return JSON.toJSONString(list);
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            return "";
+        }
+    }
 
-    // 其他
+    public static List<MySubject> fromJson(String json) {
+        try {
+            return JSON.parseArray(json, MySubject.class);
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            return new ArrayList<>();
+        }
+    }
 
-    @JSONField(serialize = false, deserialize = false)
-    private String term;
-
-    @JSONField(serialize = false, deserialize = false)
-    private int colorRandom;
-
-    @JSONField(serialize = false, deserialize = false)
-    private String url;
+    //////////////////
 
     public MySubject() { }
 
+    private static final String EXTRAS_ID = "extras_id";
+
+    /**
+     * 统一接口
+     */
     @Override
     @JSONField(serialize = false, deserialize = false)
     public Schedule getSchedule() {
