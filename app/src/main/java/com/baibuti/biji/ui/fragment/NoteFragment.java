@@ -128,7 +128,7 @@ public class NoteFragment extends BaseFragment implements IContextHelper {
 
         // Toolbar
         m_toolbar.setTitle("所有笔记");
-        m_toolbar.inflateMenu(R.menu.notefragment_actionbar);
+        m_toolbar.inflateMenu(R.menu.note_frag_action);
         m_toolbar.setNavigationIcon(R.drawable.tab_menu);
         m_toolbar.setNavigationOnClickListener((View view) -> {
             MainActivity activity = (MainActivity) getActivity();

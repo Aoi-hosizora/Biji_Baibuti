@@ -76,7 +76,7 @@ public class SearchItemActivity extends AppCompatActivity implements IContextHel
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_starsearchitem);
+        setContentView(R.layout.activity_star);
         ActionBar actionBar = getSupportActionBar();
         if (actionBar != null)
             actionBar.setDisplayHomeAsUpEnabled(true);
@@ -129,7 +129,7 @@ public class SearchItemActivity extends AppCompatActivity implements IContextHel
      */
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.actionbar_ssiact, menu);
+        getMenuInflater().inflate(R.menu.star_act_action, menu);
         return true;
     }
 
@@ -205,7 +205,7 @@ public class SearchItemActivity extends AppCompatActivity implements IContextHel
      */
     private void ListItem_LongClicked(SearchItem searchItem) {
         m_LongClickItemPopupMenu = new Dialog(this, R.style.BottomDialog);
-        LinearLayout root = LayoutUtil.initPopupMenu(this, m_LongClickItemPopupMenu, R.layout.popupmenu_starsearchitem_longclickstaritem);
+        LinearLayout root = LayoutUtil.initPopupMenu(this, m_LongClickItemPopupMenu, R.layout.popup_star_act_long_click_item);
 
         root.findViewById(R.id.id_SSIActivity_PopupMenu_CancelStar).setOnClickListener((v) -> SearchItem_CancelStarClick(searchItem));
         root.findViewById(R.id.id_SSIActivity_PopupMenu_CancelAllStar).setOnClickListener((v) -> SearchItem_CancelAllStarClick());

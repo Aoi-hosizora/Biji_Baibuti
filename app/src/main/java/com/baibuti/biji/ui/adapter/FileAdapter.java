@@ -47,7 +47,7 @@ public class FileAdapter extends RecyclerView.Adapter<FileAdapter.ViewHolder> {
     @NonNull
     public ViewHolder onCreateViewHolder(@NonNull final ViewGroup parent, int viewType){
         //此处重用文档列表项view
-        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.dialog_fileimportdialog_file, parent, false);
+        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.adapter_file, parent, false);
         final ViewHolder holder = new ViewHolder(view);
         Log.i("TEST", "onCreateViewHolder: "+holder.getAdapterPosition());
         view.setOnClickListener(new View.OnClickListener() {

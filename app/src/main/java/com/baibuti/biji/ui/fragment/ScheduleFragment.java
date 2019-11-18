@@ -85,7 +85,7 @@ public class ScheduleFragment extends BaseFragment {
                 parent.removeView(view);
         }
         else {
-            view = inflater.inflate(R.layout.fragment_scheduletab, container, false);
+            view = inflater.inflate(R.layout.fragment_schedule, container, false);
 
             scheduleDao = new ScheduleDao(getContext());
             loadingDialog = new ProgressDialog(getContext());
@@ -152,7 +152,7 @@ public class ScheduleFragment extends BaseFragment {
 
         m_toolbar.setPopupTheme(R.style.popup_theme);
 
-        m_toolbar.inflateMenu(R.menu.schedulefragment_menu);
+        m_toolbar.inflateMenu(R.menu.schedule_frag_action);
         m_toolbar.setOnMenuItemClickListener(new Toolbar.OnMenuItemClickListener() {
             @Override
             public boolean onMenuItemClick(MenuItem item) {

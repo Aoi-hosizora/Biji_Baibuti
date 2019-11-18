@@ -16,7 +16,7 @@ import com.baibuti.biji.R;
 
 import java.util.List;
 
-public class FileClassAdapter extends BaseAdapter {
+public class DocClassAdapter extends BaseAdapter {
 
     public List<DocClass> list;
     LayoutInflater inflater;
@@ -27,7 +27,7 @@ public class FileClassAdapter extends BaseAdapter {
 
     public boolean isDeleting = false;
 
-    public FileClassAdapter(Context context, List<DocClass> list) {
+    public DocClassAdapter(Context context, List<DocClass> list) {
         this.list = list;
         inflater = LayoutInflater.from(context);
         this.context = context;
@@ -61,17 +61,17 @@ public class FileClassAdapter extends BaseAdapter {
 
         Toast.makeText(context, "调用getview", Toast.LENGTH_LONG).show();
 
-        FileClassAdapter.ViewHolder holder = null;
+        DocClassAdapter.ViewHolder holder = null;
         if(null == convertView) {
-            holder = new FileClassAdapter.ViewHolder();
-            convertView = inflater.inflate(R.layout.modulelayout_filefrag_fileclasslistitem, viewGroup, false);
+            holder = new DocClassAdapter.ViewHolder();
+            convertView = inflater.inflate(R.layout.adapter_docclass, viewGroup, false);
             holder.fileClassListItemName = (Button) convertView.findViewById(R.id.id_adapter_fileclasslistitem_name);
             TransitionDrawable buttonTransition = (TransitionDrawable) context.getResources().getDrawable(R.drawable.button_transition);
             holder.fileClassListItemName.setBackground(buttonTransition);
             convertView.setTag(holder);
         }
         else{
-            holder = (FileClassAdapter.ViewHolder) convertView.getTag();
+            holder = (DocClassAdapter.ViewHolder) convertView.getTag();
             TransitionDrawable buttonTransition = (TransitionDrawable) context.getResources().getDrawable(R.drawable.button_transition);
             holder.fileClassListItemName.setBackground(buttonTransition);
         }

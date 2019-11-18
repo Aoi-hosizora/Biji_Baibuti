@@ -38,7 +38,7 @@ public class DocumentAdapter extends RecyclerView.Adapter<DocumentAdapter.ViewHo
     @Override
     @NonNull
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType){
-        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.modulelayout_filefrag_documentlistitem, parent, false);
+        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.adapter_document, parent, false);
         final ViewHolder holder = new ViewHolder(view);
         view.setOnClickListener(new View.OnClickListener() {
             @Override

@@ -51,7 +51,7 @@ public class FileImportDialog extends Dialog implements android.view.View.OnClic
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         requestWindowFeature(Window.FEATURE_NO_TITLE);
-        setContentView(R.layout.dialog_fileimportdialog);
+        setContentView(R.layout.dialog_file_import);
         close = (ImageButton) findViewById(R.id.fileimportdialog_btnClose);
         title = (TextView) findViewById(R.id.fileimportdialog_title_text);
         title.setText("导入文件...");

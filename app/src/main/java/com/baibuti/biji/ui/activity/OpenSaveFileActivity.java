@@ -7,7 +7,6 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.support.v7.app.AppCompatActivity;
 import android.text.Editable;
-import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
@@ -180,9 +179,9 @@ public class OpenSaveFileActivity extends AppCompatActivity implements View.OnCl
 
             // 显示
             ArrayAdapter<String> spinnerAdapter = new ArrayAdapter<>(this,
-                    R.layout.modulelayout_opensavefile_spinneritemselect, FileType);
+                    R.layout.layout_spinner_select, FileType);
             // 下拉
-            spinnerAdapter.setDropDownViewResource(R.layout.modulelayout_opensavefile_spinneritemdrop);
+            spinnerAdapter.setDropDownViewResource(R.layout.layout_spinner_drop);
             //spinnerAdapter.setDropDownViewTheme(Theme.LIGHT);
             m_FileTypeSpinner.setAdapter(spinnerAdapter);
 

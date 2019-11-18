@@ -82,7 +82,7 @@ public class EditNoteActivity extends AppCompatActivity implements IContextHelpe
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_modifynote);
+        setContentView(R.layout.activity_edit_note);
         ActionBar actionBar = getSupportActionBar();
         if (actionBar != null)
             actionBar.setDisplayHomeAsUpEnabled(true);
@@ -108,7 +108,7 @@ public class EditNoteActivity extends AppCompatActivity implements IContextHelpe
      */
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.modifynoteactivity_menu, menu);
+        getMenuInflater().inflate(R.menu.edit_note_act_action, menu);
         return true;
     }
 

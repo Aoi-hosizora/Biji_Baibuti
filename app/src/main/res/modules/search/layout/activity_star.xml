@@ -7,7 +7,7 @@
     tools:context=".ui.activity.SearchItemActivity">
 
     <include
-        layout="@layout/modulelayout_recycleview_emptyview"
+        layout="@layout/layout_recycleview_empty_view"
         android:id="@+id/id_StarSearchItemActivity_StarListView_EmptyView"
         android:layout_width="match_parent"
         android:layout_height="match_parent"

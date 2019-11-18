@@ -86,7 +86,7 @@ public class SearchFragment extends BaseFragment implements IContextHelper {
                 parent.removeView(view);
         }
         else {
-            view = inflater.inflate(R.layout.fragment_searchtab, container, false);
+            view = inflater.inflate(R.layout.fragment_search, container, false);
             initView();
 
             AuthManager.getInstance().addLoginChangeListener(new AuthManager.OnLoginChangeListener() {
@@ -115,7 +115,7 @@ public class SearchFragment extends BaseFragment implements IContextHelper {
 
         Toolbar m_toolbar = view.findViewById(R.id.tab_search_toolbar);
         m_toolbar.setTitle("网页搜索");
-        m_toolbar.inflateMenu(R.menu.actionbar_searchfrag);
+        m_toolbar.inflateMenu(R.menu.search_frag_action);
         m_toolbar.setNavigationIcon(R.drawable.tab_menu);
         m_toolbar.setNavigationOnClickListener((View view) -> {
             MainActivity activity = (MainActivity) getActivity();
@@ -248,7 +248,7 @@ public class SearchFragment extends BaseFragment implements IContextHelper {
         if (activity == null) return;
 
         m_itemPopupMenu = new Dialog(activity, R.style.BottomDialog);
-        LinearLayout root = LayoutUtil.initPopupMenu(activity, m_itemPopupMenu, R.layout.popupmenu_searchitem_longclickitem);
+        LinearLayout root = LayoutUtil.initPopupMenu(activity, m_itemPopupMenu, R.layout.popup_search_frag_long_click_item);
 
         root.findViewById(R.id.id_SearchFrag_PopupMenu_Star).setOnClickListener((v) -> SearchItem_StarClick(searchItem));
         root.findViewById(R.id.id_SearchFrag_PopupMenu_Cancel).setOnClickListener((v) -> m_itemPopupMenu.dismiss());

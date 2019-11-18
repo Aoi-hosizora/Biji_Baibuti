@@ -41,7 +41,7 @@ import com.baibuti.biji.model.po.DocClass;
 import com.baibuti.biji.service.auth.AuthManager;
 import com.baibuti.biji.ui.IContextHelper;
 import com.baibuti.biji.ui.adapter.DocumentAdapter;
-import com.baibuti.biji.ui.adapter.FileClassAdapter;
+import com.baibuti.biji.ui.adapter.DocClassAdapter;
 import com.baibuti.biji.model.dao.local.DocumentDao;
 import com.baibuti.biji.model.dao.local.DocClassDao;
 import com.baibuti.biji.model.po.Document;
@@ -69,7 +69,7 @@ public class FileFragment extends BaseFragment implements IContextHelper {
     private List<DocClass> docClassListItems = new ArrayList<>();
     private ListView fileClassList;
     private DocClassDao docClassDao;
-    private FileClassAdapter fileClassAdapter;
+    private DocClassAdapter docClassAdapter;
     private View view;
     private int TAG_NEW = 0;
     private int TAG_RENAME = 1;
@@ -117,7 +117,7 @@ public class FileFragment extends BaseFragment implements IContextHelper {
                 parent.removeView(view);
         }
         else {
-            view = inflater.inflate(R.layout.fragment_filetab, container, false);
+            view = inflater.inflate(R.layout.fragment_file, container, false);
 
             loadingDialog = new ProgressDialog(getContext());
             loadingDialog.setMessage(getResources().getString(R.string.NoteFrag_LoadingData));
@@ -186,7 +186,7 @@ public class FileFragment extends BaseFragment implements IContextHelper {
 
         mToolBar.setPopupTheme(R.style.popup_theme);
 
-        mToolBar.inflateMenu(R.menu.filefragment_menu);
+        mToolBar.inflateMenu(R.menu.file_frag_action);
         mToolBar.setOnMenuItemClickListener(new Toolbar.OnMenuItemClickListener() {
             @Override
             public boolean onMenuItemClick(MenuItem item) {
@@ -326,7 +326,7 @@ public class FileFragment extends BaseFragment implements IContextHelper {
                     activity.runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
-                            fileClassAdapter.isDeleting = true;
+                            docClassAdapter.isDeleting = true;
                         }
                     });
 
@@ -346,8 +346,8 @@ public class FileFragment extends BaseFragment implements IContextHelper {
                             docClassListItems.remove(lastPositionClicked);
                             documentListItems.clear();
                             documentListsByClass.remove(lastPositionClicked);
-                            fileClassAdapter.lastButton = null;
-                            fileClassAdapter.notifyDataSetChanged();
+                            docClassAdapter.lastButton = null;
+                            docClassAdapter.notifyDataSetChanged();
                             documentAdapter.notifyDataSetChanged();
                             documentHeader.setText("");
                             unSelectedText.setVisibility(View.VISIBLE);
@@ -458,7 +458,7 @@ public class FileFragment extends BaseFragment implements IContextHelper {
 
                             AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
                             LayoutInflater inflater = getLayoutInflater();
-                            View dialoglayout = inflater.inflate(R.layout.documents_share_code, null);
+                            View dialoglayout = inflater.inflate(R.layout.layout_share_code, null);
                             AlertDialog dia = builder.create();
                             dia.show();
                             Window window = dia.getWindow();
@@ -629,15 +629,15 @@ public class FileFragment extends BaseFragment implements IContextHelper {
                 activity.runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
-                        fileClassAdapter = new FileClassAdapter(getContext(), docClassListItems);
+                        docClassAdapter = new DocClassAdapter(getContext(), docClassListItems);
                         fileClassList = (ListView) view.findViewById(R.id.filefragment_fileclasses);
-                        fileClassList.setAdapter(fileClassAdapter);
+                        fileClassList.setAdapter(docClassAdapter);
                         fileClassList.setVerticalScrollBarEnabled(false);
                         fileClassList.setDivider(null);
                         fileClassList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
                             @Override
                             public void onItemClick(AdapterView<?> adapterView, View view, int position, long id) {
-                                fileClassAdapter.isDeleting = false;
+                                docClassAdapter.isDeleting = false;
                                 if(unSelectedText.getVisibility() == View.VISIBLE)
                                     unSelectedText.setVisibility(View.GONE);
                                 if(position != fileClassList.getCount() - 1) {
@@ -655,8 +655,8 @@ public class FileFragment extends BaseFragment implements IContextHelper {
 
                         if(!docClassListItems.get(docClassListItems.size() - 1).getName().equals("+")) {
                             DocClass temp = new DocClass("+", 0);
-                            docClassListItems.add(fileClassAdapter.getCount(), temp);
-                            fileClassAdapter.notifyDataSetChanged();
+                            docClassListItems.add(docClassAdapter.getCount(), temp);
+                            docClassAdapter.notifyDataSetChanged();
                         }
 
                         Log.e("测试", "filefrg.run: 执行");
@@ -823,7 +823,7 @@ public class FileFragment extends BaseFragment implements IContextHelper {
                                 activity.runOnUiThread(new Runnable() {
                                     @Override
                                     public void run() {
-                                        docClassListItems.add(fileClassAdapter.getCount() - 1, newDocClass);
+                                        docClassListItems.add(docClassAdapter.getCount() - 1, newDocClass);
                                     }
                                 });
                                 List<Document> l = documentDao.queryDocumentByClassId(newDocClass.getName());
@@ -831,7 +831,7 @@ public class FileFragment extends BaseFragment implements IContextHelper {
                                     @Override
                                     public void run() {
                                         documentListsByClass.add(position, l);
-                                        fileClassAdapter.notifyDataSetChanged();
+                                        docClassAdapter.notifyDataSetChanged();
                                         Log.e("测试", "更新本地记录："
                                                 + new UtLogDao(getContext()).getLog(LogModule.Mod_FileClass).getUpdateTime().toString());
 
@@ -861,7 +861,7 @@ public class FileFragment extends BaseFragment implements IContextHelper {
                                         docClassListItems.remove(position);
                                         docClassListItems.add(position, currentDocClass);
                                         documentHeader.setText(newFileClassName);
-                                        fileClassAdapter.notifyDataSetChanged();
+                                        docClassAdapter.notifyDataSetChanged();
 
                                         cancelLoadingDialog();
 
@@ -1068,13 +1068,13 @@ public class FileFragment extends BaseFragment implements IContextHelper {
 
                 if(!docClassListItems.get(docClassListItems.size() - 1).getName().equals("+")) {
                     DocClass temp = new DocClass("+", 0);
-                    docClassListItems.add(fileClassAdapter.getCount(), temp);
+                    docClassListItems.add(docClassAdapter.getCount(), temp);
                 }
 
                 activity.runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
-                        fileClassAdapter.notifyDataSetChanged();
+                        docClassAdapter.notifyDataSetChanged();
                         dealWithDocuments();
                         documentHeader.setText("");
                         unSelectedText.setVisibility(View.VISIBLE);
