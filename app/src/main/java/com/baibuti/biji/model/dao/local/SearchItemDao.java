@@ -17,14 +17,23 @@ public class SearchItemDao implements ISearchItemDao {
     private final static String TBL_NAME = "tbl_search_item";
 
     private final static String COL_ID = "sis_id";
-    private final static String COL_URL = "sis_url";
     private final static String COL_TITLE = "sis_title";
+    private final static String COL_URL = "sis_url";
     private final static String COL_CONTENT = "sis_content";
 
     private DbOpenHelper helper;
 
     public SearchItemDao(Context context) {
         helper = new DbOpenHelper(context);
+    }
+
+    public static void create_tbl(SQLiteDatabase db) {
+        db.execSQL("CREATE TABLE IF NOT EXISTS " + TBL_NAME + " (" +
+            COL_ID      + " integer PRIMARY KEY AUTOINCREMENT, " +
+            COL_TITLE   + " varchar NOT NULL, " +
+            COL_URL     + " varchar NOT NULL, " +
+            COL_CONTENT + " varchar NOT NULL)"
+        );
     }
 
     /**

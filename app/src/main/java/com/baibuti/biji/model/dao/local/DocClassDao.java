@@ -9,7 +9,6 @@ import android.database.sqlite.SQLiteStatement;
 
 import com.baibuti.biji.model.dao.DbOpenHelper;
 import com.baibuti.biji.model.dao.daoInterface.IDocClassDao;
-import com.baibuti.biji.model.dto.ServerException;
 import com.baibuti.biji.model.po.DocClass;
 
 import java.util.ArrayList;
@@ -30,6 +29,13 @@ public class DocClassDao implements IDocClassDao {
         // 处理默认
         if (queryAllDocClasses().isEmpty())
             insertDocClass(new DocClass()); // DEF_CLASS_NAME
+    }
+
+    public static void create_tbl(SQLiteDatabase db) {
+        db.execSQL("CREATE TABLE IF NOT EXISTS " + TBL_NAME + " (" +
+            COL_ID      + " integer PRIMARY KEY AUTOINCREMENT, " +
+            COL_NAME    + " varchar NOT NULL UNIQUE)"
+        );
     }
 
     /**

@@ -31,6 +31,14 @@ public class DocumentDao implements IDocumentDao {
         docClassDao = new DocClassDao(context);
     }
 
+    public static void create_tbl(SQLiteDatabase db) {
+        db.execSQL("CREATE TABLE IF NOT EXISTS " + TBL_NAME + " (" +
+            COL_ID          + " integer PRIMARY KEY AUTOINCREMENT, " +
+            COL_PATH        + " varchar NOT NULL, " +
+            COL_DOCCLASS_ID + " varchar NOT NULL)"
+        );
+    }
+
     /**
      * 查询所有文件
      * @return 文件列表

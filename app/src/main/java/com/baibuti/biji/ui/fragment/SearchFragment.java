@@ -263,7 +263,7 @@ public class SearchFragment extends BaseFragment implements IContextHelper {
         ((Button) root.findViewById(R.id.id_SearchFrag_PopupMenu_Star)).setText("收藏");
         ISearchItemDao searchItemDao = DaoStrategyHelper.getInstance().getSearchDao(getActivity());
         try {
-            if (searchItemDao.querySearchItemById(searchItem.getUrl()) != null)
+            if (searchItemDao.querySearchItemById(searchItem.getId()) != null)
                 ((Button) root.findViewById(R.id.id_SearchFrag_PopupMenu_Star)).setText("取消收藏");
         } catch (ServerException ex) {
             ex.printStackTrace();
@@ -279,7 +279,7 @@ public class SearchFragment extends BaseFragment implements IContextHelper {
 
         ISearchItemDao searchItemDao = DaoStrategyHelper.getInstance().getSearchDao(getActivity());
         try {
-            if (searchItemDao.querySearchItemById(searchItem.getUrl()) == null) {
+            if (searchItemDao.querySearchItemById(searchItem.getId()) == null) {
                 // 收藏
                 if (searchItemDao.insertSearchItem(searchItem) != 0)
                     showToast(getActivity(), String.format(Locale.CHINA, "收藏 %s 成功", searchItem.getTitle()));
@@ -288,7 +288,7 @@ public class SearchFragment extends BaseFragment implements IContextHelper {
                 searchItemAdapter.notifyDataSetChanged();
             } else {
                 // 取消收藏
-                if (searchItemDao.deleteSearchItem(searchItem.getUrl()))
+                if (searchItemDao.deleteSearchItem(searchItem.getId()))
                     showToast(getActivity(), String.format(Locale.CHINA, "取消收藏 %s 成功", searchItem.getTitle()));
                 else
                     showToast(getActivity(), String.format(Locale.CHINA, "取消收藏 %s 失败", searchItem.getTitle()));

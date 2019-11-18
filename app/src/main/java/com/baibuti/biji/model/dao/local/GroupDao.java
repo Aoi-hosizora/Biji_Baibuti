@@ -37,6 +37,15 @@ public class GroupDao implements IGroupDao {
         precessOrder();
     }
 
+    public static void create_tbl(SQLiteDatabase db) {
+        db.execSQL("CREATE TABLE IF NOT EXISTS " + TBL_NAME + " (" +
+            COL_ID      + " integer PRIMARY KEY AUTOINCREMENT, " +
+            COL_NAME    + " varchar NOT NULL UNIQUE, " +
+            COL_ORDER   + " integer NOT NULL, " +
+            COL_COLOR   + " varchar NOT NULL)"
+        );
+    }
+
     /**
      * 查询所有分组
      * @return 分组列表

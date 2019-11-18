@@ -223,7 +223,7 @@ public class SearchItemActivity extends AppCompatActivity implements IContextHel
     private void SearchItem_CancelStarClick(SearchItem searchItem) {
         ISearchItemDao searchItemDao = DaoStrategyHelper.getInstance().getSearchDao(this);
         try {
-             if (!searchItemDao.deleteSearchItem(searchItem.getUrl())) {
+             if (!searchItemDao.deleteSearchItem(searchItem.getId())) {
                  Toast.makeText(SearchItemActivity.this, String.format("取消收藏 \"%s\" 失败", searchItem.getTitle()), Toast.LENGTH_SHORT).show();
              } else {
                  Toast.makeText(SearchItemActivity.this, String.format("取消收藏 \"%s\" 成功", searchItem.getTitle()), Toast.LENGTH_SHORT).show();

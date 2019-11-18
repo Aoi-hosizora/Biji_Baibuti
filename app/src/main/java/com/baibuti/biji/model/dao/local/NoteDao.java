@@ -42,6 +42,17 @@ public class NoteDao implements INoteDao {
         //     insertNote(Note.DEF_NOTE);
     }
 
+    public static void create_tbl(SQLiteDatabase db) {
+        db.execSQL("CREATE TABLE IF NOT EXISTS " + TBL_NAME + " (" +
+            COL_ID          + " integer PRIMARY KEY AUTOINCREMENT, " +
+            COL_TITLE       + " varchar NOT NULL, " +
+            COL_CONTENT     + " varchar, " +
+            COL_GROUP_ID    + " integer NOT NULL, " +
+            COL_CREATE_TIME + " datetime NOT NULL, " +
+            COL_UPDATE_TIME + " datetime NOT NULL)"
+        );
+    }
+
     /**
      * 查询所有笔记
      * @return 笔记列表
