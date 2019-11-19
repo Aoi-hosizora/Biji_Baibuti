@@ -44,51 +44,39 @@
 
         <ListView
             android:id="@+id/id_docclass_list_view"
-            android:layout_width="180dp"
+            android:layout_width="0dp"
             android:layout_height="match_parent"
-            android:layout_weight="3"
+            android:layout_weight="1"
             android:background="@color/grey_250"
             android:splitMotionEvents="false" />
 
         <android.support.constraint.ConstraintLayout
-            android:layout_width="match_parent"
+            android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="3">
 
-            <TextView
-                android:id="@+id/id_txt_document_list_head"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="8dp"
-                android:layout_marginTop="8dp"
-                android:textColor="@color/grey_700"
-                android:textSize="16sp"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent" />
+            <include
+                android:id="@+id/id_document_empty"
+                layout="@layout/layout_recycler_view_empty"
+                android:layout_marginStart="2dp"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:visibility="gone"/>
 
-            <android.support.v7.widget.RecyclerView
-                android:id="@+id/id_document_list_view"
-                android:layout_width="0dp"
-                android:layout_height="0dp"
-                android:layout_marginTop="8dp"
-                android:layout_marginBottom="8dp"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/id_txt_document_list_head" />
+            <android.support.v4.widget.SwipeRefreshLayout
+                android:id="@+id/id_document_srl"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:divider="@null"
+                android:visibility="visible" >
 
-            <TextView
-                android:id="@+id/id_txt_document_unselected_hint"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="8dp"
-                android:text="@string/FileFragment_UnselectedText"
-                android:textSize="18sp"
-                android:visibility="gone"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent" />
+                <com.baibuti.biji.ui.widget.listView.RecyclerViewEmptySupport
+                    android:id="@+id/id_document_list_view"
+                    android:layout_marginStart="2dp"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"/>
+            </android.support.v4.widget.SwipeRefreshLayout>
+
 
         </android.support.constraint.ConstraintLayout>
 

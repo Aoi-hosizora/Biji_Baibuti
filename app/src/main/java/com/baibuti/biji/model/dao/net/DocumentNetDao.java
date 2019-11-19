@@ -43,10 +43,10 @@ public class DocumentNetDao implements IDocumentDao {
     }
 
     @Override
-    public List<Document> queryDocumentByClassId(String className) throws ServerException {
+    public List<Document> queryDocumentByClassId(int cid) throws ServerException {
         Observable<ResponseDTO<DocumentDTO[]>> observable = RetrofitFactory.getInstance()
             .createRequest(AuthManager.getInstance().getAuthorizationHead())
-            .getDocumentByClassId(className)
+            .getDocumentByClassId(cid)
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread());
 

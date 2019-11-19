@@ -18,11 +18,11 @@ import java.util.List;
 
 public class DocumentDao implements IDocumentDao {
 
-    private final static String TBL_NAME = "tbl_document";
+    final static String TBL_NAME = "tbl_document";
 
     private final static String COL_ID = "doc_id";
     private final static String COL_PATH = "doc_path";
-    private final static String COL_DOCCLASS_ID = "doc_class_name";
+    final static String COL_DOCCLASS_ID = "doc_class_name";
 
     private DbOpenHelper helper;
     private DocClassDao docClassDao;
@@ -46,21 +46,21 @@ public class DocumentDao implements IDocumentDao {
      */
     @Override
     public List<Document> queryAllDocuments() {
-        return queryDocumentByClassId(null);
+        return queryDocumentByClassId(-1);
     }
 
     /**
      * 根据 ClassName 查询所有文件
-     * @param className 分类，null for all
+     * @param cid 分类，-1 for all
      * @return 文件分类列表
      */
     @Override
-    public List<Document> queryDocumentByClassId(String className) {
+    public List<Document> queryDocumentByClassId(int cid) {
 
         SQLiteDatabase db = helper.getWritableDatabase();
         Cursor cursor = null;
         String sql = "select * from " + TBL_NAME +
-            ((className == null) ? "" : " where " + COL_DOCCLASS_ID + " = " + className);
+            ((cid == -1) ? "" : " where " + COL_DOCCLASS_ID + " = " + cid);
 
         List<Document> documentList = new ArrayList<>();
         try {

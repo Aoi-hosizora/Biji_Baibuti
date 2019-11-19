@@ -17,5 +17,5 @@ public interface IGroupDao {
     // 增删改
     DbStatusType insertGroup(Group group) throws ServerException;
     DbStatusType updateGroup(Group group) throws ServerException;
-    DbStatusType deleteGroup(int groupId) throws ServerException;
+    DbStatusType deleteGroup(int groupId, boolean isToDefault) throws ServerException;
 }

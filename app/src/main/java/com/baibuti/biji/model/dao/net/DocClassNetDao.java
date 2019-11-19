@@ -172,10 +172,10 @@ public class DocClassNetDao implements IDocClassDao {
      * @return SUCCESS | FAILED | DEFAULT
      */
     @Override
-    public DbStatusType deleteDocClass(int id) throws ServerException {
+    public DbStatusType deleteDocClass(int id, boolean isToDefault) throws ServerException {
         Observable<ResponseDTO<DocClassDTO>> observable = RetrofitFactory.getInstance()
             .createRequest(AuthManager.getInstance().getAuthorizationHead())
-            .deleteDocClass(id)
+            .deleteDocClass(id, isToDefault)
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread());
 

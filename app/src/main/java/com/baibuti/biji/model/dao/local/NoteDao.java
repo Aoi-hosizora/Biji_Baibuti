@@ -20,12 +20,12 @@ import java.util.List;
 
 public class NoteDao implements INoteDao {
 
-    private final static String TBL_NAME = "tbl_note";
+    final static String TBL_NAME = "tbl_note";
 
     private final static String COL_ID = "n_id";
     private final static String COL_TITLE = "n_title";
     private final static String COL_CONTENT = "n_content";
-    private final static String COL_GROUP_ID = "n_group_id";
+    final static String COL_GROUP_ID = "n_group_id";
     private final static String COL_CREATE_TIME = "n_create_time";
     private final static String COL_UPDATE_TIME = "n_update_time";
 

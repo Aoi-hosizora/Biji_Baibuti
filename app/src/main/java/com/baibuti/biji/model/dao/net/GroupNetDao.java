@@ -172,10 +172,10 @@ public class GroupNetDao implements IGroupDao {
      * @return SUCCESS | FAILED  | DEFAULT
      */
     @Override
-    public DbStatusType deleteGroup(int id) throws ServerException {
+    public DbStatusType deleteGroup(int id, boolean isToDefault) throws ServerException {
         Observable<ResponseDTO<GroupDTO>> observable = RetrofitFactory.getInstance()
             .createRequest(AuthManager.getInstance().getAuthorizationHead())
-            .deleteGroup(id)
+            .deleteGroup(id, isToDefault)
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread());
 

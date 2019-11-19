@@ -17,5 +17,5 @@ public interface IDocClassDao {
     // 增删改
     DbStatusType insertDocClass(DocClass docClass) throws ServerException;
     DbStatusType updateDocClass(DocClass docClass) throws ServerException;
-    DbStatusType deleteDocClass(int id) throws ServerException;
+    DbStatusType deleteDocClass(int id, boolean isToDefault) throws ServerException;
 }

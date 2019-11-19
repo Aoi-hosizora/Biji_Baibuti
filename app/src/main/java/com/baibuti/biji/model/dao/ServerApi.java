@@ -148,9 +148,10 @@ public interface ServerApi {
         @Part("color") String color
     );
 
+    // TODO 接口待改
     @NeedAuth
     @DELETE("/group/{gid}")
-    Observable<ResponseDTO<GroupDTO>> deleteGroup(@Path("gid") int id);
+    Observable<ResponseDTO<GroupDTO>> deleteGroup(@Path("gid") int id, @Query("default") boolean isToDefault);
 
     // endregion Group
 
@@ -203,7 +204,7 @@ public interface ServerApi {
 
     // endregion Schedule
 
-    // region DocClass (7+)
+    // region DocClass (7)
 
     @NeedAuth
     @GET("/docclass/")
@@ -236,13 +237,10 @@ public interface ServerApi {
         @Part("name") String name
     );
 
+    // TODO 接口待改
     @NeedAuth
     @DELETE("/docclass/{cid}")
-    Observable<ResponseDTO<DocClassDTO>> deleteDocClass(@Path("cid") int id);
-
-    // TODO 接口待改
-    // @GET("/docclass/share")
-    // Observable<ResponseDTO<>> getShareCode(@Path("id") int id);
+    Observable<ResponseDTO<DocClassDTO>> deleteDocClass(@Path("cid") int id, @Query("default") boolean isToDefault);
 
     // endregion DocClass
 
@@ -254,7 +252,7 @@ public interface ServerApi {
 
     @NeedAuth
     @GET("/document/class/{cid}")
-    Observable<ResponseDTO<DocumentDTO[]>> getDocumentByClassId(@Path("cid") String fileClass);
+    Observable<ResponseDTO<DocumentDTO[]>> getDocumentByClassId(@Path("cid") int cid);
 
     @NeedAuth
     @GET("/document/{did}")

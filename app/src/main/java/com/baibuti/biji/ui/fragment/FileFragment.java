@@ -8,8 +8,8 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.content.FileProvider;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -19,7 +19,6 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.SearchView;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import com.baibuti.biji.model.dao.DaoStrategyHelper;
@@ -39,6 +38,7 @@ import com.baibuti.biji.model.vo.FileItem;
 import com.baibuti.biji.R;
 import com.baibuti.biji.ui.activity.MainActivity;
 import com.baibuti.biji.ui.dialog.FileImportDialog;
+import com.baibuti.biji.ui.widget.listView.RecyclerViewEmptySupport;
 import com.baibuti.biji.util.imgTextUtil.SearchUtil;
 import com.baibuti.biji.util.otherUtil.DefineString;
 import com.baibuti.biji.util.otherUtil.LayoutUtil;
@@ -60,18 +60,15 @@ public class FileFragment extends BaseFragment implements IContextHelper {
 
     private View view;
 
-    @BindView(R.id.id_txt_document_list_head)
-    private TextView m_txt_documentHeader;
-
-    @BindView(R.id.id_txt_document_unselected_hint)
-    private TextView m_txt_unSelected;
-
     @BindView(R.id.id_view_file_search)
     private SearchView m_searchView;
 
+    @BindView(R.id.id_document_srl)
+    private SwipeRefreshLayout m_srl;
+
     // ListView
     @BindView(R.id.id_document_list_view)
-    private RecyclerView m_documentListView;
+    private RecyclerViewEmptySupport m_documentListView;
 
     @BindView(R.id.id_docclass_list_view)
     private ListView m_docClassListView;
@@ -136,8 +133,12 @@ public class FileFragment extends BaseFragment implements IContextHelper {
         m_toolbar.setPopupTheme(R.style.popup_theme);
         m_toolbar.setOnMenuItemClickListener(menuItemClickListener);
 
-        m_txt_documentHeader.setText("");
-        m_txt_unSelected.setVisibility(View.VISIBLE);
+        // Empty View
+        m_documentListView.setEmptyView(view.findViewById(R.id.id_document_empty));
+
+        // Swl
+        m_srl.setColorSchemeResources(R.color.colorPrimary);
+        m_srl.setOnRefreshListener(this::initData);
 
         // Document
         DocumentAdapter documentAdapter = new DocumentAdapter(getContext());
@@ -148,7 +149,8 @@ public class FileFragment extends BaseFragment implements IContextHelper {
         m_documentListView.setAdapter(documentAdapter);
 
         // DocClass
-        DocClassAdapter docClassAdapter = new DocClassAdapter(getContext(), pageData.docClassListItems);
+        DocClassAdapter docClassAdapter = new DocClassAdapter(getContext());
+        docClassAdapter.setList(pageData.docClassListItems);
         m_docClassListView.setVerticalScrollBarEnabled(false);
         m_docClassListView.setDivider(null);
         m_docClassListView.setOnItemClickListener((adapterView, view, position, id) -> onDocClassItemClicked(pageData.docClassListItems.get(position)));
@@ -201,25 +203,18 @@ public class FileFragment extends BaseFragment implements IContextHelper {
             ex.printStackTrace();
             showAlert(getActivity(), "错误", "加载数据错误：" + ex.getMessage());
         }
+
+        if (m_srl.isRefreshing())
+            m_srl.setRefreshing(false);
     }
 
     /**
      * 点击分组，更新显示或者新建
      */
     private void onDocClassItemClicked(DocClass docClass) {
-        DocClassAdapter adapter = (DocClassAdapter) m_docClassListView.getAdapter();
-        adapter.isDeleting = false;
-
-        if (m_txt_unSelected.getVisibility() == View.VISIBLE)
-            m_txt_unSelected.setVisibility(View.GONE);
-
-        if (!docClass.getName().equals("+")) {
-            m_txt_documentHeader.setText(docClass.getName());
-            pageData.showDocumentList.clear();
-            pageData.showDocumentList.addAll(filterDocumentByDocClass(docClass, pageData.documentListItems));
-            m_documentListView.getAdapter().notifyDataSetChanged();
-        } else
-            addDocClass();
+        pageData.showDocumentList.clear();
+        pageData.showDocumentList.addAll(filterDocumentByDocClass(docClass, pageData.documentListItems));
+        m_documentListView.getAdapter().notifyDataSetChanged();
     }
 
     /**
@@ -239,10 +234,12 @@ public class FileFragment extends BaseFragment implements IContextHelper {
      * Toolbar 菜单点击事件
      */
     private Toolbar.OnMenuItemClickListener menuItemClickListener = (MenuItem item) -> {
-        DocClass docClass = pageData.docClassListItems.get(m_docClassListView.getSelectedItemPosition());
         switch (item.getItemId()) {
+            case R.id.action_new_fileclass:
+                addDocClass();
+                break;
             case R.id.action_rename_fileclass:
-                renameDocClass(docClass);
+                renameDocClass();
                 break;
             case R.id.action_delete_fileclass:
                 deleteDocClass();
@@ -260,8 +257,11 @@ public class FileFragment extends BaseFragment implements IContextHelper {
         return true;
     };
 
+    /**
+     * 中文 字母 数字
+     */
     private boolean isIllegalName(String fileClassName){
-        return !Pattern.compile("[\\w]+").matcher(fileClassName).matches();
+        return !Pattern.compile("[A-Za-z0-9\\u4e00-\\u9fa5_]+").matcher(fileClassName).matches();
     }
 
     /**
@@ -300,8 +300,6 @@ public class FileFragment extends BaseFragment implements IContextHelper {
                     ex.printStackTrace();
                     showAlert(getActivity(), "错误", "新建分组错误：" + ex.getMessage());
                 }
-
-
             },
             "取消", null
         );
@@ -310,8 +308,9 @@ public class FileFragment extends BaseFragment implements IContextHelper {
     /**
      * 重命名分组
      */
-    private void renameDocClass(DocClass docClass) {
+    private void renameDocClass() {
 
+        DocClass docClass = pageData.docClassListItems.get(m_docClassListView.getSelectedItemPosition());
         String motoName = docClass.getName();
 
         showInputDialog(getActivity(),
@@ -342,7 +341,7 @@ public class FileFragment extends BaseFragment implements IContextHelper {
                         showAlert(getActivity(), "错误", "分组名 \"" + docClass.getName() + "\" 重复，请重新输入。");
                     else if (status == DbStatusType.DEFAULT)
                         showAlert(getActivity(), "错误", "无法修改默认分组名，请重新输入。");
-                    else if (status == DbStatusType.FAILED)
+                    else
                         showAlert(getActivity(), "错误", "分组名修改错误，请重试。");
                 } catch (ServerException ex) {
                     ex.printStackTrace();
@@ -357,28 +356,72 @@ public class FileFragment extends BaseFragment implements IContextHelper {
      * 删除分组
      */
     private void deleteDocClass() {
-        docClassAdapter.isDeleting = true;
-        ProgressDialog progressDialog = showProgress(getActivity(), "删除中...", false, null);
 
+        DocClass docClass = pageData.docClassListItems.get(m_docClassListView.getSelectedItemPosition());
+        IDocClassDao docClassDao = DaoStrategyHelper.getInstance().getDocClassDao(getActivity());
+        IDocumentDao documentDao = DaoStrategyHelper.getInstance().getDocumentDao(getActivity());
         try {
-            docClassDao.deleteDocClass(docClassListItems.get(lastPositionClicked).getId());
-            documentDao.deleteDocumentByClass(docClassListItems.get(lastPositionClicked).getName(), true);
+            List<Document> documents = documentDao.queryDocumentByClassId(docClass.getId());
+            if (documents.isEmpty()) {
+                showAlert(getActivity(),
+                    "删除", "是否删除分组 \"" + docClass.getName() + "\"？",
+                    "删除", (d, w) -> {
+                        try {
+                            // SUCCESS | FAILED | DEFAULT
+                            DbStatusType status = docClassDao.deleteDocClass(docClass.getId(), false);
+                            if (status == DbStatusType.SUCCESS)
+                                showToast(getActivity(), "分组 \"" + docClass.getName() +"\" 删除成功");
+                            else if (status == DbStatusType.DEFAULT)
+                                showAlert(getActivity(), "错误", "无法删除默认分组。");
+                            else
+                                showAlert(getActivity(), "错误", "分组名删除错误，请重试。");
+                        } catch (ServerException ex) {
+                            ex.printStackTrace();
+                            showAlert(getActivity(), "错误", "删除分组错误：" + ex.getMessage());
+                        }
+                    },
+                    "取消", null
+                );
+            } else {
+                showAlert(getActivity(),
+                    "删除", "分组 \"" + docClass.getName() + "\" 有相关联的 " + documents.size() + " 条文档，是否同时删除？",
+                    "删除分组及文档记录", (d, w) -> {
+                        try {
+                            // SUCCESS | FAILED | DEFAULT
+                            DbStatusType status = docClassDao.deleteDocClass(docClass.getId(), false);
+                            if (status == DbStatusType.SUCCESS)
+                                showToast(getActivity(), "分组 \"" + docClass.getName() + "\" 删除成功");
+                            else if (status == DbStatusType.DEFAULT)
+                                showAlert(getActivity(), "错误", "无法删除默认分组。");
+                            else
+                                showAlert(getActivity(), "错误", "分组名删除错误，请重试。");
+                        } catch (ServerException ex) {
+                            ex.printStackTrace();
+                            showAlert(getActivity(), "错误", "删除分组错误：" + ex.getMessage());
+                        }
+                    },
+                    "删除分组并修改为默认分组", (d, w) -> {
+                        try {
+                            // SUCCESS | FAILED | DEFAULT
+                            DbStatusType status = docClassDao.deleteDocClass(docClass.getId(), true);
+                            if (status == DbStatusType.SUCCESS)
+                                showToast(getActivity(), "分组 \"" + docClass.getName() + "\" 删除成功");
+                            else if (status == DbStatusType.DEFAULT)
+                                showAlert(getActivity(), "错误", "无法删除默认分组。");
+                            else
+                                showAlert(getActivity(), "错误", "分组名删除错误，请重试。");
+                        } catch (ServerException ex) {
+                            ex.printStackTrace();
+                            showAlert(getActivity(), "错误", "删除分组错误：" + ex.getMessage());
+                        }
+                    },
+                    "取消", null
+                );
+            }
         } catch (ServerException ex) {
-            progressDialog.dismiss();
             ex.printStackTrace();
-            Toast.makeText(getContext(), "删除失败", Toast.LENGTH_LONG).show();
-            return;
+            showAlert(getActivity(), "错误", "删除文档错误：" + ex.getMessage());
         }
-
-        progressDialog.dismiss();
-        docClassListItems.remove(lastPositionClicked);
-        documentListItems.clear();
-        documentListsByClass.remove(lastPositionClicked);
-        docClassAdapter.lastButton = null;
-        docClassAdapter.notifyDataSetChanged();
-        m_documentListView.getAdapter().notifyDataSetChanged();
-        m_txt_documentHeader.setText("");
-        m_txt_unSelected.setVisibility(View.VISIBLE);
     }
 
     /**

@@ -11,6 +11,7 @@ import com.baibuti.biji.model.dao.DbOpenHelper;
 import com.baibuti.biji.model.dao.DbStatusType;
 import com.baibuti.biji.model.dao.daoInterface.IGroupDao;
 import com.baibuti.biji.model.po.Group;
+import com.baibuti.biji.model.po.Note;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -26,9 +27,11 @@ public class GroupDao implements IGroupDao {
     private final static String COL_COLOR = "g_color";
 
     private DbOpenHelper helper;
+    private Context context;
 
     public GroupDao(Context context) {
         helper = new DbOpenHelper(context);
+        this.context = context;
 
         // 处理默认
         // TODO
@@ -238,25 +241,53 @@ public class GroupDao implements IGroupDao {
     /**
      * 删除分组
      * @param id 删除的分组 id
+     * @param isToDefault 是否转移到默认分组
      * @return SUCCESS | FAILED | DEFAULT
      */
     @Override
-    public DbStatusType deleteGroup(int id) {
+    public DbStatusType deleteGroup(int id, boolean isToDefault) {
 
-        if (queryDefaultGroup().getId() == id)
+        Group defGroup = queryDefaultGroup();
+        if (defGroup.getId() == id)
             return DbStatusType.DEFAULT;
 
-        SQLiteDatabase db = helper.getWritableDatabase();
+        NoteDao noteDao = new NoteDao(context);
+        List<Note> notes = noteDao.queryNotesByGroupId(id);
 
-        int ret = db.delete(TBL_NAME,
-            COL_ID + " = ?", new String[] { String.valueOf(id) });
-        db.close();
+        try (SQLiteDatabase db = helper.getWritableDatabase()) {
 
-        if (ret != 0) {
-            precessOrder();
-            return DbStatusType.SUCCESS;
-        } else
-            return DbStatusType.FAILED;
+            if (notes.isEmpty()) {
+                int ret = db.delete(TBL_NAME, COL_ID + " = ?", new String[] { String.valueOf(id) });
+                return ret == 0 ? DbStatusType.FAILED : DbStatusType.SUCCESS;
+            } else {
+                db.beginTransaction();
+
+                if (isToDefault) {
+                    ContentValues values = new ContentValues();
+                    values.put(NoteDao.COL_GROUP_ID, defGroup.getId());
+                    int count = db.update(NoteDao.TBL_NAME, values, NoteDao.COL_GROUP_ID + " = ?", new String[] { String.valueOf(id) });
+                    if (count != notes.size()) {
+                        db.endTransaction();
+                        return DbStatusType.FAILED;
+                    }
+                } else {
+                    int count = db.delete(NoteDao.TBL_NAME, NoteDao.COL_GROUP_ID + " = ?", new String[] { String.valueOf(id) });
+                    if (count != notes.size()) {
+                        db.endTransaction();
+                        return DbStatusType.FAILED;
+                    }
+                }
+
+                int count = db.delete(TBL_NAME, COL_ID + " = ?", new String[] { String.valueOf(id) });
+                if (count <= 0) {
+                    db.endTransaction();
+                    return DbStatusType.FAILED;
+                } else {
+                    db.setTransactionSuccessful();
+                    return DbStatusType.SUCCESS;
+                }
+            }
+        }
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

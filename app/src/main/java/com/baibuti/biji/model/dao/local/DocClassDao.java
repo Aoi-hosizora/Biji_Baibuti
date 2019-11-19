@@ -11,6 +11,7 @@ import com.baibuti.biji.model.dao.DbOpenHelper;
 import com.baibuti.biji.model.dao.DbStatusType;
 import com.baibuti.biji.model.dao.daoInterface.IDocClassDao;
 import com.baibuti.biji.model.po.DocClass;
+import com.baibuti.biji.model.po.Document;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -22,9 +23,11 @@ public class DocClassDao implements IDocClassDao {
     private static final String COL_ID = "f_id";
     private static final String COL_NAME = "f_name";
 
+    private Context context;
     private DbOpenHelper helper;
 
     public DocClassDao(Context context) {
+        this.context = context;
         helper = new DbOpenHelper(context);
 
         // 处理默认
@@ -224,19 +227,52 @@ public class DocClassDao implements IDocClassDao {
     /**
      * 删除分类
      * @param id 删除的分类 id
+     * @param isToDefault 关联分组转移到默认 | 一块删除
      * @return SUCCESS | FAILED | DEFAULT
      */
     @Override
-    public DbStatusType deleteDocClass(int id) {
+    public DbStatusType deleteDocClass(int id, boolean isToDefault) {
 
-        if (queryDefaultDocClass().getId() == id)
+        DocClass defDocclass = queryDefaultDocClass();
+        if (defDocclass.getId() == id)
             return DbStatusType.DEFAULT;
 
-        SQLiteDatabase db = helper.getWritableDatabase();
+        DocumentDao documentDao = new DocumentDao(context);
+        List<Document> documents = documentDao.queryDocumentByClassId(id);
 
-        int ret = db.delete(TBL_NAME, COL_ID + " = ?", new String[] { String.valueOf(id) });
-        db.close();
+        try (SQLiteDatabase db = helper.getWritableDatabase()) {
 
-        return ret == 0 ? DbStatusType.FAILED : DbStatusType.SUCCESS;
+            if (documents.isEmpty()) {
+                int ret = db.delete(TBL_NAME, COL_ID + " = ?", new String[] { String.valueOf(id) });
+                return ret == 0 ? DbStatusType.FAILED : DbStatusType.SUCCESS;
+            } else {
+                db.beginTransaction();
+
+                if (isToDefault) {
+                    ContentValues values = new ContentValues();
+                    values.put(DocumentDao.COL_DOCCLASS_ID, queryDefaultDocClass().getId());
+                    int count = db.update(DocumentDao.TBL_NAME, values, DocumentDao.COL_DOCCLASS_ID + " = ?", new String[] { String.valueOf(id) });
+                    if (count != documents.size()) {
+                        db.endTransaction();
+                        return DbStatusType.FAILED;
+                    }
+                } else {
+                    int count = db.delete(DocumentDao.TBL_NAME, DocumentDao.COL_DOCCLASS_ID + " = ?", new String[] { String.valueOf(id) });
+                    if (count != documents.size()) {
+                        db.endTransaction();
+                        return DbStatusType.FAILED;
+                    }
+                }
+
+                int count = db.delete(TBL_NAME, COL_ID + " = ?", new String[] { String.valueOf(id) });
+                if (count <= 0) {
+                    db.endTransaction();
+                    return DbStatusType.FAILED;
+                } else {
+                    db.setTransactionSuccessful();
+                    return DbStatusType.SUCCESS;
+                }
+            }
+        }
     }
 }

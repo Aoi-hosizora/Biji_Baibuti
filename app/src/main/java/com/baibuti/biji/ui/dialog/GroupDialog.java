@@ -2,7 +2,6 @@ package com.baibuti.biji.ui.dialog;
 
 import android.app.Activity;
 import android.app.AlertDialog;
-import android.app.Dialog;
 import android.os.Bundle;
 import android.widget.Button;
 import android.view.View;

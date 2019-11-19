@@ -172,46 +172,14 @@ public class GroupEditDialog extends AlertDialog implements IContextHelper {
             if (currGroup.getId() == groupDao.queryDefaultGroup().getId())
                 showAlert(activity, "错误", "无法删除默认分组。");
 
-            // TODO 增加事务支持
             List<Note> groupNotes = noteDao.queryNotesByGroupId(currGroup.getId());
-            if (groupNotes.size() != 0) {
-                // 包含笔记
-                showAlert(activity,
-                    "删除", "该分组有相关联的笔记，是否更改与该分组对应的笔记？",
-                    "删除分组并修改为默认分组", (d, w) -> {
-                        try {
-                            Group def = groupDao.queryDefaultGroup();
-                            for (Note note : groupNotes) {
-                                note.setGroup(def);
-                                noteDao.updateNote(note);
-                            }
-                            if (groupDao.deleteGroup(currGroup.getId()) == DbStatusType.FAILED)
-                                showAlert(activity, "错误", "分组删除错误，笔记分组已被修改。");
-                        } catch (ServerException ex) {
-                            ex.printStackTrace();
-                            showAlert(activity, "错误", ex.getMessage());
-                        }
-                    },
-                    "删除分组及笔记", (d, w) -> {
-                        try {
-                            for (Note note : groupNotes)
-                                noteDao.deleteNote(note.getId());
-                            if (groupDao.deleteGroup(currGroup.getId()) == DbStatusType.FAILED)
-                                showAlert(activity, "错误", "分组删除错误，笔记已被删除。");
-                        } catch (ServerException ex) {
-                            ex.printStackTrace();
-                            showAlert(activity, "错误", ex.getMessage());
-                        }
-                    },
-                    "不删除分组", null
-                );
-            } else {
+            if (groupNotes.isEmpty()) {
                 // 不包含笔记
                 showAlert(activity,
                     "删除", String.format("是否删除分组 %s？", currGroup.getName()),
                     "删除", (d, w) -> {
                         try {
-                            if (groupDao.deleteGroup(currGroup.getId()) == DbStatusType.FAILED)
+                            if (groupDao.deleteGroup(currGroup.getId(), false) == DbStatusType.FAILED)
                                 showAlert(activity, "错误", "分组删除错误。");
                         } catch (ServerException ex) {
                             ex.printStackTrace();
@@ -219,6 +187,33 @@ public class GroupEditDialog extends AlertDialog implements IContextHelper {
                         }
                     },
                     "返回", null
+                );
+            } else {
+
+                // 包含笔记
+                showAlert(activity,
+                    "删除", "该分组有相关联的笔记，是否同时删除？",
+                    "删除分组及笔记", (d, w) -> {
+                        try {
+                            for (Note note : groupNotes)
+                                noteDao.deleteNote(note.getId());
+                            if (groupDao.deleteGroup(currGroup.getId(), false) == DbStatusType.FAILED)
+                                showAlert(activity, "错误", "分组删除错误，已恢复修改。");
+                        } catch (ServerException ex) {
+                            ex.printStackTrace();
+                            showAlert(activity, "错误", ex.getMessage());
+                        }
+                    },
+                    "删除分组并修改为默认分组", (d, w) -> {
+                        try {
+                            if (groupDao.deleteGroup(currGroup.getId(), true) == DbStatusType.FAILED)
+                                showAlert(activity, "错误", "分组删除错误，已恢复修改。");
+                        } catch (ServerException ex) {
+                            ex.printStackTrace();
+                            showAlert(activity, "错误", ex.getMessage());
+                        }
+                    },
+                    "不删除分组", null
                 );
             }
         }
