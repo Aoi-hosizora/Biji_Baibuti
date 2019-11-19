@@ -1,5 +1,6 @@
 package com.baibuti.biji.model.dao.daoInterface;
 
+import com.baibuti.biji.model.dao.DbStatusType;
 import com.baibuti.biji.model.dto.ServerException;
 import com.baibuti.biji.model.po.Group;
 
@@ -14,7 +15,7 @@ public interface IGroupDao {
     Group queryDefaultGroup() throws ServerException;
 
     // 增删改
-    long insertGroup(Group group) throws ServerException;
-    boolean updateGroup(Group group) throws ServerException;
-    boolean deleteGroup(int groupId) throws ServerException;
+    DbStatusType insertGroup(Group group) throws ServerException;
+    DbStatusType updateGroup(Group group) throws ServerException;
+    DbStatusType deleteGroup(int groupId) throws ServerException;
 }

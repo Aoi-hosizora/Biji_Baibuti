@@ -8,6 +8,7 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteStatement;
 
 import com.baibuti.biji.model.dao.DbOpenHelper;
+import com.baibuti.biji.model.dao.DbStatusType;
 import com.baibuti.biji.model.dao.daoInterface.INoteDao;
 import com.baibuti.biji.model.po.Group;
 import com.baibuti.biji.model.po.Note;
@@ -143,19 +144,19 @@ public class NoteDao implements INoteDao {
     /**
      * 插入笔记
      * @param note 新笔记，自动编号
-     * @return 笔记 id
+     * @return SUCCESS | FAILED
      */
-    public long insertNote(Note note) {
+    public DbStatusType insertNote(Note note) {
 
         SQLiteDatabase db = helper.getWritableDatabase();
         String sql =
-                "insert into " + TBL_NAME +
-                "(" + COL_TITLE + ", " + COL_CONTENT + ", " + COL_GROUP_ID + ", " + COL_CREATE_TIME + ", " + COL_UPDATE_TIME + ")" +
+            "insert into " + TBL_NAME +
+                "(" + COL_TITLE + ", " + COL_CONTENT + ", " + COL_GROUP_ID + ", "
+                + COL_CREATE_TIME + ", " + COL_UPDATE_TIME + ")" +
                 "values (?, ?, ?, ?, ?)";
         SQLiteStatement stat = db.compileStatement(sql);
         db.beginTransaction();
 
-        long ret_id = 0;
         try {
             stat.bindString(1, note.getTitle()); // COL_TITLE
             stat.bindString(2, note.getContent()); // COL_TITLE
@@ -163,27 +164,29 @@ public class NoteDao implements INoteDao {
             stat.bindString(4, DateColorUtil.Date2Str(note.getCreateTime())); // COL_CREATE_TIME
             stat.bindString(5, DateColorUtil.Date2Str(note.getUpdateTime())); // COL_UPDATE_TIME
 
-            ret_id = stat.executeInsert();
-            db.setTransactionSuccessful();
-        }
-        catch (SQLException e) {
+            long ret_id = stat.executeInsert();
+            if (ret_id != -1) {
+                note.setId((int) ret_id);
+                db.setTransactionSuccessful();
+                return DbStatusType.SUCCESS;
+            } else
+                return DbStatusType.FAILED;
+        } catch (SQLException e) {
             e.printStackTrace();
-        }
-        finally {
+            return DbStatusType.FAILED;
+        } finally {
             db.endTransaction();
             db.close();
         }
-
-        return ret_id;
     }
 
     /**
      * 更新笔记
      * @param note 覆盖更新
-     * @return 是否成功更新
+     * @return SUCCESS | FAILED
      */
     @Override
-    public boolean updateNote(Note note) {
+    public DbStatusType updateNote(Note note) {
 
         SQLiteDatabase db = helper.getWritableDatabase();
         ContentValues values = new ContentValues();
@@ -193,35 +196,31 @@ public class NoteDao implements INoteDao {
         values.put(COL_GROUP_ID, note.getGroup().getId());
         values.put(COL_UPDATE_TIME, DateColorUtil.Date2Str(note.getUpdateTime()));
 
-        int ret = db.update(TBL_NAME, values, COL_ID + " = ?", new String[] { String.valueOf(note.getId()) });
+        int ret = db.update(TBL_NAME, values,
+            COL_ID + " = ?", new String[] { String.valueOf(note.getId()) });
         db.close();
-
-        return ret > 0;
+        return ret == 0 ? DbStatusType.FAILED : DbStatusType.SUCCESS;
     }
 
     /**
      * 删除笔记
      * @param id 删除笔记的 id
-     * @return 是否成功删除
+     * @return SUCCESS | FAILED
      */
     @Override
-    public boolean deleteNote(int id) {
+    public DbStatusType deleteNote(int id) {
         SQLiteDatabase db = helper.getWritableDatabase();
 
-        int ret = 0;
-        try {
-            ret = db.delete(TBL_NAME, COL_ID + " = ?", new String[] { String.valueOf(id) });
-        }
-        catch (Exception e) {
-            e.printStackTrace();
-        }
-        finally {
-            if (db != null && db.isOpen()) db.close();
-        }
-
-        return ret > 0;
+        int ret = db.delete(TBL_NAME,
+            COL_ID + " = ?", new String[] { String.valueOf(id) });
+        db.close();
+        return ret == 0 ? DbStatusType.FAILED : DbStatusType.SUCCESS;
     }
 
+    /**
+     * 删除多条笔记
+     * @return 删除的数量
+     */
     @Override
     public int deleteNotes(int[] ids) {
         SQLiteDatabase db = helper.getWritableDatabase();
@@ -229,17 +228,8 @@ public class NoteDao implements INoteDao {
         for (int i = 0; i < id_str.length; i++)
             id_str[i] = String.valueOf(ids[i]);
 
-        int ret = 0;
-        try {
-            ret = db.delete(TBL_NAME, COL_ID + " = ?", id_str);
-        }
-        catch (Exception e) {
-            e.printStackTrace();
-        }
-        finally {
-            if (db != null && db.isOpen()) db.close();
-        }
-
+        int ret = db.delete(TBL_NAME, COL_ID + " = ?", id_str);
+        db.close();
         return ret;
     }
 }

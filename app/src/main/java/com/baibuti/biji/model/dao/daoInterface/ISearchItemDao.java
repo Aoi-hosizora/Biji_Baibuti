@@ -1,5 +1,6 @@
 package com.baibuti.biji.model.dao.daoInterface;
 
+import com.baibuti.biji.model.dao.DbStatusType;
 import com.baibuti.biji.model.dto.ServerException;
 import com.baibuti.biji.model.po.SearchItem;
 
@@ -12,7 +13,7 @@ public interface ISearchItemDao {
     SearchItem querySearchItemById(int id) throws ServerException;
 
     // 增删改
-    long insertSearchItem(SearchItem searchItem) throws ServerException;
-    boolean deleteSearchItem(int id) throws ServerException;
+    DbStatusType insertSearchItem(SearchItem searchItem) throws ServerException;
+    DbStatusType deleteSearchItem(int id) throws ServerException;
     int deleteSearchItems(List<SearchItem> searchItems) throws ServerException;
 }

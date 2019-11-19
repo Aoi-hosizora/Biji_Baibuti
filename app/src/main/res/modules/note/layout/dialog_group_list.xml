@@ -84,7 +84,7 @@
             />
 
         <Button
-            android:id="@+id/id_GroupDialog_ButtonCancel"
+            android:id="@+id/id_GroupDialog_ButtonOK"
             android:layout_width="@dimen/groupDlgButtonLargeWidth"
             android:layout_height="match_parent"
             android:layout_marginEnd="@dimen/groupDlgStartEndMargin"

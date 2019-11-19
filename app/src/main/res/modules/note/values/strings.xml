@@ -184,7 +184,7 @@
     <string name="GroupDialog_Delete">删除</string>
     <string name="GroupDialog_Add">添加</string>
     <string name="GroupDialog_Edit">编辑</string>
-    <string name="GroupDialog_Return">返回</string>
+    <string name="GroupDialog_Return">完成</string>
 
     <!-- Show Add Group Dialog -->
     <string name="GroupDialog_AddAlertColorText">分组代表颜色：</string>

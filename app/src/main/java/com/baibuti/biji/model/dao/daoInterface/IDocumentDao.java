@@ -1,5 +1,6 @@
 package com.baibuti.biji.model.dao.daoInterface;
 
+import com.baibuti.biji.model.dao.DbStatusType;
 import com.baibuti.biji.model.dto.ServerException;
 import com.baibuti.biji.model.po.Document;
 
@@ -13,7 +14,7 @@ public interface IDocumentDao {
     Document queryDocumentById(int id) throws ServerException;
 
     // 增删改
-    long insertDocument(Document document) throws ServerException;
-    boolean updateDocument(Document document) throws ServerException;
-    boolean deleteDocument(int id) throws ServerException;
+    DbStatusType insertDocument(Document document) throws ServerException;
+    DbStatusType updateDocument(Document document) throws ServerException;
+    DbStatusType deleteDocument(int id) throws ServerException;
 }

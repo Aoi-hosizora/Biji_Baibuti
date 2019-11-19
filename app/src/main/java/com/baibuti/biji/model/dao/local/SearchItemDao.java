@@ -6,6 +6,7 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteStatement;
 
 import com.baibuti.biji.model.dao.DbOpenHelper;
+import com.baibuti.biji.model.dao.DbStatusType;
 import com.baibuti.biji.model.dao.daoInterface.ISearchItemDao;
 import com.baibuti.biji.model.po.SearchItem;
 
@@ -106,9 +107,9 @@ public class SearchItemDao implements ISearchItemDao {
     /**
      * 插入收藏项
      * @param searchItem 新收藏
-     * @return 收藏的记录 ID
+     * @return SUCCESS | FAILED
      */
-    public long insertSearchItem(SearchItem searchItem) {
+    public DbStatusType insertSearchItem(SearchItem searchItem) {
 
         SQLiteDatabase db = helper.getWritableDatabase();
         String sql = "insert into " + TBL_NAME +
@@ -117,50 +118,43 @@ public class SearchItemDao implements ISearchItemDao {
         SQLiteStatement stat = db.compileStatement(sql);
         db.beginTransaction();
 
-        long ret_id = 0;
         try {
             stat.bindString(1, searchItem.getUrl()); // COL_URL
             stat.bindString(2, searchItem.getTitle()); // COL_TITLE
             stat.bindString(3, searchItem.getContent()); // COL_CONTENT
 
-            ret_id = stat.executeInsert();
-            searchItem.setId((int) ret_id);
-            db.setTransactionSuccessful();
+            long ret_id = stat.executeInsert();
+            if (ret_id != -1) {
+                searchItem.setId((int) ret_id);
+                db.setTransactionSuccessful();
+                return DbStatusType.SUCCESS;
+            } else
+                return DbStatusType.FAILED;
         }
         catch (Exception ex) {
             ex.printStackTrace();
+            return DbStatusType.FAILED;
         }
         finally {
             db.endTransaction();
             db.close();
         }
-
-        return ret_id;
     }
 
     /**
      * 删除收藏项
      * @param id 收藏的链接
-     * @return 是否成功删除
+     * @return SUCCESS | FAILED
      */
     @Override
-    public boolean deleteSearchItem(int id) {
+    public DbStatusType deleteSearchItem(int id) {
 
         SQLiteDatabase db = helper.getWritableDatabase();
 
-        int ret = 0;
-        try {
-            ret = db.delete(TBL_NAME, COL_ID + " = ?", new String[] { String.valueOf(id) });
-        }
-        catch (Exception e) {
-            e.printStackTrace();
-        }
-        finally {
-            if (db != null && db.isOpen())
-                db.close();
-        }
-
-        return ret > 0;
+        int ret = db.delete(TBL_NAME,
+            COL_ID + " = ?", new String[] { String.valueOf(id) });
+        db.close();
+        return ret == 0 ? DbStatusType.FAILED : DbStatusType.SUCCESS;
     }
 
     /**
@@ -171,25 +165,12 @@ public class SearchItemDao implements ISearchItemDao {
     @Override
     public int deleteSearchItems(List<SearchItem> searchItems) {
         SQLiteDatabase db = helper.getWritableDatabase();
-        int ret_num = 0;
-        if (searchItems != null && searchItems.size() > 0) {
-            db.beginTransaction();
-            try {
-                for (SearchItem searchItem : searchItems)
-                    ret_num += db.delete(TBL_NAME, COL_ID + " = ?",
-                        new String[] { String.valueOf(searchItem.getId()) } );
+        String[] id_str = new String[searchItems.size()];
+        for (int i = 0; i < id_str.length; i++)
+            id_str[i] = String.valueOf(searchItems.get(i).getId());
 
-                db.setTransactionSuccessful();
-            }
-            catch (Exception e) {
-                ret_num = 0;
-                e.printStackTrace();
-            }
-            finally {
-                db.endTransaction();
-                db.close();
-            }
-        }
-        return ret_num;
+        int ret = db.delete(TBL_NAME, COL_ID + " = ?", id_str);
+        db.close();
+        return ret;
     }
 }

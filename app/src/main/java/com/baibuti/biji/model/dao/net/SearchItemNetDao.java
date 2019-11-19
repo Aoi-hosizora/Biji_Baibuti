@@ -1,5 +1,6 @@
 package com.baibuti.biji.model.dao.net;
 
+import com.baibuti.biji.model.dao.DbStatusType;
 import com.baibuti.biji.model.dto.OneFieldDTO;
 import com.baibuti.biji.model.dto.ResponseDTO;
 import com.baibuti.biji.model.dto.ServerException;
@@ -62,8 +63,11 @@ public class SearchItemNetDao implements ISearchItemDao {
         }
     }
 
+    /**
+     * @param searchItem SUCCESS | FAILED
+     */
     @Override
-    public long insertSearchItem(SearchItem searchItem) throws ServerException {
+    public DbStatusType insertSearchItem(SearchItem searchItem) throws ServerException {
         Observable<ResponseDTO<SearchItemDTO>> observable = RetrofitFactory.getInstance()
             .createRequest(AuthManager.getInstance().getAuthorizationHead())
             .insertStar(searchItem.getTitle(), searchItem.getUrl(), searchItem.getContent())
@@ -72,11 +76,15 @@ public class SearchItemNetDao implements ISearchItemDao {
 
         try {
             ResponseDTO<SearchItemDTO> response = observable.toFuture().get();
-            if (response.getCode() != ServerErrorHandle.SUCCESS)
-                throw ServerErrorHandle.parseErrorMessage(response);
-
-            // TODO
-            return response.getData().toSearchItem().getUrl().length();
+            switch (response.getCode()) {
+                case ServerErrorHandle.SUCCESS:
+                    return DbStatusType.SUCCESS;
+                case ServerErrorHandle.HAS_EXISTED:
+                case ServerErrorHandle.DATABASE_FAILED:
+                    return DbStatusType.FAILED;
+                default:
+                    throw ServerErrorHandle.parseErrorMessage(response);
+            }
         }
         catch (ServerException | InterruptedException | ExecutionException ex) {
             ex.printStackTrace();
@@ -84,8 +92,11 @@ public class SearchItemNetDao implements ISearchItemDao {
         }
     }
 
+    /**
+     * @return SUCCESS | FAILED
+     */
     @Override
-    public boolean deleteSearchItem(int id) throws ServerException {
+    public DbStatusType deleteSearchItem(int id) throws ServerException {
         Observable<ResponseDTO<SearchItemDTO>> observable = RetrofitFactory.getInstance()
             .createRequest(AuthManager.getInstance().getAuthorizationHead())
             .deleteStar(id)
@@ -94,10 +105,15 @@ public class SearchItemNetDao implements ISearchItemDao {
 
         try {
             ResponseDTO<SearchItemDTO> response = observable.toFuture().get();
-            if (response.getCode() != ServerErrorHandle.SUCCESS)
-                throw ServerErrorHandle.parseErrorMessage(response);
-
-            return true;
+            switch (response.getCode()) {
+                case ServerErrorHandle.SUCCESS:
+                    return DbStatusType.SUCCESS;
+                case ServerErrorHandle.NOT_FOUND:
+                case ServerErrorHandle.DATABASE_FAILED:
+                    return DbStatusType.FAILED;
+                default:
+                    throw ServerErrorHandle.parseErrorMessage(response);
+            }
         }
         catch (ServerException | InterruptedException | ExecutionException ex) {
             ex.printStackTrace();

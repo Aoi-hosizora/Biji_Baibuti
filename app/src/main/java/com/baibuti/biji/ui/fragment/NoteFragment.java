@@ -257,7 +257,16 @@ public class NoteFragment extends BaseFragment implements IContextHelper {
      * 工具栏 分组
      */
     private void ToolbarGroup_Clicked() {
-        m_drawerLayout.openDrawer(Gravity.END);
+        try {
+            List<Group> groups = DaoStrategyHelper.getInstance().getGroupDao(getContext()).queryAllGroups();
+            GroupRadioAdapter adapter = (GroupRadioAdapter) m_groupListView.getAdapter();
+            adapter.setList(groups);
+            adapter.notifyDataSetChanged();
+            m_drawerLayout.openDrawer(Gravity.END);
+        } catch (ServerException ex) {
+            ex.printStackTrace();
+            showAlert(getActivity(), "错误", "分组信息获取错误：" + ex.getMessage());
+        }
     }
 
     /**
@@ -369,6 +378,15 @@ public class NoteFragment extends BaseFragment implements IContextHelper {
     // region Right Nav Group
 
     /**
+     * 右边栏 选中列表
+     */
+    private void GroupRadio_Clicked(int position) {
+        m_drawerLayout.closeDrawer(Gravity.END);
+        GroupRadioAdapter adapter = (GroupRadioAdapter) m_groupListView.getAdapter();
+        groupNote(adapter.getList().get(position));
+    }
+
+    /**
      * 右边栏 分组管理
      */
     @OnClick(R.id.id_NoteFrag_nav_GroupMgrButton)
@@ -383,16 +401,7 @@ public class NoteFragment extends BaseFragment implements IContextHelper {
     }
 
     /**
-     * 右边栏 选中列表
-     */
-    private void GroupRadio_Clicked(int position) {
-        GroupRadioAdapter adapter = (GroupRadioAdapter) m_groupListView.getAdapter();
-        groupNote(adapter.getList().get(position));
-    }
-
-
-    /**
-     * 显示分组管理对话框
+     * !!! 显示分组管理对话框
      */
     private void ShowGroupDialog() {
         m_drawerLayout.closeDrawer(Gravity.END);
@@ -411,7 +420,7 @@ public class NoteFragment extends BaseFragment implements IContextHelper {
             }
         });
 
-        dialog.setCancelable(false);
+        dialog.setCancelable(true);
         dialog.show();
     }
 
@@ -578,23 +587,36 @@ public class NoteFragment extends BaseFragment implements IContextHelper {
      * 分组显示
      */
     private void groupNote(Group group) {
-        pageData.pageState = PageState.GROUPING;
 
-        // 页面显示处理
-        m_toolbar.getMenu().findItem(R.id.action_search_group_back).setVisible(true); // 显示返回
-        m_toolbar.getMenu().findItem(R.id.action_search).setVisible(true); // 显示搜索
-        m_toolbar.getMenu().findItem(R.id.action_group).setVisible(false); // 隐藏分组
-
-        m_swipeRefresh.setEnabled(false); // 禁止刷新
-        m_fabMenu.setVisibility(View.GONE); // 隐藏 Fab
-        m_drawerLayout.setEnabled(false); // 禁止分组
-
-        m_toolbar.setTitle("\"" + group.getName() + "\" 的分组结果");
+        boolean[] cancel = new boolean[] { false };
+        ProgressDialog progressDialog = showProgress(getActivity(), "分组搜索中...",
+            true, (v) -> cancel[0] = true);
 
         // 数据处理
         try {
             List<Note> notes = DaoStrategyHelper.getInstance().getNoteDao(getContext()).queryNotesByGroupId(group.getId());
-            setListContent(notes);
+            if (!cancel[0] && notes != null) {
+
+                progressDialog.dismiss();
+                m_toolbar.setTitle(String.format(Locale.CHINA, "\"%s\"的分组结果 (共 %d / %d 项)", group.getName(), notes.size(), pageData.allNotes.size()));
+                if (notes.size() != 0)
+                    showToast(getActivity(), "共找到 " + notes.size() + " 项");
+                else
+                    showToast(getActivity(), "没有找到内容");
+                setListContent(notes);
+
+                pageData.pageState = PageState.GROUPING;
+
+                // 页面显示处理
+                m_toolbar.getMenu().findItem(R.id.action_search_group_back).setVisible(true); // 显示返回
+                m_toolbar.getMenu().findItem(R.id.action_search).setVisible(true); // 显示搜索
+                m_toolbar.getMenu().findItem(R.id.action_group).setVisible(false); // 隐藏分组
+
+                m_swipeRefresh.setEnabled(false); // 禁止刷新
+                m_fabMenu.setVisibility(View.GONE); // 隐藏 Fab
+                m_drawerLayout.setEnabled(false); // 禁止分组
+
+            }
         } catch (ServerException ex) {
             showAlert(getContext(), "错误", "数据加载错误：" + ex.getMessage());
         }
@@ -604,23 +626,35 @@ public class NoteFragment extends BaseFragment implements IContextHelper {
      * 搜索显示
      */
     private void searchNote(String searchingStr) {
-        pageData.pageState = PageState.SEARCHING;
 
-        // 页面显示处理
-        m_toolbar.getMenu().findItem(R.id.action_search_group_back).setVisible(true); // 显示返回
-        m_toolbar.getMenu().findItem(R.id.action_search).setVisible(false); // 隐藏搜索
-        m_toolbar.getMenu().findItem(R.id.action_group).setVisible(true); // 允许分组
-
-        m_drawerLayout.setEnabled(true); // 允许分组
-        m_swipeRefresh.setEnabled(false); // 禁止刷新
-        m_fabMenu.setVisibility(View.GONE); // 隐藏 Fab
-
-        m_toolbar.setTitle("\"" + searchingStr + "\" 的搜索结果");
+        boolean[] cancel = new boolean[] { false };
+        ProgressDialog progressDialog = showProgress(getActivity(), "搜索中...",
+            true, (v) -> cancel[0] = true);
 
         // 数据处理
         List<Note> searchResult =
             SearchUtil.getSearchItems(pageData.allNotes.toArray(new Note[0]), searchingStr);
-        setListContent(searchResult);
+
+        if (!cancel[0] && searchResult != null) {
+            progressDialog.dismiss();
+            m_toolbar.setTitle(String.format(Locale.CHINA, "\"%s\"的搜索结果 (共 %d / %d 项)", searchingStr, searchResult.size(), pageData.allNotes.size()));
+            if (searchResult.size() != 0)
+                showToast(getActivity(), "共找到 " + searchResult.size() + " 项");
+            else
+                showToast(getActivity(), "没有找到内容");
+            setListContent(searchResult);
+
+            pageData.pageState = PageState.SEARCHING;
+
+            // 页面显示处理
+            m_toolbar.getMenu().findItem(R.id.action_search_group_back).setVisible(true); // 显示返回
+            m_toolbar.getMenu().findItem(R.id.action_search).setVisible(false); // 隐藏搜索
+            m_toolbar.getMenu().findItem(R.id.action_group).setVisible(true); // 允许分组
+
+            m_drawerLayout.setEnabled(true); // 允许分组
+            m_swipeRefresh.setEnabled(false); // 禁止刷新
+            m_fabMenu.setVisibility(View.GONE); // 隐藏 Fab
+        }
     }
 
     /**

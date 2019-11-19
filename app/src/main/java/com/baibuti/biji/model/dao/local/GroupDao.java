@@ -8,6 +8,7 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteStatement;
 
 import com.baibuti.biji.model.dao.DbOpenHelper;
+import com.baibuti.biji.model.dao.DbStatusType;
 import com.baibuti.biji.model.dao.daoInterface.IGroupDao;
 import com.baibuti.biji.model.po.Group;
 
@@ -160,12 +161,15 @@ public class GroupDao implements IGroupDao {
     }
 
     /**
-     * 添加分组 (添加在末尾，不更新 Order)
+     * 添加分组
      * @param group 新分组，自动编码
-     * @return 分组 id
+     * @return SUCCESS | FAILED | DUPLICATED
      */
     @Override
-    public long insertGroup(Group group) {
+    public DbStatusType insertGroup(Group group) {
+
+        if (queryGroupByName(group.getName()) != null)
+            return DbStatusType.DUPLICATED;
 
         SQLiteDatabase db = helper.getWritableDatabase();
         String sql = "insert into " + TBL_NAME +
@@ -174,7 +178,6 @@ public class GroupDao implements IGroupDao {
         SQLiteStatement stat = db.compileStatement(sql);
         db.beginTransaction();
 
-        long ret_id = 0;
         try {
             group.setOrder(queryAllGroups().size()); // 每次都到插入最后
 
@@ -182,95 +185,98 @@ public class GroupDao implements IGroupDao {
             stat.bindLong(2, group.getOrder()); // COL_ORDER
             stat.bindString(3, group.getColor()); // COL_ORDER
 
-            ret_id = stat.executeInsert();
-            db.setTransactionSuccessful();
+            long ret_id = stat.executeInsert();
+            if (ret_id != -1) {
+                db.setTransactionSuccessful();
+                group.setId((int) ret_id);
+                return DbStatusType.SUCCESS;
+            } else
+                return DbStatusType.FAILED;
         } catch (SQLException e) {
             e.printStackTrace();
+            return DbStatusType.FAILED;
         } finally {
             db.endTransaction();
             db.close();
         }
-
-        return ret_id;
     }
 
     /**
-     * 更新分组 (刷新 Order)
+     * 更新分组
      * @param group 覆盖更新
-     * @return 是否成功更新
+     * @return SUCCESS | FAILED | DUPLICATED | DEFAULT
      */
     @Override
-    public boolean updateGroup(Group group) {
+    public DbStatusType updateGroup(Group group) {
 
-        // 更新默认分组的标签
+        Group sameNameGroup = queryGroupByName(group.getName());
+        if (sameNameGroup != null && sameNameGroup.getId() != group.getId())
+            return DbStatusType.DUPLICATED;
+
         Group def = queryDefaultGroup();
         if (def.getId() == group.getId() && !def.getName().equals(group.getName()))
-            return false;
+            return DbStatusType.DEFAULT;
 
         SQLiteDatabase db = helper.getWritableDatabase();
         ContentValues values = new ContentValues();
-
         values.put(COL_NAME, group.getName());
         values.put(COL_ORDER, group.getOrder());
         values.put(COL_COLOR, group.getColor());
 
-        int ret = db.update(TBL_NAME, values, COL_ID + " = ?",
-            new String[] { String.valueOf(group.getId()) });
+        int ret = db.update(TBL_NAME, values,
+            COL_ID + " = ?", new String[] { String.valueOf(group.getId()) });
         db.close();
-
-        // 更新后刷新 Order
-        precessOrder();
-        return ret > 0;
+        if (ret != 0) {
+            precessOrder();
+            return DbStatusType.SUCCESS;
+        } else
+            return DbStatusType.FAILED;
     }
 
 
     /**
-     * 删除分组 (刷新 Order)
+     * 删除分组
      * @param id 删除的分组 id
-     * @return 是否成功删除
+     * @return SUCCESS | FAILED | DEFAULT
      */
     @Override
-    public boolean deleteGroup(int id) {
+    public DbStatusType deleteGroup(int id) {
 
-        // 删除默认分组
         if (queryDefaultGroup().getId() == id)
-            return false;
+            return DbStatusType.DEFAULT;
 
         SQLiteDatabase db = helper.getWritableDatabase();
 
-        int ret = 0;
-        try {
-            ret = db.delete(TBL_NAME, COL_ID + " = ?",
-                new String[] { String.valueOf(id) });
-        }
-        catch (Exception e) {
-            e.printStackTrace();
-        }
-        finally {
-            if (db != null && db.isOpen())
-                db.close();
-        }
+        int ret = db.delete(TBL_NAME,
+            COL_ID + " = ?", new String[] { String.valueOf(id) });
+        db.close();
 
-        // 删除后刷新 Order
-        precessOrder();
-        return ret > 0;
+        if (ret != 0) {
+            precessOrder();
+            return DbStatusType.SUCCESS;
+        } else
+            return DbStatusType.FAILED;
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     /**
-     * 处理顺序 (所有操作前 以及 删除操作后)
+     * 处理顺序 (所有操作前 以及 更新删除操作后)
      */
     private void precessOrder() {
         List<Group> groups = queryAllGroups();
         Collections.sort(groups);
 
+        SQLiteDatabase db = helper.getWritableDatabase();
         for (int i = 0; i < groups.size(); i++) {
             if (groups.get(i).getOrder() != i) {
-                groups.get(i).setOrder(i);
-                updateGroup(groups.get(i));
+                ContentValues values = new ContentValues();
+                values.put(COL_ORDER, i);
+                db.update(TBL_NAME, values,
+                    COL_ID + " = ?", new String[] { String.valueOf(groups.get(i).getId()) });
             }
         }
+        db.close();
     }
 }

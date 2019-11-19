@@ -1,5 +1,6 @@
 package com.baibuti.biji.model.dao.net;
 
+import com.baibuti.biji.model.dao.DbStatusType;
 import com.baibuti.biji.model.dao.daoInterface.INoteDao;
 import com.baibuti.biji.model.dto.OneFieldDTO;
 import com.baibuti.biji.model.dto.ResponseDTO;
@@ -83,8 +84,11 @@ public class NoteNetDao implements INoteDao {
         }
     }
 
+    /**
+     * @return SUCCESS | FAILED
+     */
     @Override
-    public long insertNote(Note note) throws ServerException {
+    public DbStatusType insertNote(Note note) throws ServerException {
 
         // TODO 同时上传图片
 
@@ -165,10 +169,15 @@ public class NoteNetDao implements INoteDao {
 
         try {
             ResponseDTO<NoteDTO> response = observable.toFuture().get();
-            if (response.getCode() != ServerErrorHandle.SUCCESS)
-                throw ServerErrorHandle.parseErrorMessage(response);
-
-            return response.getData().getId();
+            switch (response.getCode()) {
+                case ServerErrorHandle.SUCCESS:
+                    return DbStatusType.SUCCESS;
+                case ServerErrorHandle.HAS_EXISTED:
+                case ServerErrorHandle.DATABASE_FAILED:
+                    return DbStatusType.FAILED;
+                default:
+                    throw ServerErrorHandle.parseErrorMessage(response);
+            }
         }
         catch (ServerException | InterruptedException | ExecutionException ex) {
             ex.printStackTrace();
@@ -176,8 +185,11 @@ public class NoteNetDao implements INoteDao {
         }
     }
 
+    /**
+     * @return SUCCESS | FAILED
+     */
     @Override
-    public boolean updateNote(Note note) throws ServerException {
+    public DbStatusType updateNote(Note note) throws ServerException {
 
         // TODO 同时上传图片
 
@@ -189,10 +201,15 @@ public class NoteNetDao implements INoteDao {
 
         try {
             ResponseDTO<NoteDTO> response = observable.toFuture().get();
-            if (response.getCode() != ServerErrorHandle.SUCCESS)
-                throw ServerErrorHandle.parseErrorMessage(response);
-
-            return true;
+            switch (response.getCode()) {
+                case ServerErrorHandle.SUCCESS:
+                    return DbStatusType.SUCCESS;
+                case ServerErrorHandle.NOT_FOUND:
+                case ServerErrorHandle.DATABASE_FAILED:
+                    return DbStatusType.FAILED;
+                default:
+                    throw ServerErrorHandle.parseErrorMessage(response);
+            }
         }
         catch (ServerException | InterruptedException | ExecutionException ex) {
             ex.printStackTrace();
@@ -200,8 +217,11 @@ public class NoteNetDao implements INoteDao {
         }
     }
 
+    /**
+     * SUCCESS | FAILED
+     */
     @Override
-    public boolean deleteNote(int id) throws ServerException {
+    public DbStatusType deleteNote(int id) throws ServerException {
 
         // TODO 同时判断，删除图片
 
@@ -213,10 +233,15 @@ public class NoteNetDao implements INoteDao {
 
         try {
             ResponseDTO<NoteDTO> response = observable.toFuture().get();
-            if (response.getCode() != ServerErrorHandle.SUCCESS)
-                throw ServerErrorHandle.parseErrorMessage(response);
-
-            return true;
+            switch (response.getCode()) {
+                case ServerErrorHandle.SUCCESS:
+                    return DbStatusType.SUCCESS;
+                case ServerErrorHandle.NOT_FOUND:
+                case ServerErrorHandle.DATABASE_FAILED:
+                    return DbStatusType.FAILED;
+                default:
+                    throw ServerErrorHandle.parseErrorMessage(response);
+            }
         }
         catch (ServerException | InterruptedException | ExecutionException ex) {
             ex.printStackTrace();

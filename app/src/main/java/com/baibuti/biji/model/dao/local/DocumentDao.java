@@ -8,6 +8,7 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteStatement;
 
 import com.baibuti.biji.model.dao.DbOpenHelper;
+import com.baibuti.biji.model.dao.DbStatusType;
 import com.baibuti.biji.model.dao.daoInterface.IDocumentDao;
 import com.baibuti.biji.model.po.DocClass;
 import com.baibuti.biji.model.po.Document;
@@ -121,79 +122,70 @@ public class DocumentDao implements IDocumentDao {
     /**
      * 插入归档文件
      * @param document 新归档，自动编号
-     * @return 归档 id
+     * @return SUCCESS | FAILED
      */
     @Override
-    public long insertDocument(Document document) {
+    public DbStatusType insertDocument(Document document) {
 
         SQLiteDatabase db = helper.getWritableDatabase();
         String sql =
             "insert into " + TBL_NAME +
-            "(" + COL_PATH + ", " + COL_DOCCLASS_ID + ") " +
-            "values (?, ?)";
+            "(" + COL_PATH + ", " + COL_DOCCLASS_ID + ") values (?, ?)";
         SQLiteStatement stat = db.compileStatement(sql);
         db.beginTransaction();
 
-        long ret_id = 0;
         try {
             stat.bindString(1, document.getFilename() == null ? "" : document.getFilename()); // COL_PATH
             stat.bindLong(2, document.getDocClass().getId());
 
-            ret_id = stat.executeInsert();
-            db.setTransactionSuccessful();
+            long ret_id = stat.executeInsert();
+            if (ret_id != -1) {
+                document.setId((int) ret_id);
+                db.setTransactionSuccessful();
+                return DbStatusType.SUCCESS;
+            } else
+                return DbStatusType.FAILED;
         } catch (SQLException e) {
             e.printStackTrace();
+            return DbStatusType.FAILED;
         }  finally {
             db.endTransaction();
             db.close();
         }
-
-        return ret_id;
     }
 
     /**
      * 修改归档文件信息
      * @param document 覆盖更新信息
-     * @return 是否成功更新
+     * @return SUCCESS | FAILED
      */
     @Override
-    public boolean updateDocument(Document document) {
+    public DbStatusType updateDocument(Document document) {
+
         SQLiteDatabase db = helper.getWritableDatabase();
         ContentValues values = new ContentValues();
 
         values.put(COL_DOCCLASS_ID, document.getDocClass().getId());
         values.put(COL_PATH, document.getFilename());
 
-        int ret = db.update(TBL_NAME, values, COL_ID + " = ?",
-            new String[] { String.valueOf(document.getId()) } );
+        int ret = db.update(TBL_NAME, values,
+            COL_ID + " = ?", new String[] { String.valueOf(document.getId()) } );
         db.close();
-
-        return ret != 0;
+        return ret == 0 ? DbStatusType.FAILED : DbStatusType.SUCCESS;
     }
 
     /**
      * 删除资料
      * @param id 删除的资料 id
-     * @return 是否删除成功
+     * @return SUCCESS | FAILED
      */
     @Override
-    public boolean deleteDocument(int id) {
-
+    public DbStatusType deleteDocument(int id) {
         SQLiteDatabase db = helper.getWritableDatabase();
 
-        int ret = 0;
-        try {
-            ret = db.delete(TBL_NAME, COL_ID + " = ?",
-                new String[]{ String.valueOf(id) });
-        }
-        catch (Exception e) {
-            e.printStackTrace();
-        }
-        finally {
-            if (db != null && db.isOpen())
-                db.close();
-        }
-
-        return ret > 0;
+        int ret = db.delete(TBL_NAME,
+            COL_ID + " = ?", new String[]{String.valueOf(id)});
+        db.close();
+        return ret == 0 ? DbStatusType.FAILED : DbStatusType.SUCCESS;
     }
 }

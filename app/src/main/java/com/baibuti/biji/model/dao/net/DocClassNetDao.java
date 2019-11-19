@@ -1,5 +1,6 @@
 package com.baibuti.biji.model.dao.net;
 
+import com.baibuti.biji.model.dao.DbStatusType;
 import com.baibuti.biji.model.dao.daoInterface.IDocClassDao;
 import com.baibuti.biji.model.dto.DocClassDTO;
 import com.baibuti.biji.model.dto.ResponseDTO;
@@ -103,8 +104,11 @@ public class DocClassNetDao implements IDocClassDao {
         }
     }
 
+    /**
+     * @param docClass SUCCESS | FAILED | DUPLICATED
+     */
     @Override
-    public long insertDocClass(DocClass docClass) throws ServerException {
+    public DbStatusType insertDocClass(DocClass docClass) throws ServerException {
         Observable<ResponseDTO<DocClassDTO>> observable = RetrofitFactory.getInstance()
             .createRequest(AuthManager.getInstance().getAuthorizationHead())
             .insertDocClass(docClass.getName())
@@ -113,10 +117,17 @@ public class DocClassNetDao implements IDocClassDao {
 
         try {
             ResponseDTO<DocClassDTO> response = observable.toFuture().get();
-            if (response.getCode() != ServerErrorHandle.SUCCESS)
-                throw ServerErrorHandle.parseErrorMessage(response);
-
-            return response.getData().getId();
+            switch (response.getCode()) {
+                case ServerErrorHandle.SUCCESS:
+                    return DbStatusType.SUCCESS;
+                case ServerErrorHandle.HAS_EXISTED:
+                case ServerErrorHandle.DATABASE_FAILED:
+                    return DbStatusType.FAILED;
+                case ServerErrorHandle.DUPLICATE_FAILED:
+                    return DbStatusType.DUPLICATED;
+                default:
+                    throw ServerErrorHandle.parseErrorMessage(response);
+            }
         }
         catch (ServerException | InterruptedException | ExecutionException ex) {
             ex.printStackTrace();
@@ -124,8 +135,11 @@ public class DocClassNetDao implements IDocClassDao {
         }
     }
 
+    /**
+     * @return SUCCESS | FAILED | DUPLICATED | DEFAULT
+     */
     @Override
-    public boolean updateDocClass(DocClass docClass) throws ServerException {
+    public DbStatusType updateDocClass(DocClass docClass) throws ServerException {
         Observable<ResponseDTO<DocClassDTO>> observable = RetrofitFactory.getInstance()
             .createRequest(AuthManager.getInstance().getAuthorizationHead())
             .updateDocClass(docClass.getId(), docClass.getName())
@@ -134,10 +148,19 @@ public class DocClassNetDao implements IDocClassDao {
 
         try {
             ResponseDTO<DocClassDTO> response = observable.toFuture().get();
-            if (response.getCode() != ServerErrorHandle.SUCCESS)
-                throw ServerErrorHandle.parseErrorMessage(response);
-
-            return true;
+            switch (response.getCode()) {
+                case ServerErrorHandle.SUCCESS:
+                    return DbStatusType.SUCCESS;
+                case ServerErrorHandle.NOT_FOUND:
+                case ServerErrorHandle.DATABASE_FAILED:
+                    return DbStatusType.FAILED;
+                case ServerErrorHandle.DUPLICATE_FAILED:
+                    return DbStatusType.DUPLICATED;
+                case ServerErrorHandle.DEFAULT_FAILED:
+                    return DbStatusType.DEFAULT;
+                default:
+                    throw ServerErrorHandle.parseErrorMessage(response);
+            }
         }
         catch (ServerException | InterruptedException | ExecutionException ex) {
             ex.printStackTrace();
@@ -145,8 +168,11 @@ public class DocClassNetDao implements IDocClassDao {
         }
     }
 
+    /**
+     * @return SUCCESS | FAILED | DEFAULT
+     */
     @Override
-    public boolean deleteDocClass(int id) throws ServerException {
+    public DbStatusType deleteDocClass(int id) throws ServerException {
         Observable<ResponseDTO<DocClassDTO>> observable = RetrofitFactory.getInstance()
             .createRequest(AuthManager.getInstance().getAuthorizationHead())
             .deleteDocClass(id)
@@ -155,10 +181,17 @@ public class DocClassNetDao implements IDocClassDao {
 
         try {
             ResponseDTO<DocClassDTO> response = observable.toFuture().get();
-            if (response.getCode() != ServerErrorHandle.SUCCESS)
-                throw ServerErrorHandle.parseErrorMessage(response);
-
-            return true;
+            switch (response.getCode()) {
+                case ServerErrorHandle.SUCCESS:
+                    return DbStatusType.SUCCESS;
+                case ServerErrorHandle.NOT_FOUND:
+                case ServerErrorHandle.DATABASE_FAILED:
+                    return DbStatusType.FAILED;
+                case ServerErrorHandle.DEFAULT_FAILED:
+                    return DbStatusType.DEFAULT;
+                default:
+                    throw ServerErrorHandle.parseErrorMessage(response);
+            }
         }
         catch (ServerException | InterruptedException | ExecutionException ex) {
             ex.printStackTrace();

@@ -1,6 +1,7 @@
 package com.baibuti.biji.ui.dialog;
 
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.app.Dialog;
 import android.os.Bundle;
 import android.view.View;
@@ -26,7 +27,7 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 
-public class GroupEditDialog extends Dialog implements IContextHelper {
+public class GroupEditDialog extends AlertDialog implements IContextHelper {
 
     private Activity activity;
 
@@ -129,24 +130,28 @@ public class GroupEditDialog extends Dialog implements IContextHelper {
 
         String newGroupColor = DateColorUtil.ColorInt_HexEncoding(m_color_picker.getColor());
 
+        IGroupDao groupDao = DaoStrategyHelper.getInstance().getGroupDao(activity);
         try {
-            IGroupDao groupDao = DaoStrategyHelper.getInstance().getGroupDao(activity);
-            List<Group> groupList = groupDao.queryAllGroups();
-            if (currGroup == null) {
-                for (Group group : groupList) {
-                    if (group.getName().equals(newGroupName))
-                        showAlert(activity, "错误", "分组 %s 已存在，请修改名称。");
-                }
-                groupDao.insertGroup(new Group(newGroupName, newGroupColor));
-            }
-            else {
-                for (Group group : groupList) {
-                    if (!group.getName().equals(currGroup.getName()) && group.getName().equals(newGroupName))
-                        showAlert(activity, "错误", "分组 %s 已存在，请修改名称。");
-                }
-                groupDao.updateGroup(new Group(newGroupName, newGroupColor));
+            Group def = groupDao.queryDefaultGroup();
+            Group sameNameGroup = groupDao.queryGroupByName(newGroupName);
+
+            if (sameNameGroup != null && (currGroup == null || currGroup.getId() != sameNameGroup.getId())) {
+                showAlert(activity, "错误", "分组 %s 已存在，请修改名称。");
+                return;
             }
 
+            if (currGroup == null) { // 新建
+                if (groupDao.insertGroup(new Group(newGroupName, newGroupColor)) <= 0) {
+                    showAlert(activity, "错误", "新建分组错误");
+                    return;
+                }
+            } else { // 更新
+                if (def.getId() == currGroup.getId() && !def.getName().equals(currGroup.getName())) {
+                    showAlert(activity, "错误", "不允许修改默认分组名。");
+                } else if (!groupDao.updateGroup(new Group(currGroup.getId(), newGroupName, currGroup.getOrder(), newGroupColor))) {
+                    showAlert(activity, "错误", "更新分组错误");
+                }
+            }
         } catch (ServerException ex) {
             ex.printStackTrace();
             showAlert(activity, "错误", ex.getMessage());

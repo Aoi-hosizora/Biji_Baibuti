@@ -1,5 +1,6 @@
 package com.baibuti.biji.model.dao.daoInterface;
 
+import com.baibuti.biji.model.dao.DbStatusType;
 import com.baibuti.biji.model.dto.ServerException;
 import com.baibuti.biji.model.po.DocClass;
 
@@ -14,7 +15,7 @@ public interface IDocClassDao {
     DocClass queryDefaultDocClass() throws ServerException;
 
     // 增删改
-    long insertDocClass(DocClass docClass) throws ServerException;
-    boolean updateDocClass(DocClass docClass) throws ServerException;
-    boolean deleteDocClass(int id) throws ServerException;
+    DbStatusType insertDocClass(DocClass docClass) throws ServerException;
+    DbStatusType updateDocClass(DocClass docClass) throws ServerException;
+    DbStatusType deleteDocClass(int id) throws ServerException;
 }

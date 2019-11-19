@@ -1,5 +1,6 @@
 package com.baibuti.biji.model.dao.net;
 
+import com.baibuti.biji.model.dao.DbStatusType;
 import com.baibuti.biji.model.dto.ResponseDTO;
 import com.baibuti.biji.model.dto.ServerException;
 import com.baibuti.biji.service.auth.AuthManager;
@@ -103,8 +104,11 @@ public class GroupNetDao implements IGroupDao {
         }
     }
 
+    /**
+     * @return SUCCESS | FAILED | DUPLICATED
+     */
     @Override
-    public long insertGroup(Group group) throws ServerException {
+    public DbStatusType insertGroup(Group group) throws ServerException {
         Observable<ResponseDTO<GroupDTO>> observable = RetrofitFactory.getInstance()
             .createRequest(AuthManager.getInstance().getAuthorizationHead())
             .insertGroup(group.getName(), group.getColor())
@@ -113,10 +117,17 @@ public class GroupNetDao implements IGroupDao {
 
         try {
             ResponseDTO<GroupDTO> response = observable.toFuture().get();
-            if (response.getCode() != ServerErrorHandle.SUCCESS)
-                throw ServerErrorHandle.parseErrorMessage(response);
-
-            return response.getData().getId();
+            switch (response.getCode()) {
+                case ServerErrorHandle.SUCCESS:
+                    return DbStatusType.SUCCESS;
+                case ServerErrorHandle.HAS_EXISTED:
+                case ServerErrorHandle.DATABASE_FAILED:
+                    return DbStatusType.FAILED;
+                case ServerErrorHandle.DUPLICATE_FAILED:
+                    return DbStatusType.DUPLICATED;
+                default:
+                    throw ServerErrorHandle.parseErrorMessage(response);
+            }
         }
         catch (ServerException | InterruptedException | ExecutionException ex) {
             ex.printStackTrace();
@@ -124,8 +135,11 @@ public class GroupNetDao implements IGroupDao {
         }
     }
 
+    /**
+     * @return SUCCESS | FAILED | DUPLICATED | DEFAULT
+     */
     @Override
-    public boolean updateGroup(Group group) throws ServerException {
+    public DbStatusType updateGroup(Group group) throws ServerException {
         Observable<ResponseDTO<GroupDTO>> observable = RetrofitFactory.getInstance()
             .createRequest(AuthManager.getInstance().getAuthorizationHead())
             .updateGroup(group.getId(), group.getName(), group.getOrder(), group.getColor())
@@ -134,10 +148,19 @@ public class GroupNetDao implements IGroupDao {
 
         try {
             ResponseDTO<GroupDTO> response = observable.toFuture().get();
-            if (response.getCode() != ServerErrorHandle.SUCCESS)
-                throw ServerErrorHandle.parseErrorMessage(response);
-
-            return true;
+            switch (response.getCode()) {
+                case ServerErrorHandle.SUCCESS:
+                    return DbStatusType.SUCCESS;
+                case ServerErrorHandle.NOT_FOUND:
+                case ServerErrorHandle.DATABASE_FAILED:
+                    return DbStatusType.FAILED;
+                case ServerErrorHandle.DUPLICATE_FAILED:
+                    return DbStatusType.DUPLICATED;
+                case ServerErrorHandle.DEFAULT_FAILED:
+                    return DbStatusType.DEFAULT;
+                default:
+                    throw ServerErrorHandle.parseErrorMessage(response);
+            }
         }
         catch (ServerException | InterruptedException | ExecutionException ex) {
             ex.printStackTrace();
@@ -145,8 +168,11 @@ public class GroupNetDao implements IGroupDao {
         }
     }
 
+    /**
+     * @return SUCCESS | FAILED  | DEFAULT
+     */
     @Override
-    public boolean deleteGroup(int id) throws ServerException {
+    public DbStatusType deleteGroup(int id) throws ServerException {
         Observable<ResponseDTO<GroupDTO>> observable = RetrofitFactory.getInstance()
             .createRequest(AuthManager.getInstance().getAuthorizationHead())
             .deleteGroup(id)
@@ -155,10 +181,17 @@ public class GroupNetDao implements IGroupDao {
 
         try {
             ResponseDTO<GroupDTO> response = observable.toFuture().get();
-            if (response.getCode() != ServerErrorHandle.SUCCESS)
-                throw ServerErrorHandle.parseErrorMessage(response);
-
-            return true;
+            switch (response.getCode()) {
+                case ServerErrorHandle.SUCCESS:
+                    return DbStatusType.SUCCESS;
+                case ServerErrorHandle.NOT_FOUND:
+                case ServerErrorHandle.DATABASE_FAILED:
+                    return DbStatusType.FAILED;
+                case ServerErrorHandle.DEFAULT_FAILED:
+                    return DbStatusType.DEFAULT;
+                default:
+                    throw ServerErrorHandle.parseErrorMessage(response);
+            }
         } catch (ServerException | InterruptedException | ExecutionException ex) {
             ex.printStackTrace();
             throw ServerErrorHandle.getClientError(ex);

@@ -205,6 +205,7 @@ public class EditNoteActivity extends AppCompatActivity implements IContextHelpe
                     imgEditIntent.putExtra(IMGEditActivity.INT_IMAGE_URI, uri);
                     imgEditIntent.putExtra(IMGEditActivity.INT_IMAGE_SAVE_URI, FileNameUtil.getImageFileName(FileNameUtil.SaveType.EDITED));
 
+                    // TODO 报错
                     RxActivityResult.on(EditNoteActivity.this).startIntent(imgEditIntent)
                         .subscribe((result) -> {
                             if (result.resultCode() != RESULT_OK) return;

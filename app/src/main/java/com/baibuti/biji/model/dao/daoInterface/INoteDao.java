@@ -1,5 +1,6 @@
 package com.baibuti.biji.model.dao.daoInterface;
 
+import com.baibuti.biji.model.dao.DbStatusType;
 import com.baibuti.biji.model.dto.ServerException;
 import com.baibuti.biji.model.po.Note;
 
@@ -13,8 +14,8 @@ public interface INoteDao {
     Note queryNoteById(int id) throws ServerException;
 
     // 增删改
-    long insertNote(Note note) throws ServerException;
-    boolean updateNote(Note note) throws ServerException;
-    boolean deleteNote(int id) throws ServerException;
+    DbStatusType insertNote(Note note) throws ServerException;
+    DbStatusType updateNote(Note note) throws ServerException;
+    DbStatusType deleteNote(int id) throws ServerException;
     int deleteNotes(int[] id) throws ServerException;
 }

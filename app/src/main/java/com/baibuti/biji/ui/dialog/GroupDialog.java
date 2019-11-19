@@ -1,6 +1,7 @@
 package com.baibuti.biji.ui.dialog;
 
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.app.Dialog;
 import android.os.Bundle;
 import android.widget.Button;
@@ -22,7 +23,7 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 
-public class GroupDialog extends Dialog implements IContextHelper {
+public class GroupDialog extends AlertDialog implements IContextHelper {
 
     private Activity activity;
 
@@ -65,18 +66,19 @@ public class GroupDialog extends Dialog implements IContextHelper {
         setContentView(R.layout.dialog_group_list);
         ButterKnife.bind(this);
 
-        refreshBtnPositionEnabled(0);
-
         groupAdapter = new GroupRadioAdapter(activity);
         groupList = new ArrayList<>();
         groupAdapter.setList(groupList);
         m_list_group.setAdapter(groupAdapter);
         m_list_group.setVisibility(View.VISIBLE);
 
+        refreshBtnPositionEnabled(0);
+
         try {
             IGroupDao groupDao = DaoStrategyHelper.getInstance().getGroupDao(activity);
-            groupList = groupDao.queryAllGroups();
+            groupList.addAll(groupDao.queryAllGroups());
             groupAdapter.notifyDataSetChanged();
+            groupAdapter.setChecked(0);
         } catch (ServerException ex) {
             ex.printStackTrace();
             showAlert(activity, "错误", "分组数据加载错误，请重试。");
@@ -112,10 +114,19 @@ public class GroupDialog extends Dialog implements IContextHelper {
     }
 
     /**
-     * 关闭对话框
+     * 完成对话框
      */
-    @OnClick(R.id.id_GroupDialog_ButtonCancel)
-    void ButtonDismiss_Clicked() {
+    @OnClick(R.id.id_GroupDialog_ButtonOK)
+    void ButtonOK_Clicked() {
+        IGroupDao groupDao = DaoStrategyHelper.getInstance().getGroupDao(activity);
+        try {
+            for (Group group : groupList) {
+                groupDao.updateGroup(group);
+            }
+        } catch (ServerException ex) {
+            ex.printStackTrace();
+            showAlert(activity, "错误", "分组更新失败：" + ex.getMessage());
+        }
         dismiss();
     }
 
@@ -138,7 +149,9 @@ public class GroupDialog extends Dialog implements IContextHelper {
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-
+    /**
+     * 设置自定义背景 按钮可用
+     */
     private void setEnabled(Button button, boolean en) {
         button.setEnabled(en);
         if (en)
@@ -156,11 +169,11 @@ public class GroupDialog extends Dialog implements IContextHelper {
         setEnabled(m_btn_down, true);
 
         // 首行与次行，默认分行不动
-        if (pos == 0 || pos == 1)
+        if (pos <= 1)
             setEnabled(m_btn_up, false);
 
         // 最后一行
-        if (pos == groupList.size() - 1)
+        if (pos >= groupList.size() - 1)
             setEnabled(m_btn_down, false);
     }
 
@@ -183,6 +196,8 @@ public class GroupDialog extends Dialog implements IContextHelper {
                 groupAdapter.setChecked(groupList.size() - 1);
             groupAdapter.notifyDataSetChanged();
         });
+        dialog.setCancelable(false);
+        dialog.show();
     }
 
     /**
@@ -200,7 +215,7 @@ public class GroupDialog extends Dialog implements IContextHelper {
         int currentPos = groupAdapter.getCurrentItemIndex();
         if (isUP && currentPos != 1 && currentPos != 0) { // 上移
             Group upGroup = groupList.get(currentPos - 1);
-;           group.setOrder(currentPos - 1);
+            group.setOrder(currentPos - 1);
             upGroup.setOrder(currentPos);
         }
         else if (!isUP && currentPos != groupList.size() - 1 && currentPos != 0) { // 下移
@@ -208,6 +223,7 @@ public class GroupDialog extends Dialog implements IContextHelper {
             group.setOrder(currentPos + 1);
             downGroup.setOrder(currentPos);
         }
+        refreshBtnPositionEnabled(currentPos);
         groupAdapter.notifyDataSetChanged();
     }
 

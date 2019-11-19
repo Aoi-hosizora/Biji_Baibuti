@@ -1,5 +1,6 @@
 package com.baibuti.biji.model.dao.net;
 
+import com.baibuti.biji.model.dao.DbStatusType;
 import com.baibuti.biji.model.dao.daoInterface.IDocumentDao;
 import com.baibuti.biji.model.dto.DocumentDTO;
 import com.baibuti.biji.model.dto.ResponseDTO;
@@ -83,8 +84,11 @@ public class DocumentNetDao implements IDocumentDao {
         }
     }
 
+    /**
+     * @return SUCCESS | FAILED | UPLOAD_FAILED
+     */
     @Override
-    public long insertDocument(Document document) throws ServerException {
+    public DbStatusType insertDocument(Document document) throws ServerException {
 
         /*
 
@@ -103,10 +107,17 @@ public class DocumentNetDao implements IDocumentDao {
 
         try {
             ResponseDTO<DocumentDTO> response = observable.toFuture().get();
-            if (response.getCode() != ServerErrorHandle.SUCCESS)
-                throw ServerErrorHandle.parseErrorMessage(response);
-
-            return response.getData().getId();
+            switch (response.getCode()) {
+                case ServerErrorHandle.SUCCESS:
+                    return DbStatusType.SUCCESS;
+                case ServerErrorHandle.HAS_EXISTED:
+                case ServerErrorHandle.DATABASE_FAILED:
+                    return DbStatusType.FAILED;
+                case ServerErrorHandle.SAVE_FILE_FAILED:
+                    return DbStatusType.UPLOAD_FAILED;
+                default:
+                    throw ServerErrorHandle.parseErrorMessage(response);
+            }
         }
         catch (ServerException | InterruptedException | ExecutionException ex) {
             ex.printStackTrace();
@@ -114,8 +125,11 @@ public class DocumentNetDao implements IDocumentDao {
         }
     }
 
+    /**
+     * @return SUCCESS | FAILED
+     */
     @Override
-    public boolean updateDocument(Document document) throws ServerException {
+    public DbStatusType updateDocument(Document document) throws ServerException {
         Observable<ResponseDTO<DocumentDTO>> observable = RetrofitFactory.getInstance()
             .createRequest(AuthManager.getInstance().getAuthorizationHead())
             .updateDocument(document.getId(), document.getFilename(), document.getDocClass().getId())
@@ -124,10 +138,15 @@ public class DocumentNetDao implements IDocumentDao {
 
         try {
             ResponseDTO<DocumentDTO> response = observable.toFuture().get();
-            if (response.getCode() != ServerErrorHandle.SUCCESS)
-                throw ServerErrorHandle.parseErrorMessage(response);
-
-            return true;
+            switch (response.getCode()) {
+                case ServerErrorHandle.SUCCESS:
+                    return DbStatusType.SUCCESS;
+                case ServerErrorHandle.NOT_FOUND:
+                case ServerErrorHandle.DATABASE_FAILED:
+                    return DbStatusType.FAILED;
+                default:
+                    throw ServerErrorHandle.parseErrorMessage(response);
+            }
         }
         catch (ServerException | InterruptedException | ExecutionException ex) {
             ex.printStackTrace();
@@ -135,8 +154,11 @@ public class DocumentNetDao implements IDocumentDao {
         }
     }
 
+    /**
+     * @return SUCCESS | FAILED
+     */
     @Override
-    public boolean deleteDocument(int id) throws ServerException {
+    public DbStatusType deleteDocument(int id) throws ServerException {
         Observable<ResponseDTO<DocumentDTO>> observable = RetrofitFactory.getInstance()
             .createRequest(AuthManager.getInstance().getAuthorizationHead())
             .deleteDocument(id)
@@ -145,10 +167,15 @@ public class DocumentNetDao implements IDocumentDao {
 
         try {
             ResponseDTO<DocumentDTO> response = observable.toFuture().get();
-            if (response.getCode() != ServerErrorHandle.SUCCESS)
-                throw ServerErrorHandle.parseErrorMessage(response);
-
-            return true;
+            switch (response.getCode()) {
+                case ServerErrorHandle.SUCCESS:
+                    return DbStatusType.SUCCESS;
+                case ServerErrorHandle.NOT_FOUND:
+                case ServerErrorHandle.DATABASE_FAILED:
+                    return DbStatusType.FAILED;
+                default:
+                    throw ServerErrorHandle.parseErrorMessage(response);
+            }
         }
         catch (ServerException | InterruptedException | ExecutionException ex) {
             ex.printStackTrace();

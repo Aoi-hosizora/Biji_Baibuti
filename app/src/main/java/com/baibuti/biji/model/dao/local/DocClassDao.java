@@ -8,6 +8,7 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteStatement;
 
 import com.baibuti.biji.model.dao.DbOpenHelper;
+import com.baibuti.biji.model.dao.DbStatusType;
 import com.baibuti.biji.model.dao.daoInterface.IDocClassDao;
 import com.baibuti.biji.model.po.DocClass;
 
@@ -159,75 +160,83 @@ public class DocClassDao implements IDocClassDao {
     }
 
     /**
-     * 添加分组 (添加在末尾，不更新 Order)
-     * @param docClass 新分类，自动编码
-     * @return 分类 id
+     * 添加分组
+     * @param docClass 新分组
+     * @return SUCCESS | FAILED | DUPLICATED
      */
     @Override
-    public long insertDocClass(DocClass docClass) {
+    public DbStatusType insertDocClass(DocClass docClass) {
+
+        if (queryDocClassByName(docClass.getName()) != null)
+            return DbStatusType.DUPLICATED;
 
         SQLiteDatabase db = helper.getWritableDatabase();
         String sql = "insert into " + TBL_NAME +
-            "(" + COL_NAME + ") " +
-            "values(?)";
+            "(" + COL_NAME + ") values(?)";
         SQLiteStatement stat = db.compileStatement(sql);
         db.beginTransaction();
 
-        long ret_id = 0;
         try {
             stat.bindString(1, docClass.getName()); // COL_NAME
 
-            ret_id = stat.executeInsert();
-            db.setTransactionSuccessful();
+            long ret_id = stat.executeInsert();
+            if (ret_id != -1) {
+                docClass.setId((int) ret_id);
+                db.setTransactionSuccessful();
+                return DbStatusType.SUCCESS;
+            } else
+                return DbStatusType.FAILED;
         } catch (SQLException e) {
             e.printStackTrace();
+            return DbStatusType.FAILED;
         } finally {
             db.endTransaction();
             db.close();
         }
-
-        return ret_id;
     }
 
     /**
-     * 更新分类 (刷新 Order)
+     * 更新分类
      * @param docClass 覆盖更新
-     * @return 是否成功更新
+     * @return SUCCESS | FAILED | DUPLICATED | DEFAULT
      */
     @Override
-    public boolean updateDocClass(DocClass docClass) {
+    public DbStatusType updateDocClass(DocClass docClass) {
+
+        DocClass sameName = queryDocClassByName(docClass.getName());
+        if (sameName != null && sameName.getId() != docClass.getId())
+            return DbStatusType.DUPLICATED;
+
+        DocClass def = queryDefaultDocClass();
+        if (def.getId() == docClass.getId() && !def.getName().equals(docClass.getName()))
+            return DbStatusType.DEFAULT;
 
         SQLiteDatabase db = helper.getWritableDatabase();
         ContentValues values = new ContentValues();
-
         values.put(COL_NAME, docClass.getName());
 
-        int ret = db.update(TBL_NAME, values, COL_ID + " = ?", new String[] { String.valueOf(docClass.getId()) });
+        int ret = db.update(TBL_NAME, values,
+            COL_ID + " = ?", new String[] { String.valueOf(docClass.getId()) });
         db.close();
-        return ret > 0;
+        return ret == 0 ? DbStatusType.FAILED : DbStatusType.SUCCESS;
     }
 
     /**
-     * 删除分类 (刷新 Order)
+     * 删除分类
      * @param id 删除的分类 id
-     * @return 是否成功删除
+     * @return SUCCESS | FAILED | DEFAULT
      */
     @Override
-    public boolean deleteDocClass(int id) {
+    public DbStatusType deleteDocClass(int id) {
+
+        if (queryDefaultDocClass().getId() == id)
+            return DbStatusType.DEFAULT;
 
         SQLiteDatabase db = helper.getWritableDatabase();
 
-        int ret = 0;
-        try {
-            ret = db.delete(TBL_NAME, COL_ID + " = ?", new String[] { String.valueOf(id) });
-        }
-        catch (Exception e) {
-            e.printStackTrace();
-        }
-        finally {
-            if (db != null && db.isOpen())
-                db.close();
-        }
-        return ret > 0;
+        int ret = db.delete(TBL_NAME, COL_ID + " = ?", new String[] { String.valueOf(id) });
+        db.close();
+
+        return ret == 0 ? DbStatusType.FAILED : DbStatusType.SUCCESS;
     }
 }

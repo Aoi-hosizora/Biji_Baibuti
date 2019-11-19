@@ -49,7 +49,8 @@ public class GroupRadioAdapter extends BaseAdapter {
      * 选择项
      */
     public void setChecked(int position) {
-        states.put(list.get(position), true);
+        if (list.size() > position)
+            states.put(list.get(position), true);
     }
 
     // /**
