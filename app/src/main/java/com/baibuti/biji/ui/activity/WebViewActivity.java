@@ -71,7 +71,7 @@ public class WebViewActivity extends AppCompatActivity {
 
             Intent intent = new Intent();
             intent.putExtra("html", htmlStr);
-            setResult(101, intent);
+            setResult(RESULT_OK, intent);
             finish();
         });
     }

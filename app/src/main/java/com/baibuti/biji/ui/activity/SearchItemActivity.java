@@ -26,6 +26,7 @@ import com.baibuti.biji.ui.widget.listView.RecyclerViewEmptySupport;
 import com.baibuti.biji.util.otherUtil.LayoutUtil;
 import com.baibuti.biji.util.imgTextUtil.SearchUtil;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
@@ -62,7 +63,7 @@ public class SearchItemActivity extends AppCompatActivity implements IContextHel
         /**
          * 当前页面的数据
          */
-        List<SearchItem> currentList;
+        List<SearchItem> currentList = new ArrayList<>();
 
         /**
          * 搜索内容
@@ -179,8 +180,14 @@ public class SearchItemActivity extends AppCompatActivity implements IContextHel
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        if (item.getItemId() == R.id.action_FindSearchStar)
-            FindSearch_Clicked();
+        switch (item.getItemId()) {
+            case R.id.action_FindSearchStar:
+                FindSearch_Clicked();
+                break;
+            case android.R.id.home:
+                finish();
+                break;
+        }
         return true;
     }
 

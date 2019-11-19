@@ -171,7 +171,7 @@ public class ViewNoteActivity extends AppCompatActivity implements IContextHelpe
 
         boolean isNew = motoIntent.getBooleanExtra(NoteFragment.INT_IS_NEW, true);
 
-        if (isModified) {
+        if (isNew || isModified) {
             // isNew:  NoteFrag -> EditNote -> NoteFrag --> ViewNote
             // !isNew: NoteFrag -> ViewNote -> EditNote -> ViewNote
 

@@ -31,6 +31,9 @@ import java.util.Locale;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
+import rx_activity_result2.RxActivityResult;
+
+import static android.app.Activity.RESULT_OK;
 
 public class ScheduleFragment extends BaseFragment implements IContextHelper {
 
@@ -44,8 +47,6 @@ public class ScheduleFragment extends BaseFragment implements IContextHelper {
 
     @BindView(R.id.schedulefragment_week_textview)
     TextView m_titleTextView;
-
-    private static final int REQ_BROWSER = 100;
 
     @Nullable
     @Override
@@ -152,18 +153,6 @@ public class ScheduleFragment extends BaseFragment implements IContextHelper {
     }
 
     /**
-     * 课程表导入回调
-     */
-    @Override
-    public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-        if (requestCode == REQ_BROWSER && resultCode == 101) {
-            String html = data.getStringExtra("html");
-            CbImportSchedule(html);
-        }
-    }
-
-    /**
      * ActionBar 点击事件
      */
     private Toolbar.OnMenuItemClickListener menuItemClickListener = (menu) -> {
@@ -185,7 +174,13 @@ public class ScheduleFragment extends BaseFragment implements IContextHelper {
      */
     private void ActionImportSchedule_Clicked() {
         Intent intent = new Intent(getContext(), WebViewActivity.class);
-        startActivityForResult(intent, REQ_BROWSER);
+        RxActivityResult.on(this).startIntent(intent)
+            .subscribe((result) -> {
+                if (result.resultCode() == RESULT_OK) {
+                    String html = result.data().getStringExtra("html");
+                    CbImportSchedule(html);
+                }
+            }).isDisposed();
     }
 
     /**

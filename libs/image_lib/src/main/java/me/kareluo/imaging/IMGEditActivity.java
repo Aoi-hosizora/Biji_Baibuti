@@ -157,23 +157,24 @@ public class IMGEditActivity extends IMGEditBaseActivity {
         catch (IOException e) {
             e.printStackTrace();
         }
+
         return file.getAbsolutePath();
     }
 
-
     @Override
     public void onDoneClick() {
-            Bitmap bitmap = mImgView.saveBitmap();
-            if (bitmap != null) {
+        Bitmap bitmap = mImgView.saveBitmap();
+        if (bitmap != null) {
 
-                String str = saveEditedImgToSdCard(bitmap);
+            String str = saveEditedImgToSdCard(bitmap);
+            Log.i("", "onDoneClick: " + str);
 
-                Intent intent = new Intent();
-                intent.setData(Uri.parse(str));
+            Intent intent = new Intent();
+            intent.setData(Uri.parse(str));
 
-                setResult(RESULT_OK, intent);
-                finish();
-                return;
+            setResult(RESULT_OK, intent);
+            finish();
+            return;
         }
         setResult(RESULT_CANCELED);
         finish();

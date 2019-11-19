@@ -195,24 +195,27 @@ public class EditNoteActivity extends AppCompatActivity implements IContextHelpe
                 Uri uri = returnIntent.getData();
                 if (uri != null) {
                     String imgPath = AppPathUtil.getFilePathByUri(this, uri);
+                    // content://media/external/images/media/221, /storage/emulated/0/Others/007.jpg
                     if (imgPath == null || imgPath.isEmpty()) {
                         showAlert(this, "插入图片", "从相册获取的图片不存在，请重试。");
                         return;
                     }
 
-                    Intent imgEditIntent = new Intent(this, IMGEditActivity.class);
+                    Intent imgEditIntent = new Intent(EditNoteActivity.this, IMGEditActivity.class);
                     imgEditIntent.putExtra(IMGEditActivity.INT_IMAGE_URI, uri);
                     imgEditIntent.putExtra(IMGEditActivity.INT_IMAGE_SAVE_URI, FileNameUtil.getImageFileName(FileNameUtil.SaveType.EDITED));
 
-                    RxActivityResult.on(this).startIntent(imgEditIntent)
-                        .map(Result::data)
-                        .subscribe((returnIntent2) -> {
-                            Uri uri1 = returnIntent2.getData();
-                            if (uri1 != null) {
+                    RxActivityResult.on(EditNoteActivity.this).startIntent(imgEditIntent)
+                        .subscribe((result) -> {
+                            if (result.resultCode() != RESULT_OK) return;
+                            Uri editedUri = result.data().getData();
+                            if (editedUri != null)
                                 // 无需删除图片
-                                insertImagesSync(uri1);
-                            }
+                                insertImagesSync(editedUri);
 
+                        }, (throwable) -> {
+                            throwable.printStackTrace();
+                            showAlert(this, "错误", throwable.getMessage());
                         }).isDisposed();
                 }
             }).isDisposed();
@@ -306,7 +309,7 @@ public class EditNoteActivity extends AppCompatActivity implements IContextHelpe
     }
 
     /**
-     * 文件保存活动处理
+     * !!! 文件保存活动处理
      */
     private void ToolbarSaveNote_Clicked() {
         boolean[] isContinue = new boolean[] { true };
@@ -346,7 +349,6 @@ public class EditNoteActivity extends AppCompatActivity implements IContextHelpe
             intent.putExtra(NoteFragment.INT_IS_MODIFIED, false); // <<<
             setResult(RESULT_OK, intent);
             finish();
-
             return;
         }
 

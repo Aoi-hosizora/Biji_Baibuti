@@ -95,9 +95,9 @@ public class NoteAdapter extends RecyclerViewEmptySupport.Adapter<NoteAdapter.Vi
 
     @Override
     public int getItemCount() {
-        if (noteList != null)
-            return noteList.size();
-        return 0;
+        if (noteList == null)
+            return 0;
+        return noteList.size();
     }
 
     public class ViewHolder extends RecyclerViewEmptySupport.ViewHolder {

@@ -55,6 +55,7 @@ public class GroupDialog extends Dialog implements IContextHelper {
     public GroupDialog(Activity activity, OnUpdateGroupListener listener) {
         super(activity);
         this.activity = activity;
+        this.groupList = new ArrayList<>();
         this.m_listener = listener;
     }
 

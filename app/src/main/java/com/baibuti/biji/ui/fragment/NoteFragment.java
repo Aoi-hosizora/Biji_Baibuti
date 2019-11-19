@@ -57,6 +57,7 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 import me.kareluo.imaging.IMGEditActivity;
+import rx_activity_result2.RxActivityResult;
 
 import static android.app.Activity.RESULT_OK;
 
@@ -436,83 +437,9 @@ public class NoteFragment extends BaseFragment implements IContextHelper {
 
     // region !!! new edit
 
-    /*
-    1. 新建笔记:
-        传递 INT_NOTE_DATA | INT_IS_NEW: true ->
-        Edit Act -> 返回 INT_NOTE_DATA | INT_IS_NEW: true
-        View Act -> 返回 INT_NOTE_DATA | INT_IS_NEW: true -> 结束
-
-    2. 浏览笔记:
-        传递 INT_NOTE_DATA | INT_IS_NEW: true ->
-        View Act -> 返回 INT_NOTE_DATA | INT_IS_NEW: false | INT_IS_MODIFIED: ? -> 结束
-     */
-
-    private static final int REQ_NEW_NOTE_INTENT = 0;
-    private static final int REQ_OPEN_NOTE_INTENT = 1;
-    private static final int REQ_OCR_TAKE_PHOTO = 2;
-    private static final int REQ_OCR_EDIT_PHOTO = 3;
-
     public static final String INT_NOTE_DATA = "note_data";
     public static final String INT_IS_NEW = "is_new";
     public static final String INT_IS_MODIFIED = "is_modified";
-
-    /**
-     * 活动返回
-     */
-    @Override
-    public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-
-        switch (requestCode) {
-            case REQ_NEW_NOTE_INTENT: // 新笔记返回 -> 浏览
-                if (resultCode == RESULT_OK) {
-                    Note note = (Note) data.getSerializableExtra(INT_NOTE_DATA);
-                    openViewNote(note, true);
-                }
-                break;
-            case REQ_OPEN_NOTE_INTENT: // 笔记浏览返回 -> Toast
-                if (resultCode == RESULT_OK) {
-                    boolean isNew = data.getBooleanExtra(INT_IS_NEW, true);
-                    boolean isModified = data.getBooleanExtra(INT_IS_MODIFIED, true);
-                    Note note = (Note) data.getSerializableExtra(INT_NOTE_DATA);
-
-                    if (isNew) {
-                        // 新笔记
-                        showToast(getContext(), "笔记 \"" + note.getTitle() + "\" 新建成功");
-                        NoteAdapter adapter = (NoteAdapter) m_noteListView.getAdapter();
-                        List<Note> notes = adapter.getNoteList();
-                        notes.add(note);
-                        adapter.setNoteList(notes);
-                        adapter.notifyDataSetChanged();
-
-                    } else if (isModified) {
-                        // 旧的更新过的笔记
-                        showToast(getContext(), "笔记 \"" + note.getTitle() + "\" 更新成功");
-                        NoteAdapter adapter = (NoteAdapter) m_noteListView.getAdapter();
-                        List<Note> notes = adapter.getNoteList();
-
-                        for (Note n : notes)
-                            if (n.getId() == note.getId()) {
-                                notes.set(notes.indexOf(n), note);
-                                return;
-                            }
-
-                        adapter.setNoteList(notes);
-                        adapter.notifyDataSetChanged();
-                    }
-                }
-                break;
-            case REQ_OCR_TAKE_PHOTO: // OCR 拍照 (OCRTakePhoto)
-                // https://zhidao.baidu.com/question/1638421275428158220.html
-                if (resultCode == RESULT_OK)
-                    OCREditPhoto(data.getData()); // photoUri
-                break;
-            case REQ_OCR_EDIT_PHOTO: // OCR 剪辑 (OCREditPhoto)
-                if (resultCode == RESULT_OK)
-                    OpenOCRActivity(data.getData()); // editedUri
-                break;
-        }
-    }
 
     /**
      * 新建笔记
@@ -531,25 +458,47 @@ public class NoteFragment extends BaseFragment implements IContextHelper {
         intent.putExtra(INT_NOTE_DATA, note);
         intent.putExtra(INT_IS_NEW, true); // NEW
 
-        startActivityForResult(intent, REQ_NEW_NOTE_INTENT);
-    }
-
-    /**
-     * 查看笔记
-     * @param isNew 是否为新笔记 (newNote)
-     */
-    private void openViewNote(@NonNull Note note, boolean isNew) {
-        Intent intent = new Intent(getActivity(), ViewNoteActivity.class);
-        intent.putExtra(INT_NOTE_DATA, note);
-        intent.putExtra(INT_IS_NEW, isNew);
-        startActivityForResult(intent, REQ_OPEN_NOTE_INTENT);
+        RxActivityResult.on(this).startIntent(intent) // -> INT_NOTE_DATA, INT_IS_MODIFIED, INT_IS_NEW
+            .subscribe((result) -> {
+                if (result.resultCode() != RESULT_OK)
+                    return;
+                Intent returnIntent = result.data();
+                Note newNote = (Note) returnIntent.getSerializableExtra(INT_NOTE_DATA);
+                boolean isModify = returnIntent.getBooleanExtra(INT_IS_MODIFIED, true);
+                if (isModify) {
+                    showToast(getContext(), String.format(Locale.CHINA, "笔记 \"%s\"新建成功", newNote.getTitle()));
+                    pageData.allNotes.add(newNote);
+                    m_noteListView.getAdapter().notifyDataSetChanged();
+                }
+            }).isDisposed();
     }
 
     /**
      * 查看已经存在的笔记
      */
     private void openViewNote(@NonNull Note note) {
-        openViewNote(note, false);
+        Intent intent = new Intent(getActivity(), ViewNoteActivity.class);
+        intent.putExtra(INT_NOTE_DATA, note);
+        intent.putExtra(INT_IS_NEW, false);
+
+        RxActivityResult.on(this).startIntent(intent) // -> INT_NOTE_DATA, INT_IS_MODIFIED, INT_IS_NEW
+            .subscribe((result) -> {
+                if (result.resultCode() != RESULT_OK)
+                    return;
+                Intent returnIntent = result.data();
+                Note modifiedNote = (Note) returnIntent.getSerializableExtra(INT_NOTE_DATA);
+                boolean isModify = returnIntent.getBooleanExtra(INT_IS_MODIFIED, true);
+                if (isModify) {
+                    showToast(getContext(), "笔记 \"" + modifiedNote.getTitle() + "\" 更新成功");
+                    for (Note note1 : pageData.allNotes) {
+                        if (note1.getId() == modifiedNote.getId()) {
+                            pageData.allNotes.set(pageData.allNotes.indexOf(note1), modifiedNote);
+                            break;
+                        }
+                    }
+                    m_noteListView.getAdapter().notifyDataSetChanged();
+                }
+            }).isDisposed();
     }
 
     // endregion
@@ -569,8 +518,12 @@ public class NoteFragment extends BaseFragment implements IContextHelper {
         ProgressDialog progressDialog = showProgress(getContext(), "加载数据中...", false, null);
         try {
             pageData.allNotes = DaoStrategyHelper.getInstance().getNoteDao(getContext()).queryAllNotes();
+            setListContent(pageData.allNotes);
+            m_swipeRefresh.setRefreshing(false);
             progressDialog.dismiss();
         } catch (ServerException ex) {
+            ex.printStackTrace();
+            m_swipeRefresh.setRefreshing(false);
             progressDialog.dismiss();
             showAlert(getContext(), "错误", "数据加载错误：" + ex.getMessage(),
                 "重试", (d, w) -> onInitNoteData(), "确定", null);
@@ -679,17 +632,14 @@ public class NoteFragment extends BaseFragment implements IContextHelper {
 
     // region OCR
 
-    /*
-        拍照 (生成 photoUri) ->
-        编辑 (生成 editedUri) ->
-        识别 (删除 photoUri) -> 保留 editedUri
-     */
-
     /**
-     * 文字识别之前 拍照
+     * 文字识别
+     *
+     * 拍照 (生成 photoUri) ->
+     * 编辑 (生成 editedUri) ->
+     * 识别 (删除 photoUri) -> 保留 editedUri
      */
     private void OCRTakePhoto() {
-
         String photoPath = FileNameUtil.getImageFileName(FileNameUtil.SaveType.PHOTO);
 
         // 7.0 调用系统相机拍照不再允许使用 Uri 方式，应该替换为 FileProvider
@@ -699,48 +649,38 @@ public class NoteFragment extends BaseFragment implements IContextHelper {
         intent.addFlags(Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION);
         intent.putExtra(MediaStore.EXTRA_OUTPUT, photoUri);
 
-        try {
-            startActivityForResult(intent, REQ_OCR_TAKE_PHOTO);
-        }
-        catch (Exception ex) {
-            ex.printStackTrace();
-            showAlert(getContext(), "错误", "打开设备摄像机错误，请检查。");
-        }
+        RxActivityResult.on(this).startIntent(intent) // photoUri -> 打开相机 -> returnUri(imgPath)
+            .subscribe((result) -> {
+                if (result.resultCode() != RESULT_OK) return;
+                Uri returnUri = result.data().getData();
+                String imgPath;
+                if (returnUri == null || (imgPath = AppPathUtil.getFilePathByUri(getContext(), returnUri)) == null || imgPath.isEmpty()) {
+                    showAlert(getContext(), "错误", "从相册获取的图片或拍照得到的图片不存在，请重试。");
+                    return;
+                }
+                String editedPath = FileNameUtil.getImageFileName(FileNameUtil.SaveType.EDITED); // 编辑的文件名
+
+                Intent intent1 = new Intent(getActivity(), IMGEditActivity.class);
+                intent1.putExtra(IMGEditActivity.INT_IMAGE_URI, photoUri);
+                intent1.putExtra(IMGEditActivity.INT_IMAGE_SAVE_URI, editedPath);
+                RxActivityResult.on(this).startIntent(intent1) // editedPath -> 编辑 -> editedUri
+                    .subscribe((result1) -> {
+                        if (result1.resultCode() != RESULT_OK) return;
+                        AppPathUtil.deleteFile(imgPath); // 删除原始拍照图片
+                        Uri editedUri = result1.data().getData();
+                        if (editedUri == null)
+                            showAlert(getContext(), "错误", "编辑得到的图片不存在，请重试。");
+                        else {
+                            Intent intent2 = new Intent(getContext(), OCRActivity.class);
+                            intent2.putExtra(OCRActivity.INT_IMAGE_PATH, editedUri.toString());
+                            startActivity(intent2);
+                        }
+                    }).isDisposed();
+
+            }, (throwable) -> {
+                throwable.printStackTrace();
+                showAlert(getContext(), "错误", "打开设备摄像机错误，请检查。");
+            }).isDisposed();
     }
-
-    /**
-     * 文字识别之前 编辑
-     */
-    private void OCREditPhoto(Uri photoUri) {
-        String imgPath = AppPathUtil.getFilePathByUri(getContext(), photoUri);
-        if (imgPath == null || imgPath.isEmpty())
-            showAlert(getContext(), "错误", "从相册获取的图片或拍照得到的图片不存在，请重试。");
-        else {
-            String editedPath = FileNameUtil.getImageFileName(FileNameUtil.SaveType.EDITED);
-
-            Intent intent = new Intent(getActivity(), IMGEditActivity.class);
-            intent.putExtra(IMGEditActivity.INT_IMAGE_URI, photoUri);
-            intent.putExtra(IMGEditActivity.INT_IMAGE_SAVE_URI, editedPath);
-
-            startActivityForResult(intent, REQ_OCR_EDIT_PHOTO);
-        }
-    }
-
-    /**
-     * 拍照 -> 编辑 -> 识别
-     */
-    private void OpenOCRActivity(@Nullable Uri editedUri) {
-        // TODO delete photoUri
-
-        if (editedUri == null) {
-            showAlert(getContext(), "错误", "编辑得到的图片不存在，请重试。");
-            return;
-        }
-
-        Intent intent = new Intent(getContext(), OCRActivity.class);
-        intent.putExtra(OCRActivity.INT_IMAGE_PATH, editedUri.toString());
-        startActivity(intent);
-    }
-
     // endregion
 }

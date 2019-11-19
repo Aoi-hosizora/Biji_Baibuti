@@ -161,6 +161,20 @@ public class AppPathUtil {
             return getAppRootDir() + filename;
         }
 
+        // content://media/external/images/media/222
+        if (ContentResolver.SCHEME_CONTENT.equals(uri.getScheme())) {
+            Cursor cursor = context.getContentResolver().query(uri, new String[]{MediaStore.Images.Media.DATA}, null, null, null);
+            if (cursor != null) {
+                if (cursor.moveToFirst()) {
+                    int columnIndex = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATA);
+                    if (columnIndex > -1) {
+                        return cursor.getString(columnIndex);
+                    }
+                }
+                cursor.close();
+            }
+        }
+
         // content://com.android.providers.media.documents/document/image%3A235700
         if (ContentResolver.SCHEME_CONTENT.equals(uri.getScheme())) {
             if (DocumentsContract.isDocumentUri(context, uri)) {
@@ -221,24 +235,21 @@ public class AppPathUtil {
     }
 
     /**
-     * @param uri The Uri to check.
-     * @return Whether the Uri authority is ExternalStorageProvider.
+     * ExternalStorageProvider.
      */
     private static boolean isExternalStorageDocument(Uri uri) {
         return "com.android.externalstorage.documents".equals(uri.getAuthority());
     }
 
     /**
-     * @param uri The Uri to check.
-     * @return Whether the Uri authority is DownloadsProvider.
+     * DownloadsProvider.
      */
     private static boolean isDownloadsDocument(Uri uri) {
         return "com.android.providers.downloads.documents".equals(uri.getAuthority());
     }
 
     /**
-     * @param uri The Uri to check.
-     * @return Whether the Uri authority is MediaProvider.
+     * MediaProvider.
      */
     private static boolean isMediaDocument(Uri uri) {
         return "com.android.providers.media.documents".equals(uri.getAuthority());

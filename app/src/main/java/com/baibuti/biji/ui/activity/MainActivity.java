@@ -19,6 +19,7 @@ import android.os.Bundle;
 
 import android.support.v4.widget.DrawerLayout;
 import android.util.DisplayMetrics;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.ViewGroup;
@@ -64,8 +65,7 @@ public class MainActivity extends FragmentActivity implements IContextHelper, Au
         Manifest.permission.INTERNET,
         Manifest.permission.ACCESS_NETWORK_STATE,
 
-        Manifest.permission.CAMERA,
-        Manifest.permission.VIBRATE
+        Manifest.permission.CAMERA
     };
     private static final int REQUEST_PERMISSION_CODE = 1;
 
@@ -76,11 +76,13 @@ public class MainActivity extends FragmentActivity implements IContextHelper, Au
         ButterKnife.bind(this);
 
         // Android 6.0 以上版本 -> 动态申请权限
+
         if (Build.VERSION.SDK_INT > Build.VERSION_CODES.LOLLIPOP) {
             List<String> RequirePermission = new ArrayList<>();
-            for (String permission : ALL_PERMISSION)
+            for (String permission : ALL_PERMISSION) {
                 if (ContextCompat.checkSelfPermission(this, permission) != PackageManager.PERMISSION_GRANTED)
                     RequirePermission.add(permission);
+            }
 
             if (RequirePermission.size() > 0) {
                 showAlert(this,

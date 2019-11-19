@@ -125,7 +125,7 @@ public class GroupDao implements IGroupDao {
     public Group queryGroupByName(String groupName) {
         SQLiteDatabase db = helper.getWritableDatabase();
         Cursor cursor = null;
-        String sql = "select * from " + TBL_NAME + " where " + COL_NAME + " = " + groupName;
+        String sql = "select * from " + TBL_NAME + " where " + COL_NAME + " = \"" + groupName + "\"";
 
         try {
             cursor = db.rawQuery(sql, null);
