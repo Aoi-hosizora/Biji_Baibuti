@@ -31,6 +31,7 @@ public class GroupDao implements IGroupDao {
         helper = new DbOpenHelper(context);
 
         // 处理默认
+        // TODO
         if (queryAllGroups().isEmpty())
             insertGroup(Group.DEF_GROUP);
 

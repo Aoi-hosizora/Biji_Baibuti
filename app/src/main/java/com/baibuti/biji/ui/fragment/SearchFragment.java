@@ -18,6 +18,7 @@ import android.widget.TextView;
 
 
 import com.baibuti.biji.model.dao.DaoStrategyHelper;
+import com.baibuti.biji.model.dao.DbStatusType;
 import com.baibuti.biji.model.dao.daoInterface.ISearchItemDao;
 import com.baibuti.biji.model.dto.ServerException;
 import com.baibuti.biji.service.auth.AuthManager;
@@ -295,14 +296,14 @@ public class SearchFragment extends BaseFragment implements IContextHelper {
         try {
             if (searchItemDao.querySearchItemById(searchItem.getId()) == null) {
                 // 收藏
-                if (searchItemDao.insertSearchItem(searchItem) != 0)
+                if (searchItemDao.insertSearchItem(searchItem) == DbStatusType.SUCCESS)
                     showToast(getActivity(), String.format(Locale.CHINA, "收藏 %s 成功", searchItem.getTitle()));
                 else
                     showToast(getActivity(), String.format(Locale.CHINA, "收藏 %s 失败", searchItem.getTitle()));
                 m_list_result.getAdapter().notifyDataSetChanged();
             } else {
                 // 取消收藏
-                if (searchItemDao.deleteSearchItem(searchItem.getId()))
+                if (searchItemDao.deleteSearchItem(searchItem.getId()) == DbStatusType.SUCCESS)
                     showToast(getActivity(), String.format(Locale.CHINA, "取消收藏 %s 成功", searchItem.getTitle()));
                 else
                     showToast(getActivity(), String.format(Locale.CHINA, "取消收藏 %s 失败", searchItem.getTitle()));

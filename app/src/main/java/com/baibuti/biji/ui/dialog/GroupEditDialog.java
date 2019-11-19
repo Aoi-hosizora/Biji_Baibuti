@@ -2,7 +2,6 @@ package com.baibuti.biji.ui.dialog;
 
 import android.app.Activity;
 import android.app.AlertDialog;
-import android.app.Dialog;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
@@ -10,6 +9,7 @@ import android.widget.EditText;
 import android.widget.TextView;
 
 import com.baibuti.biji.model.dao.DaoStrategyHelper;
+import com.baibuti.biji.model.dao.DbStatusType;
 import com.baibuti.biji.model.dao.daoInterface.IGroupDao;
 import com.baibuti.biji.model.dao.daoInterface.INoteDao;
 import com.baibuti.biji.model.dto.ServerException;
@@ -132,24 +132,26 @@ public class GroupEditDialog extends AlertDialog implements IContextHelper {
 
         IGroupDao groupDao = DaoStrategyHelper.getInstance().getGroupDao(activity);
         try {
-            Group def = groupDao.queryDefaultGroup();
-            Group sameNameGroup = groupDao.queryGroupByName(newGroupName);
-
-            if (sameNameGroup != null && (currGroup == null || currGroup.getId() != sameNameGroup.getId())) {
-                showAlert(activity, "错误", "分组 %s 已存在，请修改名称。");
-                return;
-            }
-
             if (currGroup == null) { // 新建
-                if (groupDao.insertGroup(new Group(newGroupName, newGroupColor)) <= 0) {
+                DbStatusType status = groupDao.insertGroup(new Group(newGroupName, newGroupColor));
+                if (status == DbStatusType.FAILED) {
                     showAlert(activity, "错误", "新建分组错误");
+                    return;
+                } else if (status == DbStatusType.DUPLICATED) {
+                    showAlert(activity, "错误", "分组名重复，请检查");
                     return;
                 }
             } else { // 更新
-                if (def.getId() == currGroup.getId() && !def.getName().equals(currGroup.getName())) {
+                DbStatusType status = groupDao.updateGroup(new Group(currGroup.getId(), newGroupName, currGroup.getOrder(), newGroupColor));
+                if (status == DbStatusType.FAILED) {
+                    showAlert(activity, "错误", "新建分组错误。");
+                    return;
+                } else if (status == DbStatusType.DUPLICATED) {
+                    showAlert(activity, "错误", "分组名重复，请检查。");
+                    return;
+                } else if (status == DbStatusType.DEFAULT) {
                     showAlert(activity, "错误", "不允许修改默认分组名。");
-                } else if (!groupDao.updateGroup(new Group(currGroup.getId(), newGroupName, currGroup.getOrder(), newGroupColor))) {
-                    showAlert(activity, "错误", "更新分组错误");
+                    return;
                 }
             }
         } catch (ServerException ex) {
@@ -170,6 +172,7 @@ public class GroupEditDialog extends AlertDialog implements IContextHelper {
             if (currGroup.getId() == groupDao.queryDefaultGroup().getId())
                 showAlert(activity, "错误", "无法删除默认分组。");
 
+            // TODO 增加事务支持
             List<Note> groupNotes = noteDao.queryNotesByGroupId(currGroup.getId());
             if (groupNotes.size() != 0) {
                 // 包含笔记
@@ -177,11 +180,13 @@ public class GroupEditDialog extends AlertDialog implements IContextHelper {
                     "删除", "该分组有相关联的笔记，是否更改与该分组对应的笔记？",
                     "删除分组并修改为默认分组", (d, w) -> {
                         try {
+                            Group def = groupDao.queryDefaultGroup();
                             for (Note note : groupNotes) {
-                                note.setGroup(groupDao.queryDefaultGroup());
+                                note.setGroup(def);
                                 noteDao.updateNote(note);
                             }
-                            groupDao.deleteGroup(currGroup.getId());
+                            if (groupDao.deleteGroup(currGroup.getId()) == DbStatusType.FAILED)
+                                showAlert(activity, "错误", "分组删除错误，笔记分组已被修改。");
                         } catch (ServerException ex) {
                             ex.printStackTrace();
                             showAlert(activity, "错误", ex.getMessage());
@@ -191,7 +196,8 @@ public class GroupEditDialog extends AlertDialog implements IContextHelper {
                         try {
                             for (Note note : groupNotes)
                                 noteDao.deleteNote(note.getId());
-                            groupDao.deleteGroup(currGroup.getId());
+                            if (groupDao.deleteGroup(currGroup.getId()) == DbStatusType.FAILED)
+                                showAlert(activity, "错误", "分组删除错误，笔记已被删除。");
                         } catch (ServerException ex) {
                             ex.printStackTrace();
                             showAlert(activity, "错误", ex.getMessage());
@@ -205,7 +211,8 @@ public class GroupEditDialog extends AlertDialog implements IContextHelper {
                     "删除", String.format("是否删除分组 %s？", currGroup.getName()),
                     "删除", (d, w) -> {
                         try {
-                            groupDao.deleteGroup(currGroup.getId());
+                            if (groupDao.deleteGroup(currGroup.getId()) == DbStatusType.FAILED)
+                                showAlert(activity, "错误", "分组删除错误。");
                         } catch (ServerException ex) {
                             ex.printStackTrace();
                             showAlert(activity, "错误", ex.getMessage());

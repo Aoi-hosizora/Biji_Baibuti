@@ -18,6 +18,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.baibuti.biji.model.dao.DaoStrategyHelper;
+import com.baibuti.biji.model.dao.DbStatusType;
 import com.baibuti.biji.model.dao.daoInterface.IGroupDao;
 import com.baibuti.biji.model.dao.daoInterface.INoteDao;
 import com.baibuti.biji.model.dto.ServerException;
@@ -387,10 +388,15 @@ public class EditNoteActivity extends AppCompatActivity implements IContextHelpe
         try {
             INoteDao noteDao = DaoStrategyHelper.getInstance().getNoteDao(this);
             if (isNew) {
-                long noteId = noteDao.insertNote(currNote);
-                currNote.setId((int) noteId);
+                if (noteDao.insertNote(currNote) != DbStatusType.SUCCESS) {
+                    showAlert(this, "错误", "新建笔记错误");
+                    return;
+                }
             } else {
-                noteDao.updateNote(currNote);
+                if (noteDao.updateNote(currNote) != DbStatusType.SUCCESS) {
+                    showAlert(this, "错误", "更新笔记错误");
+                    return;
+                }
             }
 
             Intent intent = new Intent();

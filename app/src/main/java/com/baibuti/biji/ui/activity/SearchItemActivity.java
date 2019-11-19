@@ -15,6 +15,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.baibuti.biji.model.dao.DaoStrategyHelper;
+import com.baibuti.biji.model.dao.DbStatusType;
 import com.baibuti.biji.model.dao.daoInterface.ISearchItemDao;
 import com.baibuti.biji.model.dto.ServerException;
 import com.baibuti.biji.ui.IContextHelper;
@@ -250,7 +251,7 @@ public class SearchItemActivity extends AppCompatActivity implements IContextHel
 
         ISearchItemDao searchItemDao = DaoStrategyHelper.getInstance().getSearchDao(this);
         try {
-             if (!searchItemDao.deleteSearchItem(searchItem.getId())) {
+             if (searchItemDao.deleteSearchItem(searchItem.getId()) == DbStatusType.FAILED) {
                  Toast.makeText(SearchItemActivity.this, String.format("取消收藏 \"%s\" 失败", searchItem.getTitle()), Toast.LENGTH_SHORT).show();
              } else {
                  Toast.makeText(SearchItemActivity.this, String.format("取消收藏 \"%s\" 成功", searchItem.getTitle()), Toast.LENGTH_SHORT).show();

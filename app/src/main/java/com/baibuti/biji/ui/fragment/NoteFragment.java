@@ -27,6 +27,7 @@ import android.widget.ListView;
 import android.widget.TextView;
 
 import com.baibuti.biji.model.dao.DaoStrategyHelper;
+import com.baibuti.biji.model.dao.DbStatusType;
 import com.baibuti.biji.model.dao.daoInterface.INoteDao;
 import com.baibuti.biji.model.dto.ServerException;
 import com.baibuti.biji.service.auth.AuthManager;
@@ -343,8 +344,11 @@ public class NoteFragment extends BaseFragment implements IContextHelper {
             showAlert(getContext(), "修改分组", groupAdapter,
                 (d, w) -> note.setGroup(groups.get(w)));
 
-            DaoStrategyHelper.getInstance().getNoteDao(getContext()).updateNote(note);
-            DaoStrategyHelper.getInstance().getNoteDao(getContext()).updateNote(note);
+            INoteDao noteDao = DaoStrategyHelper.getInstance().getNoteDao(getContext());
+            if (noteDao.updateNote(note) != DbStatusType.SUCCESS) {
+                showAlert(getActivity(), "错误", "更新笔记错误。");
+                return;
+            }
 
             NoteAdapter adapter = (NoteAdapter) m_noteListView.getAdapter();
             for (Note n : pageData.allNotes)
@@ -560,7 +564,10 @@ public class NoteFragment extends BaseFragment implements IContextHelper {
             INoteDao noteDao = DaoStrategyHelper.getInstance().getNoteDao(getContext());
 
             int idx = adapter.getNoteList().indexOf(note);
-            noteDao.deleteNote(note.getId());
+            if (noteDao.deleteNote(note.getId()) != DbStatusType.SUCCESS) {
+                showAlert(getActivity(), "错误", "删除笔记错误。");
+                return;
+            }
             adapter.getNoteList().remove(note);
 
             adapter.notifyDataSetChanged();

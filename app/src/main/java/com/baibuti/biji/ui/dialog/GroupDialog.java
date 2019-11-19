@@ -121,7 +121,7 @@ public class GroupDialog extends AlertDialog implements IContextHelper {
         IGroupDao groupDao = DaoStrategyHelper.getInstance().getGroupDao(activity);
         try {
             for (Group group : groupList) {
-                groupDao.updateGroup(group);
+                groupDao.updateGroup(group); // 只修改分组顺序
             }
         } catch (ServerException ex) {
             ex.printStackTrace();
