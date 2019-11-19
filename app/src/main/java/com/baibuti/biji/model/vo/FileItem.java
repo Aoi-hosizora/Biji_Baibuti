@@ -10,6 +10,11 @@ import lombok.Data;
 @Data
 public class FileItem implements Serializable {
 
+    /**
+     * 被选择
+     */
+    public static final int CHECKED = 1;
+
     private int tag;
 
     private String filePath;

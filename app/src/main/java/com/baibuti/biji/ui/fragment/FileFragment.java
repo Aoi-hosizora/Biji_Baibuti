@@ -1,17 +1,14 @@
 package com.baibuti.biji.ui.fragment;
 
 import android.app.ProgressDialog;
-import android.content.Intent;
-import android.net.Uri;
-import android.os.Build;
+import android.graphics.Bitmap;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.v4.content.FileProvider;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
@@ -28,11 +25,10 @@ import com.baibuti.biji.model.dao.daoInterface.IDocumentDao;
 import com.baibuti.biji.model.dto.ServerException;
 import com.baibuti.biji.model.po.DocClass;
 import com.baibuti.biji.service.auth.AuthManager;
+import com.baibuti.biji.service.wps.WpsService;
 import com.baibuti.biji.ui.IContextHelper;
 import com.baibuti.biji.ui.adapter.DocumentAdapter;
 import com.baibuti.biji.ui.adapter.DocClassAdapter;
-import com.baibuti.biji.model.dao.local.DocumentDao;
-import com.baibuti.biji.model.dao.local.DocClassDao;
 import com.baibuti.biji.model.po.Document;
 import com.baibuti.biji.model.vo.FileItem;
 import com.baibuti.biji.R;
@@ -40,13 +36,10 @@ import com.baibuti.biji.ui.activity.MainActivity;
 import com.baibuti.biji.ui.dialog.FileImportDialog;
 import com.baibuti.biji.ui.widget.listView.RecyclerViewEmptySupport;
 import com.baibuti.biji.util.imgTextUtil.SearchUtil;
-import com.baibuti.biji.util.otherUtil.DefineString;
+import com.baibuti.biji.util.otherUtil.CommonUtil;
 import com.baibuti.biji.util.otherUtil.LayoutUtil;
 import com.jwsd.libzxing.OnQRCodeScanCallback;
 import com.jwsd.libzxing.QRCodeManager;
-
-import org.json.JSONException;
-import org.json.JSONObject;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -72,9 +65,6 @@ public class FileFragment extends BaseFragment implements IContextHelper {
 
     @BindView(R.id.id_docclass_list_view)
     private ListView m_docClassListView;
-
-    // 标记导入的文件是否被选择
-    final private static int CHECKED = 1;
 
     private static class PageData {
 
@@ -144,7 +134,7 @@ public class FileFragment extends BaseFragment implements IContextHelper {
         DocumentAdapter documentAdapter = new DocumentAdapter(getContext());
         documentAdapter.setDocumentList(pageData.showDocumentList);
         documentAdapter.setOnDocumentClickListener(this::openDocument);
-        documentAdapter.setOnDocumentLongClickListener(this::deleteDocumentFromList);
+        documentAdapter.setOnDocumentLongClickListener(this::deleteDocumentFromList); // TODO
         m_documentListView.setLayoutManager(new LinearLayoutManager(getContext()));
         m_documentListView.setAdapter(documentAdapter);
 
@@ -234,7 +224,9 @@ public class FileFragment extends BaseFragment implements IContextHelper {
      * Toolbar 菜单点击事件
      */
     private Toolbar.OnMenuItemClickListener menuItemClickListener = (MenuItem item) -> {
+
         switch (item.getItemId()) {
+
             case R.id.action_new_fileclass:
                 addDocClass();
                 break;
@@ -244,14 +236,15 @@ public class FileFragment extends BaseFragment implements IContextHelper {
             case R.id.action_delete_fileclass:
                 deleteDocClass();
                 break;
+
             case R.id.action_import_documents:
-                importFileclass();
+                importDocumentIntoDocClass();
                 break;
             case R.id.action_share_documents:
-                shareDocuments();
+                shareTheWholeClassDocuments();
                 break;
             case R.id.action_scan_share_code:
-                scanShareCode();
+                scanShareCodeQrCode();
                 break;
         }
         return true;
@@ -424,62 +417,68 @@ public class FileFragment extends BaseFragment implements IContextHelper {
         }
     }
 
+    //////////////////////////////////////////////////////////////////////////////
+
     /**
      * 导入分组
      */
-    private void importFileclass(){
-        //导入资料
-        if(!m_txt_documentHeader.getText().toString().equals("")) {
+    private void importDocumentIntoDocClass() {
+        if (m_docClassListView.getSelectedItemPosition() != -1) {
+            DocClass docClass = pageData.docClassListItems.get(m_docClassListView.getSelectedItemPosition());
 
             List<FileItem> importedDocuments = new ArrayList<>();
 
             FileImportDialog cdd = new FileImportDialog(getActivity(), importedDocuments);
             cdd.setOnFinishScanListener(() -> {
-//                Toast.makeText(getContext(), importedDocuments.size() + "", Toast.LENGTH_LONG).show();
                 ProgressDialog progressDialog = showProgress(getActivity(), "上传中...", false, null);
+
+                IDocumentDao documentDao = DaoStrategyHelper.getInstance().getDocumentDao(getContext());
+
                 for (int i = 0; i < importedDocuments.size(); i++) {
 
                     FileItem f = importedDocuments.get(i);
-                    if (f.getTag() == CHECKED) {
-                        Document newDocument = new Document(f.getFileType(), f.getFileName(), f.getFilePath(), m_txt_documentHeader.getText().toString());
-                        activity.runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                documentListItems.add(newDocument);
-                            }
-                        });
-                        documentDao.insertDocument(newDocument);
+                    if (f.getTag() == FileItem.CHECKED) {
+                        Document newDocument = new Document(-1, f.getFilePath(), docClass);
+                        pageData.documentListItems.add(newDocument);
+                        pageData.showDocumentList.add(newDocument);
+                        try {
+                            documentDao.insertDocument(newDocument);
+                        } catch (ServerException ex) {
+                            ex.printStackTrace();
+                        }
                     }
                 }
-
                 progressDialog.dismiss();
                 m_documentListView.getAdapter().notifyDataSetChanged();
-                documentListsByClass.remove(lastPositionClicked);
-                documentListsByClass.add(lastPositionClicked, new ArrayList<>(documentListItems));
-                importedDocuments.clear();
             });
             cdd.show();
         }
     }
 
     /**
-     * 共享文档
+     * 共享整个分组的文档
      */
-    private void shareDocuments() {
+    private void shareTheWholeClassDocuments() {
 
-        if (m_txt_documentHeader.getText().toString().equals("")) {
-            Toast.makeText(getContext(), "未选择分类", Toast.LENGTH_SHORT).show();
+        if (m_docClassListView.getSelectedItemPosition() == -1) {
+            showToast(getContext(), "未选择文档分组");
             return;
         }
-        ProgressDialog progressDialog = showProgress(getActivity(), "生成共享码...", false, null);
         if (!AuthManager.getInstance().isLogin()) {
-            progressDialog.dismiss();
-            Toast.makeText(getContext(), "未登录，无法共享", Toast.LENGTH_SHORT).show();
+            showToast(getContext(), "未登录，无法共享");
             return;
         }
+
+        ProgressDialog progressDialog = showProgress(getActivity(), "生成共享码...", false, null);
 
         String shareCode = FileClassUtil.getShareCode(m_txt_documentHeader.getText().toString());
+        Bitmap qrCode = CommonUtil.generateQrCode(shareCode, 800, Color.BLACK);
         progressDialog.dismiss();
+
+        if (qrCode == null) {
+            showAlert(getContext(), "错误", "二维码生成错误。");
+            return;
+        }
 
         MainActivity activity = (MainActivity) getActivity();
         if (activity == null) return;
@@ -487,16 +486,15 @@ public class FileFragment extends BaseFragment implements IContextHelper {
         ImageView qrCodeImageView = new ImageView(getActivity());
         qrCodeImageView.setMinimumWidth(800);
         qrCodeImageView.setMinimumHeight(800);
-        qrCodeImageView.setImageDrawable(null); // TODO
+        qrCodeImageView.setImageBitmap(qrCode);
         showAlert(getActivity(), "共享二维码", qrCodeImageView, "返回", null);
-
     }
 
     /**
      * 扫描共享码
      */
-    private void scanShareCode() {
-        if(!AuthManager.getInstance().isLogin()){
+    private void scanShareCodeQrCode() {
+        if (!AuthManager.getInstance().isLogin()) {
             Toast.makeText(getContext(), "未登录", Toast.LENGTH_SHORT).show();
             return;
         }
@@ -507,9 +505,14 @@ public class FileFragment extends BaseFragment implements IContextHelper {
 
                 @Override
                 public void onCompleted(String shareCode) {
+
+                    // TODO api
+
                     showAlert(getActivity(),
                         "扫描结果", "添加共享文件？",
-                        "确认", (d, v) -> getSharedDocuments(shareCode),
+                        "确认", (d, v) -> {
+                            // TODO Api
+                        },
                         "取消", null
                     );
                 }
@@ -527,36 +530,6 @@ public class FileFragment extends BaseFragment implements IContextHelper {
     }
 
     // endregion
-
-    //////////////////////////////////////////////////////////////////////////////
-
-    private void getSharedDocuments(final String shareCode){
-        Log.e("测试", "shareCode: "+shareCode);
-        try {
-            JSONObject jsonObject = new JSONObject(shareCode);
-            final String username = jsonObject.getString("usr");
-            final String foldername = jsonObject.getString("folder");
-            new Thread(new Runnable() {
-                @Override
-                public void run() {
-                    try {
-                        DocumentUtil.getSharedFiles("?username=" + username + "&docClass="+foldername);
-                        activity.runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                refresh();
-                            }
-                        });
-                    }catch(ServerException e){
-                        e.printStackTrace();
-                    }
-                }
-            }).start();
-        }catch(JSONException e){
-            e.printStackTrace();
-        }
-
-    }
 
     /**
      * 调用wps打开文档
@@ -582,45 +555,8 @@ public class FileFragment extends BaseFragment implements IContextHelper {
             }
         }
 
-        try {
-            //下载完成并更新路径，打开
-            Intent intent = activity.getPackageManager().getLaunchIntentForPackage("cn.wps.moffice_eng");
-            if (intent == null)
-                throw new Exception();
-            Bundle bundle = new Bundle();
-            //打开模式
-            bundle.putString(DefineString.OPEN_MODE, DefineString.NORMAL);
-            bundle.putBoolean(DefineString.ENTER_REVISE_MODE, true);//以修订模式打开
-            //bundle.putString(DefineString.OPEN_MODE, DefineString.READ_ONLY);
-            bundle.putBoolean(DefineString.SEND_SAVE_BROAD, true);
-            bundle.putBoolean(DefineString.SEND_CLOSE_BROAD, true);
-            bundle.putBoolean(DefineString.HOME_KEY_DOWN, true);
-            bundle.putBoolean(DefineString.BACK_KEY_DOWN, true);
-            bundle.putBoolean(DefineString.ENTER_REVISE_MODE, true);
-            bundle.putBoolean(DefineString.IS_SHOW_VIEW, false);
-            bundle.putBoolean(DefineString.AUTO_JUMP, true);
-            //设置广播
-            bundle.putString(DefineString.THIRD_PACKAGE, activity.getPackageName());
-            intent.setAction(Intent.ACTION_VIEW);
-            Log.e("test", "openDocument: 设置action");
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-                Uri contentUri = FileProvider.getUriForFile(activity,
-                    "com.baibuti.biji.FileProvider", file);
-                intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
-                intent.addFlags(Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
-                intent.setDataAndType(contentUri, "*/*");
-            } else {
-                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                intent.setDataAndType(Uri.fromFile(file), "*/*");
-            }
-            Log.e("test", "openDocument: 即将发送");
-            intent.putExtras(bundle);
-            activity.startActivity(intent);
-        } catch (Exception ex) {
-            ex.printStackTrace();
-            showAlert(getActivity(), "错误", "打开文档错误。");
-        }
-
+        if (!WpsService.OpenDocumentThroughWPS(getActivity(), new File(document.getFilename())))
+            showAlert(getContext(), "错误", "打开文档错误。");
     }
 
     /**
@@ -644,49 +580,5 @@ public class FileFragment extends BaseFragment implements IContextHelper {
             },
             "取消", null
         );
-    }
-
-    /**
-     * 登录时刷新
-     */
-    private void refresh(){
-
-        ProgressDialog progressDialog = showProgress(getActivity(), "加载中...", false, null);
-
-        docClassListItems.clear();
-        documentListItems.clear();
-        documentListsByClass.clear();
-
-        docClassDao = new DocClassDao(activity);
-        documentDao = new DocumentDao(activity);
-
-        docClassListItems.addAll(docClassDao.queryAllDocClasses());
-        documentDao.pushpull();
-        for(DocClass f: docClassListItems){
-            if(!f.getName().equals("+")) {
-                List<Document> l = documentDao.queryDocumentByClassId(f.getName(), false);
-                if(null != l && l.size() != 0) {
-                    for (Document document : l)
-                        Log.e("测试", "refresh: " + document.getId() + ' ' +
-                            document.getDocName() + ' ' +
-                            document.getClassName() + '\n');
-                }
-                documentListsByClass.add(l);
-            }
-        }
-
-        if(!docClassListItems.get(docClassListItems.size() - 1).getName().equals("+")) {
-            DocClass temp = new DocClass("+", 0);
-            docClassListItems.add(docClassAdapter.getCount(), temp);
-        }
-
-        progressDialog.dismiss();
-
-        docClassAdapter.notifyDataSetChanged();
-        dealWithDocuments();
-        m_txt_documentHeader.setText("");
-        m_txt_unSelected.setVisibility(View.VISIBLE);
-        documentListItems.clear();
-
     }
 }
