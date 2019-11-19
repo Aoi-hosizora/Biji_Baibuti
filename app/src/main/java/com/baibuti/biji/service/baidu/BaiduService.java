@@ -1,7 +1,5 @@
 package com.baibuti.biji.service.baidu;
 
-import android.util.Log;
-
 import com.baibuti.biji.model.po.SearchItem;
 
 import org.jsoup.Jsoup;
@@ -126,9 +124,10 @@ public class BaiduService {
                     if (!url.contains("http://") && !url.contains("https://"))
                         throw new Exception();
 
-                    Log.e("", "addToParseBaiduRet: " + url);
+                    // Log.e("", "addToParseBaiduRet: " + url);
 
-                    searchItems.add(new SearchItem(title, content, getBaiduResultRealUrl(url)));
+                    searchItems.add(new SearchItem(title, content, url));
+                    // searchItems.add(new SearchItem(title, content, getBaiduResultRealUrl(url)));
                 }
                 catch (Exception ex) {
                     ex.printStackTrace();
@@ -143,33 +142,33 @@ public class BaiduService {
         return searchItems;
     }
 
-    /**
-     * 从 百度 Url 转换成 真正的 Url
-     * @param baiduUrl www.baidu.com/link? url=xxx & wd=xxx & eqid=xxx
-     */
-    private static String getBaiduResultRealUrl(String baiduUrl) {
-        OkHttpClient okHttpClient = new OkHttpClient.Builder()
-                .connectTimeout(TIME_CONN_1SEC, TimeUnit.SECONDS)
-                .readTimeout(TIME_READ_1SEC, TimeUnit.SECONDS)
-                .build();
+//    /**
+//     * 从 百度 Url 转换成 真正的 Url
+//     * @param baiduUrl www.baidu.com/link? url=xxx & wd=xxx & eqid=xxx
+//     */
+//    private static String getBaiduResultRealUrl(String baiduUrl) {
+//        OkHttpClient okHttpClient = new OkHttpClient.Builder()
+//                .connectTimeout(TIME_CONN_1SEC, TimeUnit.SECONDS)
+//                .readTimeout(TIME_READ_1SEC, TimeUnit.SECONDS)
+//                .build();
 
-        baiduUrl = baiduUrl.replace("http://", "https://");
-        try {
-            Request request = new Request.Builder()
-                .url(baiduUrl)
-                .addHeader("User-Agent", DEF_UserAgent)
-                .build();
+//        baiduUrl = baiduUrl.replace("http://", "https://");
+//        try {
+//            Request request = new Request.Builder()
+//                .url(baiduUrl)
+//                .addHeader("User-Agent", DEF_UserAgent)
+//                .build();
 
-            Response response = okHttpClient.newCall(request).execute();
-            return response.request().url().toString();
-        }
-        catch (SocketTimeoutException ex) {
-            ex.printStackTrace();
-            return baiduUrl;
-        }
-        catch (Exception ex) {
-            ex.printStackTrace();
-        }
-        return baiduUrl;
-    }
+//            Response response = okHttpClient.newCall(request).execute();
+//            return response.request().url().toString();
+//        }
+//        catch (SocketTimeoutException ex) {
+//            ex.printStackTrace();
+//            return baiduUrl;
+//        }
+//        catch (Exception ex) {
+//            ex.printStackTrace();
+//        }
+//        return baiduUrl;
+//    }
 }

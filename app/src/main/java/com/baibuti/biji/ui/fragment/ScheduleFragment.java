@@ -94,7 +94,7 @@ public class ScheduleFragment extends BaseFragment implements IContextHelper {
             if (activity != null) activity.openNavMenu();
         });
         m_toolbar.setOnMenuItemClickListener(menuItemClickListener);
-        // m_toolbar.setPopupTheme(R.style.popup_theme);
+        m_toolbar.setPopupTheme(R.style.popup_theme);
 
         // WeekView
         m_weekView.curWeek(1)

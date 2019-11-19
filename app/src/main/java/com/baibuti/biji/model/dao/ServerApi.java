@@ -79,13 +79,16 @@ public interface ServerApi {
     @GET("/note/{nid}")
     Observable<ResponseDTO<NoteDTO>> getNoteById(@Path("nid") int id);
 
+    // TODO 接口待改
     @NeedAuth
     @Multipart
     @POST("/note/")
     Observable<ResponseDTO<NoteDTO>> insertNote(
         @Part("title") String title,
         @Part("content") String content,
-        @Part("group_id") int groupId
+        @Part("group_id") int groupId,
+        @Part("create_time") String createTime,
+        @Part("update_time") String updateTime
     );
 
     @NeedAuth
@@ -113,6 +116,7 @@ public interface ServerApi {
 
     // region Group (7)
 
+    // TODO #A5A5A5
     @NeedAuth
     @GET("/group/")
     Observable<ResponseDTO<GroupDTO[]>> getAllGroups();

@@ -27,6 +27,7 @@ import android.widget.ListView;
 import android.widget.TextView;
 
 import com.baibuti.biji.model.dao.DaoStrategyHelper;
+import com.baibuti.biji.model.dao.daoInterface.INoteDao;
 import com.baibuti.biji.model.dto.ServerException;
 import com.baibuti.biji.service.auth.AuthManager;
 import com.baibuti.biji.ui.IContextHelper;
@@ -546,10 +547,24 @@ public class NoteFragment extends BaseFragment implements IContextHelper {
      */
     private void deleteNote(@NonNull Note note) {
         try {
-            DaoStrategyHelper.getInstance().getNoteDao(getContext()).deleteNote(note.getId());
             NoteAdapter adapter = (NoteAdapter) m_noteListView.getAdapter();
+            INoteDao noteDao = DaoStrategyHelper.getInstance().getNoteDao(getContext());
+
+            int idx = adapter.getNoteList().indexOf(note);
+            noteDao.deleteNote(note.getId());
             adapter.getNoteList().remove(note);
+
             adapter.notifyDataSetChanged();
+            showSnackbar(view, "删除成功：\"" + note.getTitle() + "\"", "撤销", (v) -> {
+                try {
+                    noteDao.insertNote(note);
+                    adapter.getNoteList().add(idx, note);
+                    adapter.notifyDataSetChanged();
+                    showSnackBar(view, "恢复笔记：\"" + note.getTitle() + "\"");
+                } catch (ServerException ex) {
+                    showAlert(getContext(), "错误", "撤销笔记删除错误：" + ex.getMessage());
+                }
+            });
         } catch (ServerException ex) {
             showAlert(getContext(), "错误", "删除笔记错误：" + ex.getMessage());
         }

@@ -20,7 +20,7 @@ public class Group implements Serializable, Comparable<Group> {
     private String color;
 
     private static String DEF_GROUP_NAME = "默认分组";
-    private static String DEF_GROUP_COLOR = "#F0F0F0";
+    private static String DEF_GROUP_COLOR = "#A5A5A5";
 
     /**
      * 默认分组

@@ -77,7 +77,7 @@ public class AppPathUtil {
      */
     private static String mkdirAndGetDir(String path) {
         File file = new File(path);
-        if (!file.exists() && file.mkdirs())
+        if (file.exists() || (!file.exists() && file.mkdirs()))
             return path;
         return "";
     }

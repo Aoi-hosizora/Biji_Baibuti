@@ -12,6 +12,8 @@ import android.support.annotation.Nullable;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ArrayAdapter;
+import android.widget.Spinner;
 
 import com.baibuti.biji.model.dto.ServerException;
 import com.baibuti.biji.service.auth.AuthManager;
@@ -21,7 +23,10 @@ import com.baibuti.biji.service.auth.dto.AuthRespDTO;
 import com.baibuti.biji.ui.activity.AuthActivity;
 import com.baibuti.biji.ui.IContextHelper;
 
+import java.util.Arrays;
+import java.util.LinkedHashMap;
 import java.util.Locale;
+import java.util.Map;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -42,6 +47,9 @@ public class LoginFragment extends Fragment implements IContextHelper {
 
     @BindView(R.id.loginFrag_edt_password)
     TextInputEditText m_PasswordEditText;
+
+    @BindView(R.id.loginFrag_spinner_ex)
+    Spinner m_ExSpinner;
 
     @Nullable
     @Override
@@ -67,7 +75,26 @@ public class LoginFragment extends Fragment implements IContextHelper {
     private void initView() {
         if (AuthManager.getInstance().isLogin())
             m_LoginEditText.setText(AuthManager.getInstance().getUsername());
+        AuthActivity activity = (AuthActivity) getActivity();
+        if (activity != null) {
+            ArrayAdapter<String> spinnerAdapter = new ArrayAdapter<>(activity, R.layout.layout_login_spinner, exTexts);
+            m_ExSpinner.setAdapter(spinnerAdapter);
+            m_ExSpinner.setSelection(Arrays.asList(exTexts).indexOf("30天"), true);
+        }
     }
+
+    private Map<String, Integer> exTextNumbers = new LinkedHashMap<String, Integer>() {{
+        put("1天", 1);
+        put("2天", 2);
+        put("3天", 3);
+        put("7天", 7);
+        put("15天", 15);
+        put("30天", 30);
+        put("45天", 45);
+        put("60天", 60);
+    }};
+
+    private String[] exTexts = exTextNumbers.keySet().toArray(new String[0]);
 
     /**
      * 登录按钮
@@ -87,13 +114,16 @@ public class LoginFragment extends Fragment implements IContextHelper {
             return;
         }
 
+        int exp = exTextNumbers.get(exTexts[m_ExSpinner.getSelectedItemPosition()]);
+        exp *= 24 * 3600;
+
         ProgressDialog progressDialog =
             showProgress(getContext(),
                 String.format(Locale.CHINA, "用户 \"%s\" 登录中，请稍后...", username),
                 true, null);
 
         try {
-            AuthRespDTO auth = AuthService.login(username, password);
+            AuthRespDTO auth = AuthService.login(username, password, exp);
 
             progressDialog.dismiss();
             showToast(getContext(), String.format(Locale.CHINA, "用户 \"%s\" 登录成功", auth.getUsername()));

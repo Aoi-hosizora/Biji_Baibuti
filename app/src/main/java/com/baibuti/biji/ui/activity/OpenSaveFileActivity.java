@@ -7,6 +7,7 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.support.v7.app.AppCompatActivity;
 import android.text.Editable;
+import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
@@ -207,6 +208,7 @@ public class OpenSaveFileActivity extends AppCompatActivity implements View.OnCl
      * @param dir
      */
     private void setupDirList(String dir) {
+        Log.i("===", "setupDirList: " + dir);
         File dirFile = new File(dir);
         if (!dirFile.exists() || !dirFile.isDirectory()) {
             dir = m_sdcardDirectory;

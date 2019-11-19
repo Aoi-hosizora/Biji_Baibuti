@@ -2,7 +2,6 @@ package com.baibuti.biji.ui.adapter;
 
 import android.content.Context;
 import android.support.annotation.NonNull;
-import android.support.v7.widget.RecyclerView;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -20,7 +19,7 @@ import com.baibuti.biji.ui.widget.listView.RecyclerViewEmptySupport;
 import java.util.ArrayList;
 import java.util.List;
 
-public class SearchItemAdapter extends RecyclerView.Adapter<SearchItemAdapter.ViewHolder>
+public class SearchItemAdapter extends RecyclerViewEmptySupport.Adapter<SearchItemAdapter.ViewHolder>
     implements View.OnClickListener, View.OnLongClickListener {
 
     private Context context;

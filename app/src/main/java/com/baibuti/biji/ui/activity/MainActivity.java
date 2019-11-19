@@ -57,7 +57,7 @@ public class MainActivity extends FragmentActivity implements IContextHelper, Au
     @BindView(R.id.mainAct_view_left_nav)
     NavigationView m_navigationView;
 
-    // 权限请求：读写，网络，摄像机，震动
+    // 权限请求：读写，网络，摄像机
     private static final String[] ALL_PERMISSION = {
         Manifest.permission.READ_EXTERNAL_STORAGE,
         Manifest.permission.WRITE_EXTERNAL_STORAGE,
@@ -285,6 +285,7 @@ public class MainActivity extends FragmentActivity implements IContextHelper, Au
     private NavigationView.OnNavigationItemSelectedListener navigationItemSelectedListener = (@NonNull MenuItem item) -> {
         switch (item.getItemId()) {
             case R.id.nav_left_login:
+                m_navigationView.setCheckedItem(R.id.nav_left_main);
                 Nav_Login_Selected();
                 break;
             case R.id.nav_left_about:

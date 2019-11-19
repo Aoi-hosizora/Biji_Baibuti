@@ -43,7 +43,7 @@ public class AuthService {
         return login(username, password, 0);
     }
 
-    private synchronized static AuthRespDTO login(String username, String password, int expiration) throws ServerException {
+    public synchronized static AuthRespDTO login(String username, String password, int expiration) throws ServerException {
         Observable<Response<ResponseDTO<AuthRespDTO>>> observable = RetrofitFactory.getInstance()
             .createRequest(RetrofitFactory.getHeader())
             .login(username, password, expiration)

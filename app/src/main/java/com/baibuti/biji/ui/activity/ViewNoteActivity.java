@@ -118,7 +118,7 @@ public class ViewNoteActivity extends AppCompatActivity implements IContextHelpe
             case android.R.id.home:
                 ToolbarCancelSaveBack_Clicked();
                 break;
-            case R.id.id_menu_modifynote_info:
+            case R.id.id_menu_modifynote_viewinfo:
                 ToolbarShowInfo_Clicked();
                 break;
             case R.id.id_menu_modifynote_sharenote:
@@ -196,7 +196,7 @@ public class ViewNoteActivity extends AppCompatActivity implements IContextHelpe
     private void ToolbarShowInfo_Clicked() {
         final String info =
             "笔记标题：" + currNote.getTitle() + "\n" +
-            "笔记内容长度：" + currNote.getContent().length() + "\n" +
+            "笔记内容长度：" + currNote.getContent().length() + " 个字符\n" +
             "创建时间：" + currNote.getCreateTime_FullString() + "\n" +
             "最近修改时间：" + currNote.getUpdateTime_FullString() + "\n\n" +
             "笔记分组：" + currNote.getGroup().getName();
@@ -232,7 +232,7 @@ public class ViewNoteActivity extends AppCompatActivity implements IContextHelpe
         choosePathIntent.putExtra("FileFilterType", "docx|pdf");
 
         // 返回含后缀名的文件名，并且单独返回后缀名
-        choosePathIntent.putExtra("isReturnType", "true");
+        choosePathIntent.putExtra("isReturnType", true);
 
         // 打开选择文件名与类型
         RxActivityResult.on(this).startIntent(choosePathIntent)
@@ -249,9 +249,9 @@ public class ViewNoteActivity extends AppCompatActivity implements IContextHelpe
                     if (!path.isEmpty()) {
                         boolean saveAsDocx = !".pdf".equals(type);
 
-                        String msg = String.format(Locale.CHINA, "确定将笔记保存为 %s 类型，并保存在以下路径吗？\\n%s", type, path);
+                        String msg = String.format(Locale.CHINA, "确定将笔记保存为 %s 类型，并保存在以下路径吗？\n%s", type, path);
                         if (!saveAsDocx)
-                            msg += "\\n(提醒：PDF 格式对符号支持不好)";
+                            msg += "\n(提醒：PDF 格式对符号支持不好)";
 
                         showAlert(this,
                             "保存为文件", msg,

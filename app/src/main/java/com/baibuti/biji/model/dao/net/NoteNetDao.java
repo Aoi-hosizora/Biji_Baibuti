@@ -158,7 +158,8 @@ public class NoteNetDao implements INoteDao {
 
         Observable<ResponseDTO<NoteDTO>> observable = RetrofitFactory.getInstance()
             .createRequest(AuthManager.getInstance().getAuthorizationHead())
-            .insertNote(note.getTitle(), note.getContent(), note.getGroup().getId())
+            .insertNote(note.getTitle(), note.getContent(), note.getGroup().getId(),
+                note.getCreateTime_FullString(), note.getUpdateTime_FullString())
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread());
 

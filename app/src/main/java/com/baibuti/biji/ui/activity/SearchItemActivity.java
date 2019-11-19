@@ -46,8 +46,6 @@ public class SearchItemActivity extends AppCompatActivity implements IContextHel
 
     private Dialog m_LongClickItemPopupMenu;
 
-    private SearchItemAdapter searchItemAdapter;
-
     /**
      * 存储页面信息
      */
@@ -111,7 +109,7 @@ public class SearchItemActivity extends AppCompatActivity implements IContextHel
         layoutManager.setOrientation(LinearLayoutManager.VERTICAL);
         m_list_star.setLayoutManager(layoutManager);
 
-        searchItemAdapter = new SearchItemAdapter(this);
+        SearchItemAdapter searchItemAdapter = new SearchItemAdapter(this);
         searchItemAdapter.setSearchItems(pageData.currentList);
         searchItemAdapter.setOnItemClickListener(new SearchItemAdapter.OnRecyclerViewItemClickListener() {
             @Override
@@ -124,7 +122,17 @@ public class SearchItemActivity extends AppCompatActivity implements IContextHel
         });
         searchItemAdapter.setOnItemLongClickListener((View view, SearchItem searchItem) -> ListItem_LongClicked(searchItem));
 
-        updateTitle();
+        m_list_star.setAdapter(searchItemAdapter);
+
+        refreshListData(null);
+    }
+
+    @Override
+    public void onBackPressed() {
+        if (pageData.pageState == PageData.PageState.SEARCHING)
+            refreshListData(null);
+        else
+            finish();
     }
 
     /**
@@ -148,16 +156,18 @@ public class SearchItemActivity extends AppCompatActivity implements IContextHel
 
             ISearchItemDao searchItemDao = DaoStrategyHelper.getInstance().getSearchDao(this);
             try {
-                pageData.currentList = searchItemDao.queryAllSearchItems();
-                searchItemAdapter.notifyDataSetChanged();
-                pageData.pageState = PageData.PageState.SEARCHING;
+                pageData.currentList.clear();
+                pageData.currentList.addAll(searchItemDao.queryAllSearchItems());
+                m_list_star.getAdapter().notifyDataSetChanged();
+                pageData.pageState = PageData.PageState.NORMAL;
             } catch (ServerException ex) {
                 showAlert(this, "错误", ex.getMessage());
             }
         } else { // 加载搜索结果
-            pageData.currentList = searchItems;
-            searchItemAdapter.notifyDataSetChanged();
-            pageData.pageState = PageData.PageState.NORMAL;
+            pageData.currentList.clear();
+            pageData.currentList.addAll(searchItems);
+            m_list_star.getAdapter().notifyDataSetChanged();
+            pageData.pageState = PageData.PageState.SEARCHING;
         }
 
         // 更新标题
@@ -185,7 +195,7 @@ public class SearchItemActivity extends AppCompatActivity implements IContextHel
                 FindSearch_Clicked();
                 break;
             case android.R.id.home:
-                finish();
+                onBackPressed();
                 break;
         }
         return true;
@@ -236,6 +246,8 @@ public class SearchItemActivity extends AppCompatActivity implements IContextHel
      * 取消收藏
      */
     private void SearchItem_CancelStarClick(SearchItem searchItem) {
+        m_LongClickItemPopupMenu.dismiss();
+
         ISearchItemDao searchItemDao = DaoStrategyHelper.getInstance().getSearchDao(this);
         try {
              if (!searchItemDao.deleteSearchItem(searchItem.getId())) {
@@ -243,7 +255,7 @@ public class SearchItemActivity extends AppCompatActivity implements IContextHel
              } else {
                  Toast.makeText(SearchItemActivity.this, String.format("取消收藏 \"%s\" 成功", searchItem.getTitle()), Toast.LENGTH_SHORT).show();
                  pageData.currentList.remove(searchItem);
-                 searchItemAdapter.notifyDataSetChanged();
+                 m_list_star.getAdapter().notifyDataSetChanged();
              }
         } catch (ServerException ex) {
             ex.printStackTrace();
@@ -255,6 +267,8 @@ public class SearchItemActivity extends AppCompatActivity implements IContextHel
      * 取消全部收藏
      */
     private void SearchItem_CancelAllStarClick() {
+        m_LongClickItemPopupMenu.dismiss();
+
         showAlert(this,
             "提示", "确定要取消全部收藏吗？",
             "确定", (d, w) -> {
@@ -264,7 +278,8 @@ public class SearchItemActivity extends AppCompatActivity implements IContextHel
                     if (deleteLen == pageData.currentList.size()) {
                         showToast(this, String.format(Locale.CHINA, "成功取消收藏 %d 项", deleteLen));
                         pageData.currentList.clear();
-                        searchItemAdapter.notifyDataSetChanged();
+                        m_list_star.getAdapter().notifyDataSetChanged();
+                        updateTitle();
                     } else {
                         showToast(this, "取消全部收藏失败");
                         // 返回全部收藏

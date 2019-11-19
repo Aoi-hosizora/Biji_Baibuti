@@ -427,17 +427,30 @@ public class EditNoteActivity extends AppCompatActivity implements IContextHelpe
             );
         }
         else {
-            final String info =
-                "笔记标题："     + currNote.getTitle()                   + "\n" +
-                "笔记内容长度：" + currNote.getContent().length()        + "\n" +
-                "创建时间："     + currNote.getCreateTime_FullString()   + "\n" +
-                "最近修改时间：" + currNote.getUpdateTime_FullString()   + "\n\n" +
-                "笔记分组："     + currNote.getGroup().getName();
-
-            String modifyFlag = checkIsNoteModify() ? " (已修改)" : "";
+            String title, info;
+            if (!checkIsNoteModify()) {
+                info =
+                    "笔记标题："     + currNote.getTitle()                   + "\n" +
+                    "笔记内容长度：" + currNote.getContent().length()        + " 个字符\n" +
+                    "创建时间："     + currNote.getCreateTime_FullString()   + "\n" +
+                    "最近修改时间：" + currNote.getUpdateTime_FullString()   + "\n\n" +
+                    "笔记分组："     + currNote.getGroup().getName();
+                title = "笔记信息";
+            } else {
+                info =
+                    "笔记标题："             + m_txt_title.getText()                           + "\n" +
+                    "笔记内容长度："         + getRichTextContent(m_rich_content).length()     + " 个字符\n" +
+                    "笔记分组："             + m_txt_group.getText()                          + "\n" +
+                    "创建时间："             + currNote.getCreateTime_FullString()            + "\n" +
+                    "最近修改时间："         + currNote.getUpdateTime_FullString()            + "\n\n" +
+                    "初始笔记标题："         + currNote.getTitle()                            + "\n" +
+                    "初始笔记内容长度："      + currNote.getContent().length()                 + "\n" +
+                    "笔记分组："             + currNote.getGroup().getName();
+                title = "笔记信息 (已修改)";
+            }
 
             showAlert(this,
-                "笔记信息" + modifyFlag, info,
+                title, info,
                 "复制", (dialog, which) -> {
                 if (CommonUtil.copyText(this, info))
                     showToast(this, "信息复制成功");

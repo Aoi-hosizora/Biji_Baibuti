@@ -54,6 +54,32 @@
                 android:imeOptions="actionSend"/>
         </android.support.design.widget.TextInputLayout>
 
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginTop="12dp"
+            android:layout_marginBottom="5dp"
+            android:layout_marginStart="4dp"
+            android:layout_marginEnd="4dp" >
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:textSize="18sp"
+                android:layout_gravity="center"
+                android:textColor="@color/grey_500"
+                android:text="保持登录状态：" />
+
+            <Spinner
+                android:id="@+id/loginFrag_spinner_ex"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center" />
+
+        </LinearLayout>
+
     </LinearLayout>
 
     <Button

@@ -42,7 +42,7 @@
 
             <!-- 空内容提醒，不能放在 SwipeRefreshLayout 内 -->
             <include
-                layout="@layout/layout_recycleview_empty_view"
+                layout="@layout/layout_recycler_view_empty"
                 android:id="@+id/note_emptylist"
                 android:visibility="gone"/>
 

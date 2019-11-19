@@ -32,6 +32,7 @@ import com.baibuti.biji.ui.widget.listView.RecyclerViewEmptySupport;
 import com.baibuti.biji.util.otherUtil.LayoutUtil;
 import com.baibuti.biji.service.baidu.BaiduService;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
@@ -51,8 +52,6 @@ public class SearchFragment extends BaseFragment implements IContextHelper {
 
     private Dialog m_itemPopupMenu;
 
-    private SearchItemAdapter searchItemAdapter;
-
     /**
      * 页面数据记录
      */
@@ -62,12 +61,12 @@ public class SearchFragment extends BaseFragment implements IContextHelper {
         /**
          * 当前所有列表
          */
-        List<SearchItem> searchList;
+        List<SearchItem> searchList = new ArrayList<>();
 
         /**
          * 当前搜索中的问题
          */
-        String currentQuestion;
+        String currentQuestion = "";
 
         /**
          * 当前百度搜索的结果
@@ -130,17 +129,17 @@ public class SearchFragment extends BaseFragment implements IContextHelper {
 
         ////////////////
 
+        // EmptyView:
+        View ListEmptyView = view.findViewById(R.id.id_SearchFrag_SearchRetList_EmptyView);
+        m_list_result.setEmptyView(ListEmptyView);
+
         // LayoutMgr:
         m_list_result.addItemDecoration(new SpacesItemDecoration(0));
         StaggeredGridLayoutManager layoutManager = new StaggeredGridLayoutManager(2, StaggeredGridLayoutManager.VERTICAL);
         m_list_result.setLayoutManager(layoutManager);
 
-        // EmptyView:
-        View ListEmptyView = view.findViewById(R.id.id_SearchFrag_SearchRetList_EmptyView);
-        m_list_result.setEmptyView(ListEmptyView);
-
         // Adapter:
-        searchItemAdapter = new SearchItemAdapter(getContext());
+        SearchItemAdapter searchItemAdapter = new SearchItemAdapter(getContext());
         searchItemAdapter.setSearchItems(pageData.searchList);
         searchItemAdapter.notifyDataSetChanged();
         searchItemAdapter.setOnItemClickListener(new SearchItemAdapter.OnRecyclerViewItemClickListener() {
@@ -197,7 +196,8 @@ public class SearchFragment extends BaseFragment implements IContextHelper {
             true, (d) -> isSearching[0] = false);
 
         new Thread(() -> {
-            pageData.searchList = BaiduService.getBaiduSearchResult(pageData.currentQuestion, 1);
+            pageData.searchList.clear();
+            pageData.searchList.addAll(BaiduService.getBaiduSearchResult(pageData.currentQuestion, 1));
             MainActivity activity = (MainActivity) getActivity();
             if (activity != null) {
                 activity.runOnUiThread(() -> {
@@ -210,11 +210,10 @@ public class SearchFragment extends BaseFragment implements IContextHelper {
                     showToast(getActivity(), String.format(Locale.CHINA, "共获取了 %d 条搜索结果", pageData.searchList.size()));
                     pageData.searchList.remove(SearchItem.MORE_ITEM);
                     pageData.searchList.add(SearchItem.MORE_ITEM);
-                    searchItemAdapter.notifyDataSetChanged();
+                    m_list_result.getAdapter().notifyDataSetChanged();
                 });
             }
         }).start();
-
     }
 
     /**
@@ -242,11 +241,14 @@ public class SearchFragment extends BaseFragment implements IContextHelper {
             List<SearchItem> newSearchItems = BaiduService.getBaiduSearchResult(pageData.currentQuestion, ++pageData.currentPage);
             pageData.searchList.addAll(newSearchItems);
 
-            showToast(getActivity(), String.format(Locale.CHINA, "共新增了 %d 条搜索结果", pageData.searchList.size()));
-            pageData.searchList.remove(SearchItem.MORE_ITEM);
-            pageData.searchList.add(SearchItem.MORE_ITEM);
-            searchItemAdapter.notifyDataSetChanged();
-
+            MainActivity activity = (MainActivity) getActivity();
+            if (activity != null)
+                activity.runOnUiThread(() -> {
+                    showToast(getActivity(), String.format(Locale.CHINA, "共新增了 %d 条搜索结果", newSearchItems.size()));
+                    pageData.searchList.remove(SearchItem.MORE_ITEM);
+                    pageData.searchList.add(SearchItem.MORE_ITEM);
+                    m_list_result.getAdapter().notifyDataSetChanged();
+                });
         }).start();
     }
 
@@ -264,8 +266,8 @@ public class SearchFragment extends BaseFragment implements IContextHelper {
         root.findViewById(R.id.id_SearchFrag_PopupMenu_Star).setOnClickListener((v) -> SearchItem_StarClick(searchItem));
         root.findViewById(R.id.id_SearchFrag_PopupMenu_Cancel).setOnClickListener((v) -> m_itemPopupMenu.dismiss());
         root.findViewById(R.id.id_SearchFrag_PopupMenu_More).setOnClickListener((v) -> {
-            MoreSearchButton_Click();
             m_itemPopupMenu.dismiss();
+            MoreSearchButton_Click();
         });
 
         TextView label = root.findViewById(R.id.id_SearchFrag_PopupMenu_Label);
@@ -287,6 +289,7 @@ public class SearchFragment extends BaseFragment implements IContextHelper {
      * 弹出菜单 收藏点击
      */
     private void SearchItem_StarClick(SearchItem searchItem) {
+        m_itemPopupMenu.dismiss();
 
         ISearchItemDao searchItemDao = DaoStrategyHelper.getInstance().getSearchDao(getActivity());
         try {
@@ -296,14 +299,14 @@ public class SearchFragment extends BaseFragment implements IContextHelper {
                     showToast(getActivity(), String.format(Locale.CHINA, "收藏 %s 成功", searchItem.getTitle()));
                 else
                     showToast(getActivity(), String.format(Locale.CHINA, "收藏 %s 失败", searchItem.getTitle()));
-                searchItemAdapter.notifyDataSetChanged();
+                m_list_result.getAdapter().notifyDataSetChanged();
             } else {
                 // 取消收藏
                 if (searchItemDao.deleteSearchItem(searchItem.getId()))
                     showToast(getActivity(), String.format(Locale.CHINA, "取消收藏 %s 成功", searchItem.getTitle()));
                 else
                     showToast(getActivity(), String.format(Locale.CHINA, "取消收藏 %s 失败", searchItem.getTitle()));
-                searchItemAdapter.notifyDataSetChanged();
+                m_list_result.getAdapter().notifyDataSetChanged();
             }
         } catch (ServerException ex) {
             ex.printStackTrace();
