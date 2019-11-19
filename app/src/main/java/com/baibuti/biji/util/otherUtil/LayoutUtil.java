@@ -4,6 +4,7 @@ import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.Dialog;
 import android.content.Context;
+import android.graphics.Color;
 import android.support.annotation.Nullable;
 import android.support.design.internal.BottomNavigationItemView;
 import android.support.design.internal.BottomNavigationMenuView;
@@ -13,10 +14,12 @@ import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
+import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.LinearLayout;
+import android.widget.SearchView;
 
 import java.lang.reflect.Field;
 
@@ -92,5 +95,21 @@ public class LayoutUtil {
         ViewGroup.LayoutParams params = navigationView.getLayoutParams();
         params.width = (int) (metrics.widthPixels * rate);
         navigationView.setLayoutParams(params);
+    }
+
+    /**
+     * 去除 SearchView 下划线
+     * @param searchView
+     */
+    public static void AdjustSearchViewLayout(SearchView searchView) {
+        try {
+            Class<?> argClass = searchView.getClass();
+            Field ownField = argClass.getDeclaredField("mSearchPlate");
+            ownField.setAccessible(true);
+            View mView = (View) ownField.get(searchView);
+            mView.setBackgroundColor(Color.TRANSPARENT);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 }

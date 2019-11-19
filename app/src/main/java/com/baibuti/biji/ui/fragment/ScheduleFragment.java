@@ -200,7 +200,9 @@ public class ScheduleFragment extends BaseFragment implements IContextHelper {
         // save
         IScheduleDao scheduleDao = DaoStrategyHelper.getInstance().getScheduleDao(getActivity());
         try {
-            scheduleDao.updateSchedule(MySubject.toJsons(mySubjects));
+            if (!scheduleDao.updateSchedule(MySubject.toJsons(mySubjects))) {
+                showAlert(getActivity(), "错误", "课程表更新失败");
+            }
         } catch (ServerException ex) {
             ex.printStackTrace();
             showAlert(getActivity(), "错误", ex.getMessage());

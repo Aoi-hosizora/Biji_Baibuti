@@ -92,11 +92,12 @@ public class SearchFragment extends BaseFragment implements IContextHelper {
             initView();
 
             AuthManager.getInstance().addLoginChangeListener(new AuthManager.OnLoginChangeListener() {
-                @Override
-                public void onLogin(String username) { }
 
                 @Override
-                public void onLogout() { }
+                public void onLogin(String username) { m_list_result.getAdapter().notifyDataSetChanged(); }
+
+                @Override
+                public void onLogout() { m_list_result.getAdapter().notifyDataSetChanged(); }
             });
 
         }

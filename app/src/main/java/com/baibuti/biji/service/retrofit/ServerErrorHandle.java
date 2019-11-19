@@ -41,6 +41,7 @@ public class ServerErrorHandle {
 
         switch (responseDTO.getMessage()) {
             // Global
+            case "Request Param Error":
             case "Request Query Param Error":
             case "Request Route Param Error":
             case "Request From Data Param Error":

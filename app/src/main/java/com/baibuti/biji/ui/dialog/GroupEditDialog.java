@@ -135,10 +135,10 @@ public class GroupEditDialog extends AlertDialog implements IContextHelper {
             if (currGroup == null) { // 新建
                 DbStatusType status = groupDao.insertGroup(new Group(newGroupName, newGroupColor));
                 if (status == DbStatusType.FAILED) {
-                    showAlert(activity, "错误", "新建分组错误");
+                    showAlert(activity, "错误", "新建分组错误。");
                     return;
                 } else if (status == DbStatusType.DUPLICATED) {
-                    showAlert(activity, "错误", "分组名重复，请检查");
+                    showAlert(activity, "错误", "分组名 \"" + newGroupName + "\" 重复，请检查。");
                     return;
                 }
             } else { // 更新
@@ -147,7 +147,7 @@ public class GroupEditDialog extends AlertDialog implements IContextHelper {
                     showAlert(activity, "错误", "新建分组错误。");
                     return;
                 } else if (status == DbStatusType.DUPLICATED) {
-                    showAlert(activity, "错误", "分组名重复，请检查。");
+                    showAlert(activity, "错误", "分组名 \"" + newGroupName + "\" 重复，请检查。");
                     return;
                 } else if (status == DbStatusType.DEFAULT) {
                     showAlert(activity, "错误", "不允许修改默认分组名。");

@@ -79,7 +79,6 @@ public interface ServerApi {
     @GET("/note/{nid}")
     Observable<ResponseDTO<NoteDTO>> getNoteById(@Path("nid") int id);
 
-    // TODO 接口待改
     @NeedAuth
     @Multipart
     @POST("/note/")

@@ -7,8 +7,6 @@
     android:clipToPadding="true"
     android:fitsSystemWindows="true">
 
-
-
     <android.support.v7.widget.Toolbar
         android:id="@+id/tab_file_toolbar"
         android:layout_width="0dp"
@@ -22,7 +20,7 @@
         app:layout_constraintTop_toTopOf="parent" />
 
     <SearchView
-        android:id="@+id/filefragment_filesearch"
+        android:id="@+id/id_view_file_search"
         android:layout_width="match_parent"
         android:layout_height="42dp"
         android:layout_marginStart="10dp"
@@ -42,10 +40,10 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/filefragment_filesearch">
+        app:layout_constraintTop_toBottomOf="@+id/id_view_file_search">
 
         <ListView
-            android:id="@+id/filefragment_fileclasses"
+            android:id="@+id/id_docclass_list_view"
             android:layout_width="180dp"
             android:layout_height="match_parent"
             android:layout_weight="3"
@@ -58,7 +56,7 @@
             android:layout_weight="3">
 
             <TextView
-                android:id="@+id/filefragment_document_list_header"
+                android:id="@+id/id_txt_document_list_head"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="8dp"
@@ -69,7 +67,7 @@
                 app:layout_constraintTop_toTopOf="parent" />
 
             <android.support.v7.widget.RecyclerView
-                android:id="@+id/filefragment_document_list"
+                android:id="@+id/id_document_list_view"
                 android:layout_width="0dp"
                 android:layout_height="0dp"
                 android:layout_marginTop="8dp"
@@ -77,14 +75,14 @@
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/filefragment_document_list_header" />
+                app:layout_constraintTop_toBottomOf="@+id/id_txt_document_list_head" />
 
             <TextView
-                android:id="@+id/filefragment_document_unselected"
+                android:id="@+id/id_txt_document_unselected_hint"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="8dp"
-                android:text="@string/Filefragment_UnselectedText"
+                android:text="@string/FileFragment_UnselectedText"
                 android:textSize="18sp"
                 android:visibility="gone"
                 app:layout_constraintBottom_toBottomOf="parent"
@@ -93,27 +91,6 @@
                 app:layout_constraintTop_toTopOf="parent" />
 
         </android.support.constraint.ConstraintLayout>
-
-    </LinearLayout>
-
-    <LinearLayout
-        android:id="@+id/filefragment_search_result"
-        android:layout_width="0dp"
-        android:layout_height="0dp"
-        android:layout_marginTop="6dp"
-        android:background="@android:drawable/screen_background_dark_transparent"
-        android:orientation="vertical"
-        android:visibility="gone"
-        android:descendantFocusability="afterDescendants"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/filefragment_filesearch">
-
-        <android.support.v7.widget.RecyclerView
-            android:id="@+id/filefragment_serachresultlist"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent" />
 
     </LinearLayout>
 

@@ -21,6 +21,10 @@ public class DocClass implements Serializable {
         this(0, DEF_CLASS_NAME);
     }
 
+    public DocClass(String name) {
+        this(0, name);
+    }
+
     public DocClass(int id, String name) {
         this.id = id;
         this.name = name;

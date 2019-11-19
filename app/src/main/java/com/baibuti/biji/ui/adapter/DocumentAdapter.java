@@ -29,10 +29,6 @@ public class DocumentAdapter extends RecyclerView.Adapter<DocumentAdapter.ViewHo
         this.documentList = documentList;
     }
 
-    // public List<Document> getDocumentList() {
-    //     return documentList;
-    // }
-
     //////
 
     public interface OnDocumentClickListener {

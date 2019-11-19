@@ -8,6 +8,7 @@ import android.content.Intent;
 import android.net.Uri;
 import android.support.design.widget.Snackbar;
 import android.view.View;
+import android.widget.EditText;
 import android.widget.ListAdapter;
 import android.widget.Toast;
 
@@ -76,6 +77,63 @@ public interface IContextHelper {
             .setNegativeButton(negText, negListener)
             .setNeutralButton(neuText, neuListener)
             .show();
+    }
+
+    /**
+     * showInputDialog 提交文本
+     */
+    interface OnInputDialogClickListener {
+        void onClick(DialogInterface dialog, int which, String content);
+    }
+
+    /**
+     * AlertDialog: 标题 + View + Pos
+     */
+    default void showAlert(Context context,
+                           CharSequence title, View view,
+                           CharSequence posText, DialogInterface.OnClickListener posListener) {
+        new AlertDialog.Builder(context)
+            .setTitle(title)
+            .setView(view)
+            .setPositiveButton(posText, posListener)
+            .create().show();
+    }
+
+    /**
+     * AlertDialog: 标题 + View + Pos + Neg
+     */
+    default void showAlert(Context context,
+                           CharSequence title, View view,
+                           CharSequence posText, DialogInterface.OnClickListener posListener,
+                           CharSequence negText, DialogInterface.OnClickListener negListener) {
+        new AlertDialog.Builder(context)
+            .setTitle(title)
+            .setView(view)
+            .setPositiveButton(posText, posListener)
+            .setNegativeButton(negText, negListener)
+            .create().show();
+    }
+
+    /**
+     * AlertDialog: 标题 + EditText + Pos + Neg
+     */
+    default void showInputDialog(Context context,
+                                 CharSequence title, CharSequence text, CharSequence hint, int maxLines,
+                                 CharSequence posText, OnInputDialogClickListener posListener,
+                                 CharSequence negText, DialogInterface.OnClickListener negListener) {
+        EditText edt = new EditText(context);
+        edt.setSingleLine(true);
+        edt.setMaxLines(maxLines);
+        edt.setHorizontallyScrolling(true);
+
+        edt.setHint(hint);
+        edt.setText(text);
+
+        showAlert(context,
+            title, edt,
+            posText, (d, w) -> posListener.onClick(d, w, edt.getText().toString()),
+            negText, negListener
+        );
     }
 
     /**

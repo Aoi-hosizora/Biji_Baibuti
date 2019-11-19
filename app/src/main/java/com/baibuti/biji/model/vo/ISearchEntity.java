@@ -1,5 +1,8 @@
-package com.baibuti.biji.model.po;
+package com.baibuti.biji.model.vo;
 
+/**
+ * 一致 结巴分词 搜索接口
+ */
 public interface ISearchEntity {
 
     /**

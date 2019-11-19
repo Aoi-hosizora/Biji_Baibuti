@@ -2,6 +2,7 @@ package com.baibuti.biji.model.po;
 
 import android.support.annotation.NonNull;
 
+import com.baibuti.biji.model.vo.ISearchEntity;
 import com.baibuti.biji.util.otherUtil.DateColorUtil;
 
 import java.io.Serializable;

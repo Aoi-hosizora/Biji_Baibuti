@@ -2,7 +2,7 @@ package com.baibuti.biji.util.imgTextUtil;
 
 import android.content.Context;
 
-import com.baibuti.biji.model.po.ISearchEntity;
+import com.baibuti.biji.model.vo.ISearchEntity;
 
 import java.util.ArrayList;
 import java.util.List;

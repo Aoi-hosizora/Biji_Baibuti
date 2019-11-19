@@ -124,13 +124,6 @@ public class NoteFragment extends BaseFragment implements IContextHelper {
      */
     private void initView() {
 
-        // List Empty View
-        m_noteListView.setEmptyView(view.findViewById(R.id.note_emptylist));
-
-        // Swipe Refresh
-        m_swipeRefresh.setColorSchemeResources(R.color.colorPrimary);
-        m_swipeRefresh.setOnRefreshListener(this::onInitNoteData);
-
         // Toolbar
         m_toolbar.setTitle("所有笔记");
         m_toolbar.inflateMenu(R.menu.note_frag_action);
@@ -139,7 +132,15 @@ public class NoteFragment extends BaseFragment implements IContextHelper {
             MainActivity activity = (MainActivity) getActivity();
             if (activity != null) activity.openNavMenu();
         });
+        m_toolbar.setPopupTheme(R.style.popup_theme);
         m_toolbar.setOnMenuItemClickListener(menuItemClickListener);
+
+        // List Empty View
+        m_noteListView.setEmptyView(view.findViewById(R.id.note_emptylist));
+
+        // Swipe Refresh
+        m_swipeRefresh.setColorSchemeResources(R.color.colorPrimary);
+        m_swipeRefresh.setOnRefreshListener(this::onInitNoteData);
 
         // SearchFrag
         m_searchFragment = SearchFragment.newInstance();

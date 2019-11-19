@@ -11,8 +11,8 @@ import android.view.Window;
 import android.widget.ImageButton;
 import android.widget.TextView;
 
-import com.baibuti.biji.ui.adapter.FileAdapter;
-import com.baibuti.biji.model.po.FileItem;
+import com.baibuti.biji.ui.adapter.FileItemAdapter;
+import com.baibuti.biji.model.vo.FileItem;
 import com.baibuti.biji.R;
 
 import java.io.File;
@@ -28,7 +28,7 @@ public class FileImportDialog extends Dialog implements android.view.View.OnClic
     public TextView title;
     public RecyclerView fileList;
     public List<FileItem> fileListItems;
-    public FileAdapter fileAdapter;
+    public FileItemAdapter fileItemAdapter;
 
     private MyThread scanThread;
     private Timer scanTimer;
@@ -61,8 +61,8 @@ public class FileImportDialog extends Dialog implements android.view.View.OnClic
         close.setOnClickListener(this);
         LinearLayoutManager layoutManager = new LinearLayoutManager(getContext());
         fileList.setLayoutManager(layoutManager);
-        fileAdapter = new FileAdapter(fileListItems);
-        fileList.setAdapter(fileAdapter);
+        fileItemAdapter = new FileItemAdapter(fileListItems);
+        fileList.setAdapter(fileItemAdapter);
         startScan();
     }
 
@@ -142,7 +142,7 @@ public class FileImportDialog extends Dialog implements android.view.View.OnClic
                                 }else{
                                     fileListItems.add(new FileItem(fileName, path, "unknown"));
                                 }
-                                fileAdapter.notifyItemInserted(fileAdapter.getItemCount());
+                                fileItemAdapter.notifyItemInserted(fileItemAdapter.getItemCount());
                                 String titleText = "已扫描出" + fileListItems.size() + "个文件";
                                 title.setText(titleText);
                             }

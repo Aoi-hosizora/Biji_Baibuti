@@ -1,5 +1,6 @@
 package com.baibuti.biji.model.po;
 
+import com.baibuti.biji.model.vo.ISearchEntity;
 import com.baibuti.biji.ui.adapter.SearchItemAdapter;
 
 import java.io.Serializable;

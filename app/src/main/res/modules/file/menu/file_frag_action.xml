@@ -2,25 +2,30 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
+    <item android:id="@+id/action_scan_share_code"
+        android:title="@string/FileFragment_Item_Scan_Title"
+        android:icon="@drawable/ic_scan_share_code"
+        app:showAsAction="ifRoom" />
+
+    <item android:id="@+id/action_import_documents"
+        android:title="@string/FileFragment_Item_Import_Title"
+        android:icon="@drawable/ic_open_in_white_24dp"
+        app:showAsAction="ifRoom"/>
+
+    <item android:id="@+id/action_new_fileclass"
+        android:title="@string/FileFragment_Item_New_Title"
+        app:showAsAction="never"/>
+
     <item android:id="@+id/action_rename_fileclass"
-        android:title="@string/Filefragment_Item_Rename_Title"
+        android:title="@string/FileFragment_Item_Rename_Title"
         app:showAsAction="never"/>
 
     <item android:id="@+id/action_delete_fileclass"
-        android:title="@string/Filefragment_Item_Delete_Title"
-        app:showAsAction="never"/>
-
-    <item android:id="@+id/action_import_documents"
-        android:title="@string/Filefragment_Item_Import_Title"
+        android:title="@string/FileFragment_Item_Delete_Title"
         app:showAsAction="never"/>
 
     <item android:id="@+id/action_share_documents"
-        android:title="@string/Filefragment_Item_Share_Title"
+        android:title="@string/FileFragment_Item_Share_Title"
         app:showAsAction="never"/>
-
-    <item android:id="@+id/action_scan_share_code"
-        android:title="@string/Filefragment_Item_Scan_Title"
-        android:icon="@drawable/ic_scan_share_code"
-        app:showAsAction="always" />
 
 </menu>

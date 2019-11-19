@@ -16,14 +16,15 @@
     <!-- Show Illegal Title File Class Dialog -->
     <string name="FileClassDialog_IllegalTitleAlertMsg">请输入中文，字母，数字或下划线</string>
 
-    <!-- Filefragment Menu Item Title -->
-    <string name="Filefragment_Item_Rename_Title">重命名</string>
-    <string name="Filefragment_Item_Delete_Title">删除分类</string>
-    <string name="Filefragment_Item_Import_Title">导入资料</string>
-    <string name="Filefragment_Item_Share_Title">共享资料</string>
-    <string name="Filefragment_Item_Scan_Title">扫描共享码</string>
+    <!-- FileFragment Menu Item Title -->
+    <string name="FileFragment_Item_New_Title">新建分组</string>
+    <string name="FileFragment_Item_Rename_Title">重命名分组</string>
+    <string name="FileFragment_Item_Delete_Title">删除分组</string>
+    <string name="FileFragment_Item_Import_Title">导入资料</string>
+    <string name="FileFragment_Item_Share_Title">共享资料</string>
+    <string name="FileFragment_Item_Scan_Title">扫描共享码</string>
 
-    <!-- Filefragment Fileclass not selected Hint -->
-    <string name="Filefragment_UnselectedText">未选择分组</string>
+    <!-- FileFragment Fileclass not selected Hint -->
+    <string name="FileFragment_UnselectedText">未选择分组</string>
 
 </resources>
