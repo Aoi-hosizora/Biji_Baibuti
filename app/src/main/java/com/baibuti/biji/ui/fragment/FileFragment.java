@@ -1,8 +1,10 @@
 package com.baibuti.biji.ui.fragment;
 
 import android.app.ProgressDialog;
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.Color;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -22,6 +24,7 @@ import com.baibuti.biji.model.dao.DaoStrategyHelper;
 import com.baibuti.biji.model.dao.DbStatusType;
 import com.baibuti.biji.model.dao.daoInterface.IDocClassDao;
 import com.baibuti.biji.model.dao.daoInterface.IDocumentDao;
+import com.baibuti.biji.model.dao.net.ShareCodeNetDao;
 import com.baibuti.biji.model.dto.ServerException;
 import com.baibuti.biji.model.po.DocClass;
 import com.baibuti.biji.service.auth.AuthManager;
@@ -199,7 +202,7 @@ public class FileFragment extends BaseFragment implements IContextHelper {
     }
 
     /**
-     * 点击分组，更新显示或者新建
+     * 点击分组，更新显示
      */
     private void onDocClassItemClicked(DocClass docClass) {
         pageData.showDocumentList.clear();
@@ -464,6 +467,8 @@ public class FileFragment extends BaseFragment implements IContextHelper {
             showToast(getContext(), "未选择文档分组");
             return;
         }
+        DocClass docClass = pageData.docClassListItems.get(m_docClassListView.getSelectedItemPosition());
+
         if (!AuthManager.getInstance().isLogin()) {
             showToast(getContext(), "未登录，无法共享");
             return;
@@ -471,10 +476,18 @@ public class FileFragment extends BaseFragment implements IContextHelper {
 
         ProgressDialog progressDialog = showProgress(getActivity(), "生成共享码...", false, null);
 
-        String shareCode = FileClassUtil.getShareCode(m_txt_documentHeader.getText().toString());
+        String shareCode;
+        ShareCodeNetDao shareCodeNetDao = new ShareCodeNetDao();
+        try {
+            shareCode = shareCodeNetDao.newShareCode(docClass, ShareCodeNetDao.DEFAULT_EX);
+        } catch (ServerException ex) {
+            ex.printStackTrace();
+            showAlert(getActivity(), "错误", "获取共享码错误：" + ex.getMessage());
+            return;
+        }
+
         Bitmap qrCode = CommonUtil.generateQrCode(shareCode, 800, Color.BLACK);
         progressDialog.dismiss();
-
         if (qrCode == null) {
             showAlert(getContext(), "错误", "二维码生成错误。");
             return;
@@ -484,11 +497,20 @@ public class FileFragment extends BaseFragment implements IContextHelper {
         if (activity == null) return;
 
         ImageView qrCodeImageView = new ImageView(getActivity());
-        qrCodeImageView.setMinimumWidth(800);
-        qrCodeImageView.setMinimumHeight(800);
         qrCodeImageView.setImageBitmap(qrCode);
+        qrCodeImageView.setMinimumWidth(qrCode.getWidth());
+        qrCodeImageView.setMinimumHeight(qrCode.getHeight());
         showAlert(getActivity(), "共享二维码", qrCodeImageView, "返回", null);
     }
+
+    /*
+        // TODO 检查 uuid 是否同时被多个用户占用
+
+        本地文件 -> 上传服务器 (文件路径名不变，增加 uuid)
+        本地文件查看 -> 检查本地是否存在 (不存在 -> 下载, 存在 -> 打开)
+        共享下载文件 -> 根据共享码获取 url，直接下载，选择分组 -> 本地保存后更新路径名，uuid 不变 -> 上传为自己的数据 (同一个 uuid)
+        共享文件分享 -> 直接上传服务器处理 Redis 返回 共享码
+     */
 
     /**
      * 扫描共享码
@@ -506,15 +528,17 @@ public class FileFragment extends BaseFragment implements IContextHelper {
                 @Override
                 public void onCompleted(String shareCode) {
 
-                    // TODO api
-
-                    showAlert(getActivity(),
-                        "扫描结果", "添加共享文件？",
-                        "确认", (d, v) -> {
-                            // TODO Api
-                        },
-                        "取消", null
-                    );
+                    if (shareCode.isEmpty())
+                        showAlert(getContext(), "错误", "共享码错误。");
+                    else {
+                        showAlert(getContext(),
+                            "文件共享", "是否下载共享码中的文件？",
+                            "下载", (d, w) -> {
+                                // TODO 下载
+                            },
+                            "取消", null
+                        );
+                    }
                 }
 
                 @Override
@@ -535,28 +559,31 @@ public class FileFragment extends BaseFragment implements IContextHelper {
      * 调用wps打开文档
      */
     private void openDocument(Document document) {
-
-        File file = new File(document.getFilename());
-        if (!file.exists()) {
-
-            ProgressDialog progressDialog = showProgress(getActivity(), "下载中...", false, null);
-
-            try {
-                if (!DocClass.downloadFile(document)) {
-                    progressDialog.dismiss();
-                    showAlert(getActivity(), "错误", "文件 \"" + document.getFilename() + "\" 下载失败。");
-                    return;
+        showAlert(getContext(),
+            "打开", "是否打开文档 \"" + document.getBaseFilename() + "\"？",
+            "打开", (d, w) -> {
+                File file = new File(document.getFilename());
+                if (!file.exists()) {
+                    showAlert(getContext(),
+                        "错误", "文档 \"" + document.getBaseFilename() + "\" 不存在，是否下载？",
+                        "下载", (d1, w1) -> {
+                            // TODO api 下载
+                        }, "取消", null
+                    );
                 }
-                progressDialog.dismiss();
-                documentDao.updateDocument(document);
-            } catch (ServerException e) {
-                e.printStackTrace();
-                showAlert(getActivity(), "错误", "未知错误..."); // TODO
-            }
-        }
+                else {
+                    // boolean status = WpsService.OpenDocumentThroughWPS(getActivity(), new File(document.getFilename()));
+                    // if (!status) showAlert(getContext(), "错误", "打开文档错误。");
 
-        if (!WpsService.OpenDocumentThroughWPS(getActivity(), new File(document.getFilename())))
-            showAlert(getContext(), "错误", "打开文档错误。");
+                    Intent intent = new Intent();
+                    intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                    intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+                    intent.setAction(Intent.ACTION_VIEW);
+                    intent.setDataAndType(Uri.fromFile(file), WpsService.getMIMEType(file));
+                    startActivity(intent);
+                }
+            },
+            "取消", null);
     }
 
     /**
@@ -567,16 +594,19 @@ public class FileFragment extends BaseFragment implements IContextHelper {
         showAlert(getActivity(),
             "删除", "确定删除文档资料 \"" + document.getBaseFilename() + "\" ？",
             "删除", (d, w) -> {
+                IDocumentDao documentDao = DaoStrategyHelper.getInstance().getDocumentDao(getContext());
                 try {
-                    IDocumentDao documentDao = DaoStrategyHelper.getInstance().getDocumentDao(getContext());
-                    if (documentDao.deleteDocument(document.getId()) == DbStatusType.FAILED)
+                    if (documentDao.deleteDocument(document.getId()) == DbStatusType.FAILED) {
                         showAlert(getActivity(), "错误", "删除文档错误");
+                    } else {
+                        pageData.documentListItems.remove(document);
+                        pageData.showDocumentList.remove(document);
+                        m_documentListView.getAdapter().notifyDataSetChanged();
+                    }
                 } catch (ServerException ex) {
                     ex.printStackTrace();
                     showAlert(getActivity(), "错误", "删除文档错误：" + ex.getMessage());
                 }
-                documentListItems.remove(document);
-                m_documentListView.getAdapter().notifyDataSetChanged();
             },
             "取消", null
         );

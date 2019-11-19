@@ -7,6 +7,7 @@ import com.baibuti.biji.model.dto.ResponseDTO;
 import com.baibuti.biji.model.dto.GroupDTO;
 import com.baibuti.biji.model.dto.NoteDTO;
 import com.baibuti.biji.model.dto.SearchItemDTO;
+import com.baibuti.biji.model.dto.ShareCodeDTO;
 import com.baibuti.biji.service.auth.dto.AuthRespDTO;
 
 import java.io.File;
@@ -279,10 +280,6 @@ public interface ServerApi {
     @DELETE("/document/{did}")
     Observable<ResponseDTO<DocumentDTO>> deleteDocument(@Path("did") int id);
 
-    // TODO 接口待改
-    // @GET("/file/get_share")
-    // Observable<ResponseDTO<>> getShareCode(@Path("id") int id);
-
     // endregion Document
 
     // region Raw (2)
@@ -297,12 +294,47 @@ public interface ServerApi {
 
     @NeedAuth
     @Multipart
-    @DELETE("/rae/image")
+    @DELETE("/raw/image")
     Observable<ResponseDTO<OneFieldDTO.CountDTO>> deleteImages(
         @Part("urls") String[] urls,
         @Part("type") String type
     );
 
     // endregion Raw
+
+    // region Share
+
+    @NeedAuth
+    @GET("/share/")
+    Observable<ResponseDTO<ShareCodeDTO[]>> getAllShareCode();
+
+    @NeedAuth
+    @Multipart
+    @POST("/share/")
+    Observable<ResponseDTO<ShareCodeDTO>> putDocToShare(
+        @Part("ex") int ex,
+        @Part("did") int[] ids
+    );
+
+    @NeedAuth
+    @Multipart
+    @POST("/share/")
+    Observable<ResponseDTO<ShareCodeDTO>> putDocClassToShare(
+        @Part("ex") int ex,
+        @Query("cid") int cid
+    );
+
+    @NeedAuth
+    @Multipart
+    @DELETE("/share/")
+    Observable<ResponseDTO<OneFieldDTO.CountDTO>> deleteShareCodes(
+        @Query("sc") String[] scs
+    );
+
+    @NeedAuth
+    @DELETE("/share/user")
+    Observable<ResponseDTO<OneFieldDTO.CountDTO>> deleteUserShareCodes();
+
+    // endregion Share
 
 }
