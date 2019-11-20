@@ -21,7 +21,7 @@ import com.baibuti.biji.model.dao.DaoStrategyHelper;
 import com.baibuti.biji.model.dao.DbStatusType;
 import com.baibuti.biji.model.dao.daoInterface.ISearchItemDao;
 import com.baibuti.biji.model.dto.ServerException;
-import com.baibuti.biji.service.auth.AuthManager;
+import com.baibuti.biji.common.auth.AuthManager;
 import com.baibuti.biji.ui.IContextHelper;
 import com.baibuti.biji.ui.adapter.SearchItemAdapter;
 import com.baibuti.biji.model.po.SearchItem;

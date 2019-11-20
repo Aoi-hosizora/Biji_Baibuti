@@ -1,6 +1,6 @@
-package com.baibuti.biji.service.auth;
+package com.baibuti.biji.common.auth;
 
-import com.baibuti.biji.service.retrofit.RetrofitFactory;
+import com.baibuti.biji.common.retrofit.RetrofitFactory;
 
 import java.util.ArrayList;
 import java.util.Arrays;

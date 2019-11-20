@@ -9,7 +9,7 @@
 
     <item android:id="@+id/action_import_documents"
         android:title="@string/FileFragment_Item_Import_Title"
-        android:icon="@drawable/ic_open_in_white_24dp"
+        android:icon="@drawable/ic_folder_open_white_24dp"
         app:showAsAction="ifRoom"/>
 
     <item android:id="@+id/action_new_fileclass"

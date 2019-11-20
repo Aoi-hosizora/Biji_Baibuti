@@ -4,9 +4,9 @@ import com.baibuti.biji.model.dao.daoInterface.IScheduleDao;
 import com.baibuti.biji.model.dto.OneFieldDTO;
 import com.baibuti.biji.model.dto.ResponseDTO;
 import com.baibuti.biji.model.dto.ServerException;
-import com.baibuti.biji.service.auth.AuthManager;
-import com.baibuti.biji.service.retrofit.RetrofitFactory;
-import com.baibuti.biji.service.retrofit.ServerErrorHandle;
+import com.baibuti.biji.common.auth.AuthManager;
+import com.baibuti.biji.common.retrofit.RetrofitFactory;
+import com.baibuti.biji.common.retrofit.ServerErrorHandle;
 
 import java.util.concurrent.ExecutionException;
 

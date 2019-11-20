@@ -5,7 +5,6 @@ import android.app.AlertDialog;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.widget.Button;
-import android.view.View;
 import android.widget.ListView;
 
 import com.baibuti.biji.model.dao.DaoStrategyHelper;

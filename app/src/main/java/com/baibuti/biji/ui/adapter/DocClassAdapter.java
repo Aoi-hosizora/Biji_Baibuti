@@ -1,7 +1,6 @@
 package com.baibuti.biji.ui.adapter;
 
 import android.content.Context;
-import android.graphics.drawable.TransitionDrawable;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -13,41 +12,65 @@ import com.baibuti.biji.R;
 
 import java.util.List;
 
+import lombok.Getter;
+import lombok.Setter;
+
 /**
  * Single Checkable
  */
 public class DocClassAdapter extends BaseAdapter {
 
     private Context context;
-    private List<DocClass> list;
+
+    @Getter @Setter
+    private List<DocClass> docClassList;
+
+    @Getter
     private DocClass currentItem;
 
     public DocClassAdapter(Context context) {
         this.context = context;
     }
 
-    public List<DocClass> getList() {
-        return list;
+    public void setCurrentItem(DocClass currentItem) {
+        this.currentItem = currentItem;
+        notifyDataSetChanged();
     }
 
-    public void setList(List<DocClass> list) {
-        this.list = list;
-        if (this.list.size() > 0)
-            currentItem = this.list.get(0);
+    public int getCurrentIndex() {
+        if (currentItem == null)
+            return -1;
+        return docClassList.indexOf(currentItem);
     }
+
+    public interface OnButtonClickListener {
+        void onClick(int position);
+    }
+
+    public interface OnButtonLongClickListener {
+        boolean onLongClick(int position);
+    }
+
+    @Setter
+    private OnButtonClickListener onButtonClickListener;
+
+    @Setter
+    private OnButtonLongClickListener onButtonLongClickListener;
+
+    ////////////////
 
     @Override
     public int getCount() {
-        if (list == null)
+        if (docClassList == null)
             return 0;
-        return list.size();
+        return docClassList.size();
     }
 
     @Override
     public DocClass getItem(int i) {
-        if (i >= getCount() || list == null)
+        if (i >= getCount() || docClassList == null)
             return null;
-        return list.get(i);
+        return docClassList.get(i);
     }
 
     @Override
@@ -55,41 +78,54 @@ public class DocClassAdapter extends BaseAdapter {
         return i;
     }
 
-    //////
+    ////////////////
 
     @Override
-    public View getView(final int position, View convertView, final ViewGroup viewGroup) {
+    public View getView(final int position, View view, final ViewGroup viewGroup) {
         ViewHolder holder;
 
-        if (null == convertView) {
-            convertView = LayoutInflater.from(context).inflate(R.layout.adapter_docclass, viewGroup, false);
+        if (view == null) {
+            view = LayoutInflater.from(context)
+                .inflate(R.layout.adapter_docclass, viewGroup, false);
 
             holder = new ViewHolder();
-            holder.btn_docClass = convertView.findViewById(R.id.id_adapter_fileclasslistitem_name);
-            holder.btn_docClass.setBackground(context.getResources().getDrawable(R.drawable.button_transition));
+            holder.btn_docClass = view.findViewById(R.id.id_adapter_fileclasslistitem_name);
 
-            convertView.setTag(holder);
+            view.setTag(holder);
         } else
-            holder = (ViewHolder) convertView.getTag();
+            holder = (ViewHolder) view.getTag();
 
-        holder.btn_docClass.setOnClickListener((v) -> currentItem = list.get(position));
+        ////////////
 
-        String itemName = getItem(position).getName();
-        holder.btn_docClass.setText(itemName);
-        TransitionDrawable transition = (TransitionDrawable) holder.btn_docClass.getBackground();
+        // Text
+        holder.btn_docClass.setText(getItem(position).getName());
 
-        // TODO
-        if (currentItem != null) {
-            if (itemName.equals(currentItem.getName()))
-                transition.startTransition(0);
-            else
-                transition.startTransition(200);
-        }
+        // Event
+        holder.btn_docClass.setOnClickListener((v) -> {
+            currentItem = docClassList.get(position);
+            if (onButtonClickListener != null)
+                onButtonClickListener.onClick(position);
 
-        return convertView;
+            notifyDataSetChanged();
+        });
+
+        holder.btn_docClass.setOnLongClickListener((v) -> {
+            if (onButtonLongClickListener != null)
+                return onButtonLongClickListener.onLongClick(position);
+            return false;
+        });
+
+        // State
+
+        if (getItem(position) == currentItem)
+            holder.btn_docClass.setBackground(context.getResources().getDrawable(R.drawable.btn_selected));
+        else
+            holder.btn_docClass.setBackground(context.getResources().getDrawable(R.drawable.btn_unselected));
+
+        return view;
     }
 
-    public class ViewHolder {
+    private class ViewHolder {
         Button btn_docClass;
     }
 }

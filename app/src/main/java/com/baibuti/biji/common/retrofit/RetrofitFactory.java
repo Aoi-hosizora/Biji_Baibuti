@@ -1,7 +1,7 @@
-package com.baibuti.biji.service.retrofit;
+package com.baibuti.biji.common.retrofit;
 
 import com.baibuti.biji.model.dao.ServerApi;
-import com.baibuti.biji.service.Urls;
+import com.baibuti.biji.common.Urls;
 
 import java.util.HashMap;
 import java.util.Map;

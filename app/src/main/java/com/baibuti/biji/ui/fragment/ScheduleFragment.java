@@ -2,7 +2,6 @@ package com.baibuti.biji.ui.fragment;
 
 import android.app.ProgressDialog;
 import android.content.Intent;
-import android.content.res.AssetManager;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -17,16 +16,14 @@ import com.baibuti.biji.model.dao.daoInterface.IScheduleDao;
 import com.baibuti.biji.model.dto.ServerException;
 import com.baibuti.biji.model.po.MySubject;
 import com.baibuti.biji.R;
-import com.baibuti.biji.service.auth.AuthManager;
+import com.baibuti.biji.common.auth.AuthManager;
 import com.baibuti.biji.service.scut.ScheduleService;
 import com.baibuti.biji.ui.IContextHelper;
 import com.baibuti.biji.ui.activity.MainActivity;
 import com.baibuti.biji.ui.activity.WebViewActivity;
-import com.baibuti.biji.util.imgTextUtil.StringUtil;
 import com.zhuangfei.timetable.TimetableView;
 import com.zhuangfei.timetable.view.WeekView;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;

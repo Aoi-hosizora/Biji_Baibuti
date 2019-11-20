@@ -14,6 +14,7 @@
         android:background="?attr/colorPrimary"
         android:minHeight="?attr/actionBarSize"
         android:theme="?attr/actionBarTheme"
+        app:popupTheme="@style/popup_theme"
         android:elevation="2dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -42,43 +43,72 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/id_view_file_search">
 
-        <ListView
-            android:id="@+id/id_docclass_list_view"
+        <LinearLayout
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
-            android:background="@color/grey_250"
-            android:splitMotionEvents="false" />
+            android:orientation="vertical">
 
-        <android.support.constraint.ConstraintLayout
+            <ListView
+                android:id="@+id/id_docclass_list_view"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="1"
+                android:background="@color/grey_250"
+                android:splitMotionEvents="false" />
+
+            <Button
+                android:id="@+id/id_docclass_list_view_add"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="新建分组"
+                android:theme="@style/DlgFlatButton"
+                android:background="@drawable/btn_class_add"
+                android:textColor="@color/colorAccent" />
+
+        </LinearLayout>
+
+        <LinearLayout
             android:layout_width="0dp"
             android:layout_height="match_parent"
-            android:layout_weight="4">
+            android:layout_weight="4"
+            android:orientation="vertical" >
+
+            <com.baibuti.biji.ui.widget.otherView.EllipsizeTextView
+                android:id="@+id/id_document_header"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:layout_marginBottom="6dp"
+                android:layout_marginStart="8dp"
+                android:layout_marginEnd="8dp"
+                android:maxLines="1"
+                android:ellipsize="end"
+                android:text="头信息 (%s 项)"/>
 
             <include
                 android:id="@+id/id_document_empty"
                 layout="@layout/layout_recycler_view_empty"
-                android:layout_marginStart="2dp"
-                android:layout_width="match_parent"
                 android:layout_height="match_parent"
+                android:layout_width="match_parent"
                 android:visibility="gone"/>
 
             <android.support.v4.widget.SwipeRefreshLayout
                 android:id="@+id/id_document_srl"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
                 android:divider="@null"
-                android:visibility="visible" >
+                android:visibility="visible"
+                android:layout_height="match_parent"
+                android:layout_width="match_parent">
 
                 <com.baibuti.biji.ui.widget.listView.RecyclerViewEmptySupport
                     android:id="@+id/id_document_list_view"
-                    android:layout_marginStart="2dp"
                     android:layout_width="match_parent"
-                    android:layout_height="match_parent"/>
+                    android:layout_height="match_parent"
+                    android:layout_marginStart="2dp" />
+
             </android.support.v4.widget.SwipeRefreshLayout>
 
-
-        </android.support.constraint.ConstraintLayout>
+        </LinearLayout>
 
     </LinearLayout>
 

@@ -26,8 +26,8 @@ import android.widget.Toast;
 import android.view.MenuItem;
 
 import com.baibuti.biji.model.dto.ServerException;
-import com.baibuti.biji.service.auth.AuthManager;
-import com.baibuti.biji.service.auth.AuthService;
+import com.baibuti.biji.common.auth.AuthManager;
+import com.baibuti.biji.common.auth.AuthService;
 import com.baibuti.biji.ui.IContextHelper;
 import com.baibuti.biji.ui.fragment.BaseFragment;
 import com.baibuti.biji.ui.fragment.ScheduleFragment;

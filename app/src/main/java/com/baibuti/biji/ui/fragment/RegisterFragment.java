@@ -12,9 +12,9 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.baibuti.biji.model.dto.ServerException;
-import com.baibuti.biji.service.auth.AuthService;
+import com.baibuti.biji.common.auth.AuthService;
 import com.baibuti.biji.R;
-import com.baibuti.biji.service.auth.dto.AuthRespDTO;
+import com.baibuti.biji.common.auth.dto.AuthRespDTO;
 import com.baibuti.biji.ui.activity.AuthActivity;
 import com.baibuti.biji.ui.IContextHelper;
 

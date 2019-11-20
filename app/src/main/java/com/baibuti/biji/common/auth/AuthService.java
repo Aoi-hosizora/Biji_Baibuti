@@ -1,11 +1,11 @@
-package com.baibuti.biji.service.auth;
+package com.baibuti.biji.common.auth;
 
 import com.baibuti.biji.model.dto.OneFieldDTO;
 import com.baibuti.biji.model.dto.ResponseDTO;
 import com.baibuti.biji.model.dto.ServerException;
-import com.baibuti.biji.service.auth.dto.AuthRespDTO;
-import com.baibuti.biji.service.retrofit.RetrofitFactory;
-import com.baibuti.biji.service.retrofit.ServerErrorHandle;
+import com.baibuti.biji.common.auth.dto.AuthRespDTO;
+import com.baibuti.biji.common.retrofit.RetrofitFactory;
+import com.baibuti.biji.common.retrofit.ServerErrorHandle;
 
 import java.util.concurrent.ExecutionException;
 

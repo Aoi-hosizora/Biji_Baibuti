@@ -6,9 +6,9 @@ import com.baibuti.biji.model.dto.DocumentDTO;
 import com.baibuti.biji.model.dto.ResponseDTO;
 import com.baibuti.biji.model.dto.ServerException;
 import com.baibuti.biji.model.po.Document;
-import com.baibuti.biji.service.auth.AuthManager;
-import com.baibuti.biji.service.retrofit.RetrofitFactory;
-import com.baibuti.biji.service.retrofit.ServerErrorHandle;
+import com.baibuti.biji.common.auth.AuthManager;
+import com.baibuti.biji.common.retrofit.RetrofitFactory;
+import com.baibuti.biji.common.retrofit.ServerErrorHandle;
 
 import java.io.File;
 import java.util.Arrays;

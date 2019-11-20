@@ -30,16 +30,17 @@ public class GroupRadioAdapter extends BaseAdapter {
     @Getter
     private Group currentItem;
 
+    public GroupRadioAdapter(Context context) {
+       this.context = context;
+    }
+
     public void setCurrentItem(Group currentItem) {
         this.currentItem = currentItem;
         notifyDataSetChanged();
     }
 
-    public GroupRadioAdapter(Context context) {
-       this.context = context;
-    }
-
     public interface OnRadioButtonClickListener {
+
         /**
          * 选择了某项
          */
@@ -109,7 +110,7 @@ public class GroupRadioAdapter extends BaseAdapter {
         return view;
     }
 
-    public static class ViewHolder {
+    private class ViewHolder {
         RadioButton m_btn_radio;
         ImageView m_img;
     }

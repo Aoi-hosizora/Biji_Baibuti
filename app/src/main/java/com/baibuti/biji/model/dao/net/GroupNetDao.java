@@ -4,12 +4,12 @@ import com.baibuti.biji.model.dao.DbStatusType;
 import com.baibuti.biji.model.dto.OneFieldDTO;
 import com.baibuti.biji.model.dto.ResponseDTO;
 import com.baibuti.biji.model.dto.ServerException;
-import com.baibuti.biji.service.auth.AuthManager;
-import com.baibuti.biji.service.retrofit.RetrofitFactory;
+import com.baibuti.biji.common.auth.AuthManager;
+import com.baibuti.biji.common.retrofit.RetrofitFactory;
 import com.baibuti.biji.model.dao.daoInterface.IGroupDao;
 import com.baibuti.biji.model.dto.GroupDTO;
 import com.baibuti.biji.model.po.Group;
-import com.baibuti.biji.service.retrofit.ServerErrorHandle;
+import com.baibuti.biji.common.retrofit.ServerErrorHandle;
 
 import java.util.Arrays;
 import java.util.List;

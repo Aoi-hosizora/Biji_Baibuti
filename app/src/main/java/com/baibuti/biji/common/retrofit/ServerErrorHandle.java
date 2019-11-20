@@ -1,4 +1,4 @@
-package com.baibuti.biji.service.retrofit;
+package com.baibuti.biji.common.retrofit;
 
 import com.baibuti.biji.model.dto.ResponseDTO;
 import com.baibuti.biji.model.dto.ServerException;

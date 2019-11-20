@@ -6,11 +6,11 @@ import com.baibuti.biji.model.dto.OneFieldDTO;
 import com.baibuti.biji.model.dto.ResponseDTO;
 import com.baibuti.biji.model.dto.ServerException;
 import com.baibuti.biji.model.po.Note;
-import com.baibuti.biji.service.Urls;
-import com.baibuti.biji.service.auth.AuthManager;
-import com.baibuti.biji.service.retrofit.RetrofitFactory;
+import com.baibuti.biji.common.Urls;
+import com.baibuti.biji.common.auth.AuthManager;
+import com.baibuti.biji.common.retrofit.RetrofitFactory;
 import com.baibuti.biji.model.dto.NoteDTO;
-import com.baibuti.biji.service.retrofit.ServerErrorHandle;
+import com.baibuti.biji.common.retrofit.ServerErrorHandle;
 import com.baibuti.biji.util.imgTextUtil.StringUtil;
 
 import java.io.File;

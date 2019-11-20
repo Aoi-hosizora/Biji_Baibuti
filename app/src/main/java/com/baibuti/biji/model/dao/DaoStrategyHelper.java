@@ -10,7 +10,7 @@ import com.baibuti.biji.model.dao.net.GroupNetDao;
 import com.baibuti.biji.model.dao.net.NoteNetDao;
 import com.baibuti.biji.model.dao.net.ScheduleNetDao;
 import com.baibuti.biji.model.dao.net.SearchItemNetDao;
-import com.baibuti.biji.service.auth.AuthManager;
+import com.baibuti.biji.common.auth.AuthManager;
 
 public class DaoStrategyHelper {
 

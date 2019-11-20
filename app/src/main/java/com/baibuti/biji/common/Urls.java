@@ -1,4 +1,4 @@
-package com.baibuti.biji.service;
+package com.baibuti.biji.common;
 
 public class Urls {
 

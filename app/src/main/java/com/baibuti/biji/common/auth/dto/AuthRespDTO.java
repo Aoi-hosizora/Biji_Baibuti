@@ -1,4 +1,4 @@
-package com.baibuti.biji.service.auth.dto;
+package com.baibuti.biji.common.auth.dto;
 
 import lombok.Getter;
 import lombok.Setter;

@@ -11,6 +11,13 @@
 
     <!-- ToolBar菜单样式.-->
     <style name="popup_theme" parent="@style/ThemeOverlay.AppCompat.Light">
+        <item name="colorControlNormal">@color/white</item>
+        <item name="android:colorBackground">@color/white</item>
+        <item name="actionOverflowMenuStyle">@style/popup_overflow</item>
+    </style>
+
+    <style name="popup_overflow" parent="Widget.AppCompat.Light.PopupMenu.Overflow">=
+        <item name="overlapAnchor">false</item>
     </style>
 
     <!-- FAB 弹出菜单 Label -->

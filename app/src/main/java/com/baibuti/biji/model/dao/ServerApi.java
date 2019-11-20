@@ -8,7 +8,7 @@ import com.baibuti.biji.model.dto.GroupDTO;
 import com.baibuti.biji.model.dto.NoteDTO;
 import com.baibuti.biji.model.dto.SearchItemDTO;
 import com.baibuti.biji.model.dto.ShareCodeDTO;
-import com.baibuti.biji.service.auth.dto.AuthRespDTO;
+import com.baibuti.biji.common.auth.dto.AuthRespDTO;
 
 import java.io.File;
 import java.lang.annotation.Documented;

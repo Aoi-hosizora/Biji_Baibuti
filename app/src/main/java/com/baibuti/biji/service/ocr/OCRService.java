@@ -1,13 +1,12 @@
 package com.baibuti.biji.service.ocr;
 
 import com.baibuti.biji.service.ocr.dto.OCRRegion;
-import com.baibuti.biji.service.Urls;
-import com.baibuti.biji.service.retrofit.RetrofitFactory;
+import com.baibuti.biji.common.Urls;
+import com.baibuti.biji.common.retrofit.RetrofitFactory;
 
 import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.ExecutionException;
 
 import io.reactivex.Observable;
 import io.reactivex.android.schedulers.AndroidSchedulers;
