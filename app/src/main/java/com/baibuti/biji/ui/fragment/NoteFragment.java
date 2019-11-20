@@ -201,13 +201,13 @@ public class NoteFragment extends BaseFragment implements IContextHelper {
     public boolean onBackPressed() {
 
         // 是否打开 Drawer
-        if (m_drawerLayout.isDrawerOpen(Gravity.END)) {
+        if (m_drawerLayout != null && m_drawerLayout.isDrawerOpen(Gravity.END)) {
             m_drawerLayout.closeDrawer(Gravity.END);
             return true;
         }
 
         // 是否展开 Fab
-        if (m_fabMenu.isExpanded()) {
+        if (m_fabMenu != null && m_fabMenu.isExpanded()) {
             m_fabMenu.collapse();
             return true;
         }
@@ -262,8 +262,9 @@ public class NoteFragment extends BaseFragment implements IContextHelper {
         try {
             List<Group> groups = DaoStrategyHelper.getInstance().getGroupDao(getContext()).queryAllGroups();
             GroupRadioAdapter adapter = (GroupRadioAdapter) m_groupListView.getAdapter();
-            adapter.setList(groups);
+            adapter.setGroupList(groups);
             adapter.notifyDataSetChanged();
+
             m_drawerLayout.openDrawer(Gravity.END);
         } catch (ServerException ex) {
             ex.printStackTrace();
@@ -342,8 +343,15 @@ public class NoteFragment extends BaseFragment implements IContextHelper {
             GroupAdapter groupAdapter = new GroupAdapter(getContext());
             groupAdapter.setList(groups);
 
-            showAlert(getContext(), "修改分组", groupAdapter,
-                (d, w) -> note.setGroup(groups.get(w)));
+            showAlert(getContext(), "修改分组",
+                groupAdapter, (d, w) -> {
+                    note.setGroup(groups.get(w));
+                    m_noteListView.getAdapter().notifyDataSetChanged();
+                    showToast(getActivity(), "笔记 \"" + note.getTitle() + "\" 分组修改成功");
+                    d.dismiss();
+                },
+                "返回", null
+            );
 
             INoteDao noteDao = DaoStrategyHelper.getInstance().getNoteDao(getContext());
             if (noteDao.updateNote(note) != DbStatusType.SUCCESS) {
@@ -388,7 +396,7 @@ public class NoteFragment extends BaseFragment implements IContextHelper {
     private void GroupRadio_Clicked(int position) {
         m_drawerLayout.closeDrawer(Gravity.END);
         GroupRadioAdapter adapter = (GroupRadioAdapter) m_groupListView.getAdapter();
-        groupNote(adapter.getList().get(position));
+        groupNote(adapter.getGroupList().get(position));
     }
 
     /**
@@ -569,7 +577,7 @@ public class NoteFragment extends BaseFragment implements IContextHelper {
             }
             adapter.getNoteList().remove(note);
             adapter.notifyDataSetChanged();
-            showSnackBar(view, "删除成功：\"" + note.getTitle() + "\"");
+            showToast(getActivity(), "删除成功：\"" + note.getTitle() + "\"");
         } catch (ServerException ex) {
             showAlert(getContext(), "错误", "删除笔记错误：" + ex.getMessage());
         }
@@ -631,7 +639,7 @@ public class NoteFragment extends BaseFragment implements IContextHelper {
         List<Note> searchResult =
             SearchUtil.getSearchItems(pageData.allNotes.toArray(new Note[0]), searchingStr);
 
-        if (!cancel[0] && searchResult != null) {
+        if (!cancel[0]) {
             progressDialog.dismiss();
             m_toolbar.setTitle(String.format(Locale.CHINA, "\"%s\"的搜索结果 (共 %d / %d 项)", searchingStr, searchResult.size(), pageData.allNotes.size()));
             if (searchResult.size() != 0)

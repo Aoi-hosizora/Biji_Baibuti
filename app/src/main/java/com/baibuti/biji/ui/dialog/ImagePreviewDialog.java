@@ -9,7 +9,7 @@ import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.WindowManager;
+import android.view.Window;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -48,18 +48,6 @@ public class ImagePreviewDialog extends Dialog {
         this.m_onLongClickImageListener = m_onLongClickImageListener;
     }
 
-    // /**
-    //  * 以图片为输入，备用
-    //  * @param activity 当前活动，用于 runOnUiThread
-    //  * @param bitmaps Bitmap[]
-    //  * @param currIndex 当前图片
-    //  */
-    // public ImagePreviewDialog(Activity activity, Bitmap[] bitmaps, int currIndex) {
-    //     super(activity);
-    //     this.bitmaps = bitmaps;
-    //     this.currIndex = currIndex;
-    // }
-
     /**
      * 以 path 为输入
      * @param activity 当前活动，用于 runOnUiThread
@@ -77,12 +65,10 @@ public class ImagePreviewDialog extends Dialog {
             // 本地
             Bitmap bitmap = ImageUtil.getBitmapFromPath(url);
             if (bitmap == null) {
-                // TODO 网络
                 bitmaps.add(null);
                 final int ki = i;
                 new Thread(() ->
                     ImageUtil.getImgAsync(activity, url, (netBitmap) -> {
-                        // Log.e("", "onGetImg: " + url);
                         this.bitmaps[ki] = netBitmap;
                         m_pager_adapter.notifyDataSetChanged();
                     })
@@ -97,16 +83,14 @@ public class ImagePreviewDialog extends Dialog {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        requestWindowFeature(Window.FEATURE_NO_TITLE);
         super.onCreate(savedInstanceState);
+
         setContentView(R.layout.dialog_image_popup);
         ButterKnife.bind(this);
 
-        if (getWindow() != null) {
-            WindowManager.LayoutParams lp = getWindow().getAttributes();
-            lp.width = WindowManager.LayoutParams.MATCH_PARENT;
-            lp.height = WindowManager.LayoutParams.WRAP_CONTENT;
-            getWindow().setAttributes(lp);
-        }
+        if (getWindow() != null)
+            getWindow().setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
 
         m_view_pager = findViewById(R.id.id_image_popup_dialog_pager);
         m_txt_page_idx = findViewById(R.id.id_image_popup_dialog_index);

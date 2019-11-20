@@ -19,7 +19,6 @@ import android.os.Bundle;
 
 import android.support.v4.widget.DrawerLayout;
 import android.util.DisplayMetrics;
-import android.util.Log;
 import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.ViewGroup;
@@ -37,8 +36,6 @@ import com.baibuti.biji.ui.fragment.SearchFragment;
 import com.baibuti.biji.ui.fragment.FileFragment;
 import com.baibuti.biji.R;
 import com.baibuti.biji.util.otherUtil.LayoutUtil;
-import com.baibuti.biji.util.imgTextUtil.SearchUtil;
-import com.facebook.stetho.Stetho;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -93,13 +90,6 @@ public class MainActivity extends FragmentActivity implements IContextHelper, Au
                 );
             }
         }
-
-//        new Thread(() -> {
-//            // FB 数据库查看
-//            Stetho.initializeWithDefaults(getApplicationContext());
-//            // 初始化结巴分词
-//            SearchUtil.initJieba(getApplicationContext());
-//        }).start();
 
         initViews(); // 布局
         initNav();   // 滑动栏
@@ -222,11 +212,16 @@ public class MainActivity extends FragmentActivity implements IContextHelper, Au
     public boolean onKeyDown(int keyCode, KeyEvent event) {
         if (keyCode == KeyEvent.KEYCODE_BACK && event.getAction() == KeyEvent.ACTION_DOWN) {
 
+            if (m_drawerLayout != null && m_drawerLayout.isDrawerOpen(Gravity.START)) {
+                m_drawerLayout.closeDrawer(Gravity.START);
+                return true;
+            }
+
             // 当前碎片 返回按键
             FragmentStatePagerAdapter statePagerAdapter = (FragmentStatePagerAdapter) m_viewPager.getAdapter();
             if (statePagerAdapter != null) {
                 BaseFragment fragment = (BaseFragment) statePagerAdapter.getItem(m_viewPager.getCurrentItem());
-                if (fragment.onBackPressed())
+                if (fragment != null && fragment.onBackPressed())
                     return true;
             }
 

@@ -9,6 +9,7 @@ import android.view.View;
 import android.widget.ListView;
 
 import com.baibuti.biji.model.dao.DaoStrategyHelper;
+import com.baibuti.biji.model.dao.DbStatusType;
 import com.baibuti.biji.model.dao.daoInterface.IGroupDao;
 import com.baibuti.biji.model.dto.ServerException;
 import com.baibuti.biji.model.po.Group;
@@ -16,7 +17,7 @@ import com.baibuti.biji.ui.IContextHelper;
 import com.baibuti.biji.ui.adapter.GroupRadioAdapter;
 import com.baibuti.biji.R;
 
-import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import butterknife.BindView;
@@ -60,15 +61,13 @@ public class GroupDialog extends AlertDialog implements IContextHelper {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.dialog_group_list);
         ButterKnife.bind(this);
+        refreshBtnPositionEnabled(0);
 
         groupAdapter = new GroupRadioAdapter(activity);
-        groupList = new ArrayList<>();
-        groupAdapter.setList(groupList);
+        groupAdapter.setGroupList(groupList);
+        groupAdapter.setCurrentItem(groupList.get(0));
+        groupAdapter.setOnRadioButtonClickListener(this::refreshBtnPositionEnabled);
         m_list_group.setAdapter(groupAdapter);
-        groupAdapter.setChecked(0);
-        m_list_group.setVisibility(View.VISIBLE);
-
-        refreshBtnPositionEnabled(0);
     }
 
     /**
@@ -84,7 +83,7 @@ public class GroupDialog extends AlertDialog implements IContextHelper {
      */
     @OnClick(R.id.id_GroupDialog_ButtonEdit)
     void ButtonEdit_Clicked() {
-        editGroup(groupList.get(groupAdapter.getCurrentItemIndex()));
+        editGroup(groupAdapter.getCurrentItem());
     }
 
     /**
@@ -92,7 +91,7 @@ public class GroupDialog extends AlertDialog implements IContextHelper {
      */
     @OnClick(R.id.id_GroupDialog_ButtonDelete)
     void ButtonDelete_Clicked() {
-        deleteGroup(groupList.get(groupAdapter.getCurrentItemIndex()));
+        deleteGroup(groupAdapter.getCurrentItem());
     }
 
     /**
@@ -102,13 +101,16 @@ public class GroupDialog extends AlertDialog implements IContextHelper {
     void ButtonOK_Clicked() {
         IGroupDao groupDao = DaoStrategyHelper.getInstance().getGroupDao(activity);
         try {
-            for (Group group : groupList) {
-                groupDao.updateGroup(group); // 只修改分组顺序
+            if (groupDao.updateGroupsOrder(groupList.toArray(new Group[0])) != DbStatusType.SUCCESS) {
+                showAlert(getContext(), "错误", "分组顺序更新失败。");
+                return;
             }
         } catch (ServerException ex) {
             ex.printStackTrace();
             showAlert(activity, "错误", "分组更新失败：" + ex.getMessage());
         }
+        if (m_listener != null)
+            m_listener.onUpdated();
         dismiss();
     }
 
@@ -117,7 +119,7 @@ public class GroupDialog extends AlertDialog implements IContextHelper {
      */
     @OnClick(R.id.id_GroupDialog_ButtonUp)
     void ButtonUp_Clicked() {
-        moveGroupOrder(groupList.get(groupAdapter.getCurrentItemIndex()), true);
+        moveGroupOrder(groupList.indexOf(groupAdapter.getCurrentItem()), true);
     }
 
     /**
@@ -125,7 +127,7 @@ public class GroupDialog extends AlertDialog implements IContextHelper {
      */
     @OnClick(R.id.id_GroupDialog_ButtonDown)
     void ButtonDown_Clicked() {
-        moveGroupOrder(groupList.get(groupAdapter.getCurrentItemIndex()), false);
+        moveGroupOrder(groupList.indexOf(groupAdapter.getCurrentItem()), false);
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -150,8 +152,14 @@ public class GroupDialog extends AlertDialog implements IContextHelper {
         setEnabled(m_btn_up, true);
         setEnabled(m_btn_down, true);
 
-        // 首行与次行，默认分行不动
-        if (pos <= 1)
+        // 首行
+        if (pos == 0) {
+            setEnabled(m_btn_up, false);
+            setEnabled(m_btn_down, false);
+        }
+
+        // 次行
+        if (pos == 1)
             setEnabled(m_btn_up, false);
 
         // 最后一行
@@ -173,9 +181,11 @@ public class GroupDialog extends AlertDialog implements IContextHelper {
      *          notnull 更新分组
      */
     private void editGroup(Group inputGroup) {
-        GroupEditDialog dialog = new GroupEditDialog(activity, inputGroup, () -> {
-            if (inputGroup == null)
-                groupAdapter.setChecked(groupList.size() - 1);
+        GroupEditDialog dialog = new GroupEditDialog(activity, inputGroup, (group) -> {
+            if (inputGroup == null) { // 新建
+                groupList.add(group);
+                groupAdapter.setCurrentItem(group);
+            }
             groupAdapter.notifyDataSetChanged();
         });
         dialog.setCancelable(false);
@@ -193,26 +203,25 @@ public class GroupDialog extends AlertDialog implements IContextHelper {
     /**
      * 移动分组
      */
-    private void moveGroupOrder(Group group, boolean isUP) {
-        int currentPos = groupAdapter.getCurrentItemIndex();
-        if (isUP && currentPos != 1 && currentPos != 0) { // 上移
-            Group upGroup = groupList.get(currentPos - 1);
-            group.setOrder(currentPos - 1);
-            upGroup.setOrder(currentPos);
-        }
-        else if (!isUP && currentPos != groupList.size() - 1 && currentPos != 0) { // 下移
-            Group downGroup = groupList.get(currentPos + 1);
-            group.setOrder(currentPos + 1);
-            downGroup.setOrder(currentPos);
-        }
-        refreshBtnPositionEnabled(currentPos);
-        groupAdapter.notifyDataSetChanged();
-    }
+    private void moveGroupOrder(int pos, boolean isUP) {
+        Group currGroup = groupList.get(pos);
+        if (isUP && pos > 1) { // 上移
+            Group upGroup = groupList.get(pos - 1);
 
-    @Override
-    public void dismiss() {
-        if (m_listener != null)
-            m_listener.onUpdated();
-        super.dismiss();
+            currGroup.setOrder(pos - 1);
+            upGroup.setOrder(pos);
+            refreshBtnPositionEnabled(pos - 1);
+        }
+        else if (!isUP && pos < groupList.size() - 1) { // 下移
+            Group downGroup = groupList.get(pos + 1);
+
+            currGroup.setOrder(pos + 1);
+            downGroup.setOrder(pos);
+            refreshBtnPositionEnabled(pos + 1);
+        } else
+            return;
+
+        Collections.sort(groupList);
+        groupAdapter.notifyDataSetChanged();
     }
 }

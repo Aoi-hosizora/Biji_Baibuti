@@ -116,17 +116,7 @@ public class OCRActivity extends AppCompatActivity implements IContextHelper {
      * @param imgPath 本地 / 网络地址
      */
     private void initBG(String imgPath) {
-
-        // 压缩图片
-
-        // imgPath _Edited
-        // smallImagePath _Small
-
-        int screenWidth = CommonUtil.getScreenWidth(this);
-        int screenHeight = CommonUtil.getScreenHeight(this);
-
         Bitmap bg = ImageUtil.getBitmapFromPath(imgPath);
-
         if (bg == null) {
             new Thread(() -> ImageUtil.getImgAsync(this, imgPath, (bitmap) -> {
 
@@ -134,22 +124,14 @@ public class OCRActivity extends AppCompatActivity implements IContextHelper {
                     showAlert(this, "错误", "网络连接错误，请重试", "返回", (dialog, which) -> finish());
                     return;
                 }
-
-                // TODO 保存文件
-                Bitmap net_bg = ImageUtil.compressImage(bitmap, screenWidth, screenHeight, true);
-                net_bg = ImageUtil.compressImage(net_bg);
                 String fileName = FileNameUtil.getImageFileName(FileNameUtil.SaveType.OCR);
                 ImageUtil.saveBitmap(bitmap, fileName);
 
-                m_layout_region.setImgBG(net_bg);
+                m_layout_region.setImgBG(bitmap);
                 toOCRHandler(fileName);
-
             })).start();
         }
         else {
-            bg = ImageUtil.compressImage(bg, screenWidth, screenHeight, true);
-            bg = ImageUtil.compressImage(bg);
-
             m_layout_region.setImgBG(bg);
             toOCRHandler(imgPath);
         }

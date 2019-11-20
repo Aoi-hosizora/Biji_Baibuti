@@ -49,7 +49,7 @@
     </style>
 
     <!-- 对话框显示 -->
-    <style name="CommentStyle" parent="@android:style/Theme.Dialog">
+    <style name="FullScreenDialog" parent="@android:style/Theme.Dialog">
         <item name="android:windowFullscreen">true</item>
         <item name="android:windowNoTitle">true</item>
     </style>

@@ -54,7 +54,7 @@ public class Group implements Serializable, Comparable<Group> {
 
     @Override
     public int compareTo(@NonNull Group o) {
-        return Integer.compare(o.order, this.order);
+        return Integer.compare(this.order, o.order);
     }
 
     @Override

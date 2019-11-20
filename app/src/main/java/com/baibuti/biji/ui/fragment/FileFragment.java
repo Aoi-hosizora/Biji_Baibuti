@@ -132,7 +132,7 @@ public class FileFragment extends BaseFragment implements IContextHelper {
             if (activity != null) activity.openNavMenu();
         });
         m_toolbar.setOnMenuItemClickListener(menuItemClickListener);
-        m_toolbar.setPopupTheme(R.style.popup_theme);
+        // m_toolbar.setPopupTheme(R.style.popup_theme);
 
         // Empty View
         m_documentListView.setEmptyView(view.findViewById(R.id.id_document_empty));
@@ -161,7 +161,7 @@ public class FileFragment extends BaseFragment implements IContextHelper {
         // Search
         LayoutUtil.AdjustSearchViewLayout(m_searchView);
         m_searchView.setIconified(false);
-        m_searchView.setSubmitButtonEnabled(true);
+        // m_searchView.setSubmitButtonEnabled(true);
         // m_searchView.setQueryRefinementEnabled(true);
         m_searchView.setQueryHint("搜索文档");
         m_searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() { // TODO back
@@ -326,7 +326,7 @@ public class FileFragment extends BaseFragment implements IContextHelper {
                     return;
                 }
                 if (CommonUtil.isIllegalName(text)) {
-                    showAlert(getActivity(), "错误", "分组名不合法，仅允许由中文、字母、数字和下划线组成");
+                    showAlert(getActivity(), "错误", "分组名不合法，仅允许由1-30个中文、字母、数字和下划线组成。");
                     return;
                 }
                 DocClass newDocClass = new DocClass(text);
@@ -369,7 +369,7 @@ public class FileFragment extends BaseFragment implements IContextHelper {
                     return;
                 }
                 if (CommonUtil.isIllegalName(text)) {
-                    showAlert(getActivity(), "错误", "分组名不合法，仅允许由中文、字母、数字和下划线组成。");
+                    showAlert(getActivity(), "错误", "分组名不合法，仅允许由1-30个中文、字母、数字和下划线组成。");
                     return;
                 }
 

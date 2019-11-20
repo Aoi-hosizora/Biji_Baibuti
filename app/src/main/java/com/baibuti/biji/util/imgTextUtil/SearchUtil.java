@@ -1,22 +1,15 @@
 package com.baibuti.biji.util.imgTextUtil;
 
-import android.content.Context;
-
 import com.baibuti.biji.model.vo.ISearchEntity;
 
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.annotation.Nonnull;
+
 import jackmego.com.jieba_android.JiebaSegmenter;
 
 public class SearchUtil {
-
-    /**
-     * 初始化结巴分词
-     */
-    public static void initJieba(Context context) {
-        new Thread(() -> JiebaSegmenter.init(context)).start();
-    }
 
     /**
      * 进行结巴分词
@@ -33,9 +26,10 @@ public class SearchUtil {
      * @param keyword 搜索关键词
      * @return 符合关键词的搜索项
      */
+    @Nonnull
     public static <T> List<T> getSearchItems(T[] listItems, String keyword) {
         if (listItems == null || listItems.length == 0 || !(listItems[0] instanceof ISearchEntity))
-            return null;
+            return new ArrayList<>();
 
         // 返回的词组
         List<T> words = new ArrayList<>();

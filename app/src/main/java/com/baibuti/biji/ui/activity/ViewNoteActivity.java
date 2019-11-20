@@ -94,7 +94,7 @@ public class ViewNoteActivity extends AppCompatActivity implements IContextHelpe
      */
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.view_note_act_action,menu);
+        getMenuInflater().inflate(R.menu.view_note_act_action, menu);
         return true;
     }
 
@@ -149,7 +149,7 @@ public class ViewNoteActivity extends AppCompatActivity implements IContextHelpe
                     currNote = (Note) returnIntent.getSerializableExtra(NoteFragment.INT_NOTE_DATA);
                     // 没更新过才更新状态
                     if (!isModified)
-                    isModified = returnIntent.getBooleanExtra(NoteFragment.INT_IS_MODIFIED, true);
+                        isModified = returnIntent.getBooleanExtra(NoteFragment.INT_IS_MODIFIED, true);
 
                     if (isModified) {
                         m_txt_title.setText(currNote.getTitle());
@@ -179,8 +179,7 @@ public class ViewNoteActivity extends AppCompatActivity implements IContextHelpe
             intent.putExtra(NoteFragment.INT_IS_NEW, isNew);
             intent.putExtra(NoteFragment.INT_IS_MODIFIED, true);
             setResult(RESULT_OK, intent);
-        }
-        else {
+        } else {
             setResult(RESULT_CANCELED, intent);
         }
         finish();
@@ -194,12 +193,11 @@ public class ViewNoteActivity extends AppCompatActivity implements IContextHelpe
      * 显示笔记详细信息
      */
     private void ToolbarShowInfo_Clicked() {
-        final String info =
-            "笔记标题：" + currNote.getTitle() + "\n" +
+        final String info = "笔记标题：" + currNote.getTitle() + "\n" +
             "笔记内容长度：" + currNote.getContent().length() + " 个字符\n" +
+            "笔记分组：" + currNote.getGroup().getName() + "\n\n" +
             "创建时间：" + currNote.getCreateTime_FullString() + "\n" +
-            "最近修改时间：" + currNote.getUpdateTime_FullString() + "\n\n" +
-            "笔记分组：" + currNote.getGroup().getName();
+            "最近修改时间：" + currNote.getUpdateTime_FullString();
 
         showAlert(this,
             "笔记信息", info,
@@ -223,7 +221,7 @@ public class ViewNoteActivity extends AppCompatActivity implements IContextHelpe
      * 打开保存为文件的路径选择活动
      */
     private void ToolbarSaveDocument_Clicked() {
-        Intent choosePathIntent=new Intent(this, OpenSaveFileActivity.class);
+        Intent choosePathIntent = new Intent(this, OpenSaveFileActivity.class);
 
         choosePathIntent.putExtra("isSaving", true);
         choosePathIntent.putExtra("FileType", ".docx");
@@ -280,7 +278,7 @@ public class ViewNoteActivity extends AppCompatActivity implements IContextHelpe
      * 保存笔记
      */
     private void saveDocument(boolean isSaveAsDocx, String path, Note note) {
-        boolean[] dismiss = new boolean[] { false };
+        boolean[] dismiss = new boolean[]{false};
         ProgressDialog progressDialog = showProgress(this,
             String.format(Locale.CHINA, "%s 文件正在保存到 \"%s\"...", isSaveAsDocx ? "Docx" : "Pdf", path),
             true, (dialog) -> dismiss[0] = true
@@ -289,8 +287,7 @@ public class ViewNoteActivity extends AppCompatActivity implements IContextHelpe
         new Thread(() -> {
             try {
                 Thread.sleep(200);
-            }
-            catch (InterruptedException ex) {
+            } catch (InterruptedException ex) {
                 ex.printStackTrace();
             }
 
@@ -326,8 +323,7 @@ public class ViewNoteActivity extends AppCompatActivity implements IContextHelpe
             ImagePreviewDialog dialog = new ImagePreviewDialog(this, imagePaths, currentPosition);
             dialog.setOnLongClickImageListener((v, index) -> imagePopup_LongClicked(imagePaths[index]));
             dialog.show();
-        }
-        catch (Exception ex) {
+        } catch (Exception ex) {
             ex.printStackTrace();
         }
     }
@@ -350,6 +346,8 @@ public class ViewNoteActivity extends AppCompatActivity implements IContextHelpe
      * 文字识别
      */
     private void OCRLongClickImagePopup_Clicked(String imagePath) {
+        m_LongClickImgPopupMenu.dismiss();
+
         Intent intent = new Intent(ViewNoteActivity.this, OCRActivity.class);
         intent.putExtra(OCRActivity.INT_IMAGE_PATH, imagePath);
         startActivity(intent);
@@ -364,8 +362,9 @@ public class ViewNoteActivity extends AppCompatActivity implements IContextHelpe
 
     /**
      * 初始化富文本框，加载数据，图片点击...
+     *
      * @param text 初始化数据显示
-     * m_rich_content.post(new Runnable() -> initRichTextEditor(););
+     *             m_rich_content.post(new Runnable() -> initRichTextEditor(););
      */
     private void initRichTextEditor(String text) {
         m_rich_content.clearAllLayout();

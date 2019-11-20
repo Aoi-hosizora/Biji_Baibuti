@@ -149,6 +149,14 @@ public interface ServerApi {
         @Part("color") String color
     );
 
+    // TODO 接口待加
+    @NeedAuth
+    @PUT("/group/order")
+    Observable<ResponseDTO<OneFieldDTO.CountDTO>> updateGroupsOrder(
+        @Part("ids") int[] ids,
+        @Part("orders") int[] orders
+    );
+
     // TODO 接口待改
     @NeedAuth
     @DELETE("/group/{gid}")

@@ -229,7 +229,7 @@ public class NoteDao implements INoteDao {
         for (int i = 0; i < id_str.length; i++)
             id_str[i] = String.valueOf(ids[i]);
 
-        int ret = db.delete(TBL_NAME, COL_ID + " = ?", id_str);
+        int ret = db.delete(TBL_NAME, COL_ID + " in (?)", id_str);
         dbMgr.closeDatabase();
         return ret;
     }

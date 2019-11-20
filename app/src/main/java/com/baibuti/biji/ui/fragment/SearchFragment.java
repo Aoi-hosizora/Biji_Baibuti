@@ -149,7 +149,11 @@ public class SearchFragment extends BaseFragment implements IContextHelper {
             @Override
             public void onItemClick(View view, SearchItem searchItem) {
                 // 浏览器打开
-                showBrowser(getActivity(), new String[] { searchItem.getUrl() });
+                showAlert(getActivity(),
+                    "用浏览器打开", "确定使用浏览器打开 \"" + searchItem.getTitle() + "\" 吗？",
+                    "打开", (d, w) -> showBrowser(getActivity(), new String[] { searchItem.getUrl() }),
+                    "取消", null
+                );
             }
 
             @Override
@@ -235,12 +239,13 @@ public class SearchFragment extends BaseFragment implements IContextHelper {
             true, (d) -> isSearching[0] = false);
 
         new Thread(() -> {
+
+            List<SearchItem> newSearchItems = BaiduService.getBaiduSearchResult(pageData.currentQuestion, ++pageData.currentPage);
+
             if (progressDialog.isShowing())
                 progressDialog.dismiss();
 
             if (!isSearching[0]) return;
-
-            List<SearchItem> newSearchItems = BaiduService.getBaiduSearchResult(pageData.currentQuestion, ++pageData.currentPage);
             pageData.searchList.addAll(newSearchItems);
 
             MainActivity activity = (MainActivity) getActivity();

@@ -13,6 +13,9 @@ import com.baibuti.biji.R;
 
 import java.util.List;
 
+/**
+ * Single Checkable
+ */
 public class DocClassAdapter extends BaseAdapter {
 
     private Context context;
@@ -42,7 +45,7 @@ public class DocClassAdapter extends BaseAdapter {
 
     @Override
     public DocClass getItem(int i) {
-        if (i == getCount() || list == null)
+        if (i >= getCount() || list == null)
             return null;
         return list.get(i);
     }

@@ -27,7 +27,7 @@ public class CommonUtil {
      * 中文 字母 数字
      */
     public static boolean isIllegalName(String fileClassName){
-        return Pattern.compile("[A-Za-z0-9\\u4e00-\\u9fa5_]+").matcher(fileClassName).matches();
+        return !Pattern.compile("[A-Za-z0-9\\u4e00-\\u9fa5_]{1,30}").matcher(fileClassName).matches();
     }
 
     /**

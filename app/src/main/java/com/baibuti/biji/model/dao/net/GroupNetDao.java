@@ -1,6 +1,7 @@
 package com.baibuti.biji.model.dao.net;
 
 import com.baibuti.biji.model.dao.DbStatusType;
+import com.baibuti.biji.model.dto.OneFieldDTO;
 import com.baibuti.biji.model.dto.ResponseDTO;
 import com.baibuti.biji.model.dto.ServerException;
 import com.baibuti.biji.service.auth.AuthManager;
@@ -158,6 +159,41 @@ public class GroupNetDao implements IGroupDao {
                     return DbStatusType.DUPLICATED;
                 case ServerErrorHandle.DEFAULT_FAILED:
                     return DbStatusType.DEFAULT;
+                default:
+                    throw ServerErrorHandle.parseErrorMessage(response);
+            }
+        }
+        catch (ServerException | InterruptedException | ExecutionException ex) {
+            ex.printStackTrace();
+            throw ServerErrorHandle.getClientError(ex);
+        }
+    }
+
+    /**
+     * SUCCESS | FAILED
+     */
+    @Override
+    public DbStatusType updateGroupsOrder(Group[] groups) throws ServerException {
+        int[] ids = new int[groups.length];
+        int[] orders = new int[groups.length];
+        for (int i = 0; i < groups.length; i++) {
+            ids[i] = groups[i].getId();
+            orders[i] = groups[i].getOrder();
+        }
+
+        Observable<ResponseDTO<OneFieldDTO.CountDTO>> observable = RetrofitFactory.getInstance()
+            .createRequest(AuthManager.getInstance().getAuthorizationHead())
+            .updateGroupsOrder(ids, orders)
+            .subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread());
+
+        try {
+            ResponseDTO<OneFieldDTO.CountDTO> response = observable.toFuture().get();
+            switch (response.getCode()) {
+                case ServerErrorHandle.SUCCESS:
+                    return DbStatusType.SUCCESS;
+                case ServerErrorHandle.DATABASE_FAILED:
+                    return DbStatusType.FAILED;
                 default:
                     throw ServerErrorHandle.parseErrorMessage(response);
             }

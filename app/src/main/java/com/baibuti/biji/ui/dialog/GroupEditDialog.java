@@ -60,7 +60,7 @@ public class GroupEditDialog extends AlertDialog implements IContextHelper {
         /**
          * 分组数据修改
          */
-        void onUpdated();
+        void onUpdated(Group group);
     }
 
     GroupEditDialog(Activity activity, Group currGroup, OnUpdateGroupListener listener) {
@@ -72,10 +72,10 @@ public class GroupEditDialog extends AlertDialog implements IContextHelper {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        requestWindowFeature(WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE);
         super.onCreate(savedInstanceState);
         setContentView(R.layout.dialog_group_add);
         ButterKnife.bind(this);
-        requestWindowFeature(WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE);
 
         m_color_picker.addSaturationBar(findViewById(R.id.id_ColorPicker_SaturationBar));
         m_color_picker.addSVBar(findViewById(R.id.id_ColorPicker_SVBar));
@@ -112,13 +112,6 @@ public class GroupEditDialog extends AlertDialog implements IContextHelper {
         }
     }
 
-    @Override
-    public void dismiss() {
-        super.dismiss();
-        if (m_listener != null)
-            m_listener.onUpdated();
-    }
-
     /**
      * 修改分组信息提交
      */
@@ -131,7 +124,7 @@ public class GroupEditDialog extends AlertDialog implements IContextHelper {
             return;
         }
         if (CommonUtil.isIllegalName(newGroupName)) {
-            showAlert(activity, "错误", "分组名不合法，仅允许由中文、字母、数字和下划线组成。");
+            showAlert(activity, "错误", "分组名不合法，仅允许由1-30个中文、字母、数字和下划线组成。");
             return;
         }
 
@@ -140,32 +133,44 @@ public class GroupEditDialog extends AlertDialog implements IContextHelper {
         IGroupDao groupDao = DaoStrategyHelper.getInstance().getGroupDao(activity);
         try {
             if (currGroup == null) { // 新建
-                DbStatusType status = groupDao.insertGroup(new Group(newGroupName, newGroupColor));
-                if (status == DbStatusType.FAILED) {
-                    showAlert(activity, "错误", "新建分组错误。");
-                    return;
-                } else if (status == DbStatusType.DUPLICATED) {
-                    showAlert(activity, "错误", "分组名 \"" + newGroupName + "\" 重复，请检查。");
+                currGroup = new Group(newGroupName, newGroupColor);
+                DbStatusType status = groupDao.insertGroup(currGroup);
+                if (status == DbStatusType.SUCCESS) {
+                    if (m_listener != null)
+                        m_listener.onUpdated(currGroup);
+                    dismiss();
                     return;
                 }
+
+                if (status == DbStatusType.FAILED)
+                    showAlert(activity, "错误", "新建分组错误。");
+                else if (status == DbStatusType.DUPLICATED)
+                    showAlert(activity, "错误", "分组名 \"" + newGroupName + "\" 重复，请检查。");
             } else { // 更新
-                DbStatusType status = groupDao.updateGroup(new Group(currGroup.getId(), newGroupName, currGroup.getOrder(), newGroupColor));
-                if (status == DbStatusType.FAILED) {
-                    showAlert(activity, "错误", "新建分组错误。");
-                    return;
-                } else if (status == DbStatusType.DUPLICATED) {
-                    showAlert(activity, "错误", "分组名 \"" + newGroupName + "\" 重复，请检查。");
-                    return;
-                } else if (status == DbStatusType.DEFAULT) {
-                    showAlert(activity, "错误", "不允许修改默认分组名。");
+                String motoName = currGroup.getName(), motoColor = currGroup.getColor();
+                currGroup.setName(newGroupName);
+                currGroup.setColor(newGroupColor);
+                DbStatusType status = groupDao.updateGroup(currGroup);
+                if (status == DbStatusType.SUCCESS) {
+                    if (m_listener != null)
+                        m_listener.onUpdated(currGroup);
+                    dismiss();
                     return;
                 }
+
+                currGroup.setName(motoName);
+                currGroup.setColor(motoColor);
+                if (status == DbStatusType.FAILED)
+                    showAlert(activity, "错误", "新建分组错误。");
+                else if (status == DbStatusType.DUPLICATED)
+                    showAlert(activity, "错误", "分组名 \"" + newGroupName + "\" 重复，请检查。");
+                else if (status == DbStatusType.DEFAULT)
+                    showAlert(activity, "错误", "不允许修改默认分组名。");
             }
         } catch (ServerException ex) {
             ex.printStackTrace();
             showAlert(activity, "错误", ex.getMessage());
         }
-        dismiss();
     }
 
     /**

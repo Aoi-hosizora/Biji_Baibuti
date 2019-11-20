@@ -15,15 +15,17 @@ import android.widget.Toast;
 public interface IContextHelper {
 
     /**
-     * Toast: 信息
+     * Toast: message
      */
     default void showToast(Context context,
                            CharSequence message) {
         Toast.makeText(context, message, Toast.LENGTH_SHORT).show();
     }
 
+    ////////////////////////////////
+
     /**
-     * AlertDialog: 标题 + 信息
+     * AlertDialog: title + message
      */
     default void showAlert(Context context,
                            CharSequence title, CharSequence message) {
@@ -35,7 +37,7 @@ public interface IContextHelper {
     }
 
     /**
-     * AlertDialog: 标题 + 信息 + Pos
+     * AlertDialog: title + message + Pos
      */
     default void showAlert(Context context,
                            CharSequence title, CharSequence message,
@@ -48,7 +50,7 @@ public interface IContextHelper {
     }
 
     /**
-     * AlertDialog: 标题 + 信息 + Pos + Neg
+     * AlertDialog: title + message + Pos + Neg
      */
     default void showAlert(Context context,
                            CharSequence title, CharSequence message,
@@ -63,7 +65,7 @@ public interface IContextHelper {
     }
 
     /**
-     * AlertDialog: 标题 + 信息 + Pos + Neg + Neu
+     * AlertDialog: title + message + Pos + Neg + Neu
      */
     default void showAlert(Context context,
                            CharSequence title, CharSequence message,
@@ -79,15 +81,10 @@ public interface IContextHelper {
             .show();
     }
 
-    /**
-     * showInputDialog 提交文本
-     */
-    interface OnInputDialogClickListener {
-        void onClick(DialogInterface dialog, int which, String content);
-    }
+    ////////////////////////////////
 
     /**
-     * AlertDialog: 标题 + View + Pos
+     * AlertDialog: title + View + Pos
      */
     default void showAlert(Context context,
                            CharSequence title, View view,
@@ -100,7 +97,7 @@ public interface IContextHelper {
     }
 
     /**
-     * AlertDialog: 标题 + View + Pos + Neg
+     * AlertDialog: title + View + Pos + Neg
      */
     default void showAlert(Context context,
                            CharSequence title, View view,
@@ -114,8 +111,47 @@ public interface IContextHelper {
             .create().show();
     }
 
+    ////////////////////////////////
+
     /**
-     * AlertDialog: 标题 + EditText + Pos + Neg
+     * AlertDialog: title + list + Pos
+     */
+    default void showAlert(Context context,
+                           CharSequence title,
+                           CharSequence[] list, DialogInterface.OnClickListener listener,
+                           CharSequence posText, DialogInterface.OnClickListener posListener) {
+        new AlertDialog.Builder(context)
+            .setTitle(title)
+            .setItems(list, listener)
+            .setPositiveButton(posText, posListener)
+            .show();
+    }
+
+    /**
+     * AlertDialog: title + list + adapter + pos
+     */
+    default void showAlert(Context context,
+                           CharSequence title,
+                           ListAdapter adapter, DialogInterface.OnClickListener listener,
+                           CharSequence posText, DialogInterface.OnClickListener posListener) {
+        new AlertDialog.Builder(context)
+            .setTitle(title)
+            .setSingleChoiceItems(adapter, 0, listener)
+            .setPositiveButton(posText, posListener)
+            .show();
+    }
+
+    ////////////////////////////////
+
+    /**
+     * showInputDialog
+     */
+    interface OnInputDialogClickListener {
+        void onClick(DialogInterface dialog, int which, String content);
+    }
+
+    /**
+     * AlertDialog: title + EditText + Pos + Neg
      */
     default void showInputDialog(Context context,
                                  CharSequence title, CharSequence text, CharSequence hint, int maxLines,
@@ -136,32 +172,10 @@ public interface IContextHelper {
         );
     }
 
-    /**
-     * AlertDialog: 标题 + 列表
-     */
-    default void showAlert(Context context,
-                           CharSequence title,
-                           CharSequence[] list, DialogInterface.OnClickListener listener) {
-        new AlertDialog.Builder(context)
-            .setTitle(title)
-            .setItems(list, listener)
-            .show();
-    }
+    ////////////////////////////////
 
     /**
-     * AlertDialog: 标题 + 列表 + 适配器
-     */
-    default void showAlert(Context context,
-                           CharSequence title,
-                           ListAdapter adapter, DialogInterface.OnClickListener listener) {
-        new AlertDialog.Builder(context)
-            .setTitle(title)
-            .setSingleChoiceItems(adapter, 0, listener)
-            .show();
-    }
-
-    /**
-     * ProgressDialog: 信息 + cancelable + onCancelListener
+     * ProgressDialog: message + cancelable + onCancelListener
      */
     default ProgressDialog showProgress(Context context,
                                         CharSequence message,
@@ -175,7 +189,7 @@ public interface IContextHelper {
     }
 
     /**
-     * ProgressDialog: 标题 + 信息 + cancelable + onCancelListener
+     * ProgressDialog: title + message + cancelable + onCancelListener
      */
     default ProgressDialog showProgress(Context context,
                                         CharSequence title, CharSequence message,
@@ -189,8 +203,10 @@ public interface IContextHelper {
         return progressDialog;
     }
 
+    ////////////////////////////////
+
     /**
-     * Snackbar: 信息
+     * Snackbar: message
      */
     default void showSnackBar(View view,
                               CharSequence message) {
@@ -198,7 +214,7 @@ public interface IContextHelper {
     }
 
     /**
-     * Snackbar: 信息 + Action
+     * Snackbar: message + action
      */
     default void showSnackBar(View view,
                               CharSequence message,
@@ -209,8 +225,10 @@ public interface IContextHelper {
             .show();
     }
 
+    ////////////////////////////////
+
     /**
-     * Intent.ACTION_VIEW: 打开浏览器
+     * Intent.ACTION_VIEW: browser
      */
     default void showBrowser(Context context, String[] links) {
         for (String link : links) {

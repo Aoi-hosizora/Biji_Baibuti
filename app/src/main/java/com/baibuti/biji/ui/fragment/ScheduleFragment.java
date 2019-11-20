@@ -1,6 +1,7 @@
 package com.baibuti.biji.ui.fragment;
 
 import android.app.ProgressDialog;
+import android.content.Intent;
 import android.content.res.AssetManager;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -20,10 +21,9 @@ import com.baibuti.biji.service.auth.AuthManager;
 import com.baibuti.biji.service.scut.ScheduleService;
 import com.baibuti.biji.ui.IContextHelper;
 import com.baibuti.biji.ui.activity.MainActivity;
+import com.baibuti.biji.ui.activity.WebViewActivity;
 import com.baibuti.biji.util.imgTextUtil.StringUtil;
 import com.zhuangfei.timetable.TimetableView;
-import com.zhuangfei.timetable.listener.ISchedule;
-import com.zhuangfei.timetable.model.Schedule;
 import com.zhuangfei.timetable.view.WeekView;
 
 import java.io.IOException;
@@ -34,6 +34,9 @@ import java.util.Locale;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
+import rx_activity_result2.RxActivityResult;
+
+import static android.app.Activity.RESULT_OK;
 
 public class ScheduleFragment extends BaseFragment implements IContextHelper {
 
@@ -112,7 +115,6 @@ public class ScheduleFragment extends BaseFragment implements IContextHelper {
 
         // TimeTable
         m_timetableView.curWeek(1)
-            .curTerm("大三下学期")
             .callback((int curWeek) ->
                 m_titleTextView.setText(String.format(Locale.CHINA, "第 %d 周", curWeek)))
             .showView();
@@ -146,10 +148,13 @@ public class ScheduleFragment extends BaseFragment implements IContextHelper {
         for (int i = 0; i < m_weekView.itemCount(); i++)
             items[i] = String.format(Locale.CHINA, "第 %d 周", i + 1);
 
-        showAlert(getActivity(), "设置当前周", items, (v, w) -> {
-            m_weekView.curWeek(w + 1).updateView();
-            m_timetableView.changeWeekForce(w + 1);
-        });
+        showAlert(getActivity(), "设置当前周",
+            items, (v, w) -> {
+                m_weekView.curWeek(w + 1).updateView();
+                m_timetableView.changeWeekForce(w + 1);
+            },
+            "取消", null
+        );
     }
 
     /**
@@ -173,23 +178,23 @@ public class ScheduleFragment extends BaseFragment implements IContextHelper {
      * ActionBar 导入课程表
      */
     private void ActionImportSchedule_Clicked() {
-//        Intent intent = new Intent(getContext(), WebViewActivity.class);
-//        RxActivityResult.on(this).startIntent(intent)
-//            .subscribe((result) -> {
-//                if (result.resultCode() == RESULT_OK) {
-//                    String html = result.data().getStringExtra("html");
-//                    CbImportSchedule(html);
-//                }
-//            }).isDisposed();
+        Intent intent = new Intent(getContext(), WebViewActivity.class);
+        RxActivityResult.on(this).startIntent(intent)
+            .subscribe((result) -> {
+                if (result.resultCode() == RESULT_OK) {
+                    String html = result.data().getStringExtra("html");
+                    CbImportSchedule(html);
+                }
+            }).isDisposed();
 
 
-        AssetManager manager = getResources().getAssets();
-        try {
-            String html = StringUtil.readFromInputStream(manager.open("schedule.html"));
-            CbImportSchedule(html);
-        } catch (IOException ex) {
-            ex.printStackTrace();
-        }
+//        AssetManager manager = getResources().getAssets();
+//        try {
+//            String html = StringUtil.readFromInputStream(manager.open("schedule.html"));
+//            CbImportSchedule(html);
+//        } catch (IOException ex) {
+//            ex.printStackTrace();
+//        }
     }
 
     /**

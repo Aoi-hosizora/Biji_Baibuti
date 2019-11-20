@@ -79,7 +79,6 @@ public class GroupDao implements IGroupDao {
             if (cursor != null && !cursor.isClosed()) cursor.close();
             dbMgr.closeDatabase();
         }
-
         return groupList;
     }
 
@@ -114,7 +113,6 @@ public class GroupDao implements IGroupDao {
             if (cursor != null && !cursor.isClosed()) cursor.close();
             dbMgr.closeDatabase();
         }
-
         return null;
     }
 
@@ -148,7 +146,6 @@ public class GroupDao implements IGroupDao {
             if (cursor != null && !cursor.isClosed()) cursor.close();
             dbMgr.closeDatabase();
         }
-
         return null;
     }
 
@@ -235,6 +232,40 @@ public class GroupDao implements IGroupDao {
             return DbStatusType.FAILED;
     }
 
+    /**
+     * 只修改分组顺序
+     * @return SUCCESS | FAILED
+     */
+    @Override
+    public DbStatusType updateGroupsOrder(Group[] groups) {
+        Group def = queryDefaultGroup();
+
+        SQLiteDatabase db = dbMgr.getWritableDatabase();
+        db.beginTransaction();
+
+        for (Group group : groups) {
+            if (group.getId() == def.getId())
+                continue;
+
+            ContentValues values = new ContentValues();
+            values.put(COL_ORDER, group.getOrder());
+
+            int ret = db.update(TBL_NAME, values,
+                COL_ID + " = ?", new String[] { String.valueOf(group.getId()) });
+            if (ret == 0) {
+                db.endTransaction();
+                dbMgr.closeDatabase();
+                return DbStatusType.FAILED;
+            }
+        }
+
+        db.setTransactionSuccessful();
+        db.endTransaction();
+        dbMgr.closeDatabase();
+
+        precessOrder();
+        return DbStatusType.SUCCESS;
+    }
 
     /**
      * 删除分组

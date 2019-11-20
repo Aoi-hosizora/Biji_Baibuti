@@ -15,6 +15,9 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
+import java.net.URL;
 
 import okhttp3.Call;
 import okhttp3.Callback;
@@ -125,12 +128,10 @@ public class ImageUtil {
         }
     }
 
-    /**
-     * 异步回调接口
-     */
     public interface IImageBack {
+
         /**
-         * 返回图片或者 null(Error)
+         * @param bitmap nullable
          */
         @UiThread
         void onGetImg(@Nullable Bitmap bitmap);
@@ -139,36 +140,32 @@ public class ImageUtil {
     /**
      * ImgPopupDialog OCRActivity 用
      * 异步获取图片
+     * @param activity runOnUiThread
      * @param url 网络连接
      * @param imageBack 异步回调
      */
     @WorkerThread
     public static void getImgAsync(Activity activity, String url, IImageBack imageBack) {
-        Log.e("", "GetImg: " + url);
-        OkHttpClient client = new OkHttpClient();
-        Request request = new Request.Builder().url(url).build();
+        URL fileUrl;
         try {
-            client.newCall(request).enqueue(new Callback() {
-
-                @EverythingIsNonNull
-                @Override
-                public void onFailure(Call call, IOException e) { }
-
-                @EverythingIsNonNull
-                @Override
-                public void onResponse(Call call, Response response) {
-                    ResponseBody body = response.body();
-                    if (body != null) {
-                        InputStream in = body.byteStream();
-                        activity.runOnUiThread(() -> imageBack.onGetImg(BitmapFactory.decodeStream(in)));
-                    } else {
-                        activity.runOnUiThread(() -> imageBack.onGetImg(null));
-                    }
-                }
-            });
+            fileUrl = new URL(url);
+        } catch (MalformedURLException e) {
+            e.printStackTrace();
+            activity.runOnUiThread(() -> imageBack.onGetImg(null));
+            return;
         }
-        catch (NullPointerException ex) {
-            ex.printStackTrace();
+        try {
+            HttpURLConnection conn = (HttpURLConnection) fileUrl.openConnection();
+            conn.setDoInput(true);
+            conn.connect();
+
+            InputStream is = conn.getInputStream();
+            Bitmap bitmap = BitmapFactory.decodeStream(is);
+            activity.runOnUiThread(() -> imageBack.onGetImg(bitmap));
+            is.close();
+        } catch (IOException | NullPointerException e) {
+            activity.runOnUiThread(() -> imageBack.onGetImg(null));
+            e.printStackTrace();
         }
     }
 }

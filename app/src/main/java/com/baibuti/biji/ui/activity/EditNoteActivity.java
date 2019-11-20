@@ -187,39 +187,30 @@ public class EditNoteActivity extends AppCompatActivity implements IContextHelpe
         galleryIntent.setAction(Intent.ACTION_PICK);
         galleryIntent.setDataAndType(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, "image/*");
 
-        // 打开相册
+        // Gallery
         RxActivityResult.on(this).startIntent(galleryIntent)
             .map(Result::data)
             .subscribe((returnIntent) -> {
-                // 编辑相册图片
 
-                Uri uri = returnIntent.getData();
-                if (uri != null) {
-                    String imgPath = AppPathUtil.getFilePathByUri(this, uri);
-                    // content://media/external/images/media/221, /storage/emulated/0/Others/007.jpg
-                    if (imgPath == null || imgPath.isEmpty()) {
-                        showAlert(this, "插入图片", "从相册获取的图片不存在，请重试。");
-                        return;
-                    }
-
-                    Intent imgEditIntent = new Intent(EditNoteActivity.this, IMGEditActivity.class);
-                    imgEditIntent.putExtra(IMGEditActivity.INT_IMAGE_URI, uri);
-                    imgEditIntent.putExtra(IMGEditActivity.INT_IMAGE_SAVE_URI, FileNameUtil.getImageFileName(FileNameUtil.SaveType.EDITED));
-
-                    // TODO 报错
-                    RxActivityResult.on(EditNoteActivity.this).startIntent(imgEditIntent)
-                        .subscribe((result) -> {
-                            if (result.resultCode() != RESULT_OK) return;
-                            Uri editedUri = result.data().getData();
-                            if (editedUri != null)
-                                // 无需删除图片
-                                insertImagesSync(editedUri);
-
-                        }, (throwable) -> {
-                            throwable.printStackTrace();
-                            showAlert(this, "错误", throwable.getMessage());
-                        }).isDisposed();
+                Uri uri = returnIntent.getData(); // content://media/external/images/media/221
+                if (uri == null) return;
+                String imgPath = AppPathUtil.getFilePathByUri(this, uri); // /storage/emulated/0/Others/007.jpg
+                if (imgPath == null || imgPath.isEmpty()) {
+                    showAlert(this, "插入图片", "从相册获取的图片不存在，请重试。");
+                    return;
                 }
+
+                // Edit
+                Intent imgEditIntent = new Intent(EditNoteActivity.this, IMGEditActivity.class);
+                imgEditIntent.putExtra(IMGEditActivity.INT_IMAGE_URI, uri);
+                imgEditIntent.putExtra(IMGEditActivity.INT_IMAGE_SAVE_URI, FileNameUtil.getImageFileName(FileNameUtil.SaveType.EDITED));
+
+                Result<EditNoteActivity> result1 = RxActivityResult.on(EditNoteActivity.this).startIntent(imgEditIntent).toFuture().get();
+                if (result1.resultCode() != RESULT_OK) return;
+                Uri editedUri = result1.data().getData();
+                if (editedUri != null)
+                    insertImagesSync(editedUri);
+
             }).isDisposed();
     }
 
@@ -278,6 +269,8 @@ public class EditNoteActivity extends AppCompatActivity implements IContextHelpe
      * 文字识别图片
      */
     private void OCRLongClickImagePopup_Clicked(String imgPath) {
+        m_LongClickImgPopupMenu.dismiss();
+
         Intent intent = new Intent(EditNoteActivity.this, OCRActivity.class);
         intent.putExtra(OCRActivity.INT_IMAGE_PATH, imgPath);
         startActivity(intent);
@@ -293,8 +286,8 @@ public class EditNoteActivity extends AppCompatActivity implements IContextHelpe
     private Boolean checkIsNoteModify() {
         return
             !m_txt_title.getText().toString().equals(currNote.getTitle()) ||
-            !m_txt_group.getText().toString().equals(currNote.getGroup().getName()) ||
-            !getRichTextContent(m_rich_content).equals(currNote.getContent());
+                !m_txt_group.getText().toString().equals(currNote.getGroup().getName()) ||
+                !getRichTextContent(m_rich_content).equals(currNote.getContent());
     }
 
     /**
@@ -314,7 +307,7 @@ public class EditNoteActivity extends AppCompatActivity implements IContextHelpe
      * !!! 文件保存活动处理
      */
     private void ToolbarSaveNote_Clicked() {
-        boolean[] isContinue = new boolean[] { true };
+        boolean[] isContinue = new boolean[]{true};
 
         CommonUtil.closeSoftKeyInput(this);
 
@@ -440,35 +433,32 @@ public class EditNoteActivity extends AppCompatActivity implements IContextHelpe
                 "保存", (dialog, which) -> ToolbarSaveNote_Clicked(),
                 "取消", null
             );
-        }
-        else {
+        } else {
             String title, info;
             if (!checkIsNoteModify()) {
-                info =
-                    "笔记标题："     + currNote.getTitle()                   + "\n" +
-                    "笔记内容长度：" + currNote.getContent().length()        + " 个字符\n" +
-                    "创建时间："     + currNote.getCreateTime_FullString()   + "\n" +
-                    "最近修改时间：" + currNote.getUpdateTime_FullString()   + "\n\n" +
-                    "笔记分组："     + currNote.getGroup().getName();
+                info = "笔记标题：" + currNote.getTitle() + "\n" +
+                    "笔记内容长度：" + currNote.getContent().length() + " 个字符\n" +
+                    "笔记分组：" + currNote.getGroup().getName() + "\n\n" +
+                    "创建时间：" + currNote.getCreateTime_FullString() + "\n" +
+                    "最近修改时间：" + currNote.getUpdateTime_FullString();
                 title = "笔记信息";
             } else {
-                info =
-                    "笔记标题："             + m_txt_title.getText()                           + "\n" +
-                    "笔记内容长度："         + getRichTextContent(m_rich_content).length()     + " 个字符\n" +
-                    "笔记分组："             + m_txt_group.getText()                          + "\n" +
-                    "创建时间："             + currNote.getCreateTime_FullString()            + "\n" +
-                    "最近修改时间："         + currNote.getUpdateTime_FullString()            + "\n\n" +
-                    "初始笔记标题："         + currNote.getTitle()                            + "\n" +
-                    "初始笔记内容长度："      + currNote.getContent().length()                 + "\n" +
-                    "笔记分组："             + currNote.getGroup().getName();
+                info = "笔记标题：" + m_txt_title.getText() + "\n" +
+                    "笔记内容长度：" + getRichTextContent(m_rich_content).length() + " 个字符\n" +
+                    "笔记分组：" + m_txt_group.getText() + "\n\n" +
+                    "初始笔记标题：" + currNote.getTitle() + "\n" +
+                    "初始笔记内容长度：" + currNote.getContent().length() + "\n" +
+                    "初始笔记分组：" + currNote.getGroup().getName() + "\n\n" +
+                    "创建时间：" + currNote.getCreateTime_FullString() + "\n" +
+                    "最近修改时间：" + currNote.getUpdateTime_FullString();
                 title = "笔记信息 (已修改)";
             }
 
             showAlert(this,
                 title, info,
                 "复制", (dialog, which) -> {
-                if (CommonUtil.copyText(this, info))
-                    showToast(this, "信息复制成功");
+                    if (CommonUtil.copyText(this, info))
+                        showToast(this, "信息复制成功");
                 },
                 "确定", null
             );
@@ -479,7 +469,7 @@ public class EditNoteActivity extends AppCompatActivity implements IContextHelpe
      * 显示分组设置
      */
     private void ToolbarGroupSetting_Clicked() {
-        boolean[] isContinue = new boolean[] { true };
+        boolean[] isContinue = new boolean[]{true};
 
         IGroupDao groupDao = DaoStrategyHelper.getInstance().getGroupDao(this);
         final List<Group> groups = new ArrayList<>();
@@ -502,7 +492,9 @@ public class EditNoteActivity extends AppCompatActivity implements IContextHelpe
             groupAdapter, (dialog, which) -> {
                 m_txt_group.setText(groups.get(which).getName());
                 m_txt_group.setTextColor(groups.get(which).getIntColor());
-            }
+                dialog.dismiss();
+            },
+            "返回", null
         );
     }
 
@@ -512,8 +504,9 @@ public class EditNoteActivity extends AppCompatActivity implements IContextHelpe
 
     /**
      * 初始化富文本框，加载数据，图片点击...
+     *
      * @param text 初始化数据显示
-     * m_rich_content.post(new Runnable() -> initRichTextEditor(););
+     *             m_rich_content.post(new Runnable() -> initRichTextEditor(););
      */
     private void initRichTextEditor(String text) {
         m_rich_content.clearAllLayout();
@@ -544,8 +537,7 @@ public class EditNoteActivity extends AppCompatActivity implements IContextHelpe
             ImagePreviewDialog dialog = new ImagePreviewDialog(this, imagePaths, currentPosition);
             dialog.setOnLongClickImageListener((v, index) -> imagePopup_LongClicked(imagePaths[index]));
             dialog.show();
-        }
-        catch (Exception ex) {
+        } catch (Exception ex) {
             ex.printStackTrace();
         }
     }
@@ -555,6 +547,7 @@ public class EditNoteActivity extends AppCompatActivity implements IContextHelpe
 
     /**
      * 获取 RichTextEditor 内容
+     *
      * @param richTextEditor RichTextEditor
      * @return 笔记内容
      */
@@ -574,6 +567,7 @@ public class EditNoteActivity extends AppCompatActivity implements IContextHelpe
 
     /**
      * 异步显示笔记内容
+     *
      * @param html currNote.getContent()
      */
     private void showRichTextContentAsync(final String html) {
@@ -624,33 +618,36 @@ public class EditNoteActivity extends AppCompatActivity implements IContextHelpe
 
     /**
      * 异步插入图片
-     * @param data 图片 Uri
+     *
+     * @param uri 图片 Uri
      */
-    private void insertImagesSync(final Uri data) {
+    private void insertImagesSync(final Uri uri) {
         ProgressDialog progressDialog = showProgress(this, "插入图片中...", false, null);
 
         Observable.create((ObservableEmitter<String> emitter) -> {
             try {
                 m_rich_content.measure(0, 0);
                 // data: _Edited
-                int screenWidth = CommonUtil.getScreenWidth(this);
-                int screenHeight = CommonUtil.getScreenHeight(this);
+                // int screenWidth = CommonUtil.getScreenWidth(this);
+                // int screenHeight = CommonUtil.getScreenHeight(this);
 
-                Bitmap bitmap = ImageUtil.getBitmapFromPath(data.toString());
-                bitmap = ImageUtil.compressImage(bitmap, screenWidth, screenHeight, true); // 等屏幕大小 压缩图片
-                bitmap = ImageUtil.compressImage(bitmap); // 质量 压缩图片
+                String path = AppPathUtil.getFilePathByUri(this, uri);
+                Bitmap bitmap = ImageUtil.getBitmapFromPath(path);
+                // bitmap = ImageUtil.compressImage(bitmap, screenWidth, screenHeight, true); // 等屏幕大小 压缩图片
+                // bitmap = ImageUtil.compressImage(bitmap); // 质量 压缩图片
 
                 String smallImagePath = FileNameUtil.getImageFileName(FileNameUtil.SaveType.SMALL);
                 ImageUtil.saveBitmap(bitmap, smallImagePath);
 
                 // smallImagePath: _Small
 
-                AppPathUtil.deleteFile(data.toString()); // 删除 Edited
+                AppPathUtil.deleteFile(path); // 删除 Edited
                 emitter.onNext(smallImagePath);
 
                 // <img src="https://www.baidu.com/img/bd_logo1.png"> <- `https://` 不可漏
                 // 测试插入网络图片
                 // emitter.onNext("https://raw.githubusercontent.com/Aoi-hosizora/Biji_Baibuti/a5bb15af4098296ace557e281843513b2f672e0f/assets/DB_Query.png");
+                // <img src="https://raw.githubusercontent.com/Aoi-hosizora/Biji_Baibuti/a5bb15af4098296ace557e281843513b2f672e0f/assets/DB_Query.png">
 
                 emitter.onComplete();
             } catch (Exception e) {
@@ -659,21 +656,21 @@ public class EditNoteActivity extends AppCompatActivity implements IContextHelpe
             }
 
         })
-        .subscribeOn(Schedulers.io())
-        .observeOn(AndroidSchedulers.mainThread())
-        .subscribe(
-            (imagePath) -> m_rich_content.insertImage(imagePath, m_rich_content.getMeasuredWidth()),
-            (throwable) -> {
-                if (progressDialog != null && progressDialog.isShowing())
-                    progressDialog.dismiss();
-                Toast.makeText(EditNoteActivity.this, "图片插入失败", Toast.LENGTH_SHORT).show();
-            },
-            () -> {
-                if (progressDialog != null && progressDialog.isShowing())
-                    progressDialog.dismiss();
-                Toast.makeText(EditNoteActivity.this, "图片插入成功", Toast.LENGTH_SHORT).show();
-            }
-        ).isDisposed();
+            .subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribe(
+                (imagePath) -> m_rich_content.insertImage(imagePath, m_rich_content.getMeasuredWidth()),
+                (throwable) -> {
+                    if (progressDialog != null && progressDialog.isShowing())
+                        progressDialog.dismiss();
+                    Toast.makeText(EditNoteActivity.this, "图片插入失败", Toast.LENGTH_SHORT).show();
+                },
+                () -> {
+                    if (progressDialog != null && progressDialog.isShowing())
+                        progressDialog.dismiss();
+                    Toast.makeText(EditNoteActivity.this, "图片插入成功", Toast.LENGTH_SHORT).show();
+                }
+            ).isDisposed();
     }
 
     // endregion

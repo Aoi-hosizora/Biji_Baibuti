@@ -1,6 +1,7 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    style="@style/FullScreenDialog">
 
     <android.support.v4.view.ViewPager
         android:id="@+id/id_image_popup_dialog_pager"
@@ -18,13 +19,11 @@
 
         android:text="0 / 0"
         android:textSize="18dp"
+
         android:textColor="@color/white"
-
-
         android:shadowColor="#dd000000"
         android:shadowDx="2"
         android:shadowDy="2"
-        android:shadowRadius="1"
-        />
+        android:shadowRadius="1" />
 
 </RelativeLayout>

@@ -12,39 +12,43 @@ import java.util.concurrent.atomic.AtomicInteger;
  */
 public class DatabaseManager {
 
-    private AtomicInteger mOpenCounter = new AtomicInteger();
-    private static DatabaseManager instance;
-    private static SQLiteOpenHelper mDatabaseHelper;
-    private SQLiteDatabase mDatabase;
+    private static volatile DatabaseManager instance;
+
+    private AtomicInteger openCount = new AtomicInteger();
+    private SQLiteOpenHelper helper;
+    private volatile SQLiteDatabase db;
 
     public static synchronized DatabaseManager getInstance(SQLiteOpenHelper helper) {
-        if (instance == null) {
-            instance = new DatabaseManager();
-            mDatabaseHelper = helper;
+        if (instance == null) synchronized (DatabaseManager.class) {
+            if (instance == null) {
+                instance = new DatabaseManager();
+                instance.helper = helper;
+            }
         }
+
         return instance;
     }
 
     public synchronized SQLiteDatabase getWritableDatabase() {
-        if (mOpenCounter.incrementAndGet() == 1) {
+        if (openCount.incrementAndGet() == 1) {
             // Opening new database
-            mDatabase = mDatabaseHelper.getWritableDatabase();
+            db = helper.getWritableDatabase();
         }
-        return mDatabase;
+        return db;
     }
 
     public synchronized SQLiteDatabase getReadableDatabase() {
-        if (mOpenCounter.incrementAndGet() == 1) {
+        if (openCount.incrementAndGet() == 1) {
             // Opening new database
-            mDatabase = mDatabaseHelper.getReadableDatabase();
+            db = helper.getReadableDatabase();
         }
-        return mDatabase;
+        return db;
     }
 
     public synchronized void closeDatabase() {
-        if (mOpenCounter.decrementAndGet() == 0) {
+        if (openCount.decrementAndGet() == 0) {
             // Closing database
-            mDatabase.close();
+            db.close();
         }
     }
 }
