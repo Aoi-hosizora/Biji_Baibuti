@@ -288,6 +288,7 @@ public interface ServerApi {
 
     // region Raw (2)
 
+    // TODO 返回体待改
     @NeedAuth
     @Multipart
     @POST("/raw/image")
@@ -296,13 +297,13 @@ public interface ServerApi {
         @Part("type") String type
     );
 
-    @NeedAuth
-    @Multipart
-    @DELETE("/raw/image")
-    Observable<ResponseDTO<OneFieldDTO.CountDTO>> deleteImages(
-        @Part("urls") String[] urls,
-        @Part("type") String type
-    );
+    // @NeedAuth
+    // @Multipart
+    // @DELETE("/raw/image")
+    // Observable<ResponseDTO<OneFieldDTO.CountDTO>> deleteImages(
+    //     @Part("urls") String[] urls,
+    //     @Part("type") String type
+    // );
 
     // endregion Raw
 

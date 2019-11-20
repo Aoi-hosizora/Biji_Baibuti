@@ -562,24 +562,14 @@ public class NoteFragment extends BaseFragment implements IContextHelper {
             NoteAdapter adapter = (NoteAdapter) m_noteListView.getAdapter();
             INoteDao noteDao = DaoStrategyHelper.getInstance().getNoteDao(getContext());
 
-            int idx = adapter.getNoteList().indexOf(note);
+            // int idx = adapter.getNoteList().indexOf(note);
             if (noteDao.deleteNote(note.getId()) != DbStatusType.SUCCESS) {
                 showAlert(getActivity(), "错误", "删除笔记错误。");
                 return;
             }
             adapter.getNoteList().remove(note);
-
             adapter.notifyDataSetChanged();
-            showSnackbar(view, "删除成功：\"" + note.getTitle() + "\"", "撤销", (v) -> {
-                try {
-                    noteDao.insertNote(note);
-                    adapter.getNoteList().add(idx, note);
-                    adapter.notifyDataSetChanged();
-                    showSnackBar(view, "恢复笔记：\"" + note.getTitle() + "\"");
-                } catch (ServerException ex) {
-                    showAlert(getContext(), "错误", "撤销笔记删除错误：" + ex.getMessage());
-                }
-            });
+            showSnackBar(view, "删除成功：\"" + note.getTitle() + "\"");
         } catch (ServerException ex) {
             showAlert(getContext(), "错误", "删除笔记错误：" + ex.getMessage());
         }

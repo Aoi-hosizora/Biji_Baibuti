@@ -470,7 +470,9 @@ public class FileFragment extends BaseFragment implements IContextHelper {
         }
     }
 
-    //////////////////////////////////////////////////////////////////////////////
+    // endregion
+
+    // region Share
 
     /**
      * 导入分组
@@ -497,9 +499,19 @@ public class FileFragment extends BaseFragment implements IContextHelper {
                     pageData.documentListItems.add(newDocument);
                     pageData.showDocumentList.add(newDocument);
                     try {
-                        documentDao.insertDocument(newDocument);
+                        // 顺便上传
+                        DbStatusType status = documentDao.insertDocument(newDocument);
+                        if (status == DbStatusType.UPLOAD_FAILED) {
+                            showAlert(getActivity(), "错误", "文件上传失败，服务器错误。");
+                            return;
+                        } else if (status == DbStatusType.FAILED) {
+                            showAlert(getActivity(), "错误", "文档记录更新失败。");
+                            return;
+                        }
                     } catch (ServerException ex) {
-                        ex.printStackTrace(); // 直接忽略错误的文档
+                        ex.printStackTrace();
+                        showAlert(getActivity(), "错误", "文件上传失败：" + ex.getMessage());
+                        return;
                     }
                 }
             }
@@ -509,6 +521,9 @@ public class FileFragment extends BaseFragment implements IContextHelper {
         importDialog.show();
     }
 
+    /**
+     * 共享时长选择
+     */
     private Map<String, Integer> exTextNumbers = new LinkedHashMap<String, Integer>() {{
         put("1个小时", 1);
         put("2个小时", 2);

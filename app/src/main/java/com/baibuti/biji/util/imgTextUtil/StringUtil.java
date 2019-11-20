@@ -63,6 +63,16 @@ public class StringUtil {
     }
 
     /**
+     * 获取img标签中的src值
+     */
+    public static String[] getImgSrc(String[] content) {
+        String[] returns = new String[content.length];
+        for (int i = 0; i < content.length; i++)
+            returns[i] = getImgSrc(content[i]);
+        return returns;
+    }
+
+    /**
      * 从html文本中提取图片地址，或者文本内容
      * @param html 传入html文本
      * @param isGetImage true获取图片，false获取文本

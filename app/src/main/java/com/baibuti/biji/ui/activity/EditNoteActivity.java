@@ -388,13 +388,21 @@ public class EditNoteActivity extends AppCompatActivity implements IContextHelpe
         try {
             INoteDao noteDao = DaoStrategyHelper.getInstance().getNoteDao(this);
             if (isNew) {
-                if (noteDao.insertNote(currNote) != DbStatusType.SUCCESS) {
-                    showAlert(this, "错误", "新建笔记错误");
+                DbStatusType status = noteDao.insertNote(currNote);
+                if (status == DbStatusType.UPLOAD_FAILED) {
+                    showAlert(this, "错误", "笔记图片上传失败，请重试。");
+                    return;
+                } else if (status == DbStatusType.FAILED) {
+                    showAlert(this, "错误", "新建笔记错误。");
                     return;
                 }
             } else {
-                if (noteDao.updateNote(currNote) != DbStatusType.SUCCESS) {
-                    showAlert(this, "错误", "更新笔记错误");
+                DbStatusType status = noteDao.updateNote(currNote);
+                if (status == DbStatusType.UPLOAD_FAILED) {
+                    showAlert(this, "错误", "笔记图片上传失败，请重试。");
+                    return;
+                } else if (status == DbStatusType.FAILED) {
+                    showAlert(this, "错误", "更新笔记错误。");
                     return;
                 }
             }
@@ -529,7 +537,6 @@ public class EditNoteActivity extends AppCompatActivity implements IContextHelpe
 
     /**
      * 图片点击预览
-     * TODO 待改
      */
     private void onClickImage(List<String> imageList, int currentPosition) {
         try {
@@ -622,16 +629,12 @@ public class EditNoteActivity extends AppCompatActivity implements IContextHelpe
     private void insertImagesSync(final Uri data) {
         ProgressDialog progressDialog = showProgress(this, "插入图片中...", false, null);
 
-        // TODO 整理
-
         Observable.create((ObservableEmitter<String> emitter) -> {
             try {
                 m_rich_content.measure(0, 0);
                 // data: _Edited
                 int screenWidth = CommonUtil.getScreenWidth(this);
                 int screenHeight = CommonUtil.getScreenHeight(this);
-
-
 
                 Bitmap bitmap = ImageUtil.getBitmapFromPath(data.toString());
                 bitmap = ImageUtil.compressImage(bitmap, screenWidth, screenHeight, true); // 等屏幕大小 压缩图片
@@ -645,7 +648,6 @@ public class EditNoteActivity extends AppCompatActivity implements IContextHelpe
                 AppPathUtil.deleteFile(data.toString()); // 删除 Edited
                 emitter.onNext(smallImagePath);
 
-                // TODO 网络图片插入
                 // <img src="https://www.baidu.com/img/bd_logo1.png"> <- `https://` 不可漏
                 // 测试插入网络图片
                 // emitter.onNext("https://raw.githubusercontent.com/Aoi-hosizora/Biji_Baibuti/a5bb15af4098296ace557e281843513b2f672e0f/assets/DB_Query.png");

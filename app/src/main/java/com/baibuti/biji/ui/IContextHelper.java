@@ -200,7 +200,7 @@ public interface IContextHelper {
     /**
      * Snackbar: 信息 + Action
      */
-    default void showSnackbar(View view,
+    default void showSnackBar(View view,
                               CharSequence message,
                               CharSequence action, View.OnClickListener onClickListener) {
         Snackbar

@@ -18,7 +18,7 @@ public class Urls {
     /**
      * 临时设置的本地局域网 (调试记得设置)
      */
-    private static final String tmpLAN = "http://110.64.87.48";
+    private static final String tmpLAN = "http://110.64.87.48/";
 
     /**
      * !!! 服务器后端 API 地址
