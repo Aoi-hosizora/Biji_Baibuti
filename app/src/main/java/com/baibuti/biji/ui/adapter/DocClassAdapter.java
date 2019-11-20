@@ -29,6 +29,8 @@ public class DocClassAdapter extends BaseAdapter {
 
     public void setList(List<DocClass> list) {
         this.list = list;
+        if (this.list.size() > 0)
+            currentItem = this.list.get(0);
     }
 
     @Override
@@ -74,10 +76,12 @@ public class DocClassAdapter extends BaseAdapter {
         TransitionDrawable transition = (TransitionDrawable) holder.btn_docClass.getBackground();
 
         // TODO
-        if (itemName.equals(currentItem.getName()))
-            transition.startTransition(0);
-        else
-            transition.startTransition(200);
+        if (currentItem != null) {
+            if (itemName.equals(currentItem.getName()))
+                transition.startTransition(0);
+            else
+                transition.startTransition(200);
+        }
 
         return convertView;
     }

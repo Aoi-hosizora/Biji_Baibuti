@@ -172,8 +172,6 @@ public class NoteNetDao implements INoteDao {
     @Override
     public DbStatusType deleteNote(int id) throws ServerException {
 
-        // TODO 同时判断，删除图片
-
         Observable<ResponseDTO<NoteDTO>> observable = RetrofitFactory.getInstance()
             .createRequest(AuthManager.getInstance().getAuthorizationHead())
             .deleteNote(id)
@@ -200,8 +198,6 @@ public class NoteNetDao implements INoteDao {
 
     @Override
     public int deleteNotes(int[] ids) throws ServerException {
-
-        // TODO 同时判断，删除图片
 
         Observable<ResponseDTO<OneFieldDTO.CountDTO>> observable = RetrofitFactory.getInstance()
             .createRequest(AuthManager.getInstance().getAuthorizationHead())

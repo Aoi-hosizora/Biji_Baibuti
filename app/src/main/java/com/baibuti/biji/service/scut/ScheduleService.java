@@ -36,7 +36,7 @@ public class ScheduleService {
             Document scheduleHtml = Jsoup.parse(html);
 
             Element scheduleTbl = scheduleHtml.selectFirst("#kblist_table");
-            Elements divs = scheduleTbl.select("div.timetable_con.text-left");
+            Elements divs = scheduleTbl.select("div.timetable_con");
             int subjectIdx = 0;
             for (Element div : divs) {
                 MySubject subject = new MySubject();
@@ -45,8 +45,7 @@ public class ScheduleService {
                 String weekInDay = div.parent().parent().parent().child(0).select("td span").text().trim(); // div -> td -> tr -> tbody -> tr -> td -> span (星期一)
                 String title = div.selectFirst("span font").text().trim(); // (软件测试与维护)
 
-                Elements fonts = divs.select("p").select("font");
-
+                Elements fonts = div.select("p").select("font");
                 List<String> information = new ArrayList<>();
                 for (Element font : fonts) {
                     font.select("span").remove();
@@ -70,9 +69,8 @@ public class ScheduleService {
                 subject.setId(subjectIdx);
                 subject.setName(title); // 软件测试与维护
                 subject.setDay(text_day.get(weekInDay)); // 星期一
-
                 for (String info : information) {
-                    String[] kv = info.split("：");
+                    String[] kv = info.split("[:：]");
                     if (kv.length != 2) continue;
                     switch (kv[0]) {
                         case "周数": // !!! 2-4周(双),5-12周,16周
@@ -96,6 +94,7 @@ public class ScheduleService {
                 }
                 subject.setWeekList(getNumberFromWeekSpan(weekStr));
 
+                mySubjects.add(subject);
                 subjectIdx++;
             }
 
@@ -111,7 +110,7 @@ public class ScheduleService {
      * 2-4周(双),5-12周,16周 -> 2, 4, 5, 6, 7, 8, 9, 10, 11, 12, 16
      */
     private static List<Integer> getNumberFromWeekSpan(String weekStr) {
-        if (weekStr.isEmpty())
+        if (weekStr.trim().isEmpty())
             return new ArrayList<>();
 
         List<Integer> weekList = new ArrayList<>();
@@ -119,7 +118,7 @@ public class ScheduleService {
         // 2-4(双),5-12,16
         String[] weekSpans = weekStr.split(",");
         for (String span : weekSpans) { // 2-4(双)
-            String[] numbers = span.replaceAll("(.*)", "").split("-");
+            String[] numbers = span.replaceAll("\\([单双]\\)", "").split("-");
 
             if (numbers.length == 1)
                 weekList.add(Integer.valueOf(numbers[0]));

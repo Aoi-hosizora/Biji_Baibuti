@@ -7,6 +7,7 @@ import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteStatement;
 
+import com.baibuti.biji.model.dao.DatabaseManager;
 import com.baibuti.biji.model.dao.DbOpenHelper;
 import com.baibuti.biji.model.dao.DbStatusType;
 import com.baibuti.biji.model.dao.daoInterface.IGroupDao;
@@ -26,19 +27,15 @@ public class GroupDao implements IGroupDao {
     private final static String COL_ORDER = "g_order";
     private final static String COL_COLOR = "g_color";
 
-    private DbOpenHelper helper;
     private Context context;
+    private DatabaseManager dbMgr;
 
     public GroupDao(Context context) {
-        helper = new DbOpenHelper(context);
         this.context = context;
+        this.dbMgr = DatabaseManager.getInstance(new DbOpenHelper(context));
 
-        // 处理默认
-        // TODO
         if (queryAllGroups().isEmpty())
             insertGroup(Group.DEF_GROUP);
-
-        // 预处理顺序
         precessOrder();
     }
 
@@ -58,7 +55,7 @@ public class GroupDao implements IGroupDao {
     @Override
     public List<Group> queryAllGroups() {
 
-        SQLiteDatabase db = helper.getWritableDatabase();
+        SQLiteDatabase db = dbMgr.getReadableDatabase();
         Cursor cursor = null;
         String sql = "select * from " + TBL_NAME;
 
@@ -80,7 +77,7 @@ public class GroupDao implements IGroupDao {
             e.printStackTrace();
         } finally {
             if (cursor != null && !cursor.isClosed()) cursor.close();
-            if (db != null && db.isOpen()) db.close();
+            dbMgr.closeDatabase();
         }
 
         return groupList;
@@ -94,7 +91,7 @@ public class GroupDao implements IGroupDao {
     @Override
     public Group queryGroupById(int groupId) {
 
-        SQLiteDatabase db = helper.getWritableDatabase();
+        SQLiteDatabase db = dbMgr.getReadableDatabase();
         Cursor cursor = null;
         String sql = "select * from " + TBL_NAME + " where " + COL_ID + " = " + groupId;
 
@@ -115,7 +112,7 @@ public class GroupDao implements IGroupDao {
             e.printStackTrace();
         } finally {
             if (cursor != null && !cursor.isClosed()) cursor.close();
-            if (db != null && db.isOpen()) db.close();
+            dbMgr.closeDatabase();
         }
 
         return null;
@@ -128,7 +125,7 @@ public class GroupDao implements IGroupDao {
      */
     @Override
     public Group queryGroupByName(String groupName) {
-        SQLiteDatabase db = helper.getWritableDatabase();
+        SQLiteDatabase db = dbMgr.getReadableDatabase();
         Cursor cursor = null;
         String sql = "select * from " + TBL_NAME + " where " + COL_NAME + " = \"" + groupName + "\"";
 
@@ -149,7 +146,7 @@ public class GroupDao implements IGroupDao {
             e.printStackTrace();
         } finally {
             if (cursor != null && !cursor.isClosed()) cursor.close();
-            if (db != null && db.isOpen()) db.close();
+            dbMgr.closeDatabase();
         }
 
         return null;
@@ -158,6 +155,7 @@ public class GroupDao implements IGroupDao {
     /**
      * 查询默认分组
      * @return 返回数据库中的默认分组
+    if (queryGroupBy
      */
     @Override
     public Group queryDefaultGroup() {
@@ -175,7 +173,7 @@ public class GroupDao implements IGroupDao {
         if (queryGroupByName(group.getName()) != null)
             return DbStatusType.DUPLICATED;
 
-        SQLiteDatabase db = helper.getWritableDatabase();
+        SQLiteDatabase db = dbMgr.getWritableDatabase();
         String sql = "insert into " + TBL_NAME +
             "(" + COL_NAME + ", " + COL_ORDER + ", " + COL_COLOR + ") " +
             "values(?, ?, ?)";
@@ -201,7 +199,7 @@ public class GroupDao implements IGroupDao {
             return DbStatusType.FAILED;
         } finally {
             db.endTransaction();
-            db.close();
+            dbMgr.closeDatabase();
         }
     }
 
@@ -221,7 +219,7 @@ public class GroupDao implements IGroupDao {
         if (def.getId() == group.getId() && !def.getName().equals(group.getName()))
             return DbStatusType.DEFAULT;
 
-        SQLiteDatabase db = helper.getWritableDatabase();
+        SQLiteDatabase db = dbMgr.getWritableDatabase();
         ContentValues values = new ContentValues();
         values.put(COL_NAME, group.getName());
         values.put(COL_ORDER, group.getOrder());
@@ -229,7 +227,7 @@ public class GroupDao implements IGroupDao {
 
         int ret = db.update(TBL_NAME, values,
             COL_ID + " = ?", new String[] { String.valueOf(group.getId()) });
-        db.close();
+        dbMgr.closeDatabase();
         if (ret != 0) {
             precessOrder();
             return DbStatusType.SUCCESS;
@@ -254,7 +252,7 @@ public class GroupDao implements IGroupDao {
         NoteDao noteDao = new NoteDao(context);
         List<Note> notes = noteDao.queryNotesByGroupId(id);
 
-        try (SQLiteDatabase db = helper.getWritableDatabase()) {
+        try (SQLiteDatabase db = dbMgr.getWritableDatabase()) {
 
             if (notes.isEmpty()) {
                 int ret = db.delete(TBL_NAME, COL_ID + " = ?", new String[] { String.valueOf(id) });
@@ -287,6 +285,8 @@ public class GroupDao implements IGroupDao {
                     return DbStatusType.SUCCESS;
                 }
             }
+        } finally {
+            dbMgr.closeDatabase();
         }
     }
 
@@ -300,7 +300,7 @@ public class GroupDao implements IGroupDao {
         List<Group> groups = queryAllGroups();
         Collections.sort(groups);
 
-        SQLiteDatabase db = helper.getWritableDatabase();
+        SQLiteDatabase db = dbMgr.getWritableDatabase();
         for (int i = 0; i < groups.size(); i++) {
             if (groups.get(i).getOrder() != i) {
                 ContentValues values = new ContentValues();
@@ -309,6 +309,6 @@ public class GroupDao implements IGroupDao {
                     COL_ID + " = ?", new String[] { String.valueOf(groups.get(i).getId()) });
             }
         }
-        db.close();
+        dbMgr.closeDatabase();
     }
 }

@@ -7,6 +7,7 @@ import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteStatement;
 
+import com.baibuti.biji.model.dao.DatabaseManager;
 import com.baibuti.biji.model.dao.DbOpenHelper;
 import com.baibuti.biji.model.dao.DbStatusType;
 import com.baibuti.biji.model.dao.daoInterface.INoteDao;
@@ -29,12 +30,12 @@ public class NoteDao implements INoteDao {
     private final static String COL_CREATE_TIME = "n_create_time";
     private final static String COL_UPDATE_TIME = "n_update_time";
 
-    private DbOpenHelper helper;
     private GroupDao groupDao;
+    private DatabaseManager dbMgr;
 
     public NoteDao(Context context) {
-        helper = new DbOpenHelper(context);
-        groupDao = new GroupDao(context);
+        this.dbMgr = DatabaseManager.getInstance(new DbOpenHelper(context));
+        this.groupDao = new GroupDao(context);
     }
 
     public static void create_tbl(SQLiteDatabase db) {
@@ -64,7 +65,7 @@ public class NoteDao implements INoteDao {
     @Override
     public List<Note> queryNotesByGroupId(int groupId) {
 
-        SQLiteDatabase db = helper.getWritableDatabase();
+        SQLiteDatabase db = dbMgr.getReadableDatabase();
         Cursor cursor = null;
         String sql = "select * from " + TBL_NAME + ((groupId == -1) ? "" : " where " + COL_GROUP_ID + " = " + groupId);
 
@@ -73,17 +74,15 @@ public class NoteDao implements INoteDao {
             cursor = db.rawQuery(sql, null);
 
             while (cursor.moveToNext()) {
-
                 int id = cursor.getInt(cursor.getColumnIndex(COL_ID));
                 String title = cursor.getString(cursor.getColumnIndex(COL_TITLE));
                 String content = cursor.getString(cursor.getColumnIndex(COL_CONTENT));
+                Date ct = DateColorUtil.Str2Date(cursor.getString(cursor.getColumnIndex(COL_CREATE_TIME)));
+                Date ut = DateColorUtil.Str2Date(cursor.getString(cursor.getColumnIndex(COL_UPDATE_TIME)));
 
                 Group group = groupDao.queryGroupById(cursor.getInt(cursor.getColumnIndex(COL_GROUP_ID)));
                 if (group == null)
                     group = groupDao.queryDefaultGroup();
-
-                Date ct = DateColorUtil.Str2Date(cursor.getString(cursor.getColumnIndex(COL_CREATE_TIME)));
-                Date ut = DateColorUtil.Str2Date(cursor.getString(cursor.getColumnIndex(COL_UPDATE_TIME)));
 
                 noteList.add(new Note(id, title, content, group, ct, ut));
             }
@@ -92,7 +91,7 @@ public class NoteDao implements INoteDao {
             e.printStackTrace();
         } finally {
             if (cursor != null && !cursor.isClosed()) cursor.close();
-            if (db != null && db.isOpen()) db.close();
+            dbMgr.closeDatabase();
         }
 
         return noteList;
@@ -105,7 +104,7 @@ public class NoteDao implements INoteDao {
     @Override
     public Note queryNoteById(int noteId) {
 
-        SQLiteDatabase db = helper.getWritableDatabase();
+        SQLiteDatabase db = dbMgr.getReadableDatabase();
         Cursor cursor = null;
         String sql = "select * from " + TBL_NAME + " where " + COL_ID + " = " + noteId;
 
@@ -132,7 +131,7 @@ public class NoteDao implements INoteDao {
             e.printStackTrace();
         } finally {
             if (cursor != null && !cursor.isClosed()) cursor.close();
-            if (db != null && db.isOpen()) db.close();
+            dbMgr.closeDatabase();
         }
         return null;
     }
@@ -144,7 +143,7 @@ public class NoteDao implements INoteDao {
      */
     public DbStatusType insertNote(Note note) {
 
-        SQLiteDatabase db = helper.getWritableDatabase();
+        SQLiteDatabase db = dbMgr.getWritableDatabase();
         String sql =
             "insert into " + TBL_NAME +
                 "(" + COL_TITLE + ", " + COL_CONTENT + ", " + COL_GROUP_ID + ", "
@@ -175,7 +174,7 @@ public class NoteDao implements INoteDao {
             return DbStatusType.FAILED;
         } finally {
             db.endTransaction();
-            db.close();
+            dbMgr.closeDatabase();
         }
     }
 
@@ -190,7 +189,7 @@ public class NoteDao implements INoteDao {
         if (groupDao.queryGroupById(note.getGroup().getId()) == null)
             note.setGroup(groupDao.queryDefaultGroup());
 
-        SQLiteDatabase db = helper.getWritableDatabase();
+        SQLiteDatabase db = dbMgr.getWritableDatabase();
         ContentValues values = new ContentValues();
 
         values.put(COL_TITLE, note.getTitle());
@@ -200,7 +199,7 @@ public class NoteDao implements INoteDao {
 
         int ret = db.update(TBL_NAME, values,
             COL_ID + " = ?", new String[] { String.valueOf(note.getId()) });
-        db.close();
+        dbMgr.closeDatabase();
         return ret == 0 ? DbStatusType.FAILED : DbStatusType.SUCCESS;
     }
 
@@ -211,11 +210,11 @@ public class NoteDao implements INoteDao {
      */
     @Override
     public DbStatusType deleteNote(int id) {
-        SQLiteDatabase db = helper.getWritableDatabase();
+        SQLiteDatabase db = dbMgr.getWritableDatabase();
 
         int ret = db.delete(TBL_NAME,
             COL_ID + " = ?", new String[] { String.valueOf(id) });
-        db.close();
+        dbMgr.closeDatabase();
         return ret == 0 ? DbStatusType.FAILED : DbStatusType.SUCCESS;
     }
 
@@ -225,13 +224,13 @@ public class NoteDao implements INoteDao {
      */
     @Override
     public int deleteNotes(int[] ids) {
-        SQLiteDatabase db = helper.getWritableDatabase();
+        SQLiteDatabase db = dbMgr.getWritableDatabase();
         String[] id_str = new String[ids.length];
         for (int i = 0; i < id_str.length; i++)
             id_str[i] = String.valueOf(ids[i]);
 
         int ret = db.delete(TBL_NAME, COL_ID + " = ?", id_str);
-        db.close();
+        dbMgr.closeDatabase();
         return ret;
     }
 }

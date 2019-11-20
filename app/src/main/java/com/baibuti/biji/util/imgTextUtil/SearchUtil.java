@@ -34,7 +34,7 @@ public class SearchUtil {
      * @return 符合关键词的搜索项
      */
     public static <T> List<T> getSearchItems(T[] listItems, String keyword) {
-        if (listItems == null || !(listItems[0] instanceof ISearchEntity))
+        if (listItems == null || listItems.length == 0 || !(listItems[0] instanceof ISearchEntity))
             return null;
 
         // 返回的词组

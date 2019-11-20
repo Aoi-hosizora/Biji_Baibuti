@@ -94,12 +94,12 @@ public class MainActivity extends FragmentActivity implements IContextHelper, Au
             }
         }
 
-        new Thread(() -> {
-            // FB 数据库查看
-            Stetho.initializeWithDefaults(getApplicationContext());
-            // 初始化结巴分词
-            SearchUtil.initJieba(getApplicationContext());
-        }).start();
+//        new Thread(() -> {
+//            // FB 数据库查看
+//            Stetho.initializeWithDefaults(getApplicationContext());
+//            // 初始化结巴分词
+//            SearchUtil.initJieba(getApplicationContext());
+//        }).start();
 
         initViews(); // 布局
         initNav();   // 滑动栏

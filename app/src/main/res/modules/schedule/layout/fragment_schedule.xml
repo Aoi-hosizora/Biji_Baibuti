@@ -1,5 +1,5 @@
-<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:fab="http://schemas.android.com/apk/res-auto"
+<android.support.constraint.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/schedulefragment_layout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -23,26 +23,26 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="@color/background"
-        fab:layout_constraintEnd_toEndOf="parent"
-        fab:layout_constraintStart_toStartOf="parent"
-        fab:layout_constraintTop_toBottomOf="@id/ScheduleFrag_Toolbar" />
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/ScheduleFrag_Toolbar" />
 
     <com.zhuangfei.timetable.TimetableView
         android:id="@+id/schedulefragment_timetableView"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:background="@color/background"
-        fab:layout_constraintBottom_toBottomOf="parent"
-        fab:layout_constraintEnd_toEndOf="parent"
-        fab:layout_constraintStart_toStartOf="parent"
-        fab:layout_constraintTop_toBottomOf="@+id/schedulefragment_weekview" />
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/schedulefragment_weekview" />
 
     <TextView
         android:id="@+id/schedulefragment_week_textview"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="16dp"
-        android:text="TextView"
+        android:text=""
         android:textSize="18sp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"

@@ -7,6 +7,7 @@ import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteStatement;
 
+import com.baibuti.biji.model.dao.DatabaseManager;
 import com.baibuti.biji.model.dao.DbOpenHelper;
 import com.baibuti.biji.model.dao.DbStatusType;
 import com.baibuti.biji.model.dao.daoInterface.IDocumentDao;
@@ -24,12 +25,12 @@ public class DocumentDao implements IDocumentDao {
     private final static String COL_PATH = "doc_path";
     final static String COL_DOCCLASS_ID = "doc_class_name";
 
-    private DbOpenHelper helper;
+    private DatabaseManager dbMgr;
     private DocClassDao docClassDao;
 
     public DocumentDao(Context context) {
-        helper = new DbOpenHelper(context);
-        docClassDao = new DocClassDao(context);
+        this.dbMgr = DatabaseManager.getInstance(new DbOpenHelper(context));
+        this.docClassDao = new DocClassDao(context);
     }
 
     public static void create_tbl(SQLiteDatabase db) {
@@ -57,7 +58,7 @@ public class DocumentDao implements IDocumentDao {
     @Override
     public List<Document> queryDocumentByClassId(int cid) {
 
-        SQLiteDatabase db = helper.getWritableDatabase();
+        SQLiteDatabase db = dbMgr.getReadableDatabase();
         Cursor cursor = null;
         String sql = "select * from " + TBL_NAME +
             ((cid == -1) ? "" : " where " + COL_DOCCLASS_ID + " = " + cid);
@@ -80,7 +81,7 @@ public class DocumentDao implements IDocumentDao {
             e.printStackTrace();
         } finally {
             if (cursor != null && !cursor.isClosed()) cursor.close();
-            if (db != null && db.isOpen()) db.close();
+            dbMgr.closeDatabase();
         }
         return documentList;
     }
@@ -93,7 +94,7 @@ public class DocumentDao implements IDocumentDao {
     @Override
     public Document queryDocumentById(int id) {
 
-        SQLiteDatabase db = helper.getWritableDatabase();
+        SQLiteDatabase db = dbMgr.getReadableDatabase();
         Cursor cursor = null;
         String sql = "select * from " + TBL_NAME + " where " + COL_ID + " = " + id;
 
@@ -114,7 +115,7 @@ public class DocumentDao implements IDocumentDao {
             e.printStackTrace();
         } finally {
             if (cursor != null && !cursor.isClosed()) cursor.close();
-            if (db != null && db.isOpen()) db.close();
+            dbMgr.closeDatabase();
         }
         return document;
     }
@@ -127,7 +128,7 @@ public class DocumentDao implements IDocumentDao {
     @Override
     public DbStatusType insertDocument(Document document) {
 
-        SQLiteDatabase db = helper.getWritableDatabase();
+        SQLiteDatabase db = dbMgr.getWritableDatabase();
         String sql =
             "insert into " + TBL_NAME +
             "(" + COL_PATH + ", " + COL_DOCCLASS_ID + ") values (?, ?)";
@@ -153,7 +154,7 @@ public class DocumentDao implements IDocumentDao {
             return DbStatusType.FAILED;
         }  finally {
             db.endTransaction();
-            db.close();
+            dbMgr.closeDatabase();
         }
     }
 
@@ -168,7 +169,7 @@ public class DocumentDao implements IDocumentDao {
         if (docClassDao.queryDocClassById(document.getDocClass().getId()) == null)
             document.setDocClass(docClassDao.queryDefaultDocClass());
 
-        SQLiteDatabase db = helper.getWritableDatabase();
+        SQLiteDatabase db = dbMgr.getWritableDatabase();
         ContentValues values = new ContentValues();
 
         values.put(COL_DOCCLASS_ID, document.getDocClass().getId());
@@ -176,7 +177,7 @@ public class DocumentDao implements IDocumentDao {
 
         int ret = db.update(TBL_NAME, values,
             COL_ID + " = ?", new String[] { String.valueOf(document.getId()) } );
-        db.close();
+        dbMgr.closeDatabase();
         return ret == 0 ? DbStatusType.FAILED : DbStatusType.SUCCESS;
     }
 
@@ -187,11 +188,11 @@ public class DocumentDao implements IDocumentDao {
      */
     @Override
     public DbStatusType deleteDocument(int id) {
-        SQLiteDatabase db = helper.getWritableDatabase();
+        SQLiteDatabase db = dbMgr.getWritableDatabase();
 
         int ret = db.delete(TBL_NAME,
             COL_ID + " = ?", new String[]{String.valueOf(id)});
-        db.close();
+        dbMgr.closeDatabase();
         return ret == 0 ? DbStatusType.FAILED : DbStatusType.SUCCESS;
     }
 }

@@ -7,6 +7,7 @@ import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteStatement;
 
+import com.baibuti.biji.model.dao.DatabaseManager;
 import com.baibuti.biji.model.dao.DbOpenHelper;
 import com.baibuti.biji.model.dao.DbStatusType;
 import com.baibuti.biji.model.dao.daoInterface.IDocClassDao;
@@ -24,15 +25,14 @@ public class DocClassDao implements IDocClassDao {
     private static final String COL_NAME = "f_name";
 
     private Context context;
-    private DbOpenHelper helper;
+    private DatabaseManager dbMgr;
 
     public DocClassDao(Context context) {
         this.context = context;
-        helper = new DbOpenHelper(context);
+        this.dbMgr = DatabaseManager.getInstance(new DbOpenHelper(context));
 
-        // 处理默认
         if (queryAllDocClasses().isEmpty())
-            insertDocClass(new DocClass()); // DEF_CLASS_NAME
+            insertDocClass(new DocClass());
     }
 
     public static void create_tbl(SQLiteDatabase db) {
@@ -49,7 +49,7 @@ public class DocClassDao implements IDocClassDao {
     @Override
     public List<DocClass> queryAllDocClasses() {
 
-        SQLiteDatabase db = helper.getWritableDatabase();
+        SQLiteDatabase db = dbMgr.getReadableDatabase();
         String sql = "select * from " + TBL_NAME;
         Cursor cursor = null;
 
@@ -68,7 +68,7 @@ public class DocClassDao implements IDocClassDao {
             e.printStackTrace();
         } finally {
             if (cursor != null && !cursor.isClosed()) cursor.close();
-            if (db != null && db.isOpen()) db.close();
+            dbMgr.closeDatabase();
         }
 
         return docClassList;
@@ -82,7 +82,7 @@ public class DocClassDao implements IDocClassDao {
     @Override
     public DocClass queryDocClassById(int id) {
 
-        SQLiteDatabase db = helper.getWritableDatabase();
+        SQLiteDatabase db = dbMgr.getReadableDatabase();
         String sql = "select * from " + TBL_NAME + " where " + COL_ID + " = " + id;
         Cursor cursor = null;
 
@@ -99,7 +99,7 @@ public class DocClassDao implements IDocClassDao {
             e.printStackTrace();
         } finally {
             if (cursor != null && !cursor.isClosed()) cursor.close();
-            if (db != null && db.isOpen()) db.close();
+            dbMgr.closeDatabase();
         }
 
         return null;
@@ -107,7 +107,7 @@ public class DocClassDao implements IDocClassDao {
 
     @Override
     public DocClass queryDocClassByName(String name) {
-        SQLiteDatabase db = helper.getWritableDatabase();
+        SQLiteDatabase db = dbMgr.getReadableDatabase();
         String sql = "select * from " + TBL_NAME + " where " + COL_NAME + " = \"" + name + "\"";
         Cursor cursor = null;
 
@@ -124,7 +124,7 @@ public class DocClassDao implements IDocClassDao {
             e.printStackTrace();
         } finally {
             if (cursor != null && !cursor.isClosed()) cursor.close();
-            if (db != null && db.isOpen()) db.close();
+            dbMgr.closeDatabase();
         }
 
         return null;
@@ -137,7 +137,7 @@ public class DocClassDao implements IDocClassDao {
     @Override
     public DocClass queryDefaultDocClass() {
 
-        SQLiteDatabase db = helper.getWritableDatabase();
+        SQLiteDatabase db = dbMgr.getReadableDatabase();
         Cursor cursor = null;
         String sql = "select * from " + TBL_NAME + " where " + COL_NAME + " = \"" + DocClass.DEF_CLASS_NAME + "\"";
 
@@ -156,7 +156,7 @@ public class DocClassDao implements IDocClassDao {
             e.printStackTrace();
         } finally {
             if (cursor != null && !cursor.isClosed()) cursor.close();
-            if (db != null && db.isOpen()) db.close();
+            dbMgr.closeDatabase();
         }
 
         return docClass;
@@ -173,7 +173,7 @@ public class DocClassDao implements IDocClassDao {
         if (queryDocClassByName(docClass.getName()) != null)
             return DbStatusType.DUPLICATED;
 
-        SQLiteDatabase db = helper.getWritableDatabase();
+        SQLiteDatabase db = dbMgr.getWritableDatabase();
         String sql = "insert into " + TBL_NAME +
             "(" + COL_NAME + ") values(?)";
         SQLiteStatement stat = db.compileStatement(sql);
@@ -194,7 +194,7 @@ public class DocClassDao implements IDocClassDao {
             return DbStatusType.FAILED;
         } finally {
             db.endTransaction();
-            db.close();
+            dbMgr.closeDatabase();
         }
     }
 
@@ -214,13 +214,13 @@ public class DocClassDao implements IDocClassDao {
         if (def.getId() == docClass.getId() && !def.getName().equals(docClass.getName()))
             return DbStatusType.DEFAULT;
 
-        SQLiteDatabase db = helper.getWritableDatabase();
+        SQLiteDatabase db = dbMgr.getWritableDatabase();
         ContentValues values = new ContentValues();
         values.put(COL_NAME, docClass.getName());
 
         int ret = db.update(TBL_NAME, values,
             COL_ID + " = ?", new String[] { String.valueOf(docClass.getId()) });
-        db.close();
+        dbMgr.closeDatabase();
         return ret == 0 ? DbStatusType.FAILED : DbStatusType.SUCCESS;
     }
 
@@ -240,7 +240,7 @@ public class DocClassDao implements IDocClassDao {
         DocumentDao documentDao = new DocumentDao(context);
         List<Document> documents = documentDao.queryDocumentByClassId(id);
 
-        try (SQLiteDatabase db = helper.getWritableDatabase()) {
+        try (SQLiteDatabase db = dbMgr.getWritableDatabase()) {
 
             if (documents.isEmpty()) {
                 int ret = db.delete(TBL_NAME, COL_ID + " = ?", new String[] { String.valueOf(id) });
@@ -273,6 +273,8 @@ public class DocClassDao implements IDocClassDao {
                     return DbStatusType.SUCCESS;
                 }
             }
+        } finally {
+            dbMgr.closeDatabase();
         }
     }
 }

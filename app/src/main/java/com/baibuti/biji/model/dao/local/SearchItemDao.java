@@ -5,6 +5,7 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteStatement;
 
+import com.baibuti.biji.model.dao.DatabaseManager;
 import com.baibuti.biji.model.dao.DbOpenHelper;
 import com.baibuti.biji.model.dao.DbStatusType;
 import com.baibuti.biji.model.dao.daoInterface.ISearchItemDao;
@@ -22,10 +23,10 @@ public class SearchItemDao implements ISearchItemDao {
     private final static String COL_URL = "sis_url";
     private final static String COL_CONTENT = "sis_content";
 
-    private DbOpenHelper helper;
+    private DatabaseManager dbMgr;
 
     public SearchItemDao(Context context) {
-        helper = new DbOpenHelper(context);
+        this.dbMgr = DatabaseManager.getInstance(new DbOpenHelper(context));
     }
 
     public static void create_tbl(SQLiteDatabase db) {
@@ -44,7 +45,7 @@ public class SearchItemDao implements ISearchItemDao {
     @Override
     public List<SearchItem> queryAllSearchItems() {
 
-        SQLiteDatabase db = helper.getWritableDatabase();
+        SQLiteDatabase db = dbMgr.getReadableDatabase();
         String sql = "select * from " + TBL_NAME;
         Cursor cursor = null;
 
@@ -66,7 +67,7 @@ public class SearchItemDao implements ISearchItemDao {
         }
         finally {
             if (cursor != null && !cursor.isClosed()) cursor.close();
-            if (db != null && db.isOpen()) db.close();
+            dbMgr.closeDatabase();
         }
         return searchItems;
     }
@@ -78,7 +79,7 @@ public class SearchItemDao implements ISearchItemDao {
      */
     @Override
     public SearchItem querySearchItemById(int id) {
-        SQLiteDatabase db = helper.getWritableDatabase();
+        SQLiteDatabase db = dbMgr.getReadableDatabase();
         String sql = "select * from " + TBL_NAME + " where " + COL_ID + " = " + id;
         Cursor cursor = null;
 
@@ -98,7 +99,7 @@ public class SearchItemDao implements ISearchItemDao {
         }
         finally {
             if (cursor != null && !cursor.isClosed()) cursor.close();
-            if (db != null && db.isOpen()) db.close();
+            dbMgr.closeDatabase();
         }
 
         return null;
@@ -111,7 +112,7 @@ public class SearchItemDao implements ISearchItemDao {
      */
     public DbStatusType insertSearchItem(SearchItem searchItem) {
 
-        SQLiteDatabase db = helper.getWritableDatabase();
+        SQLiteDatabase db = dbMgr.getWritableDatabase();
         String sql = "insert into " + TBL_NAME +
             " (" + COL_URL + ", " + COL_TITLE + ", " + COL_CONTENT + ") " +
             "values (?, ?, ?)";
@@ -137,7 +138,7 @@ public class SearchItemDao implements ISearchItemDao {
         }
         finally {
             db.endTransaction();
-            db.close();
+            dbMgr.closeDatabase();
         }
     }
 
@@ -149,11 +150,11 @@ public class SearchItemDao implements ISearchItemDao {
     @Override
     public DbStatusType deleteSearchItem(int id) {
 
-        SQLiteDatabase db = helper.getWritableDatabase();
+        SQLiteDatabase db = dbMgr.getWritableDatabase();
 
         int ret = db.delete(TBL_NAME,
             COL_ID + " = ?", new String[] { String.valueOf(id) });
-        db.close();
+        dbMgr.closeDatabase();
         return ret == 0 ? DbStatusType.FAILED : DbStatusType.SUCCESS;
     }
 
@@ -164,13 +165,13 @@ public class SearchItemDao implements ISearchItemDao {
      */
     @Override
     public int deleteSearchItems(List<SearchItem> searchItems) {
-        SQLiteDatabase db = helper.getWritableDatabase();
+        SQLiteDatabase db = dbMgr.getWritableDatabase();
         String[] id_str = new String[searchItems.size()];
         for (int i = 0; i < id_str.length; i++)
             id_str[i] = String.valueOf(searchItems.get(i).getId());
 
         int ret = db.delete(TBL_NAME, COL_ID + " = ?", id_str);
-        db.close();
+        dbMgr.closeDatabase();
         return ret;
     }
 }

@@ -5,6 +5,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
@@ -103,6 +104,26 @@ public class StringUtil {
     /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     /**
+     * 从 输入流读入
+     * @return null for error
+     */
+    @Nullable
+    public static String readFromInputStream(InputStream inputStream) {
+        try {
+            StringBuilder sb = new StringBuilder();
+            byte[] buf = new byte[inputStream.available()];
+            int len;
+            while ((len = inputStream.read(buf)) > 0)
+                sb.append(new String(buf, 0, len));
+            inputStream.close();
+            return sb.toString();
+        } catch (IOException ex) {
+            ex.printStackTrace();
+            return null;
+        }
+    }
+
+    /**
      * 从文件读取数据
      * @return null for error
      */
@@ -115,12 +136,11 @@ public class StringUtil {
 
             FileInputStream fis = new FileInputStream(filename);
             StringBuilder sb = new StringBuilder();
-            byte[] buf = new byte[1024];
+            byte[] buf = new byte[fis.available()];
 
             int len;
-            while ((len = fis.read(buf)) > 0) {
+            while ((len = fis.read(buf)) > 0)
                 sb.append(new String(buf, 0, len));
-            }
 
             fis.close();
 

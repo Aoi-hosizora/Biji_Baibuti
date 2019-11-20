@@ -131,8 +131,8 @@ public class FileFragment extends BaseFragment implements IContextHelper {
             MainActivity activity = (MainActivity) getActivity();
             if (activity != null) activity.openNavMenu();
         });
-        m_toolbar.setPopupTheme(R.style.popup_theme);
         m_toolbar.setOnMenuItemClickListener(menuItemClickListener);
+        m_toolbar.setPopupTheme(R.style.popup_theme);
 
         // Empty View
         m_documentListView.setEmptyView(view.findViewById(R.id.id_document_empty));
@@ -162,7 +162,7 @@ public class FileFragment extends BaseFragment implements IContextHelper {
         LayoutUtil.AdjustSearchViewLayout(m_searchView);
         m_searchView.setIconified(false);
         m_searchView.setSubmitButtonEnabled(true);
-        m_searchView.setQueryRefinementEnabled(true);
+        // m_searchView.setQueryRefinementEnabled(true);
         m_searchView.setQueryHint("搜索文档");
         m_searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() { // TODO back
             @Override
@@ -197,7 +197,7 @@ public class FileFragment extends BaseFragment implements IContextHelper {
             if (pageData.docClassListItems.size() != 0)
                 pageData.showDocumentList.addAll(filterDocumentByDocClass(pageData.docClassListItems.get(0), pageData.documentListItems));
 
-            m_docClassListView.getAdapter().notify();
+            ((DocClassAdapter) m_docClassListView.getAdapter()).notifyDataSetChanged();
             m_documentListView.getAdapter().notifyDataSetChanged();
 
         } catch (ServerException ex) {
@@ -338,7 +338,7 @@ public class FileFragment extends BaseFragment implements IContextHelper {
                     if (status == DbStatusType.SUCCESS) {
                         showToast(getActivity(), "分组 \"" + newDocClass.getName() + "\" 新建成功");
                         pageData.docClassListItems.add(newDocClass);
-                        m_docClassListView.getAdapter().notify();
+                        ((DocClassAdapter) m_docClassListView.getAdapter()).notifyDataSetChanged();
                         return;
                     }
                     if (status == DbStatusType.DUPLICATED)
@@ -380,7 +380,7 @@ public class FileFragment extends BaseFragment implements IContextHelper {
                     if (status == DbStatusType.SUCCESS) {
                         docClass.setName(text);
                         showToast(getActivity(), "分组 \"" + text + "\" 修改成功");
-                        m_docClassListView.getAdapter().notify();
+                        ((DocClassAdapter) m_docClassListView.getAdapter()).notifyDataSetChanged();
                         return;
                     }
                     if (status == DbStatusType.DUPLICATED)
