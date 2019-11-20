@@ -135,6 +135,9 @@ public class DocumentDao implements IDocumentDao {
         db.beginTransaction();
 
         try {
+            if (docClassDao.queryDocClassById(document.getDocClass().getId()) == null)
+                document.setDocClass(docClassDao.queryDefaultDocClass());
+
             stat.bindString(1, document.getFilename() == null ? "" : document.getFilename()); // COL_PATH
             stat.bindLong(2, document.getDocClass().getId());
 
@@ -161,6 +164,9 @@ public class DocumentDao implements IDocumentDao {
      */
     @Override
     public DbStatusType updateDocument(Document document) {
+
+        if (docClassDao.queryDocClassById(document.getDocClass().getId()) == null)
+            document.setDocClass(docClassDao.queryDefaultDocClass());
 
         SQLiteDatabase db = helper.getWritableDatabase();
         ContentValues values = new ContentValues();

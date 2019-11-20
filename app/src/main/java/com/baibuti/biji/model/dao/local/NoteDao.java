@@ -35,10 +35,6 @@ public class NoteDao implements INoteDao {
     public NoteDao(Context context) {
         helper = new DbOpenHelper(context);
         groupDao = new GroupDao(context);
-
-        // 是否为空
-        // if (queryAllNotes().isEmpty())
-        //     insertNote(Note.DEF_NOTE);
     }
 
     public static void create_tbl(SQLiteDatabase db) {
@@ -158,6 +154,9 @@ public class NoteDao implements INoteDao {
         db.beginTransaction();
 
         try {
+            if (groupDao.queryGroupById(note.getGroup().getId()) == null)
+                note.setGroup(groupDao.queryDefaultGroup());
+
             stat.bindString(1, note.getTitle()); // COL_TITLE
             stat.bindString(2, note.getContent()); // COL_TITLE
             stat.bindLong(3, note.getGroup().getId()); // COL_GROUP_ID
@@ -187,6 +186,9 @@ public class NoteDao implements INoteDao {
      */
     @Override
     public DbStatusType updateNote(Note note) {
+
+        if (groupDao.queryGroupById(note.getGroup().getId()) == null)
+            note.setGroup(groupDao.queryDefaultGroup());
 
         SQLiteDatabase db = helper.getWritableDatabase();
         ContentValues values = new ContentValues();

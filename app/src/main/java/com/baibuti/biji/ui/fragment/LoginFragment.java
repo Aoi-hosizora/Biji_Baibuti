@@ -77,7 +77,7 @@ public class LoginFragment extends Fragment implements IContextHelper {
             m_LoginEditText.setText(AuthManager.getInstance().getUsername());
         AuthActivity activity = (AuthActivity) getActivity();
         if (activity != null) {
-            ArrayAdapter<String> spinnerAdapter = new ArrayAdapter<>(activity, R.layout.layout_login_spinner, exTexts);
+            ArrayAdapter<String> spinnerAdapter = new ArrayAdapter<>(activity, R.layout.layout_common_spinner, exTexts);
             m_ExSpinner.setAdapter(spinnerAdapter);
             m_ExSpinner.setSelection(Arrays.asList(exTexts).indexOf("30天"), true);
         }

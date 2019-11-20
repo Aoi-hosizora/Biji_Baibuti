@@ -245,7 +245,7 @@ public interface ServerApi {
 
     // endregion DocClass
 
-    // region Document (6+)
+    // region Document (7)
 
     @NeedAuth
     @GET("/document/")
@@ -267,6 +267,7 @@ public interface ServerApi {
         @Part("doc_class_id") int classId
     );
 
+
     @NeedAuth
     @Multipart
     @PUT("/document/")
@@ -281,6 +282,9 @@ public interface ServerApi {
     Observable<ResponseDTO<DocumentDTO>> deleteDocument(@Path("did") int id);
 
     // endregion Document
+
+    /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     // region Raw (2)
 
@@ -304,10 +308,16 @@ public interface ServerApi {
 
     // region Share
 
+    /**
+     * 获取用户所有的共享码
+     */
     @NeedAuth
     @GET("/share/")
     Observable<ResponseDTO<ShareCodeDTO[]>> getAllShareCode();
 
+    /**
+     * 将用户文档共享
+     */
     @NeedAuth
     @Multipart
     @POST("/share/")
@@ -316,6 +326,9 @@ public interface ServerApi {
         @Part("did") int[] ids
     );
 
+    /**
+     * 将用户文档分组共享
+     */
     @NeedAuth
     @Multipart
     @POST("/share/")
@@ -324,6 +337,9 @@ public interface ServerApi {
         @Query("cid") int cid
     );
 
+    /**
+     * 删除用户共享码
+     */
     @NeedAuth
     @Multipart
     @DELETE("/share/")
@@ -331,6 +347,9 @@ public interface ServerApi {
         @Query("sc") String[] scs
     );
 
+    /**
+     * 删除用户所有共享码
+     */
     @NeedAuth
     @DELETE("/share/user")
     Observable<ResponseDTO<OneFieldDTO.CountDTO>> deleteUserShareCodes();

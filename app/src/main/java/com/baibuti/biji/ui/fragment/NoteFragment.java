@@ -7,7 +7,6 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
-import android.os.Handler;
 import android.provider.MediaStore;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -28,6 +27,7 @@ import android.widget.TextView;
 
 import com.baibuti.biji.model.dao.DaoStrategyHelper;
 import com.baibuti.biji.model.dao.DbStatusType;
+import com.baibuti.biji.model.dao.daoInterface.IGroupDao;
 import com.baibuti.biji.model.dao.daoInterface.INoteDao;
 import com.baibuti.biji.model.dto.ServerException;
 import com.baibuti.biji.service.auth.AuthManager;
@@ -411,22 +411,20 @@ public class NoteFragment extends BaseFragment implements IContextHelper {
     private void ShowGroupDialog() {
         m_drawerLayout.closeDrawer(Gravity.END);
         ProgressDialog progressDialog = showProgress(getContext(), "分组信息加载中...", false, null);
+        try {
+            IGroupDao groupDao = DaoStrategyHelper.getInstance().getGroupDao(getActivity());
+            List<Group> groups = groupDao.queryAllGroups();
 
-        GroupDialog dialog = new GroupDialog(getActivity(), new GroupDialog.OnUpdateGroupListener() {
+            progressDialog.dismiss();
+            GroupDialog dialog = new GroupDialog(getActivity(), groups, this::onInitNoteData);
+            dialog.setCancelable(true);
+            dialog.show();
 
-            @Override
-            public void onLoaded() {
-                new Handler().postDelayed(progressDialog::dismiss, 100);
-            }
-
-            @Override
-            public void onUpdated() {
-                onInitNoteData();
-            }
-        });
-
-        dialog.setCancelable(true);
-        dialog.show();
+        } catch (ServerException ex) {
+            progressDialog.dismiss();
+            ex.printStackTrace();
+            showAlert(getActivity(), "错误", "分组信息加载失败。");
+        }
     }
 
     // endregion

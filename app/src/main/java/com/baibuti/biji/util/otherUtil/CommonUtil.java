@@ -17,10 +17,18 @@ import com.google.zxing.WriterException;
 import com.google.zxing.common.BitMatrix;
 
 import java.io.File;
+import java.util.regex.Pattern;
 
 import static android.content.Context.INPUT_METHOD_SERVICE;
 
 public class CommonUtil {
+
+    /**
+     * 中文 字母 数字
+     */
+    public static boolean isIllegalName(String fileClassName){
+        return Pattern.compile("[A-Za-z0-9\\u4e00-\\u9fa5_]+").matcher(fileClassName).matches();
+    }
 
     /**
      * 关闭软键盘
@@ -45,35 +53,6 @@ public class CommonUtil {
         }
         return false;
     }
-
-    // /**
-    //  * 分享文字笔记
-    //  */
-    // public static void shareText(Context context, String content){
-    //     Intent shareIntent = new Intent();
-    //     shareIntent.setAction(Intent.ACTION_SEND);
-    //     shareIntent.putExtra(Intent.EXTRA_TEXT, content);
-    //     shareIntent.setType("text/plain");
-    //     //设置分享列表的标题，并且每次都显示分享列表
-    //     context.startActivity(Intent.createChooser(shareIntent, "分享到"));
-    // }
-    //
-    // /**
-    //  * 分享单张图片
-    //  * @param context
-    //  * @param imagePath
-    //  */
-    // public static void shareImage(Context context, String imagePath) {
-    //     //String imagePath = Environment.getExternalStorageDirectory() + File.separator + "test.jpg";
-    //     Uri imageUri = Uri.fromFile(new File(imagePath));//由文件得到uri
-    //     Log.d("share", "uri:" + imageUri);  //输出：file:///storage/emulated/0/test.jpg
-    //
-    //     Intent shareIntent = new Intent();
-    //     shareIntent.setAction(Intent.ACTION_SEND);
-    //     shareIntent.putExtra(Intent.EXTRA_STREAM, imageUri);
-    //     shareIntent.setType("image/*");
-    //     context.startActivity(Intent.createChooser(shareIntent, "分享到"));
-    // }
 
     /**
      * 分享功能

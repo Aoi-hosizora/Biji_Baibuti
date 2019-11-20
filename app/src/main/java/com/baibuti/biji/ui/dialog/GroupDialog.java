@@ -3,6 +3,7 @@ package com.baibuti.biji.ui.dialog;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.widget.Button;
 import android.view.View;
 import android.widget.ListView;
@@ -42,20 +43,15 @@ public class GroupDialog extends AlertDialog implements IContextHelper {
 
     public interface OnUpdateGroupListener {
         /**
-         * 数据加载完成
-         */
-        void onLoaded();
-
-        /**
          * 修改完成
          */
         void onUpdated();
     }
 
-    public GroupDialog(Activity activity, OnUpdateGroupListener listener) {
+    public GroupDialog(Activity activity, @NonNull List<Group> groups, OnUpdateGroupListener listener) {
         super(activity);
         this.activity = activity;
-        this.groupList = new ArrayList<>();
+        this.groupList = groups;
         this.m_listener = listener;
     }
 
@@ -69,23 +65,10 @@ public class GroupDialog extends AlertDialog implements IContextHelper {
         groupList = new ArrayList<>();
         groupAdapter.setList(groupList);
         m_list_group.setAdapter(groupAdapter);
+        groupAdapter.setChecked(0);
         m_list_group.setVisibility(View.VISIBLE);
 
         refreshBtnPositionEnabled(0);
-
-        try {
-            IGroupDao groupDao = DaoStrategyHelper.getInstance().getGroupDao(activity);
-            groupList.addAll(groupDao.queryAllGroups());
-            groupAdapter.notifyDataSetChanged();
-            groupAdapter.setChecked(0);
-        } catch (ServerException ex) {
-            ex.printStackTrace();
-            showAlert(activity, "错误", "分组数据加载错误，请重试。");
-            dismiss();
-        }
-
-        if (m_listener != null)
-            m_listener.onLoaded();
     }
 
     /**
@@ -113,7 +96,7 @@ public class GroupDialog extends AlertDialog implements IContextHelper {
     }
 
     /**
-     * 完成对话框
+     * 完成
      */
     @OnClick(R.id.id_GroupDialog_ButtonOK)
     void ButtonOK_Clicked() {

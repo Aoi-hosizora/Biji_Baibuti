@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.os.Bundle;
 import android.view.View;
+import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
@@ -17,6 +18,7 @@ import com.baibuti.biji.model.po.Group;
 import com.baibuti.biji.R;
 import com.baibuti.biji.model.po.Note;
 import com.baibuti.biji.ui.IContextHelper;
+import com.baibuti.biji.util.otherUtil.CommonUtil;
 import com.baibuti.biji.util.otherUtil.DateColorUtil;
 import com.larswerkman.holocolorpicker.ColorPicker;
 
@@ -73,6 +75,7 @@ public class GroupEditDialog extends AlertDialog implements IContextHelper {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.dialog_group_add);
         ButterKnife.bind(this);
+        requestWindowFeature(WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE);
 
         m_color_picker.addSaturationBar(findViewById(R.id.id_ColorPicker_SaturationBar));
         m_color_picker.addSVBar(findViewById(R.id.id_ColorPicker_SVBar));
@@ -125,6 +128,10 @@ public class GroupEditDialog extends AlertDialog implements IContextHelper {
         String newGroupName = m_edt_title.getText().toString();
         if (newGroupName.isEmpty()) {
             showAlert(activity, "错误", "没有输入分组名，请补全内容。");
+            return;
+        }
+        if (CommonUtil.isIllegalName(newGroupName)) {
+            showAlert(activity, "错误", "分组名不合法，仅允许由中文、字母、数字和下划线组成。");
             return;
         }
 

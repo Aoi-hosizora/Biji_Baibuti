@@ -1,5 +1,6 @@
 package com.baibuti.biji.ui.fragment;
 
+import android.app.Dialog;
 import android.app.ProgressDialog;
 import android.content.Intent;
 import android.graphics.Bitmap;
@@ -15,9 +16,13 @@ import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ArrayAdapter;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.SearchView;
+import android.widget.Spinner;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.baibuti.biji.model.dao.DaoStrategyHelper;
@@ -46,8 +51,10 @@ import com.jwsd.libzxing.QRCodeManager;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.regex.Pattern;
+import java.util.Map;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -57,17 +64,18 @@ public class FileFragment extends BaseFragment implements IContextHelper {
     private View view;
 
     @BindView(R.id.id_view_file_search)
-    private SearchView m_searchView;
+    SearchView m_searchView;
 
     @BindView(R.id.id_document_srl)
-    private SwipeRefreshLayout m_srl;
+    SwipeRefreshLayout m_srl;
 
-    // ListView
     @BindView(R.id.id_document_list_view)
-    private RecyclerViewEmptySupport m_documentListView;
+    RecyclerViewEmptySupport m_documentListView;
 
     @BindView(R.id.id_docclass_list_view)
-    private ListView m_docClassListView;
+    ListView m_docClassListView;
+
+    private Dialog m_itemPopupMenu;
 
     private static class PageData {
 
@@ -136,8 +144,8 @@ public class FileFragment extends BaseFragment implements IContextHelper {
         // Document
         DocumentAdapter documentAdapter = new DocumentAdapter(getContext());
         documentAdapter.setDocumentList(pageData.showDocumentList);
-        documentAdapter.setOnDocumentClickListener(this::openDocument);
-        documentAdapter.setOnDocumentLongClickListener(this::deleteDocumentFromList); // TODO
+        documentAdapter.setOnDocumentClickListener(this::OpenDocument);
+        documentAdapter.setOnDocumentLongClickListener(this::DocListItem_LongClicked);
         m_documentListView.setLayoutManager(new LinearLayoutManager(getContext()));
         m_documentListView.setAdapter(documentAdapter);
 
@@ -146,7 +154,8 @@ public class FileFragment extends BaseFragment implements IContextHelper {
         docClassAdapter.setList(pageData.docClassListItems);
         m_docClassListView.setVerticalScrollBarEnabled(false);
         m_docClassListView.setDivider(null);
-        m_docClassListView.setOnItemClickListener((adapterView, view, position, id) -> onDocClassItemClicked(pageData.docClassListItems.get(position)));
+        m_docClassListView.setOnItemClickListener((adapterView, view, position, id) ->
+            onDocClassItemClicked(pageData.docClassListItems.get(position)));
         m_docClassListView.setAdapter(docClassAdapter);
 
         // Search
@@ -155,8 +164,7 @@ public class FileFragment extends BaseFragment implements IContextHelper {
         m_searchView.setSubmitButtonEnabled(true);
         m_searchView.setQueryRefinementEnabled(true);
         m_searchView.setQueryHint("搜索文档");
-        m_searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
-
+        m_searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() { // TODO back
             @Override
             public boolean onQueryTextChange(String newText) { return false; }
 
@@ -221,6 +229,58 @@ public class FileFragment extends BaseFragment implements IContextHelper {
         return ret;
     }
 
+    // region popup
+
+    /**
+     * 长按 文档列表弹出菜单
+     */
+    private void DocListItem_LongClicked(Document document) {
+        MainActivity activity = (MainActivity) getActivity();
+        if (activity == null) return;
+
+        DocClass docClass = pageData.docClassListItems.get(m_docClassListView.getSelectedItemPosition());
+
+        m_itemPopupMenu = new Dialog(activity, R.style.BottomDialog);
+        LinearLayout root = LayoutUtil.initPopupMenu(activity, m_itemPopupMenu, R.layout.popup_doc_long_click_item);
+
+        TextView label = root.findViewById(R.id.id_doc_popup_label);
+        label.setText(String.format("当前选中项: %s (%s)", document.getBaseFilename(), docClass.getName()));
+
+        root.findViewById(R.id.id_doc_popup_delete).setOnClickListener((v) -> PopupDeleteDoc_Clicked(document));
+        root.findViewById(R.id.id_doc_popup_open).setOnClickListener((v) -> OpenDocument(document));
+        root.findViewById(R.id.id_doc_popup_cancel).setOnClickListener((v) -> m_itemPopupMenu.dismiss());
+
+        m_itemPopupMenu.show();
+    }
+
+    /**
+     * Popup 删除文档
+     */
+    private void PopupDeleteDoc_Clicked(Document document) {
+
+        showAlert(getActivity(),
+            "删除", "确定删除文档资料 \"" + document.getBaseFilename() + "\" ？",
+            "删除", (d, w) -> {
+                IDocumentDao documentDao = DaoStrategyHelper.getInstance().getDocumentDao(getContext());
+                try {
+                    if (documentDao.deleteDocument(document.getId()) == DbStatusType.FAILED) {
+                        showAlert(getActivity(), "错误", "删除文档错误");
+                    } else {
+                        pageData.documentListItems.remove(document);
+                        pageData.showDocumentList.remove(document);
+                        m_documentListView.getAdapter().notifyDataSetChanged();
+                    }
+                } catch (ServerException ex) {
+                    ex.printStackTrace();
+                    showAlert(getActivity(), "错误", "删除文档错误：" + ex.getMessage());
+                }
+            },
+            "取消", null
+        );
+    }
+
+    // endregion
+
     // region Toolbar
 
     /**
@@ -254,13 +314,6 @@ public class FileFragment extends BaseFragment implements IContextHelper {
     };
 
     /**
-     * 中文 字母 数字
-     */
-    private boolean isIllegalName(String fileClassName){
-        return !Pattern.compile("[A-Za-z0-9\\u4e00-\\u9fa5_]+").matcher(fileClassName).matches();
-    }
-
-    /**
      * 新建分组
      */
     private void addDocClass() {
@@ -272,8 +325,8 @@ public class FileFragment extends BaseFragment implements IContextHelper {
                     showAlert(getActivity(), "错误", "没有输入分组名。");
                     return;
                 }
-                if (isIllegalName(text)) {
-                    showAlert(getActivity(), "错误", "分组名格式不支持，只允许中文、字母、数字或下划线。");
+                if (CommonUtil.isIllegalName(text)) {
+                    showAlert(getActivity(), "错误", "分组名不合法，仅允许由中文、字母、数字和下划线组成");
                     return;
                 }
                 DocClass newDocClass = new DocClass(text);
@@ -307,8 +360,6 @@ public class FileFragment extends BaseFragment implements IContextHelper {
     private void renameDocClass() {
 
         DocClass docClass = pageData.docClassListItems.get(m_docClassListView.getSelectedItemPosition());
-        String motoName = docClass.getName();
-
         showInputDialog(getActivity(),
             "重命名分组", docClass.getName(), "", 1,
             "重命名", (v, d, text) -> {
@@ -317,22 +368,21 @@ public class FileFragment extends BaseFragment implements IContextHelper {
                     showAlert(getActivity(), "错误", "没有输入分组名。");
                     return;
                 }
-                if (isIllegalName(text)) {
-                    showAlert(getActivity(), "错误", "分组名格式不支持，只允许中文、字母、数字或下划线。");
+                if (CommonUtil.isIllegalName(text)) {
+                    showAlert(getActivity(), "错误", "分组名不合法，仅允许由中文、字母、数字和下划线组成。");
                     return;
                 }
-                docClass.setName(text);
 
                 IDocClassDao docClassDao = DaoStrategyHelper.getInstance().getDocClassDao(getActivity());
                 try {
                     // SUCCESS | FAILED | DUPLICATED | DEFAULT
-                    DbStatusType status = docClassDao.updateDocClass(docClass);
+                    DbStatusType status = docClassDao.updateDocClass(new DocClass(docClass.getId(), text));
                     if (status == DbStatusType.SUCCESS) {
-                        showToast(getActivity(), "分组 \"" + docClass.getName() + "\" 修改成功");
+                        docClass.setName(text);
+                        showToast(getActivity(), "分组 \"" + text + "\" 修改成功");
                         m_docClassListView.getAdapter().notify();
                         return;
                     }
-                    docClass.setName(motoName);
                     if (status == DbStatusType.DUPLICATED)
                         showAlert(getActivity(), "错误", "分组名 \"" + docClass.getName() + "\" 重复，请重新输入。");
                     else if (status == DbStatusType.DEFAULT)
@@ -358,7 +408,7 @@ public class FileFragment extends BaseFragment implements IContextHelper {
         IDocumentDao documentDao = DaoStrategyHelper.getInstance().getDocumentDao(getActivity());
         try {
             List<Document> documents = documentDao.queryDocumentByClassId(docClass.getId());
-            if (documents.isEmpty()) {
+            if (documents.isEmpty()) { // 无关联
                 showAlert(getActivity(),
                     "删除", "是否删除分组 \"" + docClass.getName() + "\"？",
                     "删除", (d, w) -> {
@@ -378,7 +428,7 @@ public class FileFragment extends BaseFragment implements IContextHelper {
                     },
                     "取消", null
                 );
-            } else {
+            } else { // 有关联
                 showAlert(getActivity(),
                     "删除", "分组 \"" + docClass.getName() + "\" 有相关联的 " + documents.size() + " 条文档，是否同时删除？",
                     "删除分组及文档记录", (d, w) -> {
@@ -426,37 +476,52 @@ public class FileFragment extends BaseFragment implements IContextHelper {
      * 导入分组
      */
     private void importDocumentIntoDocClass() {
-        if (m_docClassListView.getSelectedItemPosition() != -1) {
-            DocClass docClass = pageData.docClassListItems.get(m_docClassListView.getSelectedItemPosition());
+        if (m_docClassListView.getSelectedItemPosition() == -1) {
+            showAlert(getActivity(), "错误", "未选择文档分组，无法导入。");
+            return;
+        }
+        DocClass docClass = pageData.docClassListItems.get(m_docClassListView.getSelectedItemPosition());
 
-            List<FileItem> importedDocuments = new ArrayList<>();
+        List<FileItem> importedDocuments = new ArrayList<>();
+        FileImportDialog importDialog = new FileImportDialog(getActivity(), importedDocuments);
+        importDialog.setOnFinishScanListener(() -> {
 
-            FileImportDialog cdd = new FileImportDialog(getActivity(), importedDocuments);
-            cdd.setOnFinishScanListener(() -> {
-                ProgressDialog progressDialog = showProgress(getActivity(), "上传中...", false, null);
+            ProgressDialog progressDialog = showProgress(getActivity(), "上传中...", false, null);
 
-                IDocumentDao documentDao = DaoStrategyHelper.getInstance().getDocumentDao(getContext());
+            IDocumentDao documentDao = DaoStrategyHelper.getInstance().getDocumentDao(getContext());
+            for (int i = 0; i < importedDocuments.size(); i++) {
 
-                for (int i = 0; i < importedDocuments.size(); i++) {
-
-                    FileItem f = importedDocuments.get(i);
-                    if (f.getTag() == FileItem.CHECKED) {
-                        Document newDocument = new Document(-1, f.getFilePath(), docClass);
-                        pageData.documentListItems.add(newDocument);
-                        pageData.showDocumentList.add(newDocument);
-                        try {
-                            documentDao.insertDocument(newDocument);
-                        } catch (ServerException ex) {
-                            ex.printStackTrace();
-                        }
+                FileItem f = importedDocuments.get(i);
+                if (f.getTag() == FileItem.CHECKED) {
+                    Document newDocument = new Document(-1, f.getFilePath(), docClass);
+                    pageData.documentListItems.add(newDocument);
+                    pageData.showDocumentList.add(newDocument);
+                    try {
+                        documentDao.insertDocument(newDocument);
+                    } catch (ServerException ex) {
+                        ex.printStackTrace(); // 直接忽略错误的文档
                     }
                 }
-                progressDialog.dismiss();
-                m_documentListView.getAdapter().notifyDataSetChanged();
-            });
-            cdd.show();
-        }
+            }
+            progressDialog.dismiss();
+            m_documentListView.getAdapter().notifyDataSetChanged();
+        });
+        importDialog.show();
     }
+
+    private Map<String, Integer> exTextNumbers = new LinkedHashMap<String, Integer>() {{
+        put("1个小时", 1);
+        put("2个小时", 2);
+        put("5个小时", 5);
+        put("8个小时", 8);
+        put("12个小时", 12);
+        put("1天", 24);
+        put("2天", 2 * 24);
+        put("7天", 7 * 24);
+        put("15天", 15 * 24);
+    }};
+
+    private String[] exTexts = exTextNumbers.keySet().toArray(new String[0]);
 
     /**
      * 共享整个分组的文档
@@ -474,33 +539,49 @@ public class FileFragment extends BaseFragment implements IContextHelper {
             return;
         }
 
-        ProgressDialog progressDialog = showProgress(getActivity(), "生成共享码...", false, null);
-
-        String shareCode;
-        ShareCodeNetDao shareCodeNetDao = new ShareCodeNetDao();
-        try {
-            shareCode = shareCodeNetDao.newShareCode(docClass, ShareCodeNetDao.DEFAULT_EX);
-        } catch (ServerException ex) {
-            ex.printStackTrace();
-            showAlert(getActivity(), "错误", "获取共享码错误：" + ex.getMessage());
-            return;
-        }
-
-        Bitmap qrCode = CommonUtil.generateQrCode(shareCode, 800, Color.BLACK);
-        progressDialog.dismiss();
-        if (qrCode == null) {
-            showAlert(getContext(), "错误", "二维码生成错误。");
-            return;
-        }
-
         MainActivity activity = (MainActivity) getActivity();
         if (activity == null) return;
 
-        ImageView qrCodeImageView = new ImageView(getActivity());
-        qrCodeImageView.setImageBitmap(qrCode);
-        qrCodeImageView.setMinimumWidth(qrCode.getWidth());
-        qrCodeImageView.setMinimumHeight(qrCode.getHeight());
-        showAlert(getActivity(), "共享二维码", qrCodeImageView, "返回", null);
+        // Ex
+        Spinner exChooser = new Spinner(getActivity());
+        ArrayAdapter<String> spinnerAdapter = new ArrayAdapter<>(getActivity(), R.layout.layout_common_spinner, exTexts);
+        exChooser.setAdapter(spinnerAdapter);
+        exChooser.setSelection(Arrays.asList(exTexts).indexOf("1个小时"), true);
+        showAlert(getActivity(),
+            "文件共享时间", exChooser,
+            "确定", (d, w) -> {
+                int exp = exTextNumbers.get(exTexts[exChooser.getSelectedItemPosition()]);
+                exp *= 3600;
+
+                ProgressDialog progressDialog = showProgress(getActivity(), "生成共享码...", false, null);
+
+                String shareCode;
+                ShareCodeNetDao shareCodeNetDao = new ShareCodeNetDao();
+                try {
+                    shareCode = shareCodeNetDao.newShareCode(docClass, exp);
+                } catch (ServerException ex) {
+                    progressDialog.dismiss();
+                    ex.printStackTrace();
+                    showAlert(getActivity(), "错误", "获取共享码错误：" + ex.getMessage());
+                    return;
+                }
+
+                Bitmap qrCode = CommonUtil.generateQrCode(shareCode, 800, Color.BLACK);
+                progressDialog.dismiss();
+                if (qrCode == null) {
+                    showAlert(getContext(), "错误", "二维码生成错误。");
+                    return;
+                }
+
+                ImageView qrCodeImageView = new ImageView(getActivity());
+                qrCodeImageView.setImageBitmap(qrCode);
+                qrCodeImageView.setMinimumWidth(qrCode.getWidth());
+                qrCodeImageView.setMinimumHeight(qrCode.getHeight());
+                showAlert(getActivity(), "共享二维码", qrCodeImageView, "返回", null);
+
+            },
+            "取消", null
+        );
     }
 
     /*
@@ -556,9 +637,9 @@ public class FileFragment extends BaseFragment implements IContextHelper {
     // endregion
 
     /**
-     * 调用wps打开文档
+     * Popup / List 打开文档
      */
-    private void openDocument(Document document) {
+    private void OpenDocument(Document document) {
         showAlert(getContext(),
             "打开", "是否打开文档 \"" + document.getBaseFilename() + "\"？",
             "打开", (d, w) -> {
@@ -567,11 +648,12 @@ public class FileFragment extends BaseFragment implements IContextHelper {
                     showAlert(getContext(),
                         "错误", "文档 \"" + document.getBaseFilename() + "\" 不存在，是否下载？",
                         "下载", (d1, w1) -> {
+
                             // TODO api 下载
+
                         }, "取消", null
                     );
-                }
-                else {
+                } else {
                     // boolean status = WpsService.OpenDocumentThroughWPS(getActivity(), new File(document.getFilename()));
                     // if (!status) showAlert(getContext(), "错误", "打开文档错误。");
 
@@ -581,31 +663,6 @@ public class FileFragment extends BaseFragment implements IContextHelper {
                     intent.setAction(Intent.ACTION_VIEW);
                     intent.setDataAndType(Uri.fromFile(file), WpsService.getMIMEType(file));
                     startActivity(intent);
-                }
-            },
-            "取消", null);
-    }
-
-    /**
-     * 从右侧列表中删除资料
-     */
-    private void deleteDocumentFromList(Document document) {
-
-        showAlert(getActivity(),
-            "删除", "确定删除文档资料 \"" + document.getBaseFilename() + "\" ？",
-            "删除", (d, w) -> {
-                IDocumentDao documentDao = DaoStrategyHelper.getInstance().getDocumentDao(getContext());
-                try {
-                    if (documentDao.deleteDocument(document.getId()) == DbStatusType.FAILED) {
-                        showAlert(getActivity(), "错误", "删除文档错误");
-                    } else {
-                        pageData.documentListItems.remove(document);
-                        pageData.showDocumentList.remove(document);
-                        m_documentListView.getAdapter().notifyDataSetChanged();
-                    }
-                } catch (ServerException ex) {
-                    ex.printStackTrace();
-                    showAlert(getActivity(), "错误", "删除文档错误：" + ex.getMessage());
                 }
             },
             "取消", null
