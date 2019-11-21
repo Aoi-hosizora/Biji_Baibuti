@@ -174,16 +174,13 @@ public class GroupNetDao implements IGroupDao {
      */
     @Override
     public DbStatusType updateGroupsOrder(Group[] groups) throws ServerException {
-        int[] ids = new int[groups.length];
-        int[] orders = new int[groups.length];
-        for (int i = 0; i < groups.length; i++) {
-            ids[i] = groups[i].getId();
-            orders[i] = groups[i].getOrder();
-        }
+        String[] id_order = new String[groups.length];
+        for (int i = 0; i < groups.length; i++)
+            id_order[i] = groups[i].getId() + "_" + groups[i].getOrder();
 
         Observable<ResponseDTO<OneFieldDTO.CountDTO>> observable = RetrofitFactory.getInstance()
             .createRequest(AuthManager.getInstance().getAuthorizationHead())
-            .updateGroupsOrder(ids, orders)
+            .updateGroupsOrder(id_order)
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread());
 

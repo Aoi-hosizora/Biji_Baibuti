@@ -12,18 +12,20 @@ public class DocumentDTO implements Serializable {
     private int id;
     private String filename;
     private DocClassDTO docClass;
+    private String uuid;
 
-    private DocumentDTO(int id, String filename, DocClassDTO docClass) {
+    private DocumentDTO(int id, String filename, DocClassDTO docClass, String uuid) {
         this.id = id;
         this.filename = filename;
         this.docClass = docClass;
+        this.uuid = uuid;
     }
 
     /**
      * DocumentDTO -> Document
      */
     public Document toDocument() {
-        return new Document(id, filename, docClass.toFileClass());
+        return new Document(id, filename, docClass.toFileClass(), uuid);
     }
 
     /**

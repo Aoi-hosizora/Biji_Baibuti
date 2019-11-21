@@ -7,6 +7,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
 import android.provider.MediaStore;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -52,6 +53,8 @@ import com.baibuti.biji.util.imgTextUtil.SearchUtil;
 import com.getbase.floatingactionbutton.FloatingActionsMenu;
 import com.wyt.searchbox.SearchFragment;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 
@@ -67,16 +70,12 @@ public class NoteFragment extends BaseFragment implements IContextHelper {
 
     private View view;
 
-    @BindView(R.id.note_list)
-    RecyclerViewEmptySupport m_noteListView;
-
-    @BindView(R.id.id_NoteFrag_nav_GroupList)
-    ListView m_groupListView;
+    private NoteAdapter m_note_adapter;
+    private GroupRadioAdapter m_group_adapter;
 
     @BindView(R.id.note_fabmenu)
     FloatingActionsMenu m_fabMenu;
 
-    // SearchFragment.newInstance()
     private SearchFragment m_searchFragment;
 
     @BindView(R.id.note_listsrl)
@@ -88,8 +87,35 @@ public class NoteFragment extends BaseFragment implements IContextHelper {
     @BindView(R.id.id_noteFrag_drawer_layout)
     DrawerLayout m_drawerLayout;
 
-    // new Dialog(getContext(), R.style.BottomDialog)
     private Dialog m_notePopupMenu;
+
+    /**
+     * 当前页面状态
+     */
+    private enum PageState {
+        NORMAL, SEARCHING, GROUPING
+    }
+
+    /**
+     * 当前页面数据
+     */
+    private static class PageData {
+
+        /**
+         * 当前页面显示的内容
+         * FIX: 删除了 setContent()
+         */
+        List<Note> showNoteList = new ArrayList<>();
+
+        List<Note> allNotes = new ArrayList<>();
+
+        PageState pageState = PageState.NORMAL;
+    }
+
+    /**
+     * 当前页面 状态与数据
+     */
+    private PageData pageData = new PageData();
 
     @Nullable
     @Override
@@ -135,9 +161,6 @@ public class NoteFragment extends BaseFragment implements IContextHelper {
         m_toolbar.setPopupTheme(R.style.popup_theme);
         m_toolbar.setOnMenuItemClickListener(menuItemClickListener);
 
-        // List Empty View
-        m_noteListView.setEmptyView(view.findViewById(R.id.note_emptylist));
-
         // Swipe Refresh
         m_swipeRefresh.setColorSchemeResources(R.color.colorPrimary);
         m_swipeRefresh.setOnRefreshListener(this::onInitNoteData);
@@ -157,14 +180,32 @@ public class NoteFragment extends BaseFragment implements IContextHelper {
 
             @Override
             public void onMenuExpanded() {
-                back.setVisibility(View.VISIBLE);
+                new Handler().postDelayed(() -> back.setVisibility(View.VISIBLE), 100);
             }
 
             @Override
             public void onMenuCollapsed() {
-                back.setVisibility(View.GONE);
+                new Handler().postDelayed(() -> back.setVisibility(View.GONE), 100);
             }
         });
+
+        // Note List
+        RecyclerViewEmptySupport m_noteListView = view.findViewById(R.id.note_list);
+        m_noteListView.setEmptyView(view.findViewById(R.id.note_emptylist));
+
+        m_noteListView.addItemDecoration(new SpacesItemDecoration(0));
+        LinearLayoutManager layoutManager = new LinearLayoutManager(getContext());
+        layoutManager.setOrientation(LinearLayoutManager.VERTICAL);
+        m_noteListView.setLayoutManager(layoutManager);
+
+        m_note_adapter = new NoteAdapter(getContext());
+        m_note_adapter.setNoteList(pageData.showNoteList);
+        m_note_adapter.setOnItemClickListener((v, note) -> openViewNote(note));
+        m_note_adapter.setOnItemLongClickListener((v, note) -> {
+            showPopupMenu(note);
+            return true;
+        });
+        m_noteListView.setAdapter(m_note_adapter);
 
         // Right Nav
         m_drawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED);
@@ -175,23 +216,12 @@ public class NoteFragment extends BaseFragment implements IContextHelper {
         ImageButton m_groupMgrBackButton = view.findViewById(R.id.id_NoteFrag_nav_BackButton);
         m_groupMgrBackButton.setOnClickListener(v -> m_drawerLayout.closeDrawer(Gravity.END));
 
-        GroupRadioAdapter groupAdapter = new GroupRadioAdapter(getContext());
-        groupAdapter.setOnRadioButtonClickListener(this::GroupRadio_Clicked);
-        m_groupListView.setAdapter(groupAdapter);
+        // Group List
+        ListView m_groupListView = view.findViewById(R.id.id_NoteFrag_nav_GroupList);
 
-        // List Adapter
-        m_noteListView.addItemDecoration(new SpacesItemDecoration(0));
-        LinearLayoutManager layoutManager = new LinearLayoutManager(getContext());
-        layoutManager.setOrientation(LinearLayoutManager.VERTICAL);
-        m_noteListView.setLayoutManager(layoutManager);
-
-        NoteAdapter noteAdapter = new NoteAdapter(getContext());
-        noteAdapter.setOnItemClickListener((v, note) -> openViewNote(note));
-        noteAdapter.setOnItemLongClickListener((v, note) -> {
-            showPopupMenu(note);
-            return true;
-        });
-        m_noteListView.setAdapter(noteAdapter);
+        m_group_adapter = new GroupRadioAdapter(getContext());
+        m_group_adapter.setOnRadioButtonClickListener(this::GroupRadio_Clicked);
+        m_groupListView.setAdapter(m_group_adapter);
 
         // PageData
         onInitNoteData();
@@ -259,14 +289,22 @@ public class NoteFragment extends BaseFragment implements IContextHelper {
      * 工具栏 分组
      */
     private void ToolbarGroup_Clicked() {
+        boolean[] cancel = new boolean[] { false };
+        ProgressDialog progressDialog = showProgress(getContext(), "获取分组信息中...", true, v -> cancel[0] = true);
         try {
             List<Group> groups = DaoStrategyHelper.getInstance().getGroupDao(getContext()).queryAllGroups();
-            GroupRadioAdapter adapter = (GroupRadioAdapter) m_groupListView.getAdapter();
-            adapter.setGroupList(groups);
-            adapter.notifyDataSetChanged();
+            if (cancel[0]) return;
 
+            groups.add(0, Group.AllGroups);
+            Collections.sort(groups);
+            m_group_adapter.setGroupList(groups);
+            m_group_adapter.setCurrentItem(Group.AllGroups);
+            m_group_adapter.notifyDataSetChanged();
+
+            progressDialog.dismiss();
             m_drawerLayout.openDrawer(Gravity.END);
         } catch (ServerException ex) {
+            progressDialog.dismiss();
             ex.printStackTrace();
             showAlert(getActivity(), "错误", "分组信息获取错误：" + ex.getMessage());
         }
@@ -345,29 +383,26 @@ public class NoteFragment extends BaseFragment implements IContextHelper {
 
             showAlert(getContext(), "修改分组",
                 groupAdapter, (d, w) -> {
+                    Group motoGroup = note.getGroup();
                     note.setGroup(groups.get(w));
-                    m_noteListView.getAdapter().notifyDataSetChanged();
-                    showToast(getActivity(), "笔记 \"" + note.getTitle() + "\" 分组修改成功");
+                    try {
+                        INoteDao noteDao = DaoStrategyHelper.getInstance().getNoteDao(getContext());
+                        if (noteDao.updateNote(note) == DbStatusType.SUCCESS) {
+                            m_note_adapter.notifyDataSetChanged();
+                            showToast(getActivity(), "笔记 \"" + note.getTitle() + "\" 分组修改成功");
+                            d.dismiss();
+                            return;
+                        }
+                        showAlert(getActivity(), "错误", "笔记分组修改错误。");
+                    } catch (ServerException ex) {
+                        ex.printStackTrace();
+                        showAlert(getActivity(), "错误", "笔记分组修改错误：" + ex.getMessage());
+                    }
+                    note.setGroup(motoGroup);
                     d.dismiss();
                 },
                 "返回", null
             );
-
-            INoteDao noteDao = DaoStrategyHelper.getInstance().getNoteDao(getContext());
-            if (noteDao.updateNote(note) != DbStatusType.SUCCESS) {
-                showAlert(getActivity(), "错误", "更新笔记错误。");
-                return;
-            }
-
-            NoteAdapter adapter = (NoteAdapter) m_noteListView.getAdapter();
-            for (Note n : pageData.allNotes)
-                if (n.getId() == note.getId()) {
-                    pageData.allNotes.set(pageData.allNotes.indexOf(n), note);
-                    return;
-                }
-            adapter.setNoteList(pageData.allNotes);
-            adapter.notifyDataSetChanged();
-
         } catch (ServerException ex) {
             showAlert(getContext(), "错误", "分组信息加载错误：" + ex.getMessage());
         }
@@ -395,8 +430,7 @@ public class NoteFragment extends BaseFragment implements IContextHelper {
      */
     private void GroupRadio_Clicked(int position) {
         m_drawerLayout.closeDrawer(Gravity.END);
-        GroupRadioAdapter adapter = (GroupRadioAdapter) m_groupListView.getAdapter();
-        groupNote(adapter.getGroupList().get(position));
+        groupNote(m_group_adapter.getGroupList().get(position));
     }
 
     /**
@@ -422,6 +456,7 @@ public class NoteFragment extends BaseFragment implements IContextHelper {
         try {
             IGroupDao groupDao = DaoStrategyHelper.getInstance().getGroupDao(getActivity());
             List<Group> groups = groupDao.queryAllGroups();
+            Collections.sort(groups);
 
             progressDialog.dismiss();
             GroupDialog dialog = new GroupDialog(getActivity(), groups, this::onInitNoteData);
@@ -433,25 +468,6 @@ public class NoteFragment extends BaseFragment implements IContextHelper {
             ex.printStackTrace();
             showAlert(getActivity(), "错误", "分组信息加载失败。");
         }
-    }
-
-    // endregion
-
-    // region List PageData
-
-    /**
-     * 当前页面状态
-     */
-    private enum PageState {
-        NORMAL, SEARCHING, GROUPING
-    }
-
-    /**
-     * 当前页面数据
-     */
-    private class PageData {
-        List<Note> allNotes = null;
-        PageState pageState = PageState.NORMAL;
     }
 
     // endregion
@@ -483,15 +499,21 @@ public class NoteFragment extends BaseFragment implements IContextHelper {
             .subscribe((result) -> {
                 if (result.resultCode() != RESULT_OK)
                     return;
+
+                ProgressDialog progressDialog = showProgress(getContext(), "加载内容...", false, null);
+
                 Intent returnIntent = result.data();
                 Note newNote = (Note) returnIntent.getSerializableExtra(INT_NOTE_DATA);
                 boolean isModify = returnIntent.getBooleanExtra(INT_IS_MODIFIED, true);
                 if (isModify) {
                     showToast(getContext(), String.format(Locale.CHINA, "笔记 \"%s\"新建成功", newNote.getTitle()));
                     pageData.allNotes.add(newNote);
-                    m_noteListView.getAdapter().notifyDataSetChanged();
+                    pageData.showNoteList.add(newNote);
+                    m_note_adapter.notifyDataSetChanged();
                 }
-            }).isDisposed();
+
+                progressDialog.dismiss();
+            }, Throwable::printStackTrace).isDisposed();
     }
 
     /**
@@ -506,20 +528,32 @@ public class NoteFragment extends BaseFragment implements IContextHelper {
             .subscribe((result) -> {
                 if (result.resultCode() != RESULT_OK)
                     return;
+
+                ProgressDialog progressDialog = showProgress(getContext(), "加载内容...", false, null);
+
                 Intent returnIntent = result.data();
                 Note modifiedNote = (Note) returnIntent.getSerializableExtra(INT_NOTE_DATA);
                 boolean isModify = returnIntent.getBooleanExtra(INT_IS_MODIFIED, true);
                 if (isModify) {
                     showToast(getContext(), "笔记 \"" + modifiedNote.getTitle() + "\" 更新成功");
-                    for (Note note1 : pageData.allNotes) {
+                    for (Note note1 : pageData.showNoteList) {
                         if (note1.getId() == modifiedNote.getId()) {
-                            pageData.allNotes.set(pageData.allNotes.indexOf(note1), modifiedNote);
+
+                            int idx = pageData.allNotes.indexOf(note1);
+                            if (idx != -1) pageData.allNotes.set(idx, modifiedNote);
+                            idx = pageData.showNoteList.indexOf(note1);
+                            if (idx != -1) pageData.showNoteList.set(idx, modifiedNote);
+
+                            Collections.sort(pageData.allNotes);
+                            Collections.sort(pageData.showNoteList);
                             break;
                         }
                     }
-                    m_noteListView.getAdapter().notifyDataSetChanged();
+                    m_note_adapter.notifyDataSetChanged();
                 }
-            }).isDisposed();
+
+                progressDialog.dismiss();
+            }, Throwable::printStackTrace).isDisposed();
     }
 
     // endregion
@@ -527,19 +561,19 @@ public class NoteFragment extends BaseFragment implements IContextHelper {
     // region PageData initData setContent delete
 
     /**
-     * 当前页面 状态与数据
-     */
-    private PageData pageData;
-
-    /**
      * 初始化与刷新 加载数据
      */
     private void onInitNoteData() {
-        pageData = new PageData();
         ProgressDialog progressDialog = showProgress(getContext(), "加载数据中...", false, null);
         try {
             pageData.allNotes = DaoStrategyHelper.getInstance().getNoteDao(getContext()).queryAllNotes();
-            setListContent(pageData.allNotes);
+            Collections.sort(pageData.allNotes);
+
+            pageData.showNoteList.clear();
+            pageData.showNoteList.addAll(pageData.allNotes);
+            Collections.sort(pageData.showNoteList);
+            m_note_adapter.notifyDataSetChanged();
+
             m_swipeRefresh.setRefreshing(false);
             progressDialog.dismiss();
         } catch (ServerException ex) {
@@ -552,22 +586,10 @@ public class NoteFragment extends BaseFragment implements IContextHelper {
     }
 
     /**
-     * 更新页面显示为 noteList
-     */
-    private void setListContent(List<Note> noteList) {
-        NoteAdapter adapter = (NoteAdapter) m_noteListView.getAdapter();
-        if (adapter == null) return;
-
-        adapter.setNoteList(noteList);
-        adapter.notifyDataSetChanged();
-    }
-
-    /**
      * 删除笔记，更新页面
      */
     private void deleteNote(@NonNull Note note) {
         try {
-            NoteAdapter adapter = (NoteAdapter) m_noteListView.getAdapter();
             INoteDao noteDao = DaoStrategyHelper.getInstance().getNoteDao(getContext());
 
             // int idx = adapter.getNoteList().indexOf(note);
@@ -575,8 +597,8 @@ public class NoteFragment extends BaseFragment implements IContextHelper {
                 showAlert(getActivity(), "错误", "删除笔记错误。");
                 return;
             }
-            adapter.getNoteList().remove(note);
-            adapter.notifyDataSetChanged();
+            pageData.showNoteList.remove(note);
+            m_note_adapter.notifyDataSetChanged();
             showToast(getActivity(), "删除成功：\"" + note.getTitle() + "\"");
         } catch (ServerException ex) {
             showAlert(getContext(), "错误", "删除笔记错误：" + ex.getMessage());
@@ -592,6 +614,11 @@ public class NoteFragment extends BaseFragment implements IContextHelper {
      */
     private void groupNote(Group group) {
 
+        if (group == Group.AllGroups) {
+            toNormal();
+            return;
+        }
+
         boolean[] cancel = new boolean[] { false };
         ProgressDialog progressDialog = showProgress(getActivity(), "分组搜索中...",
             true, (v) -> cancel[0] = true);
@@ -602,12 +629,16 @@ public class NoteFragment extends BaseFragment implements IContextHelper {
             if (!cancel[0] && notes != null) {
 
                 progressDialog.dismiss();
-                m_toolbar.setTitle(String.format(Locale.CHINA, "\"%s\"的分组结果 (共 %d / %d 项)", group.getName(), notes.size(), pageData.allNotes.size()));
+                m_toolbar.setTitle(String.format(Locale.CHINA, "\"%s\" 分组结果 (共 %d 项)", group.getName(), notes.size()));
                 if (notes.size() != 0)
                     showToast(getActivity(), "共找到 " + notes.size() + " 项");
                 else
                     showToast(getActivity(), "没有找到内容");
-                setListContent(notes);
+
+                pageData.showNoteList.clear();
+                pageData.showNoteList.addAll(notes);
+                Collections.sort(pageData.showNoteList);
+                m_note_adapter.notifyDataSetChanged();
 
                 pageData.pageState = PageState.GROUPING;
 
@@ -641,12 +672,16 @@ public class NoteFragment extends BaseFragment implements IContextHelper {
 
         if (!cancel[0]) {
             progressDialog.dismiss();
-            m_toolbar.setTitle(String.format(Locale.CHINA, "\"%s\"的搜索结果 (共 %d / %d 项)", searchingStr, searchResult.size(), pageData.allNotes.size()));
+            m_toolbar.setTitle(String.format(Locale.CHINA, "\"%s\" 的搜索结果 (共 %d 项)", searchingStr, searchResult.size()));
             if (searchResult.size() != 0)
                 showToast(getActivity(), "共找到 " + searchResult.size() + " 项");
             else
                 showToast(getActivity(), "没有找到内容");
-            setListContent(searchResult);
+
+            pageData.showNoteList.clear();
+            pageData.showNoteList.addAll(searchResult);
+            Collections.sort(pageData.showNoteList);
+            m_note_adapter.notifyDataSetChanged();
 
             pageData.pageState = PageState.SEARCHING;
 
@@ -665,6 +700,19 @@ public class NoteFragment extends BaseFragment implements IContextHelper {
      * 正常状态，非搜索非分组
      */
     private void toNormal() {
+        ProgressDialog progressDialog = showProgress(getContext(), "返回加载数据中...", false, null);
+
+        try {
+            INoteDao noteDao = DaoStrategyHelper.getInstance().getNoteDao(getContext());
+            pageData.allNotes.clear();
+            pageData.allNotes.addAll(noteDao.queryAllNotes());
+        } catch (ServerException ex) {
+            progressDialog.dismiss();
+            ex.printStackTrace();
+            showAlert(getContext(), "错误", "获取数据错误：" + ex.getMessage());
+            return;
+        }
+
         pageData.pageState = PageState.NORMAL;
 
         // 页面显示处理
@@ -677,8 +725,13 @@ public class NoteFragment extends BaseFragment implements IContextHelper {
         m_drawerLayout.setEnabled(true); // 允许分组
         m_toolbar.setTitle("所有笔记");
 
+        progressDialog.dismiss();
+
         // 数据处理
-        setListContent(pageData.allNotes);
+        pageData.showNoteList.clear();
+        pageData.showNoteList.addAll(pageData.allNotes);
+        Collections.sort(pageData.showNoteList);
+        m_note_adapter.notifyDataSetChanged();
     }
 
     // endregion

@@ -7,7 +7,7 @@ import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteStatement;
 
-import com.baibuti.biji.model.dao.DatabaseManager;
+import com.baibuti.biji.model.dao.DbManager;
 import com.baibuti.biji.model.dao.DbOpenHelper;
 import com.baibuti.biji.model.dao.DbStatusType;
 import com.baibuti.biji.model.dao.daoInterface.IDocClassDao;
@@ -25,11 +25,11 @@ public class DocClassDao implements IDocClassDao {
     private static final String COL_NAME = "f_name";
 
     private Context context;
-    private DatabaseManager dbMgr;
+    private DbManager dbMgr;
 
     public DocClassDao(Context context) {
         this.context = context;
-        this.dbMgr = DatabaseManager.getInstance(new DbOpenHelper(context));
+        this.dbMgr = DbManager.getInstance(new DbOpenHelper(context));
 
         if (queryAllDocClasses().isEmpty())
             insertDocClass(new DocClass());

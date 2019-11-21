@@ -4,7 +4,6 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.os.Bundle;
 import android.view.View;
-import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
@@ -61,6 +60,11 @@ public class GroupEditDialog extends AlertDialog implements IContextHelper {
          * 分组数据修改
          */
         void onUpdated(Group group);
+
+        /**
+         * 分组删除
+         */
+        void onDeleted(Group group);
     }
 
     GroupEditDialog(Activity activity, Group currGroup, OnUpdateGroupListener listener) {
@@ -72,9 +76,9 @@ public class GroupEditDialog extends AlertDialog implements IContextHelper {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        requestWindowFeature(WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE);
         super.onCreate(savedInstanceState);
         setContentView(R.layout.dialog_group_add);
+        setView(new EditText(activity));
         ButterKnife.bind(this);
 
         m_color_picker.addSaturationBar(findViewById(R.id.id_ColorPicker_SaturationBar));
@@ -181,8 +185,10 @@ public class GroupEditDialog extends AlertDialog implements IContextHelper {
         try {
             INoteDao noteDao = DaoStrategyHelper.getInstance().getNoteDao(activity);
             IGroupDao groupDao = DaoStrategyHelper.getInstance().getGroupDao(activity);
-            if (currGroup.getId() == groupDao.queryDefaultGroup().getId())
+            if (currGroup.getId() == groupDao.queryDefaultGroup().getId()) {
                 showAlert(activity, "错误", "无法删除默认分组。");
+                return;
+            }
 
             List<Note> groupNotes = noteDao.queryNotesByGroupId(currGroup.getId());
             if (groupNotes.isEmpty()) {
@@ -191,7 +197,10 @@ public class GroupEditDialog extends AlertDialog implements IContextHelper {
                     "删除", String.format("是否删除分组 %s？", currGroup.getName()),
                     "删除", (d, w) -> {
                         try {
-                            if (groupDao.deleteGroup(currGroup.getId(), false) == DbStatusType.FAILED)
+                            if (groupDao.deleteGroup(currGroup.getId(), false) == DbStatusType.SUCCESS) {
+                                if (m_listener != null)
+                                    m_listener.onDeleted(currGroup);
+                            } else
                                 showAlert(activity, "错误", "分组删除错误。");
                         } catch (ServerException ex) {
                             ex.printStackTrace();
@@ -209,7 +218,10 @@ public class GroupEditDialog extends AlertDialog implements IContextHelper {
                         try {
                             for (Note note : groupNotes)
                                 noteDao.deleteNote(note.getId());
-                            if (groupDao.deleteGroup(currGroup.getId(), false) == DbStatusType.FAILED)
+                            if (groupDao.deleteGroup(currGroup.getId(), false) == DbStatusType.SUCCESS) {
+                                if (m_listener != null)
+                                    m_listener.onDeleted(currGroup);
+                            } else
                                 showAlert(activity, "错误", "分组删除错误，已恢复修改。");
                         } catch (ServerException ex) {
                             ex.printStackTrace();
@@ -218,7 +230,10 @@ public class GroupEditDialog extends AlertDialog implements IContextHelper {
                     },
                     "删除分组并修改为默认分组", (d, w) -> {
                         try {
-                            if (groupDao.deleteGroup(currGroup.getId(), true) == DbStatusType.FAILED)
+                            if (groupDao.deleteGroup(currGroup.getId(), true) == DbStatusType.SUCCESS) {
+                                if (m_listener != null)
+                                    m_listener.onDeleted(currGroup);
+                            } else
                                 showAlert(activity, "错误", "分组删除错误，已恢复修改。");
                         } catch (ServerException ex) {
                             ex.printStackTrace();
@@ -228,8 +243,7 @@ public class GroupEditDialog extends AlertDialog implements IContextHelper {
                     "不删除分组", null
                 );
             }
-        }
-        catch (ServerException ex) {
+        } catch (ServerException ex) {
             ex.printStackTrace();
             showAlert(activity, "错误", ex.getMessage());
         }

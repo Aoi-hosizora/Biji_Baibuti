@@ -7,7 +7,7 @@ import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteStatement;
 
-import com.baibuti.biji.model.dao.DatabaseManager;
+import com.baibuti.biji.model.dao.DbManager;
 import com.baibuti.biji.model.dao.DbOpenHelper;
 import com.baibuti.biji.model.dao.DbStatusType;
 import com.baibuti.biji.model.dao.daoInterface.IGroupDao;
@@ -28,11 +28,11 @@ public class GroupDao implements IGroupDao {
     private final static String COL_COLOR = "g_color";
 
     private Context context;
-    private DatabaseManager dbMgr;
+    private DbManager dbMgr;
 
     public GroupDao(Context context) {
         this.context = context;
-        this.dbMgr = DatabaseManager.getInstance(new DbOpenHelper(context));
+        this.dbMgr = DbManager.getInstance(new DbOpenHelper(context));
 
         if (queryAllGroups().isEmpty())
             insertGroup(Group.DEF_GROUP);
@@ -243,22 +243,31 @@ public class GroupDao implements IGroupDao {
         SQLiteDatabase db = dbMgr.getWritableDatabase();
         db.beginTransaction();
 
+        Cursor cursor = null;
         for (Group group : groups) {
             if (group.getId() == def.getId())
                 continue;
 
+            cursor = db.rawQuery("SELECT " + COL_ORDER + " FROM " + TBL_NAME + " WHERE " + COL_ID + " = " + group.getId(), null);
+            if (cursor.moveToFirst()) {
+                int motoOrder = cursor.getInt(cursor.getColumnIndex(COL_ORDER));
+                if (motoOrder == group.getOrder())
+                    continue;
+            }
+
             ContentValues values = new ContentValues();
             values.put(COL_ORDER, group.getOrder());
 
-            int ret = db.update(TBL_NAME, values,
-                COL_ID + " = ?", new String[] { String.valueOf(group.getId()) });
+            int ret = db.update(TBL_NAME, values, COL_ID + " = " + group.getId(), null);
             if (ret == 0) {
+                if (!cursor.isClosed()) cursor.close();
                 db.endTransaction();
                 dbMgr.closeDatabase();
                 return DbStatusType.FAILED;
             }
         }
 
+        if (cursor != null && !cursor.isClosed()) cursor.close();
         db.setTransactionSuccessful();
         db.endTransaction();
         dbMgr.closeDatabase();
@@ -313,6 +322,7 @@ public class GroupDao implements IGroupDao {
                     return DbStatusType.FAILED;
                 } else {
                     db.setTransactionSuccessful();
+                    db.endTransaction();
                     return DbStatusType.SUCCESS;
                 }
             }

@@ -1,4 +1,4 @@
-package com.baibuti.biji.model.dao;
+package com.baibuti.biji.common.retrofit;
 
 import com.baibuti.biji.model.dto.DocClassDTO;
 import com.baibuti.biji.model.dto.DocumentDTO;
@@ -116,7 +116,6 @@ public interface ServerApi {
 
     // region Group (7)
 
-    // TODO #A5A5A5
     @NeedAuth
     @GET("/group/")
     Observable<ResponseDTO<GroupDTO[]>> getAllGroups();
@@ -149,15 +148,12 @@ public interface ServerApi {
         @Part("color") String color
     );
 
-    // TODO 接口待加
     @NeedAuth
     @PUT("/group/order")
     Observable<ResponseDTO<OneFieldDTO.CountDTO>> updateGroupsOrder(
-        @Part("ids") int[] ids,
-        @Part("orders") int[] orders
+        @Part("id_order") String[] id_order
     );
 
-    // TODO 接口待改
     @NeedAuth
     @DELETE("/group/{gid}")
     Observable<ResponseDTO<GroupDTO>> deleteGroup(@Path("gid") int id, @Query("default") boolean isToDefault);
@@ -246,7 +242,6 @@ public interface ServerApi {
         @Part("name") String name
     );
 
-    // TODO 接口待改
     @NeedAuth
     @DELETE("/docclass/{cid}")
     Observable<ResponseDTO<DocClassDTO>> deleteDocClass(@Path("cid") int id, @Query("default") boolean isToDefault);
@@ -296,7 +291,6 @@ public interface ServerApi {
 
     // region Raw (2)
 
-    // TODO 返回体待改
     @NeedAuth
     @Multipart
     @POST("/raw/image")
@@ -304,14 +298,6 @@ public interface ServerApi {
         @Part("image") File image,
         @Part("type") String type
     );
-
-    // @NeedAuth
-    // @Multipart
-    // @DELETE("/raw/image")
-    // Observable<ResponseDTO<OneFieldDTO.CountDTO>> deleteImages(
-    //     @Part("urls") String[] urls,
-    //     @Part("type") String type
-    // );
 
     // endregion Raw
 

@@ -10,18 +10,18 @@ import java.util.concurrent.atomic.AtomicInteger;
  * attempt to re-open an already-closed object SQLiteDatabase
  * synchronized AtomicInteger
  */
-public class DatabaseManager {
+public class DbManager {
 
-    private static volatile DatabaseManager instance;
+    private static volatile DbManager instance;
 
     private AtomicInteger openCount = new AtomicInteger();
     private SQLiteOpenHelper helper;
     private volatile SQLiteDatabase db;
 
-    public static synchronized DatabaseManager getInstance(SQLiteOpenHelper helper) {
-        if (instance == null) synchronized (DatabaseManager.class) {
+    public static synchronized DbManager getInstance(SQLiteOpenHelper helper) {
+        if (instance == null) synchronized (DbManager.class) {
             if (instance == null) {
-                instance = new DatabaseManager();
+                instance = new DbManager();
                 instance.helper = helper;
             }
         }

@@ -5,7 +5,7 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteStatement;
 
-import com.baibuti.biji.model.dao.DatabaseManager;
+import com.baibuti.biji.model.dao.DbManager;
 import com.baibuti.biji.model.dao.DbOpenHelper;
 import com.baibuti.biji.model.dao.DbStatusType;
 import com.baibuti.biji.model.dao.daoInterface.ISearchItemDao;
@@ -23,10 +23,10 @@ public class SearchItemDao implements ISearchItemDao {
     private final static String COL_URL = "sis_url";
     private final static String COL_CONTENT = "sis_content";
 
-    private DatabaseManager dbMgr;
+    private DbManager dbMgr;
 
     public SearchItemDao(Context context) {
-        this.dbMgr = DatabaseManager.getInstance(new DbOpenHelper(context));
+        this.dbMgr = DbManager.getInstance(new DbOpenHelper(context));
     }
 
     public static void create_tbl(SQLiteDatabase db) {

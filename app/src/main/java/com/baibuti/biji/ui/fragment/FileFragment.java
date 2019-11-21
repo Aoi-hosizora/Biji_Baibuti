@@ -168,6 +168,7 @@ public class FileFragment extends BaseFragment implements IContextHelper {
 
         // Search
         LayoutUtil.AdjustSearchViewLayout(m_searchView);
+        m_searchView.clearFocus();
         m_searchView.setIconified(false);
         m_searchView.setQueryHint("搜索文档");
         m_searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() { // TODO back
@@ -176,11 +177,18 @@ public class FileFragment extends BaseFragment implements IContextHelper {
 
             @Override
             public boolean onQueryTextSubmit(String query) {
-                List<Document> searchResult = SearchUtil.getSearchItems(pageData.documentListItems.toArray(new Document[0]), query);
-                pageData.showDocumentList.clear();
-                pageData.showDocumentList.addAll(searchResult);
-                m_documentListView.getAdapter().notifyDataSetChanged();
-                return true;
+                if (query.isEmpty()) {
+                    m_searchView.clearFocus();
+                    showToast(getActivity(), "没有输入搜索内容");
+                    return false;
+                }
+                else {
+                    List<Document> searchResult = SearchUtil.getSearchItems(pageData.documentListItems.toArray(new Document[0]), query);
+                    pageData.showDocumentList.clear();
+                    pageData.showDocumentList.addAll(searchResult);
+                    m_documentListView.getAdapter().notifyDataSetChanged();
+                    return true;
+                }
             }
         });
     }
@@ -682,12 +690,9 @@ public class FileFragment extends BaseFragment implements IContextHelper {
     }
 
     /*
-        // TODO 检查 uuid 是否同时被多个用户占用
-
-        本地文件 -> 上传服务器 (文件路径名不变，增加 uuid)
-        本地文件查看 -> 检查本地是否存在 (不存在 -> 下载, 存在 -> 打开)
-        共享下载文件 -> 根据共享码获取 url，直接下载，选择分组 -> 本地保存后更新路径名，uuid 不变 -> 上传为自己的数据 (同一个 uuid)
-        共享文件分享 -> 直接上传服务器处理 Redis 返回 共享码
+        本地文件上传服务器 -> 文件路径名不变，增加 uuid
+        本地删除文件，下载 -> 直接下载到默认路径，更新服务器文件路径名
+        共享 -> redis 存储，获取共享码 -> 扫码 -> 组成 url 下载
      */
 
     /**
@@ -744,10 +749,11 @@ public class FileFragment extends BaseFragment implements IContextHelper {
                 File file = new File(document.getFilename());
                 String path = AppPathUtil.getFilePathByUri(getContext(), Uri.fromFile(file));
 
-                if (path == null || !file.exists()) { // 非本地地址 || 本地文件不存在
+                if (!file.exists() || path == null) { // 本地文件不存在
                     showAlert(getContext(),
                         "错误", "文档 \"" + document.getBaseFilename() + "\" 不存在，是否下载？",
-                        "下载", (d1, w1) -> {
+                        "下载", (d1, w1) -> { // 保存到默认路径并更新文件路径
+
 
                             // TODO api 下载
 

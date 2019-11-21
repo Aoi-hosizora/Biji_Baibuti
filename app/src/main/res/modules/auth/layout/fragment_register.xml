@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
+<android.support.constraint.ConstraintLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:orientation="vertical"
@@ -7,11 +7,13 @@
     android:layout_height="match_parent">
 
     <ImageView
+        android:id="@+id/registerFrag_image"
         android:layout_marginTop="@dimen/RegLogLogoMarginTop"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:contentDescription="@string/todo"
-        android:src="@mipmap/app_icon"/>
+        android:src="@mipmap/app_icon"
+        app:layout_constraintTop_toTopOf="parent"/>
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -20,7 +22,8 @@
         android:layout_marginTop="@dimen/RegLogEditTextMarginTop"
         android:layout_marginStart="@dimen/RegLogEditTextMarginLeftRight"
         android:layout_marginEnd="@dimen/RegLogEditTextMarginLeftRight"
-        android:layout_marginBottom="@dimen/RegLogEditTextMarginBottom">
+        android:layout_marginBottom="@dimen/RegLogEditTextMarginBottom"
+        app:layout_constraintTop_toBottomOf="@id/registerFrag_image">
 
         <android.support.design.widget.TextInputLayout
             android:id="@+id/registerFrag_layout_username"
@@ -57,43 +60,52 @@
 
     </LinearLayout>
 
-    <Button
-        android:id="@+id/registerFrag_btn_register"
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="@string/RegLogAct_Register"
+        android:orientation="vertical"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent">
 
-        android:textSize="@dimen/RegLogButtonTextSize"
-        android:textColor="@color/white"
-        android:background="@drawable/btn_auth_ripple_bg"
-        android:layout_marginTop="48dp"
-        android:layout_marginStart="@dimen/RegLogButtonMarginLeftRight"
-        android:layout_marginEnd="@dimen/RegLogButtonMarginLeftRight"/>
+        <Button
+            android:id="@+id/registerFrag_btn_register"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/RegLogAct_Register"
 
-    <Button
-        android:id="@+id/registerFrag_btn_clear"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="@string/RegLogAct_Clear"
+            android:textSize="@dimen/RegLogButtonTextSize"
+            android:textColor="@color/white"
+            android:background="@drawable/btn_auth_ripple_bg"
+            android:layout_marginTop="@dimen/RegLogButtonMarginTop"
+            android:layout_marginStart="@dimen/RegLogButtonMarginLeftRight"
+            android:layout_marginEnd="@dimen/RegLogButtonMarginLeftRight"/>
 
-        android:textSize="@dimen/RegLogButtonTextSize"
-        android:textColor="@color/white"
-        android:background="@drawable/btn_auth_ripple_bg"
-        android:layout_marginTop="@dimen/RegLogButtonMarginTop"
-        android:layout_marginStart="@dimen/RegLogButtonMarginLeftRight"
-        android:layout_marginEnd="@dimen/RegLogButtonMarginLeftRight"/>
+        <Button
+            android:id="@+id/registerFrag_btn_clear"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/RegLogAct_Clear"
 
-    <Button
-        android:id="@+id/registerFrag_btn_toLogin"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="@string/RegLogAct_ToLogin"
+            android:textSize="@dimen/RegLogButtonTextSize"
+            android:textColor="@color/white"
+            android:background="@drawable/btn_auth_ripple_bg"
+            android:layout_marginTop="@dimen/RegLogButtonMarginTop"
+            android:layout_marginStart="@dimen/RegLogButtonMarginLeftRight"
+            android:layout_marginEnd="@dimen/RegLogButtonMarginLeftRight"/>
 
-        android:textSize="@dimen/RegLogButtonTextSize"
-        android:textColor="@color/white"
-        android:background="@drawable/btn_auth_ripple_bg"
-        android:layout_marginTop="@dimen/RegLogButtonMarginTop"
-        android:layout_marginStart="@dimen/RegLogButtonMarginLeftRight"
-        android:layout_marginEnd="@dimen/RegLogButtonMarginLeftRight"/>
+        <Button
+            android:id="@+id/registerFrag_btn_toLogin"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/RegLogAct_ToLogin"
 
-</LinearLayout>
+            android:textSize="@dimen/RegLogButtonTextSize"
+            android:textColor="@color/white"
+            android:background="@drawable/btn_auth_ripple_bg"
+            android:layout_marginTop="@dimen/RegLogButtonMarginTop"
+            android:layout_marginStart="@dimen/RegLogButtonMarginLeftRight"
+            android:layout_marginEnd="@dimen/RegLogButtonMarginLeftRight"/>
+
+    </LinearLayout>
+
+</android.support.constraint.ConstraintLayout>

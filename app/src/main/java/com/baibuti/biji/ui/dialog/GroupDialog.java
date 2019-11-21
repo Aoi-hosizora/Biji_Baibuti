@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.util.Log;
 import android.widget.Button;
 import android.widget.ListView;
 
@@ -94,23 +95,23 @@ public class GroupDialog extends AlertDialog implements IContextHelper {
     }
 
     /**
-     * 完成
+     * 完成顺序修改
      */
     @OnClick(R.id.id_GroupDialog_ButtonOK)
     void ButtonOK_Clicked() {
         IGroupDao groupDao = DaoStrategyHelper.getInstance().getGroupDao(activity);
         try {
-            if (groupDao.updateGroupsOrder(groupList.toArray(new Group[0])) != DbStatusType.SUCCESS) {
+            if (groupDao.updateGroupsOrder(groupList.toArray(new Group[0])) == DbStatusType.SUCCESS) {
+                Log.i("", "ButtonOK_Clicked: order SUCCESS");
+                if (m_listener != null)
+                    m_listener.onUpdated();
+                dismiss();
+            } else
                 showAlert(getContext(), "错误", "分组顺序更新失败。");
-                return;
-            }
         } catch (ServerException ex) {
             ex.printStackTrace();
             showAlert(activity, "错误", "分组更新失败：" + ex.getMessage());
         }
-        if (m_listener != null)
-            m_listener.onUpdated();
-        dismiss();
     }
 
     /**
@@ -180,12 +181,26 @@ public class GroupDialog extends AlertDialog implements IContextHelper {
      *          notnull 更新分组
      */
     private void editGroup(Group inputGroup) {
-        GroupEditDialog dialog = new GroupEditDialog(activity, inputGroup, (group) -> {
-            if (inputGroup == null) { // 新建
-                groupList.add(group);
-                groupAdapter.setCurrentItem(group);
+        GroupEditDialog dialog = new GroupEditDialog(activity, inputGroup, new GroupEditDialog.OnUpdateGroupListener() {
+
+            @Override
+            public void onUpdated(Group group) {
+                if (inputGroup == null) { // 新建
+                    groupList.add(group);
+                    groupAdapter.setCurrentItem(group);
+                }
+                groupAdapter.notifyDataSetChanged();
+                if (m_listener != null)
+                    m_listener.onUpdated();
             }
-            groupAdapter.notifyDataSetChanged();
+
+            @Override
+            public void onDeleted(Group group) {
+                groupList.remove(group);
+                groupAdapter.notifyDataSetChanged();
+                if (m_listener != null)
+                    m_listener.onUpdated();
+            }
         });
         dialog.setCancelable(false);
         dialog.show();
@@ -195,7 +210,19 @@ public class GroupDialog extends AlertDialog implements IContextHelper {
      * 删除指定分组
      */
     private void deleteGroup(Group inputGroup) {
-        GroupEditDialog dialog = new GroupEditDialog(activity, inputGroup, null);
+        GroupEditDialog dialog = new GroupEditDialog(activity, inputGroup, new GroupEditDialog.OnUpdateGroupListener() {
+            @Override
+            public void onUpdated(Group group) { }
+
+            @Override
+            public void onDeleted(Group group) {
+                groupList.remove(group);
+                groupAdapter.setCurrentItem(groupList.get(0));
+                groupAdapter.notifyDataSetChanged();
+                if (m_listener != null)
+                    m_listener.onUpdated();
+            }
+        });
         dialog.DeleteButton_Clicked();
     }
 

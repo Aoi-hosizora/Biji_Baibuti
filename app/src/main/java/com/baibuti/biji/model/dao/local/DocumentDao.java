@@ -7,7 +7,7 @@ import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteStatement;
 
-import com.baibuti.biji.model.dao.DatabaseManager;
+import com.baibuti.biji.model.dao.DbManager;
 import com.baibuti.biji.model.dao.DbOpenHelper;
 import com.baibuti.biji.model.dao.DbStatusType;
 import com.baibuti.biji.model.dao.daoInterface.IDocumentDao;
@@ -25,11 +25,11 @@ public class DocumentDao implements IDocumentDao {
     private final static String COL_PATH = "doc_path";
     final static String COL_DOCCLASS_ID = "doc_class_name";
 
-    private DatabaseManager dbMgr;
+    private DbManager dbMgr;
     private DocClassDao docClassDao;
 
     public DocumentDao(Context context) {
-        this.dbMgr = DatabaseManager.getInstance(new DbOpenHelper(context));
+        this.dbMgr = DbManager.getInstance(new DbOpenHelper(context));
         this.docClassDao = new DocClassDao(context);
     }
 

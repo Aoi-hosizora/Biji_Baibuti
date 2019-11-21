@@ -22,9 +22,7 @@ import java.util.TimerTask;
 
 public class FileImportDialog extends Dialog implements android.view.View.OnClickListener {
 
-    private Activity c;
-    public Dialog d;
-    public ImageButton close;
+    private Activity activity;
     public TextView title;
     private List<FileItem> fileListItems;
     private FileItemAdapter fileItemAdapter;
@@ -42,7 +40,7 @@ public class FileImportDialog extends Dialog implements android.view.View.OnClic
     public FileImportDialog(Activity a, List<FileItem> l) {
         super(a, android.R.style.Widget_Material);
         fileListItems = l;
-        this.c = a;
+        this.activity = a;
     }
 
     @Override
@@ -51,13 +49,14 @@ public class FileImportDialog extends Dialog implements android.view.View.OnClic
         super.onCreate(savedInstanceState);
         setContentView(R.layout.dialog_file_import);
 
-        close = findViewById(R.id.fileimportdialog_btnClose);
-        close.setOnClickListener(this);
+        ImageButton ok_btn = findViewById(R.id.fileimportdialog_btnOk);
+        ok_btn.setOnClickListener(this);
+
+        ImageButton btn_back = findViewById(R.id.fileimportdialog_back);
+        btn_back.setOnClickListener(this);
 
         title = findViewById(R.id.fileimportdialog_title_text);
         title.setText("导入文件...");
-        title.setTextSize(18);
-        title.setTextColor(c.getResources().getColor(R.color.white));
 
         RecyclerView fileList = findViewById(R.id.fileimportdialog_filelist);
         fileList.setLayoutManager(new LinearLayoutManager(getContext()));
@@ -68,11 +67,15 @@ public class FileImportDialog extends Dialog implements android.view.View.OnClic
 
     @Override
     public void onClick(View v) {
-        if (v.getId() == R.id.fileimportdialog_btnClose) {
+        if (v.getId() == R.id.fileimportdialog_btnOk) {
             cancelTask();
             stopScan = true;
             if (null != onFinishScanListener)
                 onFinishScanListener.OnFinish();
+            dismiss();
+        } else if (v.getId() == R.id.fileimportdialog_back) {
+            cancelTask();
+            stopScan = true;
             dismiss();
         }
     }
@@ -88,7 +91,7 @@ public class FileImportDialog extends Dialog implements android.view.View.OnClic
             @Override
             public void run() {
                 if (thread.getState() == Thread.State.TERMINATED) {
-                    c.runOnUiThread(() -> {
+                    activity.runOnUiThread(() -> {
                         title.setText("扫描完成");
                         cancelTask();
                     });
@@ -114,7 +117,7 @@ public class FileImportDialog extends Dialog implements android.view.View.OnClic
                 final String path = file.getAbsolutePath();
                 for (String filterName : fileFilter) {
                     if (fileName.endsWith(filterName)) {
-                        c.runOnUiThread(() -> {
+                        activity.runOnUiThread(() -> {
                             if (fileName.endsWith(".doc") || fileName.endsWith(".docx")) {
                                 fileListItems.add(new FileItem(fileName, path, "doc"));
                             } else if (fileName.endsWith(".ppt") || fileName.endsWith(".pptx")) {

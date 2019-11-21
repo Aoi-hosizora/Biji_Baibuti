@@ -7,7 +7,7 @@ import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteStatement;
 
-import com.baibuti.biji.model.dao.DatabaseManager;
+import com.baibuti.biji.model.dao.DbManager;
 import com.baibuti.biji.model.dao.DbOpenHelper;
 import com.baibuti.biji.model.dao.DbStatusType;
 import com.baibuti.biji.model.dao.daoInterface.INoteDao;
@@ -31,10 +31,10 @@ public class NoteDao implements INoteDao {
     private final static String COL_UPDATE_TIME = "n_update_time";
 
     private GroupDao groupDao;
-    private DatabaseManager dbMgr;
+    private DbManager dbMgr;
 
     public NoteDao(Context context) {
-        this.dbMgr = DatabaseManager.getInstance(new DbOpenHelper(context));
+        this.dbMgr = DbManager.getInstance(new DbOpenHelper(context));
         this.groupDao = new GroupDao(context);
     }
 

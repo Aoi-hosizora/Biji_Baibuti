@@ -11,7 +11,6 @@ import android.widget.TextView;
 
 import com.baibuti.biji.model.po.Document;
 import com.baibuti.biji.R;
-import com.baibuti.biji.util.filePathUtil.FileNameUtil;
 
 import java.util.List;
 
@@ -91,15 +90,17 @@ public class DocumentAdapter extends RecyclerView.Adapter<DocumentAdapter.ViewHo
         Document document = documentList.get(position);
         holder.itemView.setTag(document);
 
-        holder.textView.setText(FileNameUtil.getFilepath(document.getFilename()));
-        switch (FileNameUtil.getFilenameExt(document.getFilename())) {
+        holder.textView.setText(document.getBaseFilename());
+        switch (document.getFileExtension()) {
             case "pdf":
                 holder.imageView.setImageResource(R.drawable.pdf);
                 break;
             case "ppt":
+            case "pptx":
                 holder.imageView.setImageResource(R.drawable.ppt);
                 break;
             case "doc":
+            case "docx":
                 holder.imageView.setImageResource(R.drawable.doc);
                 break;
             case "xls":
@@ -109,6 +110,7 @@ public class DocumentAdapter extends RecyclerView.Adapter<DocumentAdapter.ViewHo
                 holder.imageView.setImageResource(R.drawable.txt);
                 break;
             case "zip":
+            case "rar":
                 holder.imageView.setImageResource(R.drawable.zip);
                 break;
             default:

@@ -13,10 +13,20 @@ public class Document implements Serializable, ISearchEntity {
     private String filename;
     private DocClass docClass;
 
+    /**
+     * 服务器端的标识
+     */
+    private String uuid;
+
     public Document(int id, String filePath, DocClass docClass) {
+        this(id, filePath, docClass, "");
+    }
+
+    public Document(int id, String filePath, DocClass docClass, String uuid) {
         this.id = id;
         this.filename = filePath;
         this.docClass = docClass;
+        this.uuid = uuid;
     }
 
     /**
@@ -24,7 +34,19 @@ public class Document implements Serializable, ISearchEntity {
      */
     public String getBaseFilename() {
         String[] sp = filename.split("[/\\\\]");
+        if (sp.length == 0) return "";
         return sp[sp.length - 1];
+    }
+
+    /**
+     * 获取文件后缀名
+     */
+    public String getFileExtension() {
+        String basename = getBaseFilename();
+        String[] sp = basename.split("\\.");
+        if (sp.length <= 1) return "";
+        else
+            return sp[sp.length - 1];
     }
 
     @Override

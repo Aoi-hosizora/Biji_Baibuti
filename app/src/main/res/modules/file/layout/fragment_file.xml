@@ -55,13 +55,15 @@
                 android:layout_height="0dp"
                 android:layout_weight="1"
                 android:background="@color/grey_250"
-                android:splitMotionEvents="false" />
+                android:splitMotionEvents="false"
+                android:scrollbars="vertical" />
 
             <Button
                 android:id="@+id/id_docclass_list_view_add"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="新建分组"
+                android:textSize="14sp"
                 android:theme="@style/DlgFlatButton"
                 android:background="@drawable/btn_class_add"
                 android:textColor="@color/colorAccent" />
@@ -104,7 +106,8 @@
                     android:id="@+id/id_document_list_view"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
-                    android:layout_marginStart="2dp" />
+                    android:layout_marginStart="2dp"
+                    android:scrollbars="vertical" />
 
             </android.support.v4.widget.SwipeRefreshLayout>
 

@@ -9,7 +9,8 @@
         android:layout_height="56dp"
         android:orientation="horizontal"
         android:background="@color/colorPrimary"
-        android:layout_marginBottom="5dp">
+        android:layout_marginBottom="5dp"
+        android:elevation="2dp">
 
         <ImageButton
             android:id="@+id/id_NoteFrag_nav_BackButton"
@@ -20,7 +21,7 @@
             android:layout_gravity="center_vertical"
             android:src="@drawable/ic_back_white_24dp"
             android:contentDescription="@string/NoteFrag_GroupingMgrRightBackButton"
-            style="@style/Widget.AppCompat.Button.Borderless.Colored"/>
+            style="@style/Widget.AppCompat.Button.Borderless.Colored" />
 
         <TextView
             android:layout_width="match_parent"

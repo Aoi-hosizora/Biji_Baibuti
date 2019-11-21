@@ -50,6 +50,13 @@ public class GroupRadioAdapter extends BaseAdapter {
     @Setter
     private OnRadioButtonClickListener onRadioButtonClickListener;
 
+    // @Override
+    // public void notifyDataSetChanged() {
+    //     super.notifyDataSetChanged();
+    //     if (groupList != null && groupList.size() > 0)
+    //         currentItem = groupList.get(0);
+    // }
+
     ////////////////
 
     @Override
