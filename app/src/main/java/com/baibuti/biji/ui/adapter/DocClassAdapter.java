@@ -57,13 +57,6 @@ public class DocClassAdapter extends BaseAdapter {
     @Setter
     private OnButtonLongClickListener onButtonLongClickListener;
 
-    @Override
-    public void notifyDataSetChanged() {
-        super.notifyDataSetChanged();
-        if (this.docClassList != null && this.docClassList.size() > 0)
-            currentItem = docClassList.get(0);
-    }
-
     ////////////////
 
     @Override

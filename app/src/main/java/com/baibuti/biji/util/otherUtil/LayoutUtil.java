@@ -101,12 +101,18 @@ public class LayoutUtil {
      * 去除 SearchView 下划线
      */
     public static void AdjustSearchViewLayout(SearchView searchView) {
+        if (searchView == null) return;
+
         try {
             Class<?> argClass = searchView.getClass();
+
             Field ownField = argClass.getDeclaredField("mSearchPlate");
             ownField.setAccessible(true);
-            View mView = (View) ownField.get(searchView);
-            mView.setBackgroundColor(Color.TRANSPARENT);
+            ((View) ownField.get(searchView)).setBackgroundColor(Color.TRANSPARENT);
+
+            ownField = argClass.getDeclaredField("mSubmitArea");
+            ownField.setAccessible(true);
+            ((View) ownField.get(searchView)).setBackgroundColor(Color.TRANSPARENT);
         } catch (Exception e) {
             e.printStackTrace();
         }

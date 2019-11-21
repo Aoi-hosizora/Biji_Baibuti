@@ -44,6 +44,7 @@
         app:layout_constraintTop_toBottomOf="@+id/id_view_file_search">
 
         <LinearLayout
+            android:id="@+id/id_document_left"
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
@@ -71,6 +72,7 @@
         </LinearLayout>
 
         <LinearLayout
+            android:id="@+id/id_document_right"
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="4"

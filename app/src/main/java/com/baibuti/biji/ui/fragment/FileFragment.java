@@ -2,12 +2,14 @@ package com.baibuti.biji.ui.fragment;
 
 import android.app.Dialog;
 import android.app.ProgressDialog;
+import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.v4.content.ContextCompat;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.Toolbar;
@@ -68,6 +70,8 @@ public class FileFragment extends BaseFragment implements IContextHelper {
     @BindView(R.id.id_view_file_search)
     SearchView m_searchView;
 
+    private ImageView m_searchIcon;
+
     @BindView(R.id.id_document_srl)
     SwipeRefreshLayout m_srl;
 
@@ -118,11 +122,6 @@ public class FileFragment extends BaseFragment implements IContextHelper {
         return view;
     }
 
-    @Override
-    public boolean onBackPressed() {
-        return false;
-    }
-
     private void initView() {
 
         // Toolbar
@@ -160,6 +159,7 @@ public class FileFragment extends BaseFragment implements IContextHelper {
         m_docClassAdapter.setOnButtonClickListener((pos) ->
             onDocClassItemClicked(pageData.docClassListItems.get(pos)));
         m_docClassAdapter.setOnButtonLongClickListener((pos) -> {
+            onDocClassItemClicked(pageData.docClassListItems.get(pos));
             DocClass_LongClicked(pageData.docClassListItems.get(pos));
             return true;
         });
@@ -167,30 +167,69 @@ public class FileFragment extends BaseFragment implements IContextHelper {
         m_docClassListView.setAdapter(m_docClassAdapter);
 
         // Search
+        m_searchIcon = m_searchView.findViewById(m_searchView.getContext().getResources().getIdentifier("android:id/search_mag_icon", null, null));
+        LinearLayout m_left = view.findViewById(R.id.id_document_left);
+        LinearLayout m_right = view.findViewById(R.id.id_document_right);
         LayoutUtil.AdjustSearchViewLayout(m_searchView);
-        m_searchView.clearFocus();
-        m_searchView.setIconified(false);
+        m_searchIcon.setClickable(true);
+
+        // m_searchView.setIconified(false);
+        m_searchView.setIconifiedByDefault(false);
+        m_searchView.setSubmitButtonEnabled(true);
         m_searchView.setQueryHint("搜索文档");
-        m_searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() { // TODO back
+        m_searchView.clearFocus();
+        m_searchView.onActionViewCollapsed();
+        m_searchView.setOnClickListener((v) -> {
+            m_searchView.onActionViewExpanded();
+            Context context = getContext();
+            m_searchIcon.setTag(true);
+            if (context != null)
+                m_searchIcon.setImageDrawable(ContextCompat.getDrawable(context, R.drawable.ic_sv_back_back_24dp));
+        });
+
+        m_searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
             public boolean onQueryTextChange(String newText) { return false; }
 
             @Override
             public boolean onQueryTextSubmit(String query) {
-                if (query.isEmpty()) {
-                    m_searchView.clearFocus();
-                    showToast(getActivity(), "没有输入搜索内容");
-                    return false;
-                }
-                else {
-                    List<Document> searchResult = SearchUtil.getSearchItems(pageData.documentListItems.toArray(new Document[0]), query);
-                    pageData.showDocumentList.clear();
-                    pageData.showDocumentList.addAll(searchResult);
-                    m_documentListView.getAdapter().notifyDataSetChanged();
-                    return true;
-                }
+                m_searchView.clearFocus();
+                m_left.setVisibility(View.GONE);
+                m_txt_document_header.setVisibility(View.GONE);
+                m_right.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.MATCH_PARENT));
+
+                m_srl.setEnabled(false); // 不允许下拉刷新
+                if (getActivity() != null)
+                    CommonUtil.closeSoftKeyInput(getActivity());
+                onSearchSubmitClicked(query, false);
+                return true;
             }
         });
+        m_searchIcon.setOnClickListener((v) -> {
+            m_searchView.clearFocus();
+            m_searchView.onActionViewCollapsed();
+            m_searchIcon.setTag(false);
+            Context context = getContext();
+            if (context != null)
+                m_searchIcon.setImageDrawable(ContextCompat.getDrawable(context, R.drawable.ic_sv_back_back_24dp));
+
+            m_left.setVisibility(View.VISIBLE);
+            m_txt_document_header.setVisibility(View.VISIBLE);
+            m_right.setLayoutParams(new LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.MATCH_PARENT, 4));
+
+            m_srl.setEnabled(true);
+            onSearchSubmitClicked("", true);
+        });
+    }
+
+    @Override
+    public boolean onBackPressed() {
+        if ((boolean) m_searchIcon.getTag()) {
+            m_searchIcon.callOnClick();
+            return true;
+        }
+
+        return false;
     }
 
     /**
@@ -222,13 +261,46 @@ public class FileFragment extends BaseFragment implements IContextHelper {
     }
 
     /**
+     * Search View 搜索
+     * @param isBack 是否返回还是搜索
+     */
+    private void onSearchSubmitClicked(String query, boolean isBack) {
+        if (!isBack) {
+            ProgressDialog progressDialog = showProgress(getContext(), "搜索 \"" + query + " \" 中...", false, null);
+            if (query.trim().isEmpty())
+                showToast(getActivity(), "没有输入搜索内容");
+            else {
+                List<Document> searchResult = SearchUtil.getSearchItems(pageData.documentListItems.toArray(new Document[0]), query);
+                showToast(getActivity(), "共找到 " + searchResult.size() + " 条结果");
+                pageData.showDocumentList.clear();
+                pageData.showDocumentList.addAll(searchResult);
+                m_documentAdapter.notifyDataSetChanged();
+            }
+            progressDialog.dismiss();
+        } else {
+            ProgressDialog progressDialog = showProgress(getContext(), "返回中...", false, null);
+            initData();
+            // pageData.showDocumentList.clear();
+            // pageData.showDocumentList.addAll(pageData.documentListItems);
+            // m_documentAdapter.notifyDataSetChanged();
+            progressDialog.dismiss();
+        }
+    }
+
+    /**
+    /**
      * 点击分组，更新显示
      */
     private void onDocClassItemClicked(DocClass docClass) {
+        ProgressDialog progressDialog = showProgress(getContext(), "加载数据中...", false, null);
+
+        m_docClassAdapter.setCurrentItem(docClass);
         pageData.showDocumentList.clear();
         pageData.showDocumentList.addAll(filterDocumentByDocClass(docClass, pageData.documentListItems));
         m_txt_document_header.setText(String.format(Locale.CHINA, "%s (共 %d 项)", docClass.getName(), pageData.showDocumentList.size()));
         m_documentAdapter.notifyDataSetChanged();
+
+        progressDialog.dismiss();
     }
 
     /**
@@ -285,7 +357,7 @@ public class FileFragment extends BaseFragment implements IContextHelper {
         LinearLayout root = LayoutUtil.initPopupMenu(activity, m_popup_document, R.layout.popup_doc_long_click_item);
 
         TextView label = root.findViewById(R.id.id_doc_popup_label);
-        label.setText(String.format("当前选中文档: %s (%s)", document.getBaseFilename(), m_docClassAdapter.getCurrentItem().getName()));
+        label.setText(String.format("当前选中文档: %s (%s)", document.getBaseFilename(), document.getDocClass().getName()));
 
         root.findViewById(R.id.id_doc_popup_delete).setOnClickListener((v) -> PopupDeleteDoc_Clicked(document));
         root.findViewById(R.id.id_doc_popup_open).setOnClickListener((v) -> {
@@ -314,6 +386,8 @@ public class FileFragment extends BaseFragment implements IContextHelper {
                         pageData.documentListItems.remove(document);
                         pageData.showDocumentList.remove(document);
                         m_documentAdapter.notifyDataSetChanged();
+                        m_txt_document_header.setText(String.format(Locale.CHINA,
+                            "%s (共 %d 项)", m_docClassAdapter.getCurrentItem().getName(), pageData.showDocumentList.size()));
                     }
                 } catch (ServerException ex) {
                     ex.printStackTrace();
@@ -384,6 +458,7 @@ public class FileFragment extends BaseFragment implements IContextHelper {
                     if (status == DbStatusType.SUCCESS) {
                         showToast(getActivity(), "分组 \"" + newDocClass.getName() + "\" 新建成功");
                         pageData.docClassListItems.add(newDocClass);
+                        onDocClassItemClicked(newDocClass);
                         m_docClassAdapter.notifyDataSetChanged();
                         return;
                     }
@@ -484,7 +559,6 @@ public class FileFragment extends BaseFragment implements IContextHelper {
                                 pageData.docClassListItems.remove(docClass);
                                 m_docClassAdapter.notifyDataSetChanged();
                                 //
-                                m_docClassAdapter.setCurrentItem(pageData.docClassListItems.get(0));
                                 onDocClassItemClicked(pageData.docClassListItems.get(0));
                             }
                             else if (status == DbStatusType.DEFAULT)
@@ -511,7 +585,6 @@ public class FileFragment extends BaseFragment implements IContextHelper {
                                 m_docClassAdapter.notifyDataSetChanged();
                                 m_documentAdapter.notifyDataSetChanged();
                                 //
-                                m_docClassAdapter.setCurrentItem(pageData.docClassListItems.get(0));
                                 onDocClassItemClicked(pageData.docClassListItems.get(0));
                             }
                             else if (status == DbStatusType.DEFAULT)
@@ -533,7 +606,6 @@ public class FileFragment extends BaseFragment implements IContextHelper {
                                 m_docClassAdapter.notifyDataSetChanged();
                                 m_documentAdapter.notifyDataSetChanged();
                                 //
-                                m_docClassAdapter.setCurrentItem(pageData.docClassListItems.get(0));
                                 onDocClassItemClicked(pageData.docClassListItems.get(0));
                             }
                             else if (status == DbStatusType.DEFAULT)
@@ -580,8 +652,7 @@ public class FileFragment extends BaseFragment implements IContextHelper {
                 FileItem f = importedDocuments.get(i);
                 if (f.getTag() == FileItem.CHECKED) {
                     Document newDocument = new Document(-1, f.getFilePath(), docClass);
-                    pageData.documentListItems.add(newDocument);
-                    pageData.showDocumentList.add(newDocument);
+                    // TODO
                     try {
                         // 顺便上传
                         DbStatusType status = documentDao.insertDocument(newDocument);
@@ -591,6 +662,9 @@ public class FileFragment extends BaseFragment implements IContextHelper {
                         } else if (status == DbStatusType.FAILED) {
                             showAlert(getActivity(), "错误", "文档记录更新失败。");
                             return;
+                        } else {
+                            pageData.documentListItems.add(newDocument);
+                            pageData.showDocumentList.add(newDocument);
                         }
                     } catch (ServerException ex) {
                         ex.printStackTrace();
@@ -598,6 +672,10 @@ public class FileFragment extends BaseFragment implements IContextHelper {
                         return;
                     }
                 }
+
+                m_txt_document_header.setText(String.format(Locale.CHINA,
+                    "%s (共 %d 项)", m_docClassAdapter.getCurrentItem().getName(), pageData.showDocumentList.size()));
+                showToast(getActivity(), "成功导入 " + importedDocuments.size() + " 个文档");
             }
             progressDialog.dismiss();
             m_documentAdapter.notifyDataSetChanged();
@@ -759,7 +837,7 @@ public class FileFragment extends BaseFragment implements IContextHelper {
 
                         }, "取消", null
                     );
-                } else if (!DocService.openFile(getContext(), path)) // 打开文件
+                } else if (!DocService.openFile(getActivity(), file)) // 打开文件
                     showAlert(getContext(), "错误", "打开文件错误，文件格式不支持。");
             },
             "取消", null

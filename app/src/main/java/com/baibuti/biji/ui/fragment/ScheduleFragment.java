@@ -252,7 +252,7 @@ public class ScheduleFragment extends BaseFragment implements IContextHelper {
 
         if (progressDialog.isShowing())
             progressDialog.dismiss();
-        showToast(getActivity(), "刷新完成");
+        // showToast(getActivity(), "刷新完成");
     }
 
     /**

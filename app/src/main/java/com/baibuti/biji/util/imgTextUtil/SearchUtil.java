@@ -3,6 +3,7 @@ package com.baibuti.biji.util.imgTextUtil;
 import com.baibuti.biji.model.vo.ISearchEntity;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import javax.annotation.Nonnull;
@@ -17,7 +18,13 @@ public class SearchUtil {
      * @return 切出来的词组
      */
     private static List<String> jieba(String str) {
-        return JiebaSegmenter.getJiebaSegmenterSingleton().getDividedString(str);
+        try {
+            // TODO GC OOM
+            return JiebaSegmenter.getJiebaSegmenterSingleton().getDividedString(str);
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            return Arrays.asList(str.split("[ \t,\\\\.，。]"));
+        }
     }
 
     /**
