@@ -3,6 +3,7 @@ package com.baibuti.biji.model.po;
 import com.baibuti.biji.model.vo.ISearchEntity;
 
 import java.io.Serializable;
+import java.util.HashMap;
 
 import lombok.Data;
 
@@ -56,6 +57,11 @@ public class Document implements Serializable, ISearchEntity {
         Document that = (Document) obj;
         return filename.equals(that.getFilename()) &&
             docClass.getId() == that.getDocClass().getId();
+    }
+
+    @Override
+    public int hashCode() {
+        return (filename + docClass.getId()).hashCode();
     }
 
     @Override

@@ -280,7 +280,6 @@ public class MainActivity extends FragmentActivity implements IContextHelper, Au
     private NavigationView.OnNavigationItemSelectedListener navigationItemSelectedListener = (@NonNull MenuItem item) -> {
         switch (item.getItemId()) {
             case R.id.nav_left_login:
-                m_navigationView.setCheckedItem(R.id.nav_left_main);
                 Nav_Login_Selected();
                 break;
             case R.id.nav_left_about:
@@ -290,7 +289,7 @@ public class MainActivity extends FragmentActivity implements IContextHelper, Au
                 Nav_Feedback_Selected();
                 break;
         }
-        return true;
+        return false;
     };
 
     /**

@@ -1,6 +1,5 @@
 package com.baibuti.biji.ui.fragment;
 
-import android.app.ProgressDialog;
 import android.support.annotation.NonNull;
 import android.support.design.widget.TextInputEditText;
 import android.support.design.widget.TextInputLayout;
@@ -11,7 +10,8 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
-import com.baibuti.biji.model.dto.ServerException;
+import com.baibuti.biji.common.process.ProgressHandler;
+import com.baibuti.biji.common.process.ResponseInterface;
 import com.baibuti.biji.common.auth.AuthService;
 import com.baibuti.biji.R;
 import com.baibuti.biji.common.auth.dto.AuthRespDTO;
@@ -81,19 +81,25 @@ public class RegisterFragment extends Fragment implements IContextHelper {
             return;
         }
 
-        ProgressDialog progressDialog =
-            showProgress(getContext(),
-                String.format(Locale.CHINA, "用户 \"%s\" 注册中，请稍后...", username),
-                true, null);
+        ProgressHandler.process(getContext(), "用户注册中...", true,
+            AuthService.register(username, password), new ResponseInterface<AuthRespDTO>() {
 
-        try {
-            progressDialog.dismiss();
-            AuthRespDTO auth = AuthService.register(username, password);
-            showToast(getContext(), String.format(Locale.CHINA, "用户 \"%s\" 注册成功，请登录。", auth.getUsername()));
-        } catch (ServerException ex) {
-            progressDialog.dismiss();
-            showAlert(getContext(), "注册失败", ex.getMessage());
-        }
+                @Override
+                public void onSuccess(AuthRespDTO auth) {
+                    showToast(getContext(), String.format(Locale.CHINA, "用户 \"%s\" 注册成功，请登录。", auth.getUsername()));
+                }
+
+                @Override
+                public void onError(String message) {
+                    showAlert(getContext(), "注册", "注册错误：" + message);
+                }
+
+                @Override
+                public void onFailed(Throwable throwable) {
+                    showAlert(getContext(), "错误", "网络错误：" + throwable.getMessage());
+                }
+            }
+        );
     }
 
     /**

@@ -199,17 +199,3 @@ public class DocClassNetDao implements IDocClassDao {
         }
     }
 }
-
-/*
-
-    public static File getShareCode(String fileClassName){
-
-        return NetHelper.httpGetFileSync(
-                GetShareCodeUrl + "?docClass=" + fileClassName,
-                "Share",
-                fileClassName + ".png",
-                NetHelper.getOneHeader("Authorization", AuthManager.getInstance().getToken())
-        );
-    }
-
- */

@@ -21,7 +21,7 @@ public class AuthService {
      */
     private synchronized static AuthRespDTO currentAuth() throws ServerException {
         Observable<ResponseDTO<AuthRespDTO>> observable = RetrofitFactory.getInstance()
-            .createRequest(RetrofitFactory.getHeader())
+            .createRequest(AuthManager.getInstance().getAuthorizationHead())
             .currentUser()
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread());
@@ -59,31 +59,18 @@ public class AuthService {
             respDTO.setToken(response.headers().get("Authorization"));
 
             return respDTO;
-        }
-        catch (InterruptedException | ExecutionException ex) {
+        } catch (InterruptedException | ExecutionException ex) {
             ex.printStackTrace();
             throw ServerErrorHandle.getClientError(ex);
         }
     }
 
-    public synchronized static AuthRespDTO register(String username, String password) throws ServerException {
-        Observable<ResponseDTO<AuthRespDTO>> observable = RetrofitFactory.getInstance()
+    public static Observable<ResponseDTO<AuthRespDTO>> register(String username, String password) {
+        return RetrofitFactory.getInstance()
             .createRequest(RetrofitFactory.getHeader())
             .register(username, password)
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread());
-
-        try {
-            ResponseDTO<AuthRespDTO> response = observable.toFuture().get();
-            if (response.getCode() != ServerErrorHandle.SUCCESS)
-                throw ServerErrorHandle.parseErrorMessage(response);
-
-            return response.getData();
-        }
-        catch (InterruptedException | ExecutionException ex) {
-            ex.printStackTrace();
-            throw ServerErrorHandle.getClientError(ex);
-        }
     }
 
     public synchronized static void logout() throws ServerException {

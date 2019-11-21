@@ -1,6 +1,7 @@
 package com.baibuti.biji.model.vo;
 
 import java.io.Serializable;
+import java.util.HashMap;
 
 import lombok.Data;
 
@@ -34,5 +35,10 @@ public class FileItem implements Serializable {
             return false;
         FileItem that = (FileItem) obj;
         return this.filePath.equals(that.getFilePath());
+    }
+
+    @Override
+    public int hashCode() {
+        return (filePath + fileName + fileType).hashCode();
     }
 }
