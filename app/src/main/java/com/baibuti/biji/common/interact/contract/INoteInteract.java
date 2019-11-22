@@ -16,8 +16,8 @@ public interface INoteInteract {
     Observable<MessageVO<Note>> queryNoteById(int id);
 
     // 增删改
-    Observable<MessageVO<DbStatusType>> insertNote(Note note) ;
-    Observable<MessageVO<DbStatusType>> updateNote(Note note);
-    Observable<MessageVO<DbStatusType>> deleteNote(int id);
+    Observable<MessageVO<Boolean>> insertNote(Note note) ;
+    Observable<MessageVO<Boolean>> updateNote(Note note);
+    Observable<MessageVO<Boolean>> deleteNote(int id);
     Observable<MessageVO<Integer>> deleteNotes(int[] id);
 }

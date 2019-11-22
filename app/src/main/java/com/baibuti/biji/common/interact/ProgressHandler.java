@@ -30,15 +30,18 @@ public class ProgressHandler {
     ) {
 
         boolean[] cancel = new boolean[] { false };
-
-        ProgressDialog progressDialog = new ProgressDialog(context);
-        progressDialog.setMessage(message);
-        progressDialog.setCancelable(cancelable);
+        ProgressDialog[] progressDialog = new ProgressDialog[1];
+        if (context == null || message.isEmpty()) { // << 可选
+            progressDialog[0] = new ProgressDialog(context);
+            progressDialog[0].setMessage(message);
+            progressDialog[0].setCancelable(cancelable);
+        }
 
         Disposable disposable = observable.subscribe(
             (MessageVO<T> messageVO) -> {
                 if (cancel[0]) return;
-                progressDialog.dismiss();
+                if (progressDialog[0] != null) // <<
+                    progressDialog[0].dismiss();
 
                 // 应该都是 SUCCESS
                 if (messageVO.isSuccess())
@@ -48,7 +51,8 @@ public class ProgressHandler {
             },
             (throwable) -> {
                 if (cancel[0]) return;
-                progressDialog.dismiss();
+                if (progressDialog[0] != null) // <<
+                    progressDialog[0].dismiss();
                 // retrofit2.adapter.rxjava2.HttpException: HTTP 601 UNKNOWN
 
                 // 请求码的错误
@@ -67,11 +71,12 @@ public class ProgressHandler {
                 }
             });
 
-        progressDialog.setOnCancelListener((v) -> {
-            cancel[0] = true;
-            disposable.dispose();
-        });
-        progressDialog.show();
+        if (progressDialog[0] != null) { // <<
+            progressDialog[0].setOnCancelListener((v) -> {
+                cancel[0] = true;
+                disposable.dispose();
+            });
+            progressDialog[0].show();
+        }
     }
-
 }

@@ -49,14 +49,14 @@ public class SearchItemNetInteract implements ISearchItemInteract {
      * @param searchItem SUCCESS | FAILED
      */
     @Override
-    public Observable<MessageVO<DbStatusType>> insertSearchItem(SearchItem searchItem) {
+    public Observable<MessageVO<Boolean>> insertSearchItem(SearchItem searchItem) {
         return RetrofitFactory.getInstance()
             .createRequest(AuthManager.getInstance().getAuthorizationHead())
             .insertStar(searchItem.getTitle(), searchItem.getUrl(), searchItem.getContent())
             .map(responseDTO -> {
                 if (responseDTO.getCode() != 200)
-                    return new MessageVO<DbStatusType>(false, responseDTO.getMessage());
-                return new MessageVO<>(DbStatusType.SUCCESS);
+                    return new MessageVO<Boolean>(false, responseDTO.getMessage());
+                return new MessageVO<>(true);
             })
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread());
@@ -66,14 +66,14 @@ public class SearchItemNetInteract implements ISearchItemInteract {
      * @return SUCCESS | FAILED
      */
     @Override
-    public Observable<MessageVO<DbStatusType>> deleteSearchItem(int id) {
+    public Observable<MessageVO<Boolean>> deleteSearchItem(int id) {
         return RetrofitFactory.getInstance()
             .createRequest(AuthManager.getInstance().getAuthorizationHead())
             .deleteStar(id)
             .map(responseDTO -> {
                 if (responseDTO.getCode() != 200)
-                    return new MessageVO<DbStatusType>(false, responseDTO.getMessage());
-                return new MessageVO<>(DbStatusType.SUCCESS);
+                    return new MessageVO<Boolean>(false, responseDTO.getMessage());
+                return new MessageVO<>(true);
             })
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread());

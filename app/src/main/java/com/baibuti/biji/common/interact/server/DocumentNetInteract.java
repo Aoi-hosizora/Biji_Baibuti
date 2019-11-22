@@ -64,7 +64,7 @@ public class DocumentNetInteract implements IDocumentInteract {
      * @return SUCCESS | FAILED | UPLOAD_FAILED
      */
     @Override
-    public Observable<MessageVO<DbStatusType>> insertDocument(Document document) {
+    public Observable<MessageVO<Boolean>> insertDocument(Document document) {
         // TODO
         File file = new File(document.getFilename());
         return RetrofitFactory.getInstance()
@@ -72,8 +72,8 @@ public class DocumentNetInteract implements IDocumentInteract {
             .insertDocument(file, document.getDocClass().getId())
             .map(responseDTO -> {
                 if (responseDTO.getCode() != 200)
-                    return new MessageVO<DbStatusType>(false, responseDTO.getMessage());
-                return new MessageVO<>(DbStatusType.SUCCESS);
+                    return new MessageVO<Boolean>(false, responseDTO.getMessage());
+                return new MessageVO<>(true);
             })
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread());
@@ -83,14 +83,14 @@ public class DocumentNetInteract implements IDocumentInteract {
      * @return SUCCESS | FAILED
      */
     @Override
-    public Observable<MessageVO<DbStatusType>> updateDocument(Document document) {
+    public Observable<MessageVO<Boolean>> updateDocument(Document document) {
         return RetrofitFactory.getInstance()
             .createRequest(AuthManager.getInstance().getAuthorizationHead())
             .updateDocument(document.getId(), document.getFilename(), document.getDocClass().getId())
             .map(responseDTO -> {
                 if (responseDTO.getCode() != 200)
-                    return new MessageVO<DbStatusType>(false, responseDTO.getMessage());
-                return new MessageVO<>(DbStatusType.SUCCESS);
+                    return new MessageVO<Boolean>(false, responseDTO.getMessage());
+                return new MessageVO<>(true);
             })
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread());
@@ -100,14 +100,14 @@ public class DocumentNetInteract implements IDocumentInteract {
      * @return SUCCESS | FAILED
      */
     @Override
-    public Observable<MessageVO<DbStatusType>> deleteDocument(int id) {
+    public Observable<MessageVO<Boolean>> deleteDocument(int id) {
         return RetrofitFactory.getInstance()
             .createRequest(AuthManager.getInstance().getAuthorizationHead())
             .deleteDocument(id)
             .map(responseDTO -> {
                 if (responseDTO.getCode() != 200)
-                    return new MessageVO<DbStatusType>(false, responseDTO.getMessage());
-                return new MessageVO<>(DbStatusType.SUCCESS);
+                    return new MessageVO<Boolean>(false, responseDTO.getMessage());
+                return new MessageVO<>(true);
             })
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread());

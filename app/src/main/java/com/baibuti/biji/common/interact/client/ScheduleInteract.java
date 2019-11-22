@@ -35,7 +35,11 @@ public class ScheduleInteract implements IScheduleInteract {
         return Observable.create(
             (ObservableEmitter<MessageVO<Boolean>> emitter) -> {
                 ScheduleDao scheduleDao = new ScheduleDao(context);
-                emitter.onNext(new MessageVO<>(scheduleDao.updateSchedule(schedule)));
+                boolean status = scheduleDao.updateSchedule(schedule);
+                if (!status)
+                    emitter.onNext(new MessageVO<>(false, "Update Schedule Failed"));
+                else
+                    emitter.onNext(new MessageVO<>(true));
             })
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread());

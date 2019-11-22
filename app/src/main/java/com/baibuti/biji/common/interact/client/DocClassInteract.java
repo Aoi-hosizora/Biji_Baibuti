@@ -68,33 +68,53 @@ public class DocClassInteract implements IDocClassInteract {
     }
 
     @Override
-    public Observable<MessageVO<DbStatusType>> insertDocClass(DocClass docClass) {
+    public Observable<MessageVO<Boolean>> insertDocClass(DocClass docClass) {
         return Observable.create(
-            (ObservableEmitter<MessageVO<DbStatusType>> emitter) -> {
+            (ObservableEmitter<MessageVO<Boolean>> emitter) -> {
                 DocClassDao docClassDao = new DocClassDao(context);
-                emitter.onNext(new MessageVO<>(docClassDao.insertDocClass(docClass)));
+                DbStatusType status = docClassDao.insertDocClass(docClass);
+                if (status == DbStatusType.DUPLICATED)
+                    emitter.onNext(new MessageVO<>(false, "Document Class Name Duplicate"));
+                else if (status == DbStatusType.FAILED)
+                    emitter.onNext(new MessageVO<>(false, "Document Class Insert Failed"));
+                else
+                    emitter.onNext(new MessageVO<>(true));
             })
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread());
     }
 
     @Override
-    public Observable<MessageVO<DbStatusType>> updateDocClass(DocClass docClass) {
+    public Observable<MessageVO<Boolean>> updateDocClass(DocClass docClass) {
         return Observable.create(
-            (ObservableEmitter<MessageVO<DbStatusType>> emitter) -> {
+            (ObservableEmitter<MessageVO<Boolean>> emitter) -> {
                 DocClassDao docClassDao = new DocClassDao(context);
-                emitter.onNext(new MessageVO<>(docClassDao.updateDocClass(docClass)));
+                DbStatusType status = docClassDao.updateDocClass(docClass);
+                if (status == DbStatusType.DUPLICATED)
+                    emitter.onNext(new MessageVO<>(false, "Document Class Name Duplicate"));
+                else if (status == DbStatusType.DEFAULT)
+                    emitter.onNext(new MessageVO<>(false, "Could Not Update Default Document Class"));
+                else if (status == DbStatusType.FAILED)
+                    emitter.onNext(new MessageVO<>(false, "Document Class Update Failed"));
+                else
+                    emitter.onNext(new MessageVO<>(true));
             })
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread());
     }
 
     @Override
-    public Observable<MessageVO<DbStatusType>> deleteDocClass(int id, boolean isToDefault) {
+    public Observable<MessageVO<Boolean>> deleteDocClass(int id, boolean isToDefault) {
         return Observable.create(
-            (ObservableEmitter<MessageVO<DbStatusType>> emitter) -> {
+            (ObservableEmitter<MessageVO<Boolean>> emitter) -> {
                 DocClassDao docClassDao = new DocClassDao(context);
-                emitter.onNext(new MessageVO<>(docClassDao.deleteDocClass(id, isToDefault)));
+                DbStatusType status = docClassDao.deleteDocClass(id, isToDefault);
+                if (status == DbStatusType.DEFAULT)
+                    emitter.onNext(new MessageVO<>(false, "Could Not Delete Default Document Class"));
+                else if (status == DbStatusType.FAILED)
+                    emitter.onNext(new MessageVO<>(false, "Document Class Delete Failed"));
+                else
+                    emitter.onNext(new MessageVO<>(true));
             })
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread());

@@ -17,7 +17,7 @@ public interface IDocumentInteract {
     Observable<MessageVO<Document>> queryDocumentById(int id);
 
     // 增删改
-    Observable<MessageVO<DbStatusType>> insertDocument(Document document);
-    Observable<MessageVO<DbStatusType>> updateDocument(Document document);
-    Observable<MessageVO<DbStatusType>> deleteDocument(int id);
+    Observable<MessageVO<Boolean>> insertDocument(Document document);
+    Observable<MessageVO<Boolean>> updateDocument(Document document);
+    Observable<MessageVO<Boolean>> deleteDocument(int id);
 }

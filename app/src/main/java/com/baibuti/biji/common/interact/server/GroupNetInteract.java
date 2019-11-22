@@ -77,14 +77,14 @@ public class GroupNetInteract implements IGroupInteract {
      * @return SUCCESS | FAILED | DUPLICATED
      */
     @Override
-    public Observable<MessageVO<DbStatusType>> insertGroup(Group group) {
+    public Observable<MessageVO<Boolean>> insertGroup(Group group) {
         return RetrofitFactory.getInstance()
             .createRequest(AuthManager.getInstance().getAuthorizationHead())
             .insertGroup(group.getName(), group.getColor())
             .map(response -> {
                 if (response.getCode() != 200)
-                    return new MessageVO<DbStatusType>(false, response.getMessage());
-                return new MessageVO<>(DbStatusType.SUCCESS);
+                    return new MessageVO<Boolean>(false, response.getMessage());
+                return new MessageVO<>(true);
             })
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread());
@@ -94,14 +94,14 @@ public class GroupNetInteract implements IGroupInteract {
      * @return SUCCESS | FAILED | DUPLICATED | DEFAULT
      */
     @Override
-    public Observable<MessageVO<DbStatusType>> updateGroup(Group group) {
+    public Observable<MessageVO<Boolean>> updateGroup(Group group) {
         return RetrofitFactory.getInstance()
             .createRequest(AuthManager.getInstance().getAuthorizationHead())
             .updateGroup(group.getId(), group.getName(), group.getOrder(), group.getColor())
             .map(response -> {
                 if (response.getCode() != 200)
-                    return new MessageVO<DbStatusType>(false, response.getMessage());
-                return new MessageVO<>(DbStatusType.SUCCESS);
+                    return new MessageVO<Boolean>(false, response.getMessage());
+                return new MessageVO<>(true);
             })
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread());
@@ -111,7 +111,7 @@ public class GroupNetInteract implements IGroupInteract {
      * SUCCESS | FAILED
      */
     @Override
-    public Observable<MessageVO<DbStatusType>> updateGroupsOrder(Group[] groups) {
+    public Observable<MessageVO<Boolean>> updateGroupsOrder(Group[] groups) {
         String[] id_order = new String[groups.length];
         for (int i = 0; i < groups.length; i++)
             id_order[i] = groups[i].getId() + "_" + groups[i].getOrder();
@@ -121,8 +121,8 @@ public class GroupNetInteract implements IGroupInteract {
             .updateGroupsOrder(id_order)
             .map(response -> {
                 if (response.getCode() != 200)
-                    return new MessageVO<DbStatusType>(false, response.getMessage());
-                return new MessageVO<>(DbStatusType.SUCCESS);
+                    return new MessageVO<Boolean>(false, response.getMessage());
+                return new MessageVO<>(true);
             })
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread());
@@ -132,14 +132,14 @@ public class GroupNetInteract implements IGroupInteract {
      * @return SUCCESS | FAILED  | DEFAULT
      */
     @Override
-    public Observable<MessageVO<DbStatusType>> deleteGroup(int id, boolean isToDefault) {
+    public Observable<MessageVO<Boolean>> deleteGroup(int id, boolean isToDefault) {
         return RetrofitFactory.getInstance()
             .createRequest(AuthManager.getInstance().getAuthorizationHead())
             .deleteGroup(id, isToDefault)
             .map(response -> {
                 if (response.getCode() != 200)
-                    return new MessageVO<DbStatusType>(false, response.getMessage());
-                return new MessageVO<>(DbStatusType.SUCCESS);
+                    return new MessageVO<Boolean>(false, response.getMessage());
+                return new MessageVO<>(true);
             })
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread());

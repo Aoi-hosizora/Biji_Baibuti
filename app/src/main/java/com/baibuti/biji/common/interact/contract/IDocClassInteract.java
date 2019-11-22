@@ -18,7 +18,7 @@ public interface IDocClassInteract {
     Observable<MessageVO<DocClass>> queryDefaultDocClass();
 
     // 增删改
-    Observable<MessageVO<DbStatusType>> insertDocClass(DocClass docClass);
-    Observable<MessageVO<DbStatusType>> updateDocClass(DocClass docClass);
-    Observable<MessageVO<DbStatusType>> deleteDocClass(int id, boolean isToDefault);
+    Observable<MessageVO<Boolean>> insertDocClass(DocClass docClass);
+    Observable<MessageVO<Boolean>> updateDocClass(DocClass docClass);
+    Observable<MessageVO<Boolean>> deleteDocClass(int id, boolean isToDefault);
 }

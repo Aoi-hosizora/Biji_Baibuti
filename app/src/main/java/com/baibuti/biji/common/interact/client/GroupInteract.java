@@ -68,44 +68,66 @@ public class GroupInteract implements IGroupInteract {
     }
 
     @Override
-    public Observable<MessageVO<DbStatusType>> insertGroup(Group group) {
+    public Observable<MessageVO<Boolean>> insertGroup(Group group) {
         return Observable.create(
-            (ObservableEmitter<MessageVO<DbStatusType>> emitter) -> {
+            (ObservableEmitter<MessageVO<Boolean>> emitter) -> {
                 GroupDao groupDao = new GroupDao(context);
-                emitter.onNext(new MessageVO<>(groupDao.insertGroup(group)));
+                DbStatusType status = groupDao.insertGroup(group);
+                if (status == DbStatusType.DUPLICATED)
+                    emitter.onNext(new MessageVO<>(false, "Group Name Duplicate"));
+                else if (status == DbStatusType.FAILED)
+                    emitter.onNext(new MessageVO<>(false, "Group Insert Failed"));
+                else
+                    emitter.onNext(new MessageVO<>(true));
             })
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread());
     }
 
     @Override
-    public Observable<MessageVO<DbStatusType>> updateGroup(Group group) {
+    public Observable<MessageVO<Boolean>> updateGroup(Group group) {
         return Observable.create(
-            (ObservableEmitter<MessageVO<DbStatusType>> emitter) -> {
+            (ObservableEmitter<MessageVO<Boolean>> emitter) -> {
                 GroupDao groupDao = new GroupDao(context);
-                emitter.onNext(new MessageVO<>(groupDao.updateGroup(group)));
+                DbStatusType status = groupDao.updateGroup(group);
+                if (status == DbStatusType.DUPLICATED)
+                    emitter.onNext(new MessageVO<>(false, "Group Name Duplicate"));
+                else if (status == DbStatusType.DEFAULT)
+                    emitter.onNext(new MessageVO<>(false, "Could Not Update Default Group"));
+                else if (status == DbStatusType.FAILED)
+                    emitter.onNext(new MessageVO<>(false, "Group Update Failed"));
+                else
+                    emitter.onNext(new MessageVO<>(true));
             })
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread());
     }
 
     @Override
-    public Observable<MessageVO<DbStatusType>> updateGroupsOrder(Group[] groups) {
+    public Observable<MessageVO<Boolean>> updateGroupsOrder(Group[] groups) {
         return Observable.create(
-            (ObservableEmitter<MessageVO<DbStatusType>> emitter) -> {
+            (ObservableEmitter<MessageVO<Boolean>> emitter) -> {
                 GroupDao groupDao = new GroupDao(context);
-                emitter.onNext(new MessageVO<>(groupDao.updateGroupsOrder(groups)));
+                DbStatusType status = groupDao.updateGroupsOrder(groups);
+                if (status == DbStatusType.FAILED)
+                    emitter.onNext(new MessageVO<>(false, "Group Update Failed"));
+                else
+                    emitter.onNext(new MessageVO<>(true));
             })
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread());
     }
 
     @Override
-    public Observable<MessageVO<DbStatusType>> deleteGroup(int groupId, boolean isToDefault) {
+    public Observable<MessageVO<Boolean>> deleteGroup(int groupId, boolean isToDefault) {
         return Observable.create(
-            (ObservableEmitter<MessageVO<DbStatusType>> emitter) -> {
+            (ObservableEmitter<MessageVO<Boolean>> emitter) -> {
                 GroupDao groupDao = new GroupDao(context);
-                emitter.onNext(new MessageVO<>(groupDao.deleteGroup(groupId, isToDefault)));
+                DbStatusType status = groupDao.deleteGroup(groupId, isToDefault);
+                if (status == DbStatusType.FAILED)
+                    emitter.onNext(new MessageVO<>(false, "Group Delete Failed"));
+                else
+                    emitter.onNext(new MessageVO<>(true));
             })
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread());

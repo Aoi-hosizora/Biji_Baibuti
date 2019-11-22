@@ -46,22 +46,30 @@ public class SearchItemInteract implements ISearchItemInteract {
     }
 
     @Override
-    public Observable<MessageVO<DbStatusType>> insertSearchItem(SearchItem searchItem) {
+    public Observable<MessageVO<Boolean>> insertSearchItem(SearchItem searchItem) {
         return Observable.create(
-            (ObservableEmitter<MessageVO<DbStatusType>> emitter) -> {
+            (ObservableEmitter<MessageVO<Boolean>> emitter) -> {
                 SearchItemDao searchItemDao = new SearchItemDao(context);
-                emitter.onNext(new MessageVO<>(searchItemDao.insertSearchItem(searchItem)));
+                DbStatusType status = searchItemDao.insertSearchItem(searchItem);
+                if (status == DbStatusType.FAILED)
+                    emitter.onNext(new MessageVO<>(false, "StarItem Insert Failed"));
+                else
+                    emitter.onNext(new MessageVO<>(true));
             })
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread());
     }
 
     @Override
-    public Observable<MessageVO<DbStatusType>> deleteSearchItem(int id) {
+    public Observable<MessageVO<Boolean>> deleteSearchItem(int id) {
         return Observable.create(
-            (ObservableEmitter<MessageVO<DbStatusType>> emitter) -> {
+            (ObservableEmitter<MessageVO<Boolean>> emitter) -> {
                 SearchItemDao searchItemDao = new SearchItemDao(context);
-                emitter.onNext(new MessageVO<>(searchItemDao.deleteSearchItem(id)));
+                DbStatusType status = searchItemDao.deleteSearchItem(id);
+                if (status == DbStatusType.FAILED)
+                    emitter.onNext(new MessageVO<>(false, "StarItem Delete Failed"));
+                else
+                    emitter.onNext(new MessageVO<>(true));
             })
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread());

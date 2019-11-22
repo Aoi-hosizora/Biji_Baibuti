@@ -77,14 +77,14 @@ public class DocClassNetInteract implements IDocClassInteract {
      * @param docClass SUCCESS | FAILED | DUPLICATED
      */
     @Override
-    public Observable<MessageVO<DbStatusType>> insertDocClass(DocClass docClass) {
+    public Observable<MessageVO<Boolean>> insertDocClass(DocClass docClass) {
         return RetrofitFactory.getInstance()
             .createRequest(AuthManager.getInstance().getAuthorizationHead())
             .insertDocClass(docClass.getName())
             .map(responseDTO -> {
                 if (responseDTO.getCode() != 200)
-                    return new MessageVO<DbStatusType>(false, responseDTO.getMessage());
-                return new MessageVO<>(DbStatusType.SUCCESS);
+                    return new MessageVO<Boolean>(false, responseDTO.getMessage());
+                return new MessageVO<>(true);
             })
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread());
@@ -94,14 +94,14 @@ public class DocClassNetInteract implements IDocClassInteract {
      * @return SUCCESS | FAILED | DUPLICATED | DEFAULT
      */
     @Override
-    public Observable<MessageVO<DbStatusType>> updateDocClass(DocClass docClass) {
+    public Observable<MessageVO<Boolean>> updateDocClass(DocClass docClass) {
         return RetrofitFactory.getInstance()
             .createRequest(AuthManager.getInstance().getAuthorizationHead())
             .updateDocClass(docClass.getId(), docClass.getName())
             .map(responseDTO -> {
                 if (responseDTO.getCode() != 200)
-                    return new MessageVO<DbStatusType>(false, responseDTO.getMessage());
-                return new MessageVO<>(DbStatusType.SUCCESS);
+                    return new MessageVO<Boolean>(false, responseDTO.getMessage());
+                return new MessageVO<>(true);
             })
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread());
@@ -111,14 +111,14 @@ public class DocClassNetInteract implements IDocClassInteract {
      * @return SUCCESS | FAILED | DEFAULT
      */
     @Override
-    public Observable<MessageVO<DbStatusType>> deleteDocClass(int id, boolean isToDefault) {
+    public Observable<MessageVO<Boolean>> deleteDocClass(int id, boolean isToDefault) {
         return RetrofitFactory.getInstance()
             .createRequest(AuthManager.getInstance().getAuthorizationHead())
             .deleteDocClass(id, isToDefault)
             .map(responseDTO -> {
                 if (responseDTO.getCode() != 200)
-                    return new MessageVO<DbStatusType>(false, responseDTO.getMessage());
-                return new MessageVO<>(DbStatusType.SUCCESS);
+                    return new MessageVO<Boolean>(false, responseDTO.getMessage());
+                return new MessageVO<>(true);
             })
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread());

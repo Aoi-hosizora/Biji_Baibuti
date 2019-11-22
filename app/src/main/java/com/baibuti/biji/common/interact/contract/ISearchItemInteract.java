@@ -15,7 +15,7 @@ public interface ISearchItemInteract {
     Observable<MessageVO<SearchItem>> querySearchItemById(int id);
 
     // 增删改
-    Observable<MessageVO<DbStatusType>> insertSearchItem(SearchItem searchItem);
-    Observable<MessageVO<DbStatusType>> deleteSearchItem(int id);
+    Observable<MessageVO<Boolean>> insertSearchItem(SearchItem searchItem);
+    Observable<MessageVO<Boolean>> deleteSearchItem(int id);
     Observable<MessageVO<Integer>> deleteSearchItems(List<SearchItem> searchItems);
 }

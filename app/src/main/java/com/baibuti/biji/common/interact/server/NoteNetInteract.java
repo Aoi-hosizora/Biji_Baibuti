@@ -72,7 +72,7 @@ public class NoteNetInteract implements INoteInteract {
      * @return SUCCESS | FAILED | UPLOAD_FAILED
      */
     @Override
-    public Observable<MessageVO<DbStatusType>> insertNote(Note note) {
+    public Observable<MessageVO<Boolean>> insertNote(Note note) {
         // TODO
         return uploadImage(note)
             .flatMap((MessageVO<Note> newNote) -> RetrofitFactory.getInstance()
@@ -81,8 +81,8 @@ public class NoteNetInteract implements INoteInteract {
                     note.getCreateTime_FullString(), note.getUpdateTime_FullString())
                 .map(responseDTO -> {
                     if (responseDTO.getCode() != 200)
-                        return new MessageVO<DbStatusType>(false, responseDTO.getMessage());
-                    return new MessageVO<>(DbStatusType.SUCCESS);
+                        return new MessageVO<Boolean>(false, responseDTO.getMessage());
+                    return new MessageVO<>(true);
                 })
             )
             .subscribeOn(Schedulers.io())
@@ -93,7 +93,7 @@ public class NoteNetInteract implements INoteInteract {
      * @return SUCCESS | FAILED | UPLOAD_FAILED
      */
     @Override
-    public Observable<MessageVO<DbStatusType>> updateNote(Note note) {
+    public Observable<MessageVO<Boolean>> updateNote(Note note) {
         // TODO
         return uploadImage(note)
             .flatMap((MessageVO<Note> newNote) -> RetrofitFactory.getInstance()
@@ -101,8 +101,8 @@ public class NoteNetInteract implements INoteInteract {
                 .updateNote(note.getId(), note.getTitle(), note.getContent(), note.getGroup().getId())
                 .map(responseDTO -> {
                     if (responseDTO.getCode() != 200)
-                        return new MessageVO<DbStatusType>(false, responseDTO.getMessage());
-                    return new MessageVO<>(DbStatusType.SUCCESS);
+                        return new MessageVO<Boolean>(false, responseDTO.getMessage());
+                    return new MessageVO<>(true);
                 })
             )
             .subscribeOn(Schedulers.io())
@@ -113,14 +113,14 @@ public class NoteNetInteract implements INoteInteract {
      * SUCCESS | FAILED
      */
     @Override
-    public Observable<MessageVO<DbStatusType>> deleteNote(int id) {
+    public Observable<MessageVO<Boolean>> deleteNote(int id) {
         return RetrofitFactory.getInstance()
             .createRequest(AuthManager.getInstance().getAuthorizationHead())
             .deleteNote(id)
             .map(responseDTO -> {
                 if (responseDTO.getCode() != 20)
-                    return new MessageVO<DbStatusType>(false, responseDTO.getMessage());
-                return new MessageVO<>(DbStatusType.SUCCESS);
+                    return new MessageVO<Boolean>(false, responseDTO.getMessage());
+                return new MessageVO<>(true);
             })
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread());
@@ -149,7 +149,6 @@ public class NoteNetInteract implements INoteInteract {
 
         return Observable.create(
             (ObservableEmitter<MessageVO<Note>> emitter) -> {
-
                 List<String> textList = StringUtil.cutStringByImgTag(note.getContent()); // 所有
                 Set<String> uploadUrl = new TreeSet<>(); // 所有本地图片
                 for (String blocks : textList)

@@ -57,33 +57,46 @@ public class NoteInteract implements INoteInteract {
     }
 
     @Override
-    public Observable<MessageVO<DbStatusType>> insertNote(Note note) {
+    public Observable<MessageVO<Boolean>> insertNote(Note note) {
         return Observable.create(
-            (ObservableEmitter<MessageVO<DbStatusType>> emitter) -> {
+            (ObservableEmitter<MessageVO<Boolean>> emitter) -> {
                 NoteDao noteDao = new NoteDao(context);
-                emitter.onNext(new MessageVO<>(noteDao.insertNote(note)));
+                DbStatusType status = noteDao.insertNote(note);
+                if (status == DbStatusType.FAILED)
+                    emitter.onNext(new MessageVO<>(false, "Note Insert Failed"));
+                else
+                    emitter.onNext(new MessageVO<>(true));
             })
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread());
     }
 
     @Override
-    public Observable<MessageVO<DbStatusType>> updateNote(Note note) {
+    public Observable<MessageVO<Boolean>> updateNote(Note note) {
         return Observable.create(
-            (ObservableEmitter<MessageVO<DbStatusType>> emitter) -> {
+            (ObservableEmitter<MessageVO<Boolean>> emitter) -> {
                 NoteDao noteDao = new NoteDao(context);
-                emitter.onNext(new MessageVO<>(noteDao.updateNote(note)));
+                DbStatusType status = noteDao.updateNote(note);
+                if (status == DbStatusType.FAILED)
+                    emitter.onNext(new MessageVO<>(false, "Note Update Failed"));
+                else
+                    emitter.onNext(new MessageVO<>(true));
             })
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread());
     }
 
     @Override
-    public Observable<MessageVO<DbStatusType>> deleteNote(int id) {
+    public Observable<MessageVO<Boolean>> deleteNote(int id) {
         return Observable.create(
-            (ObservableEmitter<MessageVO<DbStatusType>> emitter) -> {
+            (ObservableEmitter<MessageVO<Boolean>> emitter) -> {
                 NoteDao noteDao = new NoteDao(context);
-                emitter.onNext(new MessageVO<>(noteDao.deleteNote(id)));
+
+                DbStatusType status = noteDao.deleteNote(id);
+                if (status == DbStatusType.FAILED)
+                    emitter.onNext(new MessageVO<>(false, "Note Delete Failed"));
+                else
+                    emitter.onNext(new MessageVO<>(true));
             })
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread());

@@ -9,25 +9,31 @@ public enum DbStatusType {
     /**
      * 操作成功
      */
-    SUCCESS,
+    SUCCESS(0),
 
     /**
      * 操作失败
      */
-    FAILED,
+    FAILED(1),
 
     /**
      * Update Delete: 修改默认
      */
-    DEFAULT,
+    DEFAULT(2),
 
     /**
      * Insert Update: Unique 重复
      */
-    DUPLICATED,
+    DUPLICATED(3),
 
     /**
      * 文件上传失败
      */
-    UPLOAD_FAILED
+    UPLOAD_FAILED(4);
+
+    int type;
+
+    DbStatusType(int type) {
+        this.type = type;
+    }
 }

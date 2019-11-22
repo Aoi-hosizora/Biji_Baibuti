@@ -57,33 +57,45 @@ public class DocumentInteract implements IDocumentInteract {
     }
 
     @Override
-    public Observable<MessageVO<DbStatusType>> insertDocument(Document document) {
+    public Observable<MessageVO<Boolean>> insertDocument(Document document) {
         return Observable.create(
-            (ObservableEmitter<MessageVO<DbStatusType>> emitter) -> {
+            (ObservableEmitter<MessageVO<Boolean>> emitter) -> {
                 DocumentDao documentDao = new DocumentDao(context);
-                emitter.onNext(new MessageVO<>(documentDao.insertDocument(document)));
+                DbStatusType status = documentDao.insertDocument(document);
+                if (status == DbStatusType.FAILED)
+                    emitter.onNext(new MessageVO<>(false, "Document Insert Failed"));
+                else
+                    emitter.onNext(new MessageVO<>(true));
             })
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread());
     }
 
     @Override
-    public Observable<MessageVO<DbStatusType>> updateDocument(Document document) {
+    public Observable<MessageVO<Boolean>> updateDocument(Document document) {
         return Observable.create(
-            (ObservableEmitter<MessageVO<DbStatusType>> emitter) -> {
+            (ObservableEmitter<MessageVO<Boolean>> emitter) -> {
                 DocumentDao documentDao = new DocumentDao(context);
-                emitter.onNext(new MessageVO<>(documentDao.updateDocument(document)));
+                DbStatusType status = documentDao.updateDocument(document);
+                if (status == DbStatusType.FAILED)
+                    emitter.onNext(new MessageVO<>(false, "Document Update Failed"));
+                else
+                    emitter.onNext(new MessageVO<>(true));
             })
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread());
     }
 
     @Override
-    public Observable<MessageVO<DbStatusType>> deleteDocument(int id) {
+    public Observable<MessageVO<Boolean>> deleteDocument(int id) {
         return Observable.create(
-            (ObservableEmitter<MessageVO<DbStatusType>> emitter) -> {
+            (ObservableEmitter<MessageVO<Boolean>> emitter) -> {
                 DocumentDao documentDao = new DocumentDao(context);
-                emitter.onNext(new MessageVO<>(documentDao.deleteDocument(id)));
+                DbStatusType status = documentDao.deleteDocument(id);
+                if (status == DbStatusType.FAILED)
+                    emitter.onNext(new MessageVO<>(false, "Document Delete Failed"));
+                else
+                    emitter.onNext(new MessageVO<>(true));
             })
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread());

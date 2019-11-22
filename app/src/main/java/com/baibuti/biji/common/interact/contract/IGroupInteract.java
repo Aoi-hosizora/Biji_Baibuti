@@ -18,8 +18,8 @@ public interface IGroupInteract {
     Observable<MessageVO<Group>> queryDefaultGroup();
 
     // 增删改
-    Observable<MessageVO<DbStatusType>> insertGroup(Group group);
-    Observable<MessageVO<DbStatusType>> updateGroup(Group group);
-    Observable<MessageVO<DbStatusType>> updateGroupsOrder(Group[] groups);
-    Observable<MessageVO<DbStatusType>> deleteGroup(int groupId, boolean isToDefault);
+    Observable<MessageVO<Boolean>> insertGroup(Group group);
+    Observable<MessageVO<Boolean>> updateGroup(Group group);
+    Observable<MessageVO<Boolean>> updateGroupsOrder(Group[] groups);
+    Observable<MessageVO<Boolean>> deleteGroup(int groupId, boolean isToDefault);
 }

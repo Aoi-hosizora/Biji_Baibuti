@@ -1,37 +1,36 @@
 package com.baibuti.biji.common.interact;
 
-import com.baibuti.biji.model.dto.ServerException;
 import com.baibuti.biji.model.vo.MessageVO;
 
 public class MessageErrorParser {
 
     public static final int SUCCESS = 200;
-    public static final int UNAUTHORIZED = 401;
-    public static final int NOT_FOUND = 404;
-    public static final int INTERNAL_SERVER_ERROR = 500;
+//    public static final int UNAUTHORIZED = 401;
+//    public static final int NOT_FOUND = 404;
+//    public static final int INTERNAL_SERVER_ERROR = 500;
+//
+//    public static final int DATABASE_FAILED = 600;
+//    public static final int HAS_EXISTED = 601;
+//    public static final int DUPLICATE_FAILED = 602;
+//    public static final int DEFAULT_FAILED = 603;
+//    public static final int SAVE_FILE_FAILED = 604;
+//
+//    public static final int BAD_REQUEST = 400;
+//    public static final int FORBIDDEN = 403;
+//    public static final int METHOD_NOT_ALLOWED = 405;
+//    public static final int NOT_ACCEPTABLE = 406;
 
-    public static final int DATABASE_FAILED = 600;
-    public static final int HAS_EXISTED = 601;
-    public static final int DUPLICATE_FAILED = 602;
-    public static final int DEFAULT_FAILED = 603;
-    public static final int SAVE_FILE_FAILED = 604;
-
-    public static final int BAD_REQUEST = 400;
-    public static final int FORBIDDEN = 403;
-    public static final int METHOD_NOT_ALLOWED = 405;
-    public static final int NOT_ACCEPTABLE = 406;
-
-    /**
-     * 客户端获取请求的错误
-     *      InterruptedException
-     *      ExecutionException
-     */
-    public static ServerException getClientError(Throwable throwable) {
-        if (throwable instanceof ServerException)
-            return (ServerException) throwable;
-
-        return new ServerException(throwable.getMessage());
-    }
+//    /**
+//     * 客户端获取请求的错误
+//     *      InterruptedException
+//     *      ExecutionException
+//     */
+//    public static ServerException getClientError(Throwable throwable) {
+//        if (throwable instanceof ServerException)
+//            return (ServerException) throwable;
+//
+//        return new ServerException(throwable.getMessage());
+//    }
 
     /**
      * 服务器端的错误
@@ -153,6 +152,22 @@ public class MessageErrorParser {
                 return "不受支持的上传类型";
             case "Save Image Failed":
                 return "图片上传失败";
+            ////////////////////////////////////////////////////
+            // Share
+            case "Share Documents Null":
+                return "共享的文档为空";
+            case "Document Share Code Generate Failed":
+                return "共享码生成错误";
+            case "Share Code Illegal":
+                return "共享码不合法";
+            case "Share Code Not Exist":
+                return "共享码不存在";
+            case "Share Code Not Include File":
+                return "共享码中不存在文档";
+            case "File Not Found":
+                return "文件不存在";
+            case "Zip File Generate Failed":
+                return "压缩文件失败";
         }
 
         return "未知错误";

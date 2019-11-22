@@ -1,7 +1,6 @@
 package com.baibuti.biji.ui.activity;
 
 import android.Manifest;
-import android.app.ProgressDialog;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Build;
@@ -25,7 +24,8 @@ import android.view.ViewGroup;
 import android.widget.Toast;
 import android.view.MenuItem;
 
-import com.baibuti.biji.model.dto.ServerException;
+import com.baibuti.biji.common.interact.InteractInterface;
+import com.baibuti.biji.common.interact.ProgressHandler;
 import com.baibuti.biji.common.auth.AuthManager;
 import com.baibuti.biji.common.auth.AuthService;
 import com.baibuti.biji.ui.IContextHelper;
@@ -304,20 +304,25 @@ public class MainActivity extends FragmentActivity implements IContextHelper, Au
             startActivity(authIntent);
         }
         else {
-            // 注销
-            ProgressDialog progressDialog = showProgress(this, "注销中...", false, null);
-            try {
-                AuthService.logout();
-                progressDialog.dismiss();
+            ProgressHandler.process(this, "注销中...", true,
+                AuthService.logout(), new InteractInterface<Boolean>() {
+                    @Override
+                    public void onSuccess(Boolean data) {
+                        if (data)
+                            showToast(MainActivity.this, "注销成功");
+                    }
 
-                AuthManager.getInstance().logout();
-                showToast(this, "注销成功，请重新登录。");
-            }
-            catch (ServerException ex) {
-                progressDialog.dismiss();
-                ex.printStackTrace();
-                showAlert(this, "注销错误", ex.getMessage());
-            }
+                    @Override
+                    public void onError(String message) {
+                        showAlert(MainActivity.this, "错误", message);
+                    }
+
+                    @Override
+                    public void onFailed(Throwable throwable) {
+                        showAlert(MainActivity.this, "错误", "网络错误：" + throwable.getMessage());
+                    }
+                }
+            );
         }
     }
 
