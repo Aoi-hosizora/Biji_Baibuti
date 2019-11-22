@@ -5,7 +5,6 @@ import android.content.Intent;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.ViewGroup;
@@ -74,7 +73,6 @@ public class WebViewActivity extends AppCompatActivity implements IContextHelper
         @SuppressWarnings("unused")
         public void showSource(String html) {
             htmlStr = html;
-            Log.i("", "showSource: " + html);
         }
 
         @JavascriptInterface
@@ -103,6 +101,9 @@ public class WebViewActivity extends AppCompatActivity implements IContextHelper
         webView.addJavascriptInterface(new InJavaScriptLocalObj(), "java_obj");
         webView.loadUrl("http://xsjw2018.jw.scut.edu.cn/jwglxt/kbcx/xskbcx_cxXskbcxIndex.html?gnmkdm=N2151&layout=default");
 
+        // [InputMethodManagerWrapper.java:77] updateSelection: SEL [18, 18], COM [-1, -1]
+        // [INFO:CONSOLE(138)] "null", source: http://xsjw2018.jw.scut.edu.cn/jwglxt/kbcx/xskbcx_cxXskbcxIndex.html?gnmkdm=N2151&layout=default (138)
+
         webView.setWebViewClient(new WebViewClient() {
 
             @Override
@@ -114,8 +115,7 @@ public class WebViewActivity extends AppCompatActivity implements IContextHelper
 
             @Override
             public void onPageFinished(WebView view, String url) {
-                view.loadUrl("javascript:window.java_obj.getSource('<head>'+document.getElementsByTagName('html')[0].innerHTML+'</head>');");
-                view.loadUrl("javascript:window.java_obj.showDescription(document.querySelector('meta[name=\"share-description\"]').getAttribute('content'));");
+                view.loadUrl("javascript:window.java_obj.showSource(document.getElementsByTagName('html')[0].innerHTML);");
                 super.onPageFinished(view, url);
             }
         });

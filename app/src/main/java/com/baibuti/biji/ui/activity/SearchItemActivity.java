@@ -161,6 +161,8 @@ public class SearchItemActivity extends AppCompatActivity implements IContextHel
                     public void onSuccess(List<SearchItem> data) {
                         pageData.currentList.clear();
                         pageData.currentList.addAll(data);
+                        for (SearchItem searchItem : pageData.currentList)
+                            searchItem.setStar(true);
                         m_list_star.getAdapter().notifyDataSetChanged();
                         pageData.pageState = PageData.PageState.NORMAL;
                         m_srl.setRefreshing(false);
@@ -185,15 +187,13 @@ public class SearchItemActivity extends AppCompatActivity implements IContextHel
             m_srl.setRefreshing(false);
             pageData.currentList.clear();
             pageData.currentList.addAll(searchItems);
+            for (SearchItem searchItem : pageData.currentList)
+                searchItem.setStar(true);
             m_list_star.getAdapter().notifyDataSetChanged();
             pageData.pageState = PageData.PageState.SEARCHING;
             // 更新标题
             updateTitle();
         }
-
-        for (SearchItem searchItem : pageData.currentList)
-            searchItem.setStar(true);
-        m_list_star.getAdapter().notifyDataSetChanged();
     }
 
     /**

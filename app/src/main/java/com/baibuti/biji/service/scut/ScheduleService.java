@@ -1,7 +1,5 @@
 package com.baibuti.biji.service.scut;
 
-import android.util.Log;
-
 import com.baibuti.biji.model.po.MySubject;
 
 import org.jsoup.Jsoup;
@@ -52,7 +50,6 @@ public class ScheduleService {
                 for (Element font : fonts) {
                     font.select("span").remove();
                     String content = font.text();
-                    Log.i("", "parseHtml: " + content.trim());
                     if (content.trim().contains("上课地点")) { // 特殊
                         String[] sp = content.trim().split("上课地点");
                         information.add(sp[0]);
