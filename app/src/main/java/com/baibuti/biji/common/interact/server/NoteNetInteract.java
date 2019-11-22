@@ -82,6 +82,7 @@ public class NoteNetInteract implements INoteInteract {
                 .map(responseDTO -> {
                     if (responseDTO.getCode() != 200)
                         return new MessageVO<Boolean>(false, responseDTO.getMessage());
+                    note.setId(responseDTO.getData().getId());
                     return new MessageVO<>(true);
                 })
             )

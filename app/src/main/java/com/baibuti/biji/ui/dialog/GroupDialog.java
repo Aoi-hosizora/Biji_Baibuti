@@ -4,14 +4,13 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
-import android.util.Log;
 import android.widget.Button;
 import android.widget.ListView;
 
+import com.baibuti.biji.common.interact.InteractInterface;
 import com.baibuti.biji.common.interact.InteractStrategy;
-import com.baibuti.biji.model.dao.DbStatusType;
+import com.baibuti.biji.common.interact.ProgressHandler;
 import com.baibuti.biji.common.interact.contract.IGroupInteract;
-import com.baibuti.biji.model.dto.ServerException;
 import com.baibuti.biji.model.po.Group;
 import com.baibuti.biji.ui.IContextHelper;
 import com.baibuti.biji.ui.adapter.GroupRadioAdapter;
@@ -99,19 +98,25 @@ public class GroupDialog extends AlertDialog implements IContextHelper {
      */
     @OnClick(R.id.id_GroupDialog_ButtonOK)
     void ButtonOK_Clicked() {
-        IGroupInteract groupDao = InteractStrategy.getInstance().getGroupInteract(activity);
-        try {
-            if (groupDao.updateGroupsOrder(groupList.toArray(new Group[0])) == DbStatusType.SUCCESS) {
-                Log.i("", "ButtonOK_Clicked: order SUCCESS");
+        IGroupInteract groupInteract = InteractStrategy.getInstance().getGroupInteract(activity);
+        ProgressHandler.process(groupInteract.updateGroupsOrder(groupList.toArray(new Group[0])), new InteractInterface<Boolean>() {
+            @Override
+            public void onSuccess(Boolean data) {
                 if (m_listener != null)
                     m_listener.onUpdated();
                 dismiss();
-            } else
+            }
+
+            @Override
+            public void onError(String message) {
                 showAlert(getContext(), "错误", "分组顺序更新失败。");
-        } catch (ServerException ex) {
-            ex.printStackTrace();
-            showAlert(activity, "错误", "分组更新失败：" + ex.getMessage());
-        }
+            }
+
+            @Override
+            public void onFailed(Throwable throwable) {
+                showAlert(activity, "错误", "网络错误：" + throwable.getMessage());
+            }
+        });
     }
 
     /**

@@ -84,6 +84,7 @@ public class DocClassNetInteract implements IDocClassInteract {
             .map(responseDTO -> {
                 if (responseDTO.getCode() != 200)
                     return new MessageVO<Boolean>(false, responseDTO.getMessage());
+                docClass.setId(responseDTO.getData().getId());
                 return new MessageVO<>(true);
             })
             .subscribeOn(Schedulers.io())

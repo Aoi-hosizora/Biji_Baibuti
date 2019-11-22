@@ -26,11 +26,11 @@ import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
 
+import com.baibuti.biji.common.interact.InteractInterface;
 import com.baibuti.biji.common.interact.InteractStrategy;
-import com.baibuti.biji.model.dao.DbStatusType;
+import com.baibuti.biji.common.interact.ProgressHandler;
 import com.baibuti.biji.common.interact.contract.IGroupInteract;
 import com.baibuti.biji.common.interact.contract.INoteInteract;
-import com.baibuti.biji.model.dto.ServerException;
 import com.baibuti.biji.common.auth.AuthManager;
 import com.baibuti.biji.ui.IContextHelper;
 import com.baibuti.biji.ui.activity.MainActivity;
@@ -289,25 +289,31 @@ public class NoteFragment extends BaseFragment implements IContextHelper {
      * 工具栏 分组
      */
     private void ToolbarGroup_Clicked() {
-        boolean[] cancel = new boolean[] { false };
-        ProgressDialog progressDialog = showProgress(getContext(), "获取分组信息中...", true, v -> cancel[0] = true);
-        try {
-            List<Group> groups = InteractStrategy.getInstance().getGroupInteract(getContext()).queryAllGroups();
-            if (cancel[0]) return;
 
-            groups.add(0, Group.AllGroups);
-            Collections.sort(groups);
-            m_group_adapter.setGroupList(groups);
-            m_group_adapter.setCurrentItem(Group.AllGroups);
-            m_group_adapter.notifyDataSetChanged();
+        IGroupInteract groupInteract = InteractStrategy.getInstance().getGroupInteract(getContext());
+        ProgressHandler.process(getContext(), "获取分组信息中...", true,
+            groupInteract.queryAllGroups(), new InteractInterface<List<Group>>() {
+                @Override
+                public void onSuccess(List<Group> groups) {
+                    groups.add(0, Group.AllGroups);
+                    Collections.sort(groups);
+                    m_group_adapter.setGroupList(groups);
+                    m_group_adapter.setCurrentItem(Group.AllGroups);
+                    m_group_adapter.notifyDataSetChanged();
+                    m_drawerLayout.openDrawer(Gravity.END);
+                }
 
-            progressDialog.dismiss();
-            m_drawerLayout.openDrawer(Gravity.END);
-        } catch (ServerException ex) {
-            progressDialog.dismiss();
-            ex.printStackTrace();
-            showAlert(getActivity(), "错误", "分组信息获取错误：" + ex.getMessage());
-        }
+                @Override
+                public void onError(String message) {
+                    showAlert(getActivity(), "错误", "分组信息获取错误：" + message);
+                }
+
+                @Override
+                public void onFailed(Throwable throwable) {
+                    showAlert(getContext(), "错误", "网络错误：" + throwable.getMessage());
+                }
+            }
+        );
     }
 
     /**
@@ -374,39 +380,58 @@ public class NoteFragment extends BaseFragment implements IContextHelper {
         m_notePopupMenu.cancel();
         if (note == null) return;
 
-        ProgressDialog progressDialog = showProgress(getContext(), "分组信息加载中...", false, null);
-        try {
-            List<Group> groups = InteractStrategy.getInstance().getGroupInteract(getContext()).queryAllGroups();
-            progressDialog.dismiss();
-            GroupAdapter groupAdapter = new GroupAdapter(getContext());
-            groupAdapter.setList(groups);
+        IGroupInteract groupInteract = InteractStrategy.getInstance().getGroupInteract(getContext());
+        ProgressHandler.process(getContext(), "分组信息加载中...", true,
+            groupInteract.queryAllGroups(), new InteractInterface<List<Group>>() {
+                @Override
+                public void onSuccess(List<Group> groups) {
+                    GroupAdapter groupAdapter = new GroupAdapter(getContext());
+                    groupAdapter.setList(groups);
 
-            showAlert(getContext(), "修改分组",
-                groupAdapter, (d, w) -> {
-                    Group motoGroup = note.getGroup();
-                    note.setGroup(groups.get(w));
-                    try {
-                        INoteInteract noteDao = InteractStrategy.getInstance().getNoteInteract(getContext());
-                        if (noteDao.updateNote(note) == DbStatusType.SUCCESS) {
-                            m_note_adapter.notifyDataSetChanged();
-                            showToast(getActivity(), "笔记 \"" + note.getTitle() + "\" 分组修改成功");
-                            d.dismiss();
-                            return;
-                        }
-                        showAlert(getActivity(), "错误", "笔记分组修改错误。");
-                    } catch (ServerException ex) {
-                        ex.printStackTrace();
-                        showAlert(getActivity(), "错误", "笔记分组修改错误：" + ex.getMessage());
-                    }
-                    note.setGroup(motoGroup);
-                    d.dismiss();
-                },
-                "返回", null
-            );
-        } catch (ServerException ex) {
-            showAlert(getContext(), "错误", "分组信息加载错误：" + ex.getMessage());
-        }
+                    showAlert(getContext(), "修改分组",
+                        groupAdapter, (d, w) -> {
+                            Group motoGroup = note.getGroup();
+                            note.setGroup(groups.get(w));
 
+                            INoteInteract noteDao = InteractStrategy.getInstance().getNoteInteract(getContext());
+                            ProgressHandler.process(getContext(), "修改笔记分组中...", true,
+                                noteDao.updateNote(note), new InteractInterface<Boolean>() {
+                                    @Override
+                                    public void onSuccess(Boolean data) {
+                                        m_note_adapter.notifyDataSetChanged();
+                                        showToast(getActivity(), "笔记 \"" + note.getTitle() + "\" 分组修改成功");
+                                        d.dismiss();
+                                    }
+
+                                    @Override
+                                    public void onError(String message) {
+                                        note.setGroup(motoGroup);
+                                        showAlert(getActivity(), "错误", message);
+                                    }
+
+                                    @Override
+                                    public void onFailed(Throwable throwable) {
+                                        note.setGroup(motoGroup);
+                                        showAlert(getContext(), "错误", "网络错误：" + throwable.getMessage());
+                                    }
+                                }
+                            );
+                        },
+                        "返回", null
+                    );
+                }
+
+                @Override
+                public void onError(String message) {
+                    showAlert(getContext(), "错误", "分组信息加载错误：" + message);
+                }
+
+                @Override
+                public void onFailed(Throwable throwable) {
+                    showAlert(getContext(), "错误", "网络错误：" + throwable.getMessage());
+                }
+            }
+        );
     }
 
     /**
@@ -452,22 +477,29 @@ public class NoteFragment extends BaseFragment implements IContextHelper {
      */
     private void ShowGroupDialog() {
         m_drawerLayout.closeDrawer(Gravity.END);
-        ProgressDialog progressDialog = showProgress(getContext(), "分组信息加载中...", false, null);
-        try {
-            IGroupInteract groupDao = InteractStrategy.getInstance().getGroupInteract(getActivity());
-            List<Group> groups = groupDao.queryAllGroups();
-            Collections.sort(groups);
 
-            progressDialog.dismiss();
-            GroupDialog dialog = new GroupDialog(getActivity(), groups, this::onInitNoteData);
-            dialog.setCancelable(true);
-            dialog.show();
+        IGroupInteract groupInteract = InteractStrategy.getInstance().getGroupInteract(getContext());
+        ProgressHandler.process(getContext(), "获取分组信息中...", true,
+            groupInteract.queryAllGroups(), new InteractInterface<List<Group>>() {
+                @Override
+                public void onSuccess(List<Group> groups) {
+                    Collections.sort(groups);
+                    GroupDialog dialog = new GroupDialog(getActivity(), groups, NoteFragment.this::onInitNoteData);
+                    dialog.setCancelable(true);
+                    dialog.show();
+                }
 
-        } catch (ServerException ex) {
-            progressDialog.dismiss();
-            ex.printStackTrace();
-            showAlert(getActivity(), "错误", "分组信息加载失败。");
-        }
+                @Override
+                public void onError(String message) {
+                    showAlert(getActivity(), "错误", "分组信息获取错误：" + message);
+                }
+
+                @Override
+                public void onFailed(Throwable throwable) {
+                    showAlert(getContext(), "错误", "网络错误：" + throwable.getMessage());
+                }
+            }
+        );
     }
 
     // endregion
@@ -482,38 +514,50 @@ public class NoteFragment extends BaseFragment implements IContextHelper {
      * 新建笔记
      */
     private void newNote() {
+
         Note note = new Note();
-        try {
-            Group defGroup = InteractStrategy.getInstance().getGroupInteract(getContext()).queryDefaultGroup();
-            note.setGroup(defGroup);
-        } catch (ServerException ex) {
-            showAlert(getContext(), "错误", "获取默认分组错误：" + ex.getMessage());
-            return;
-        }
+        IGroupInteract groupInteract = InteractStrategy.getInstance().getGroupInteract(getContext());
+        ProgressHandler.process(getContext(), "加载分组信息中...", false,
+            groupInteract.queryDefaultGroup(), new InteractInterface<Group>() {
+                @Override
+                public void onSuccess(Group data) {
 
-        Intent intent = new Intent(getActivity(), EditNoteActivity.class);
-        intent.putExtra(INT_NOTE_DATA, note);
-        intent.putExtra(INT_IS_NEW, true); // NEW
+                    Intent intent = new Intent(getActivity(), EditNoteActivity.class);
+                    intent.putExtra(INT_NOTE_DATA, note);
+                    intent.putExtra(INT_IS_NEW, true); // NEW
 
-        RxActivityResult.on(this).startIntent(intent) // -> INT_NOTE_DATA, INT_IS_MODIFIED, INT_IS_NEW
-            .subscribe((result) -> {
-                if (result.resultCode() != RESULT_OK)
-                    return;
+                    RxActivityResult.on(NoteFragment.this).startIntent(intent) // -> INT_NOTE_DATA, INT_IS_MODIFIED, INT_IS_NEW
+                        .subscribe((result) -> {
+                            if (result.resultCode() != RESULT_OK)
+                                return;
 
-                ProgressDialog progressDialog = showProgress(getContext(), "加载内容...", false, null);
+                            ProgressDialog progressDialog = showProgress(getContext(), "加载内容...", false, null);
 
-                Intent returnIntent = result.data();
-                Note newNote = (Note) returnIntent.getSerializableExtra(INT_NOTE_DATA);
-                boolean isModify = returnIntent.getBooleanExtra(INT_IS_MODIFIED, true);
-                if (isModify) {
-                    showToast(getContext(), String.format(Locale.CHINA, "笔记 \"%s\"新建成功", newNote.getTitle()));
-                    pageData.allNotes.add(newNote);
-                    pageData.showNoteList.add(newNote);
-                    m_note_adapter.notifyDataSetChanged();
+                            Intent returnIntent = result.data();
+                            Note newNote = (Note) returnIntent.getSerializableExtra(INT_NOTE_DATA);
+                            boolean isModify = returnIntent.getBooleanExtra(INT_IS_MODIFIED, true);
+                            if (isModify) {
+                                showToast(getContext(), String.format(Locale.CHINA, "笔记 \"%s\"新建成功", newNote.getTitle()));
+                                pageData.allNotes.add(newNote);
+                                pageData.showNoteList.add(newNote);
+                                m_note_adapter.notifyDataSetChanged();
+                            }
+
+                            progressDialog.dismiss();
+                        }, Throwable::printStackTrace).isDisposed();
                 }
 
-                progressDialog.dismiss();
-            }, Throwable::printStackTrace).isDisposed();
+                @Override
+                public void onError(String message) {
+                    showAlert(getContext(), "错误", "默认分组获取失败：" + message);
+                }
+
+                @Override
+                public void onFailed(Throwable throwable) {
+                    showAlert(getContext(), "错误", "网络错误：" + throwable.getMessage());
+                }
+            }
+        );
     }
 
     /**
@@ -564,45 +608,61 @@ public class NoteFragment extends BaseFragment implements IContextHelper {
      * 初始化与刷新 加载数据
      */
     private void onInitNoteData() {
-        ProgressDialog progressDialog = showProgress(getContext(), "加载数据中...", false, null);
-        try {
-            pageData.allNotes = InteractStrategy.getInstance().getNoteInteract(getContext()).queryAllNotes();
-            Collections.sort(pageData.allNotes);
+        INoteInteract noteInteract = InteractStrategy.getInstance().getNoteInteract(getContext());
+        ProgressHandler.process(getContext(), "加载数据中...", false,
+            noteInteract.queryAllNotes(), new InteractInterface<List<Note>>() {
+                @Override
+                public void onSuccess(List<Note> data) {
+                    pageData.allNotes = data;
+                    Collections.sort(pageData.allNotes);
 
-            pageData.showNoteList.clear();
-            pageData.showNoteList.addAll(pageData.allNotes);
-            Collections.sort(pageData.showNoteList);
-            m_note_adapter.notifyDataSetChanged();
+                    pageData.showNoteList.clear();
+                    pageData.showNoteList.addAll(pageData.allNotes);
+                    Collections.sort(pageData.showNoteList);
+                    m_note_adapter.notifyDataSetChanged();
 
-            m_swipeRefresh.setRefreshing(false);
-            progressDialog.dismiss();
-        } catch (ServerException ex) {
-            ex.printStackTrace();
-            m_swipeRefresh.setRefreshing(false);
-            progressDialog.dismiss();
-            showAlert(getContext(), "错误", "数据加载错误：" + ex.getMessage(),
-                "重试", (d, w) -> onInitNoteData(), "确定", null);
-        }
+                    m_swipeRefresh.setRefreshing(false);
+                }
+
+                @Override
+                public void onError(String message) {
+                    showAlert(getContext(), "错误", message);
+                }
+
+                @Override
+                public void onFailed(Throwable throwable) {
+                    showAlert(getContext(), "错误", "网络错误：" + throwable.getMessage());
+                }
+            }
+        );
     }
 
     /**
      * 删除笔记，更新页面
      */
     private void deleteNote(@NonNull Note note) {
-        try {
-            INoteInteract noteDao = InteractStrategy.getInstance().getNoteInteract(getContext());
 
-            // int idx = adapter.getNoteList().indexOf(note);
-            if (noteDao.deleteNote(note.getId()) != DbStatusType.SUCCESS) {
-                showAlert(getActivity(), "错误", "删除笔记错误。");
-                return;
+        INoteInteract noteInteract = InteractStrategy.getInstance().getNoteInteract(getContext());
+        ProgressHandler.process(getContext(), "删除笔记中...", true,
+            noteInteract.deleteNote(note.getId()), new InteractInterface<Boolean>() {
+                @Override
+                public void onSuccess(Boolean data) {
+                    pageData.showNoteList.remove(note);
+                    m_note_adapter.notifyDataSetChanged();
+                    showToast(getActivity(), "删除成功：\"" + note.getTitle() + "\"");
+                }
+
+                @Override
+                public void onError(String message) {
+                    showAlert(getContext(), "错误", message);
+                }
+
+                @Override
+                public void onFailed(Throwable throwable) {
+                    showAlert(getContext(), "错误", "网路错误：" + throwable.getMessage());
+                }
             }
-            pageData.showNoteList.remove(note);
-            m_note_adapter.notifyDataSetChanged();
-            showToast(getActivity(), "删除成功：\"" + note.getTitle() + "\"");
-        } catch (ServerException ex) {
-            showAlert(getContext(), "错误", "删除笔记错误：" + ex.getMessage());
-        }
+        );
     }
 
     // endregion
@@ -613,48 +673,49 @@ public class NoteFragment extends BaseFragment implements IContextHelper {
      * 分组显示
      */
     private void groupNote(Group group) {
-
         if (group == Group.AllGroups) {
             toNormal();
             return;
         }
+        INoteInteract noteInteract = InteractStrategy.getInstance().getNoteInteract(getContext());
+        ProgressHandler.process(getContext(), "分组搜索中...", true,
+            noteInteract.queryNotesByGroupId(group.getId()), new InteractInterface<List<Note>>() {
+                @Override
+                public void onSuccess(List<Note> notes) {
+                    m_toolbar.setTitle(String.format(Locale.CHINA, "\"%s\" 分组结果 (共 %d 项)", group.getName(), notes.size()));
+                    if (notes.size() != 0)
+                        showToast(getActivity(), "共找到 " + notes.size() + " 项");
+                    else
+                        showToast(getActivity(), "没有找到内容");
 
-        boolean[] cancel = new boolean[] { false };
-        ProgressDialog progressDialog = showProgress(getActivity(), "分组搜索中...",
-            true, (v) -> cancel[0] = true);
+                    pageData.showNoteList.clear();
+                    pageData.showNoteList.addAll(notes);
+                    Collections.sort(pageData.showNoteList);
+                    m_note_adapter.notifyDataSetChanged();
 
-        // 数据处理
-        try {
-            List<Note> notes = InteractStrategy.getInstance().getNoteInteract(getContext()).queryNotesByGroupId(group.getId());
-            if (!cancel[0] && notes != null) {
+                    pageData.pageState = PageState.GROUPING;
 
-                progressDialog.dismiss();
-                m_toolbar.setTitle(String.format(Locale.CHINA, "\"%s\" 分组结果 (共 %d 项)", group.getName(), notes.size()));
-                if (notes.size() != 0)
-                    showToast(getActivity(), "共找到 " + notes.size() + " 项");
-                else
-                    showToast(getActivity(), "没有找到内容");
+                    // 页面显示处理
+                    m_toolbar.getMenu().findItem(R.id.action_search_group_back).setVisible(true); // 显示返回
+                    m_toolbar.getMenu().findItem(R.id.action_search).setVisible(true); // 显示搜索
+                    m_toolbar.getMenu().findItem(R.id.action_group).setVisible(false); // 隐藏分组
 
-                pageData.showNoteList.clear();
-                pageData.showNoteList.addAll(notes);
-                Collections.sort(pageData.showNoteList);
-                m_note_adapter.notifyDataSetChanged();
+                    m_swipeRefresh.setEnabled(false); // 禁止刷新
+                    m_fabMenu.setVisibility(View.GONE); // 隐藏 Fab
+                    m_drawerLayout.setEnabled(false); // 禁止分组
+                }
 
-                pageData.pageState = PageState.GROUPING;
+                @Override
+                public void onError(String message) {
+                    showAlert(getContext(), "错误", message);
+                }
 
-                // 页面显示处理
-                m_toolbar.getMenu().findItem(R.id.action_search_group_back).setVisible(true); // 显示返回
-                m_toolbar.getMenu().findItem(R.id.action_search).setVisible(true); // 显示搜索
-                m_toolbar.getMenu().findItem(R.id.action_group).setVisible(false); // 隐藏分组
-
-                m_swipeRefresh.setEnabled(false); // 禁止刷新
-                m_fabMenu.setVisibility(View.GONE); // 隐藏 Fab
-                m_drawerLayout.setEnabled(false); // 禁止分组
-
+                @Override
+                public void onFailed(Throwable throwable) {
+                    showAlert(getContext(), "错误", "网络错误：" + throwable.getMessage());
+                }
             }
-        } catch (ServerException ex) {
-            showAlert(getContext(), "错误", "数据加载错误：" + ex.getMessage());
-        }
+        );
     }
 
     /**
@@ -701,18 +762,6 @@ public class NoteFragment extends BaseFragment implements IContextHelper {
      */
     private void toNormal() {
         ProgressDialog progressDialog = showProgress(getContext(), "返回加载数据中...", false, null);
-
-        try {
-            INoteInteract noteDao = InteractStrategy.getInstance().getNoteInteract(getContext());
-            pageData.allNotes.clear();
-            pageData.allNotes.addAll(noteDao.queryAllNotes());
-        } catch (ServerException ex) {
-            progressDialog.dismiss();
-            ex.printStackTrace();
-            showAlert(getContext(), "错误", "获取数据错误：" + ex.getMessage());
-            return;
-        }
-
         pageData.pageState = PageState.NORMAL;
 
         // 页面显示处理

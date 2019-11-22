@@ -73,6 +73,7 @@ public class DocumentNetInteract implements IDocumentInteract {
             .map(responseDTO -> {
                 if (responseDTO.getCode() != 200)
                     return new MessageVO<Boolean>(false, responseDTO.getMessage());
+                document.setId(responseDTO.getData().getId());
                 return new MessageVO<>(true);
             })
             .subscribeOn(Schedulers.io())

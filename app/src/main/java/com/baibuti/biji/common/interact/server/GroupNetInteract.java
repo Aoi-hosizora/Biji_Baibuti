@@ -1,6 +1,5 @@
 package com.baibuti.biji.common.interact.server;
 
-import com.baibuti.biji.model.dao.DbStatusType;
 import com.baibuti.biji.common.auth.AuthManager;
 import com.baibuti.biji.common.retrofit.RetrofitFactory;
 import com.baibuti.biji.common.interact.contract.IGroupInteract;
@@ -81,9 +80,10 @@ public class GroupNetInteract implements IGroupInteract {
         return RetrofitFactory.getInstance()
             .createRequest(AuthManager.getInstance().getAuthorizationHead())
             .insertGroup(group.getName(), group.getColor())
-            .map(response -> {
-                if (response.getCode() != 200)
-                    return new MessageVO<Boolean>(false, response.getMessage());
+            .map(responseDTO -> {
+                if (responseDTO.getCode() != 200)
+                    return new MessageVO<Boolean>(false, responseDTO.getMessage());
+                group.setId(responseDTO.getData().getId());
                 return new MessageVO<>(true);
             })
             .subscribeOn(Schedulers.io())
@@ -98,9 +98,9 @@ public class GroupNetInteract implements IGroupInteract {
         return RetrofitFactory.getInstance()
             .createRequest(AuthManager.getInstance().getAuthorizationHead())
             .updateGroup(group.getId(), group.getName(), group.getOrder(), group.getColor())
-            .map(response -> {
-                if (response.getCode() != 200)
-                    return new MessageVO<Boolean>(false, response.getMessage());
+            .map(responseDTO -> {
+                if (responseDTO.getCode() != 200)
+                    return new MessageVO<Boolean>(false, responseDTO.getMessage());
                 return new MessageVO<>(true);
             })
             .subscribeOn(Schedulers.io())

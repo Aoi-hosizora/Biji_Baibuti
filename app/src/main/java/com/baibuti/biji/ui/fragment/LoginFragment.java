@@ -15,6 +15,8 @@ import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.Spinner;
 
+import com.baibuti.biji.common.interact.InteractInterface;
+import com.baibuti.biji.common.interact.ProgressHandler;
 import com.baibuti.biji.model.dto.ServerException;
 import com.baibuti.biji.common.auth.AuthManager;
 import com.baibuti.biji.common.auth.AuthService;
@@ -117,27 +119,24 @@ public class LoginFragment extends Fragment implements IContextHelper {
         int exp = exTextNumbers.get(exTexts[m_ExSpinner.getSelectedItemPosition()]);
         exp *= 24 * 3600;
 
-        ProgressDialog progressDialog =
-            showProgress(getContext(),
-                String.format(Locale.CHINA, "用户 \"%s\" 登录中，请稍后...", username),
-                true, null);
+        ProgressHandler.process(getContext(), String.format(Locale.CHINA, "用户 \"%s\" 登录中，请稍后...", username), true,
+            AuthService.login(username, password, exp), new InteractInterface<AuthRespDTO>() {
+                @Override
+                public void onSuccess(AuthRespDTO data) {
+                    showToast(getContext(), String.format(Locale.CHINA, "用户 \"%s\" 登录成功", data.getUsername()));
+                }
 
-        try {
-            AuthRespDTO auth = AuthService.login(username, password, exp);
+                @Override
+                public void onError(String message) {
+                    showAlert(getContext(), "错误", message);
+                }
 
-            progressDialog.dismiss();
-            showToast(getContext(), String.format(Locale.CHINA, "用户 \"%s\" 登录成功", auth.getUsername()));
-            AuthManager.getInstance().login(auth.getUsername(), auth.getToken());
-
-            AuthActivity activity = (AuthActivity) getActivity();
-            if (activity != null) {
-                activity.setResult(Activity.RESULT_OK, new Intent());
-                activity.finish();
+                @Override
+                public void onFailed(Throwable throwable) {
+                    showAlert(getContext(), "错误", "网络错误：" + throwable.getMessage());
+                }
             }
-        } catch (ServerException ex) {
-            progressDialog.dismiss();
-            showAlert(getContext(), "登录失败", ex.getMessage());
-        }
+        );
     }
 
     /**

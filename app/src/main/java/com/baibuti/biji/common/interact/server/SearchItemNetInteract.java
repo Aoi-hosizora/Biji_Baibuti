@@ -56,6 +56,7 @@ public class SearchItemNetInteract implements ISearchItemInteract {
             .map(responseDTO -> {
                 if (responseDTO.getCode() != 200)
                     return new MessageVO<Boolean>(false, responseDTO.getMessage());
+                searchItem.setId(responseDTO.getData().getId());
                 return new MessageVO<>(true);
             })
             .subscribeOn(Schedulers.io())

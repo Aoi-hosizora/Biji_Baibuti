@@ -17,11 +17,11 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.baibuti.biji.common.interact.InteractInterface;
 import com.baibuti.biji.common.interact.InteractStrategy;
-import com.baibuti.biji.model.dao.DbStatusType;
+import com.baibuti.biji.common.interact.ProgressHandler;
 import com.baibuti.biji.common.interact.contract.IGroupInteract;
 import com.baibuti.biji.common.interact.contract.INoteInteract;
-import com.baibuti.biji.model.dto.ServerException;
 import com.baibuti.biji.model.po.Group;
 import com.baibuti.biji.ui.IContextHelper;
 import com.baibuti.biji.ui.adapter.GroupAdapter;
@@ -37,9 +37,8 @@ import com.baibuti.biji.util.filePathUtil.FileNameUtil;
 import com.baibuti.biji.util.imgTextUtil.StringUtil;
 import com.sendtion.xrichtext.RichTextEditor;
 
-
-import java.util.ArrayList;
 import java.util.List;
+
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -80,6 +79,7 @@ public class EditNoteActivity extends AppCompatActivity implements IContextHelpe
     private Dialog m_LongClickImgPopupMenu;
 
     private Note currNote;
+    private Group currGroup;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -102,7 +102,7 @@ public class EditNoteActivity extends AppCompatActivity implements IContextHelpe
         m_txt_group.setTextColor(currNote.getGroup().getIntColor());
 
         // m_rich_content
-
+        currGroup = currNote.getGroup();
         m_rich_content.post(() -> initRichTextEditor(currNote.getContent()));
     }
 
@@ -307,7 +307,6 @@ public class EditNoteActivity extends AppCompatActivity implements IContextHelpe
      * !!! 文件保存活动处理
      */
     private void ToolbarSaveNote_Clicked() {
-        boolean[] isContinue = new boolean[]{true};
 
         CommonUtil.closeSoftKeyInput(this);
 
@@ -348,72 +347,44 @@ public class EditNoteActivity extends AppCompatActivity implements IContextHelpe
         }
 
         // 设置内容
+        String motoTitle = currNote.getTitle();
+        String motoContent = currNote.getContent();
+        Group motoGroup = currNote.getGroup();
+
         currNote.setTitle(m_txt_title.getText().toString());
         currNote.setContent(Content);
+        currNote.setGroup(currGroup);
+        INoteInteract noteInteract = InteractStrategy.getInstance().getNoteInteract(this);
 
-        IGroupInteract groupDao = InteractStrategy.getInstance().getGroupInteract(this);
-        try {
-            Group newGroup = groupDao.queryGroupByName(m_txt_group.getText().toString());
-            if (newGroup == null)
-                newGroup = groupDao.queryDefaultGroup();
-            currNote.setGroup(newGroup);
-        } catch (ServerException ex) {
-            ex.printStackTrace();
-            showAlert(this,
-                "错误", "分组获取错误，将使用默认分组。",
-                "确定", (dialog, which) -> {
-                    try {
-                        currNote.setGroup(groupDao.queryDefaultGroup());
-                    } catch (ServerException innerEx) {
-                        innerEx.printStackTrace();
-                        showAlert(this,
-                            "错误", "无网络相应，请检查网络连接",
-                            "确定", (dialog2, w2) -> isContinue[0] = false
-                        );
-                    }
+        ProgressHandler.process(this, "保存笔记中...", true,
+            (isNew) ? noteInteract.insertNote(currNote) : noteInteract.updateNote(currNote) , new InteractInterface<Boolean>() {
+                @Override
+                public void onSuccess(Boolean data) {
+                    Intent intent = new Intent();
+                    intent.putExtra(NoteFragment.INT_NOTE_DATA, currNote);
+                    intent.putExtra(NoteFragment.INT_IS_NEW, isNew); // <<<
+                    intent.putExtra(NoteFragment.INT_IS_MODIFIED, true);
+                    setResult(RESULT_OK, intent);
+                    finish();
                 }
-            );
-        }
 
-        if (!isContinue[0]) return;
-
-        // 保存操作
-        try {
-            INoteInteract noteDao = InteractStrategy.getInstance().getNoteInteract(this);
-            if (isNew) {
-                DbStatusType status = noteDao.insertNote(currNote);
-                if (status == DbStatusType.UPLOAD_FAILED) {
-                    showAlert(this, "错误", "笔记图片上传失败，请重试。");
-                    return;
-                } else if (status == DbStatusType.FAILED) {
-                    showAlert(this, "错误", "新建笔记错误。");
-                    return;
+                @Override
+                public void onError(String message) {
+                    currNote.setTitle(motoTitle);
+                    currNote.setContent(motoContent);
+                    currNote.setGroup(motoGroup);
+                    showAlert(EditNoteActivity.this, "错误", message);
                 }
-            } else {
-                DbStatusType status = noteDao.updateNote(currNote);
-                if (status == DbStatusType.UPLOAD_FAILED) {
-                    showAlert(this, "错误", "笔记图片上传失败，请重试。");
-                    return;
-                } else if (status == DbStatusType.FAILED) {
-                    showAlert(this, "错误", "更新笔记错误。");
-                    return;
+
+                @Override
+                public void onFailed(Throwable throwable) {
+                    currNote.setTitle(motoTitle);
+                    currNote.setContent(motoContent);
+                    currNote.setGroup(motoGroup);
+                    showAlert(EditNoteActivity.this, "错误", "网络错误：" + throwable.getMessage());
                 }
             }
-
-            Intent intent = new Intent();
-            intent.putExtra(NoteFragment.INT_NOTE_DATA, currNote);
-            intent.putExtra(NoteFragment.INT_IS_NEW, isNew); // <<<
-            intent.putExtra(NoteFragment.INT_IS_MODIFIED, true);
-            setResult(RESULT_OK, intent);
-            finish();
-
-        } catch (ServerException ex) {
-            ex.printStackTrace();
-            showAlert(this,
-                "错误", "无网络相应，请检查网络连接。",
-                "确定", null
-            );
-        }
+        );
     }
 
     // endregion
@@ -469,33 +440,37 @@ public class EditNoteActivity extends AppCompatActivity implements IContextHelpe
      * 显示分组设置
      */
     private void ToolbarGroupSetting_Clicked() {
-        boolean[] isContinue = new boolean[]{true};
+        IGroupInteract groupInteract = InteractStrategy.getInstance().getGroupInteract(this);
+        ProgressHandler.process(this, "分组信息加载中...", true,
+            groupInteract.queryAllGroups(), new InteractInterface<List<Group>>() {
+                @Override
+                public void onSuccess(List<Group> groups) {
+                    GroupAdapter groupAdapter = new GroupAdapter(EditNoteActivity.this);
+                    groupAdapter.setList(groups);
 
-        IGroupInteract groupDao = InteractStrategy.getInstance().getGroupInteract(this);
-        final List<Group> groups = new ArrayList<>();
+                    showAlert(EditNoteActivity.this, "笔记分类",
+                        groupAdapter, (dialog, which) -> {
+                            currGroup = groups.get(which);
+                            m_txt_group.setText(groups.get(which).getName());
+                            m_txt_group.setTextColor(groups.get(which).getIntColor());
+                            dialog.dismiss();
+                        },
+                        "返回", null
+                    );
+                }
 
-        try {
-            groups.addAll(groupDao.queryAllGroups());
-        } catch (ServerException ex) {
-            showAlert(this,
-                "错误", "无网络相应，请检查网络连接",
-                "确定", (dialog2, w2) -> isContinue[0] = false
-            );
-        }
+                @Override
+                public void onError(String message) {
+                    showAlert(EditNoteActivity.this, "错误", message);
+                }
 
-        if (!isContinue[0]) return;
-
-        GroupAdapter groupAdapter = new GroupAdapter(this);
-        groupAdapter.setList(groups);
-
-        showAlert(this, "笔记分类",
-            groupAdapter, (dialog, which) -> {
-                m_txt_group.setText(groups.get(which).getName());
-                m_txt_group.setTextColor(groups.get(which).getIntColor());
-                dialog.dismiss();
-            },
-            "返回", null
+                @Override
+                public void onFailed(Throwable throwable) {
+                    showAlert(EditNoteActivity.this, "错误", "网络错误：" + throwable.getMessage());
+                }
+            }
         );
+
     }
 
     // endregion

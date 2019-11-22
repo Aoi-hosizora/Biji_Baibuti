@@ -11,14 +11,11 @@ import android.widget.TextView;
 import com.baibuti.biji.common.interact.InteractInterface;
 import com.baibuti.biji.common.interact.InteractStrategy;
 import com.baibuti.biji.common.interact.ProgressHandler;
-import com.baibuti.biji.model.dao.DbStatusType;
 import com.baibuti.biji.common.interact.contract.IGroupInteract;
 import com.baibuti.biji.common.interact.contract.INoteInteract;
-import com.baibuti.biji.model.dto.ServerException;
 import com.baibuti.biji.model.po.Group;
 import com.baibuti.biji.R;
 import com.baibuti.biji.model.po.Note;
-import com.baibuti.biji.model.vo.MessageVO;
 import com.baibuti.biji.ui.IContextHelper;
 import com.baibuti.biji.util.otherUtil.CommonUtil;
 import com.baibuti.biji.util.otherUtil.DateColorUtil;
@@ -134,50 +131,28 @@ public class GroupEditDialog extends AlertDialog implements IContextHelper {
             showAlert(activity, "错误", "分组名不合法，仅允许由1-30个中文、字母、数字和下划线组成。");
             return;
         }
-
         String newGroupColor = DateColorUtil.ColorInt_HexEncoding(m_color_picker.getColor());
+        IGroupInteract groupInteract = InteractStrategy.getInstance().getGroupInteract(activity);
 
-        IGroupInteract groupDao = InteractStrategy.getInstance().getGroupInteract(activity);
-        try {
-            if (currGroup == null) { // 新建
-                currGroup = new Group(newGroupName, newGroupColor);
-                DbStatusType status = groupDao.insertGroup(currGroup);
-                if (status == DbStatusType.SUCCESS) {
-                    if (m_listener != null)
-                        m_listener.onUpdated(currGroup);
-                    dismiss();
-                    return;
-                }
-
-                if (status == DbStatusType.FAILED)
-                    showAlert(activity, "错误", "新建分组错误。");
-                else if (status == DbStatusType.DUPLICATED)
-                    showAlert(activity, "错误", "分组名 \"" + newGroupName + "\" 重复，请检查。");
-            } else { // 更新
-                String motoName = currGroup.getName(), motoColor = currGroup.getColor();
-                currGroup.setName(newGroupName);
-                currGroup.setColor(newGroupColor);
-                DbStatusType status = groupDao.updateGroup(currGroup);
-                if (status == DbStatusType.SUCCESS) {
-                    if (m_listener != null)
-                        m_listener.onUpdated(currGroup);
-                    dismiss();
-                    return;
-                }
-
-                currGroup.setName(motoName);
-                currGroup.setColor(motoColor);
-                if (status == DbStatusType.FAILED)
-                    showAlert(activity, "错误", "新建分组错误。");
-                else if (status == DbStatusType.DUPLICATED)
-                    showAlert(activity, "错误", "分组名 \"" + newGroupName + "\" 重复，请检查。");
-                else if (status == DbStatusType.DEFAULT)
-                    showAlert(activity, "错误", "不允许修改默认分组名。");
+        ProgressHandler.process((currGroup == null) ?
+            groupInteract.insertGroup(new Group(newGroupName, newGroupColor)) : groupInteract.updateGroup(currGroup), new InteractInterface<Boolean>() {
+            @Override
+            public void onSuccess(Boolean data) {
+                if (m_listener != null)
+                    m_listener.onUpdated(currGroup);
+                dismiss();
             }
-        } catch (ServerException ex) {
-            ex.printStackTrace();
-            showAlert(activity, "错误", ex.getMessage());
-        }
+
+            @Override
+            public void onError(String message) {
+                showAlert(activity, "错误", message);
+            }
+
+            @Override
+            public void onFailed(Throwable throwable) {
+                showAlert(activity, "错误", "网络错误：" + throwable.getMessage());
+            }
+        });
     }
 
     /**
@@ -185,75 +160,55 @@ public class GroupEditDialog extends AlertDialog implements IContextHelper {
      */
     @OnClick(R.id.id_btn_delete)
     void DeleteButton_Clicked() {
-        INoteInteract noteDao = InteractStrategy.getInstance().getNoteInteract(activity);
-        IGroupInteract groupDao = InteractStrategy.getInstance().getGroupInteract(activity);
-        if (currGroup.getId() == groupDao.queryDefaultGroup().getId()) {
+        INoteInteract noteInteract = InteractStrategy.getInstance().getNoteInteract(activity);
+        if (currGroup.getName().equals(Group.DEF_GROUP.getName())) {
             showAlert(activity, "错误", "无法删除默认分组。");
             return;
         }
 
-        ProgressHandler.process(noteDao.queryNotesByGroupId(currGroup.getId()), new InteractInterface<List<Note>>() {
+        ProgressHandler.process(noteInteract.queryNotesByGroupId(currGroup.getId()), new InteractInterface<List<Note>>() {
             @Override
             public void onSuccess(List<Note> groupNotes) {
+
                 if (groupNotes.isEmpty()) {
                     // 不包含笔记
-                    showAlert(activity,
-                        "删除", String.format("是否删除分组 %s？", currGroup.getName()),
-                        "删除", (d, w) -> {
-                            try {
-                                if (groupDao.deleteGroup(currGroup.getId(), false) == DbStatusType.SUCCESS) {
-                                    if (m_listener != null)
-                                        m_listener.onDeleted(currGroup);
-                                } else
-                                    showAlert(activity, "错误", "分组删除错误。");
-                            } catch (ServerException ex) {
-                                ex.printStackTrace();
-                                showAlert(activity, "错误", ex.getMessage());
-                            }
-                        },
+                    showAlert(activity, "删除", String.format("是否删除分组 %s？", currGroup.getName()),
+                        "删除", (d, w) -> onDelete(currGroup.getId(), false),
                         "返回", null
                     );
                 } else {
-
                     // 包含笔记
-                    showAlert(activity,
-                        "删除", "该分组有相关联的笔记，是否同时删除？",
-                        "删除分组及笔记", (d, w) -> {
-                            try {
-                                for (Note note : groupNotes)
-                                    noteDao.deleteNote(note.getId());
-                                if (groupDao.deleteGroup(currGroup.getId(), false) == DbStatusType.SUCCESS) {
-                                    if (m_listener != null)
-                                        m_listener.onDeleted(currGroup);
-                                } else
-                                    showAlert(activity, "错误", "分组删除错误，已恢复修改。");
-                            } catch (ServerException ex) {
-                                ex.printStackTrace();
-                                showAlert(activity, "错误", ex.getMessage());
-                            }
-                        },
-                        "删除分组并修改为默认分组", (d, w) -> {
-                            try {
-                                if (groupDao.deleteGroup(currGroup.getId(), true) == DbStatusType.SUCCESS) {
-                                    if (m_listener != null)
-                                        m_listener.onDeleted(currGroup);
-                                } else
-                                    showAlert(activity, "错误", "分组删除错误，已恢复修改。");
-                            } catch (ServerException ex) {
-                                ex.printStackTrace();
-                                showAlert(activity, "错误", ex.getMessage());
-                            }
-                        },
+                    showAlert(activity, "删除", "该分组有相关联的笔记，是否同时删除？",
+                        "删除分组及笔记", (d, w) -> onDelete(currGroup.getId(), false),
+                        "删除分组并修改为默认分组", (d, w) -> onDelete(currGroup.getId(), true),
                         "不删除分组", null
                     );
                 }
             }
-
             @Override
             public void onError(String message) {
                 showAlert(getContext(), "错误", "笔记信息获取失败：" + message);
             }
 
+            @Override
+            public void onFailed(Throwable throwable) {
+                showAlert(getContext(), "错误", "网络无法连接：" + throwable.getMessage());
+            }
+        });
+    }
+
+    private void onDelete(int id, boolean isToDefault) {
+        IGroupInteract groupInteract = InteractStrategy.getInstance().getGroupInteract(activity);
+        ProgressHandler.process(groupInteract.deleteGroup(id, isToDefault), new InteractInterface<Boolean>() {
+            @Override
+            public void onSuccess(Boolean data) {
+                if (m_listener != null)
+                    m_listener.onDeleted(currGroup);
+            }
+            @Override
+            public void onError(String message) {
+                showAlert(getContext(), "错误", message);
+            }
             @Override
             public void onFailed(Throwable throwable) {
                 showAlert(getContext(), "错误", "网络无法连接：" + throwable.getMessage());
