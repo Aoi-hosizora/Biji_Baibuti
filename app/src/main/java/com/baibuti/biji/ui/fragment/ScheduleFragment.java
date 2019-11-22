@@ -11,9 +11,10 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
+import com.baibuti.biji.common.interact.InteractInterface;
 import com.baibuti.biji.common.interact.InteractStrategy;
+import com.baibuti.biji.common.interact.ProgressHandler;
 import com.baibuti.biji.common.interact.contract.IScheduleInteract;
-import com.baibuti.biji.model.dto.ServerException;
 import com.baibuti.biji.model.po.MySubject;
 import com.baibuti.biji.R;
 import com.baibuti.biji.common.auth.AuthManager;
@@ -64,12 +65,12 @@ public class ScheduleFragment extends BaseFragment implements IContextHelper {
             AuthManager.getInstance().addLoginChangeListener(new AuthManager.OnLoginChangeListener() {
                 @Override
                 public void onLogin(String username) {
-                    ActionRefresh_Clicked();
+                    ActionRefresh_Clicked(false);
                 }
 
                 @Override
                 public void onLogout() {
-                    ActionRefresh_Clicked();
+                    ActionRefresh_Clicked(false);
                 }
             });
         }
@@ -118,7 +119,7 @@ public class ScheduleFragment extends BaseFragment implements IContextHelper {
         // m_timetableView.source(mySubjects).showView();
 
         // Load data
-        ActionRefresh_Clicked();
+        ActionRefresh_Clicked(true);
     }
 
     /**
@@ -163,7 +164,7 @@ public class ScheduleFragment extends BaseFragment implements IContextHelper {
                 ActionImportSchedule_Clicked();
                 break;
             case R.id.action_refresh_schedule:
-                ActionRefresh_Clicked();
+                ActionRefresh_Clicked(false);
                 break;
             case R.id.action_delete_schedule:
                 ActionDeleteSchedule_Clicked();
@@ -209,50 +210,71 @@ public class ScheduleFragment extends BaseFragment implements IContextHelper {
         m_timetableView.source(mySubjects).updateView();
 
         // save
-        IScheduleInteract scheduleDao = InteractStrategy.getInstance().getScheduleInteract(getActivity());
-        try {
-            if (!scheduleDao.updateSchedule(MySubject.toJsons(mySubjects))) {
-                showAlert(getActivity(), "错误", "课程表更新失败");
+        IScheduleInteract scheduleInteract = InteractStrategy.getInstance().getScheduleInteract(getActivity());
+        ProgressHandler.process(getActivity(), "上传课程表中...", true,
+            scheduleInteract.updateSchedule(MySubject.toJsons(mySubjects)), new InteractInterface<Boolean>() {
+                @Override
+                public void onSuccess(Boolean data) {
+                    showToast(getActivity(), "课程表上传成功");
+                }
+
+                @Override
+                public void onError(String message) {
+                    showAlert(getActivity(), "错误", "课程表上传失败");
+                }
+
+                @Override
+                public void onFailed(Throwable throwable) {
+                    showAlert(getActivity(), "错误", "网络错误：" + throwable.getMessage());
+                }
             }
-        } catch (ServerException ex) {
-            ex.printStackTrace();
-            showAlert(getActivity(), "错误", ex.getMessage());
-        }
+        );
     }
 
     /**
      * ActionBar 刷新课程表
+     * @param isInit 首次进入是不显示 toast
      */
-    private void ActionRefresh_Clicked() {
+    private void ActionRefresh_Clicked(boolean isInit) {
         ProgressDialog progressDialog = showProgress(getActivity(), "加載中...", false, null);
 
         // Load Dao
-        IScheduleInteract scheduleDao = InteractStrategy.getInstance().getScheduleInteract(getContext());
-        String scheduleJson;
-        try {
-            scheduleJson = scheduleDao.querySchedule();
-        } catch (ServerException ex) {
-            if (progressDialog.isShowing()) progressDialog.dismiss();
-            showAlert(getActivity(), "错误", ex.getMessage());
-            return;
-        }
-        if (scheduleJson.trim().isEmpty()) {
-            if (progressDialog.isShowing()) progressDialog.dismiss();
-            // showToast(getActivity(), "尚未设置课程表");
-            return;
-        }
+        IScheduleInteract scheduleInteract = InteractStrategy.getInstance().getScheduleInteract(getContext());
+        ProgressHandler.process(getActivity(), "更新中...", true,
+            scheduleInteract.querySchedule(), new InteractInterface<String>() {
+                @Override
+                public void onSuccess(String scheduleJson) {
+                    if (scheduleJson.trim().isEmpty()) {
+                        if (progressDialog.isShowing()) progressDialog.dismiss();
+                        if (!isInit)
+                            showToast(getActivity(), "尚未设置课程表");
+                    } else {
+                        // Show Schedule
+                        MainActivity activity = (MainActivity) getActivity();
+                        if (activity == null) return;
 
-        // Show Schedule
-        MainActivity activity = (MainActivity) getActivity();
-        if (activity == null) return;
+                        List<MySubject> mySubjects = MySubject.fromJson(scheduleJson);
+                        m_weekView.source(mySubjects).showView();
+                        m_timetableView.source(mySubjects).updateView();
 
-        List<MySubject> mySubjects = MySubject.fromJson(scheduleJson);
-        m_weekView.source(mySubjects).showView();
-        m_timetableView.source(mySubjects).updateView();
+                        if (progressDialog.isShowing())
+                            progressDialog.dismiss();
+                        if (!isInit)
+                            showToast(getActivity(), "课程表更新完成");
+                    }
+                }
 
-        if (progressDialog.isShowing())
-            progressDialog.dismiss();
-        // showToast(getActivity(), "刷新完成");
+                @Override
+                public void onError(String message) {
+                    showAlert(getActivity(), "错误", message);
+                }
+
+                @Override
+                public void onFailed(Throwable throwable) {
+                    showAlert(getActivity(), "错误", "网络错误：" + throwable.getMessage());
+                }
+            }
+        );
     }
 
     /**
@@ -262,17 +284,27 @@ public class ScheduleFragment extends BaseFragment implements IContextHelper {
         showAlert(getActivity(),
             "删除", "是否删除课程表？",
             "确定", (d, v) -> {
-                IScheduleInteract scheduleDao = InteractStrategy.getInstance().getScheduleInteract(getActivity());
-                try {
-                    if (scheduleDao.deleteSchedule()) {
-                        showToast(getActivity(), "删除课表成功");
-                        m_weekView.source(new ArrayList<MySubject>()).updateView();
-                        m_timetableView.source(new ArrayList<MySubject>()).updateView();
+                IScheduleInteract scheduleInteract = InteractStrategy.getInstance().getScheduleInteract(getActivity());
+                ProgressHandler.process(getContext(), "删除课程表中...", true,
+                    scheduleInteract.deleteSchedule(), new InteractInterface<Boolean>() {
+                        @Override
+                        public void onSuccess(Boolean data) {
+                            showToast(getActivity(), "删除课表成功");
+                            m_weekView.source(new ArrayList<MySubject>()).updateView();
+                            m_timetableView.source(new ArrayList<MySubject>()).updateView();
+                        }
+
+                        @Override
+                        public void onError(String message) {
+                            showAlert(getActivity(), "错误", message);
+                        }
+
+                        @Override
+                        public void onFailed(Throwable throwable) {
+                            showAlert(getActivity(), "错误", "网络错误：" + throwable.getMessage());
+                        }
                     }
-                } catch (ServerException ex) {
-                    ex.printStackTrace();
-                    showAlert(getActivity(), "错误", ex.getMessage());
-                }
+                );
             },
             "取消", null
         );

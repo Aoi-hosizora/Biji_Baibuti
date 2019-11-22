@@ -17,10 +17,10 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 
+import com.baibuti.biji.common.interact.InteractInterface;
 import com.baibuti.biji.common.interact.InteractStrategy;
-import com.baibuti.biji.model.dao.DbStatusType;
+import com.baibuti.biji.common.interact.ProgressHandler;
 import com.baibuti.biji.common.interact.contract.ISearchItemInteract;
-import com.baibuti.biji.model.dto.ServerException;
 import com.baibuti.biji.common.auth.AuthManager;
 import com.baibuti.biji.ui.IContextHelper;
 import com.baibuti.biji.ui.adapter.SearchItemAdapter;
@@ -281,16 +281,28 @@ public class SearchFragment extends BaseFragment implements IContextHelper {
         label.setText(String.format("当前选中项: %s", searchItem.getTitle()));
 
         ((Button) root.findViewById(R.id.id_SearchFrag_PopupMenu_Star)).setText("收藏");
-        ISearchItemInteract searchItemDao = InteractStrategy.getInstance().getSearchInteract(getActivity());
-        try {
-            if (searchItemDao.querySearchItemById(searchItem.getId()) != null)
-                ((Button) root.findViewById(R.id.id_SearchFrag_PopupMenu_Star)).setText("取消收藏");
-        } catch (ServerException ex) {
-            ex.printStackTrace();
-        }
 
+        ISearchItemInteract searchInteract = InteractStrategy.getInstance().getSearchInteract(getActivity());
+        ProgressHandler.process(searchInteract.querySearchItemById(searchItem.getId()), new InteractInterface<SearchItem>() {
+            @Override
+            public void onSuccess(SearchItem data) {
+                isNeedToStarOrDeleteStar = false;
+                ((Button) root.findViewById(R.id.id_SearchFrag_PopupMenu_Star)).setText("取消收藏");
+            }
+
+            @Override
+            public void onError(String message) { }
+
+            @Override
+            public void onFailed(Throwable throwable) { }
+        });
         m_itemPopupMenu.show();
     }
+
+    /**
+     * 记录当前选中项需要收藏还是取消收藏，防止多次访问网络
+     */
+    private boolean isNeedToStarOrDeleteStar = true;
 
     /**
      * 弹出菜单 收藏点击
@@ -298,26 +310,24 @@ public class SearchFragment extends BaseFragment implements IContextHelper {
     private void SearchItem_StarClick(SearchItem searchItem) {
         m_itemPopupMenu.dismiss();
 
-        ISearchItemInteract searchItemDao = InteractStrategy.getInstance().getSearchInteract(getActivity());
-        try {
-            if (searchItemDao.querySearchItemById(searchItem.getId()) == null) {
-                // 收藏
-                if (searchItemDao.insertSearchItem(searchItem) == DbStatusType.SUCCESS)
-                    showToast(getActivity(), String.format(Locale.CHINA, "收藏 %s 成功", searchItem.getTitle()));
-                else
-                    showToast(getActivity(), String.format(Locale.CHINA, "收藏 %s 失败", searchItem.getTitle()));
-                m_list_result.getAdapter().notifyDataSetChanged();
-            } else {
-                // 取消收藏
-                if (searchItemDao.deleteSearchItem(searchItem.getId()) == DbStatusType.SUCCESS)
-                    showToast(getActivity(), String.format(Locale.CHINA, "取消收藏 %s 成功", searchItem.getTitle()));
-                else
-                    showToast(getActivity(), String.format(Locale.CHINA, "取消收藏 %s 失败", searchItem.getTitle()));
-                m_list_result.getAdapter().notifyDataSetChanged();
-            }
-        } catch (ServerException ex) {
-            ex.printStackTrace();
-            showAlert(getActivity(), "错误", ex.getMessage());
-        }
+        ISearchItemInteract searchInteract = InteractStrategy.getInstance().getSearchInteract(getActivity());
+        ProgressHandler.process(
+            isNeedToStarOrDeleteStar ? searchInteract.insertSearchItem(searchItem) : searchInteract.deleteSearchItem(searchItem.getId()),
+            new InteractInterface<Boolean>() {
+                @Override
+                public void onSuccess(Boolean data) {
+                    showToast(getActivity(), String.format(Locale.CHINA, "%s %s 成功", isNeedToStarOrDeleteStar ? "收藏" : "取消收藏", searchItem.getTitle()));
+                }
+
+                @Override
+                public void onError(String message) {
+                    showToast(getActivity(), String.format(Locale.CHINA, "%s %s 失败", isNeedToStarOrDeleteStar ? "收藏" : "取消收藏", searchItem.getTitle()));
+                }
+
+                @Override
+                public void onFailed(Throwable throwable) {
+                    showAlert(getActivity(), "网络错误", throwable.getMessage());
+                }
+            });
     }
 }

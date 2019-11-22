@@ -1,7 +1,6 @@
 package com.baibuti.biji.ui.activity;
 
 import android.app.Dialog;
-import android.app.ProgressDialog;
 import android.os.Bundle;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.ActionBar;
@@ -14,10 +13,10 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.baibuti.biji.common.interact.InteractInterface;
 import com.baibuti.biji.common.interact.InteractStrategy;
-import com.baibuti.biji.model.dao.DbStatusType;
+import com.baibuti.biji.common.interact.ProgressHandler;
 import com.baibuti.biji.common.interact.contract.ISearchItemInteract;
-import com.baibuti.biji.model.dto.ServerException;
 import com.baibuti.biji.ui.IContextHelper;
 import com.baibuti.biji.ui.adapter.SearchItemAdapter;
 import com.baibuti.biji.model.po.SearchItem;
@@ -150,33 +149,43 @@ public class SearchItemActivity extends AppCompatActivity implements IContextHel
      * @param searchItems 加载数据库或者搜索
      */
     private void refreshListData(List<SearchItem> searchItems) {
-
-        ProgressDialog progressDialog = showProgress(this, "加载中...", false, null);
-
         if (searchItems == null || searchItems.isEmpty()) { // 加载数据库内的
+            ISearchItemInteract searchInteract = InteractStrategy.getInstance().getSearchInteract(this);
+            ProgressHandler.process(this, "刷新中...", true,
+                searchInteract.queryAllSearchItems(), new InteractInterface<List<SearchItem>>() {
+                    @Override
+                    public void onSuccess(List<SearchItem> data) {
+                        pageData.currentList.clear();
+                        pageData.currentList.addAll(data);
+                        m_list_star.getAdapter().notifyDataSetChanged();
+                        pageData.pageState = PageData.PageState.NORMAL;
+                        m_srl.setRefreshing(false);
+                        // 更新标题
+                        updateTitle();
+                    }
 
-            ISearchItemInteract searchItemDao = InteractStrategy.getInstance().getSearchInteract(this);
-            try {
-                pageData.currentList.clear();
-                pageData.currentList.addAll(searchItemDao.queryAllSearchItems());
-                m_list_star.getAdapter().notifyDataSetChanged();
-                pageData.pageState = PageData.PageState.NORMAL;
-            } catch (ServerException ex) {
-                showAlert(this, "错误", ex.getMessage());
-            }
+                    @Override
+                    public void onError(String message) {
+                        m_srl.setRefreshing(false);
+                        showAlert(SearchItemActivity.this, "错误", message);
+                    }
+
+                    @Override
+                    public void onFailed(Throwable throwable) {
+                        m_srl.setRefreshing(false);
+                        showAlert(SearchItemActivity.this, "错误", "网络错误：" + throwable.getMessage());
+                    }
+                }
+            );
         } else { // 加载搜索结果
+            m_srl.setRefreshing(false);
             pageData.currentList.clear();
             pageData.currentList.addAll(searchItems);
             m_list_star.getAdapter().notifyDataSetChanged();
             pageData.pageState = PageData.PageState.SEARCHING;
+            // 更新标题
+            updateTitle();
         }
-
-        // 更新标题
-        updateTitle();
-
-        m_srl.setRefreshing(false);
-        if (progressDialog.isShowing())
-            progressDialog.cancel();
     }
 
     /**
@@ -214,15 +223,27 @@ public class SearchItemActivity extends AppCompatActivity implements IContextHel
      */
     private void FindSearchItem_Click(String searchStr) {
         pageData.searchKeyWord = searchStr;
-        ISearchItemInteract searchItemDao = InteractStrategy.getInstance().getSearchInteract(this);
+        ISearchItemInteract searchInteract = InteractStrategy.getInstance().getSearchInteract(this);
+        ProgressHandler.process(this, "刷新中...", true,
+            searchInteract.queryAllSearchItems(), new InteractInterface<List<SearchItem>>() {
+                @Override
+                public void onSuccess(List<SearchItem> data) {
+                    pageData.currentList.clear();
+                    pageData.currentList.addAll(data);
+                    refreshListData(SearchUtil.getSearchItems(data.toArray(new SearchItem[0]), searchStr));
+                }
 
-        try {
-            List<SearchItem> searchItems = searchItemDao.queryAllSearchItems();
-            refreshListData(SearchUtil.getSearchItems(searchItems.toArray(new SearchItem[0]), searchStr));
-        } catch (ServerException ex) {
-            ex.printStackTrace();
-            showAlert(this, "错误", ex.getMessage());
-        }
+                @Override
+                public void onError(String message) {
+                    showAlert(SearchItemActivity.this, "错误", message);
+                }
+
+                @Override
+                public void onFailed(Throwable throwable) {
+                    showAlert(SearchItemActivity.this, "错误", "网络错误：" + throwable.getMessage());
+                }
+            }
+        );
     }
 
     /**
@@ -248,20 +269,27 @@ public class SearchItemActivity extends AppCompatActivity implements IContextHel
      */
     private void SearchItem_CancelStarClick(SearchItem searchItem) {
         m_LongClickItemPopupMenu.dismiss();
+        ISearchItemInteract searchInteract = InteractStrategy.getInstance().getSearchInteract(this);
+        ProgressHandler.process(this, "取消收藏中...", true,
+            searchInteract.deleteSearchItem(searchItem.getId()), new InteractInterface<Boolean>() {
+                @Override
+                public void onSuccess(Boolean data) {
+                    Toast.makeText(SearchItemActivity.this, String.format("取消收藏 \"%s\" 成功", searchItem.getTitle()), Toast.LENGTH_SHORT).show();
+                    pageData.currentList.remove(searchItem);
+                    m_list_star.getAdapter().notifyDataSetChanged();
+                }
 
-        ISearchItemInteract searchItemDao = InteractStrategy.getInstance().getSearchInteract(this);
-        try {
-             if (searchItemDao.deleteSearchItem(searchItem.getId()) == DbStatusType.FAILED) {
-                 Toast.makeText(SearchItemActivity.this, String.format("取消收藏 \"%s\" 失败", searchItem.getTitle()), Toast.LENGTH_SHORT).show();
-             } else {
-                 Toast.makeText(SearchItemActivity.this, String.format("取消收藏 \"%s\" 成功", searchItem.getTitle()), Toast.LENGTH_SHORT).show();
-                 pageData.currentList.remove(searchItem);
-                 m_list_star.getAdapter().notifyDataSetChanged();
-             }
-        } catch (ServerException ex) {
-            ex.printStackTrace();
-            showAlert(this, "错误", ex.getMessage());
-        }
+                @Override
+                public void onError(String message) {
+                    Toast.makeText(SearchItemActivity.this, String.format("取消收藏 \"%s\" 失败", searchItem.getTitle()), Toast.LENGTH_SHORT).show();
+                }
+
+                @Override
+                public void onFailed(Throwable throwable) {
+                    showAlert(SearchItemActivity.this, "错误", "网络错误：" + throwable.getMessage());
+                }
+            }
+        );
     }
 
     /**
@@ -269,29 +297,26 @@ public class SearchItemActivity extends AppCompatActivity implements IContextHel
      */
     private void SearchItem_CancelAllStarClick() {
         m_LongClickItemPopupMenu.dismiss();
-
-        showAlert(this,
-            "提示", "确定要取消全部收藏吗？",
-            "确定", (d, w) -> {
-                ISearchItemInteract searchItemDao = InteractStrategy.getInstance().getSearchInteract(this);
-                try {
-                    int deleteLen = searchItemDao.deleteSearchItems(pageData.currentList);
-                    if (deleteLen == pageData.currentList.size()) {
-                        showToast(this, String.format(Locale.CHINA, "成功取消收藏 %d 项", deleteLen));
-                        pageData.currentList.clear();
-                        m_list_star.getAdapter().notifyDataSetChanged();
-                        updateTitle();
-                    } else {
-                        showToast(this, "取消全部收藏失败");
-                        // 返回全部收藏
-                        refreshListData(null);
-                    }
-                } catch (ServerException ex) {
-                    ex.printStackTrace();
-                    showAlert(this, "错误", ex.getMessage());
+        ISearchItemInteract searchInteract = InteractStrategy.getInstance().getSearchInteract(this);
+        ProgressHandler.process(this, "取消收藏中...", true,
+            searchInteract.deleteSearchItems(pageData.currentList), new InteractInterface<Integer>() {
+                @Override
+                public void onSuccess(Integer data) {
+                    Toast.makeText(SearchItemActivity.this, String.format(Locale.CHINA, "成功取消收藏 %d 项", data), Toast.LENGTH_SHORT).show();
+                    pageData.currentList.clear();
+                    m_list_star.getAdapter().notifyDataSetChanged();
                 }
-            },
-            "取消", null
+
+                @Override
+                public void onError(String message) {
+                    showAlert(SearchItemActivity.this, "错误", message);
+                }
+
+                @Override
+                public void onFailed(Throwable throwable) {
+                    showAlert(SearchItemActivity.this, "错误", "网络错误：" + throwable.getMessage());
+                }
+            }
         );
     }
 }
