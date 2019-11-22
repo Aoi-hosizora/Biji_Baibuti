@@ -8,6 +8,7 @@ import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
@@ -83,6 +84,9 @@ public class ViewNoteActivity extends AppCompatActivity implements IContextHelpe
         m_txt_time.setText(currNote.getUpdateTime_ShortString());
         m_txt_group.setText(currNote.getGroup().getName());
         m_txt_group.setTextColor(currNote.getGroup().getIntColor());
+
+        m_rich_content.setOnClickListener((v) -> ToolbarEditNote_Clicked());
+        m_txt_title.setOnClickListener((v) -> ToolbarEditNote_Clicked());
 
         //////////////////////////////////////////////////
 

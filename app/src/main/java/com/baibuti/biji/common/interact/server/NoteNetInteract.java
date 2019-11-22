@@ -1,11 +1,10 @@
 package com.baibuti.biji.common.interact.server;
 
-import com.baibuti.biji.model.dao.DbStatusType;
 import com.baibuti.biji.common.interact.contract.INoteInteract;
 import com.baibuti.biji.model.dto.OneFieldDTO;
 import com.baibuti.biji.model.dto.ResponseDTO;
 import com.baibuti.biji.model.po.Note;
-import com.baibuti.biji.common.Urls;
+import com.baibuti.biji.common.retrofit.ServerUrl;
 import com.baibuti.biji.common.auth.AuthManager;
 import com.baibuti.biji.common.retrofit.RetrofitFactory;
 import com.baibuti.biji.model.dto.NoteDTO;
@@ -166,7 +165,7 @@ public class NoteNetInteract implements INoteInteract {
                     ResponseDTO<OneFieldDTO.FilenameDTO> response = observable.toFuture().get();
                     if (response.getCode() != MessageErrorParser.SUCCESS)
                         emitter.onNext(new MessageVO<>(false, response.getMessage()));
-                    String newUrl = Urls.BaseServerEndPoint + response.getData().getFilename();
+                    String newUrl = ServerUrl.BaseServerEndPoint + response.getData().getFilename();
                     note.setContent(note.getContent().replace(url, newUrl));
                 }
                 emitter.onNext(new MessageVO<>(note));

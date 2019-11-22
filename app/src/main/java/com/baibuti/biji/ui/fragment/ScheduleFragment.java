@@ -124,17 +124,23 @@ public class ScheduleFragment extends BaseFragment implements IContextHelper {
                 Schedule schedule = scheduleList.get(0);
 
                 StringBuilder sb = new StringBuilder();
-                String message = "老师：" + schedule.getTeacher() + "\n" +
-                    "教师：" + schedule.getRoom() + "\n" +
-                    "上课周次：" + schedule.getWeekList().toString() + "\n" +
-                    "上课节数：";
-                sb.append(message);
-                for (int s = schedule.getStart(); s <= schedule.getStart() + schedule.getStep(); s++)
-                    sb.append(s).append(", ");
+                for (int s = schedule.getStart(); s < schedule.getStart() + schedule.getStep() - 1; s++)
+                    sb.append(s).append(", "); // 9, 3 -> 9, 10
+                sb.append(schedule.getStart() + schedule.getStep() - 1);
+                String times = sb.toString();
+                String weeks = schedule.getWeekList().toString().trim();
+                weeks = weeks.substring(1, weeks.length() - 1);
 
-                showAlert(getContext(),
-                    schedule.getName(), sb.toString(),
-                    "复制", (d, w) -> CommonUtil.copyText(getContext(), sb.toString()),
+                final String message = "老师：" + schedule.getTeacher() + "\n" +
+                    "上课地点：" + schedule.getRoom() + "\n" +
+                    "上课周次：第 " + weeks + " 周\n" +
+                    "上课节数：第 " + times + " 节";
+
+                showAlert(getContext(), schedule.getName(), message,
+                    "复制", (d, w) -> {
+                        if (CommonUtil.copyText(getContext(), message))
+                            showToast(getActivity(), "内容已复制");
+                    },
                     "返回", null
                 );
             })
@@ -217,6 +223,7 @@ public class ScheduleFragment extends BaseFragment implements IContextHelper {
      * ActionBar 导入课程表
      */
     private void ActionImportSchedule_Clicked() {
+        showToast(getContext(), "当前版本暂时只支持获取华工的课程表，并需要在华工的校园网内打开。");
         Intent intent = new Intent(getContext(), WebViewActivity.class);
         RxActivityResult.on(this).startIntent(intent)
             .subscribe((result) -> {

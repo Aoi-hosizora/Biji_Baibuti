@@ -1,7 +1,7 @@
 package com.baibuti.biji.service.ocr;
 
 import com.baibuti.biji.service.ocr.dto.OCRRegion;
-import com.baibuti.biji.common.Urls;
+import com.baibuti.biji.common.retrofit.ServerUrl;
 import com.baibuti.biji.common.retrofit.RetrofitFactory;
 
 import java.io.File;
@@ -39,7 +39,7 @@ public class OCRService {
         requestBodyHashMap.put("img", requestBody);
 
         Observable<OCRRegion> observable = RetrofitFactory.getInstance()
-            .createRequest(RetrofitFactory.getHeader(), Urls.OCRServerEndPoint, OCRApi.class)
+            .createRequest(RetrofitFactory.getHeader(), ServerUrl.OCRServerEndPoint, OCRApi.class)
             .upload(requestBodyHashMap)
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread());

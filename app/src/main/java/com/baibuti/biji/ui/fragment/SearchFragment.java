@@ -84,8 +84,7 @@ public class SearchFragment extends BaseFragment implements IContextHelper {
             ViewGroup parent = (ViewGroup) view.getParent();
             if (null != parent)
                 parent.removeView(view);
-        }
-        else {
+        } else {
             view = inflater.inflate(R.layout.fragment_search, container, false);
             ButterKnife.bind(this, view);
 
@@ -94,10 +93,14 @@ public class SearchFragment extends BaseFragment implements IContextHelper {
             AuthManager.getInstance().addLoginChangeListener(new AuthManager.OnLoginChangeListener() {
 
                 @Override
-                public void onLogin(String username) { m_list_result.getAdapter().notifyDataSetChanged(); }
+                public void onLogin(String username) {
+                    m_list_result.getAdapter().notifyDataSetChanged();
+                }
 
                 @Override
-                public void onLogout() { m_list_result.getAdapter().notifyDataSetChanged(); }
+                public void onLogout() {
+                    m_list_result.getAdapter().notifyDataSetChanged();
+                }
             });
 
         }
@@ -150,8 +153,8 @@ public class SearchFragment extends BaseFragment implements IContextHelper {
             public void onItemClick(View view, SearchItem searchItem) {
                 // 浏览器打开
                 showAlert(getContext(),
-                    "打开", "用浏览器打开链接 \"" + searchItem.getUrl() + "\" ？",
-                    "打开", (v, d) -> showBrowser(getContext(), new String[] { searchItem.getUrl() }),
+                    "打开", "用浏览器打开链接 \"" + searchItem.getTitle() + "\" ？",
+                    "打开", (v, d) -> showBrowser(getContext(), new String[]{searchItem.getUrl()}),
                     "取消", null
                 );
             }
@@ -195,30 +198,47 @@ public class SearchFragment extends BaseFragment implements IContextHelper {
         }
         pageData.currentQuestion = m_edt_question.getText().toString().trim();
 
-        boolean[] isSearching = new boolean[] { true };
+        boolean[] isSearching = new boolean[]{true};
 
         ProgressDialog progressDialog = showProgress(getActivity(),
-            String.format(Locale.CHINA,"搜索 \"%s\" 中", pageData.currentQuestion),
+            String.format(Locale.CHINA, "搜索 \"%s\" 中", pageData.currentQuestion),
             true, (d) -> isSearching[0] = false);
 
         new Thread(() -> {
             pageData.searchList.clear();
             pageData.searchList.addAll(BaiduService.getBaiduSearchResult(pageData.currentQuestion, 1));
-            MainActivity activity = (MainActivity) getActivity();
-            if (activity != null) {
-                activity.runOnUiThread(() -> {
-                    if (progressDialog.isShowing())
-                        progressDialog.dismiss();
 
-                    if (!isSearching[0]) return;
+            // Update Star
+            ISearchItemInteract searchItemInteract = InteractStrategy.getInstance().getSearchInteract(getContext());
+            for (SearchItem searchItem : pageData.searchList) {
+                ProgressHandler.process(searchItemInteract.querySearchItemById(searchItem.getId()), new InteractInterface<SearchItem>() {
+                    public void onSuccess(SearchItem data) {
+                        searchItem.setStar(data != null);
+                    }
 
-                    pageData.currentPage = 1;
-                    showToast(getActivity(), String.format(Locale.CHINA, "共获取了 %d 条搜索结果", pageData.searchList.size()));
-                    pageData.searchList.remove(SearchItem.MORE_ITEM);
-                    pageData.searchList.add(SearchItem.MORE_ITEM);
-                    m_list_result.getAdapter().notifyDataSetChanged();
+                    public void onError(String message) {
+                        searchItem.setStar(false);
+                    }
+
+                    public void onFailed(Throwable throwable) {
+                    }
                 });
             }
+
+            MainActivity activity = (MainActivity) getActivity();
+            if (activity == null) return;
+            activity.runOnUiThread(() -> {
+                if (progressDialog.isShowing())
+                    progressDialog.dismiss();
+
+                if (!isSearching[0]) return;
+
+                pageData.currentPage = 1;
+                showToast(getActivity(), String.format(Locale.CHINA, "共获取了 %d 条搜索结果", pageData.searchList.size()));
+                pageData.searchList.remove(SearchItem.MORE_ITEM);
+                pageData.searchList.add(SearchItem.MORE_ITEM);
+                m_list_result.getAdapter().notifyDataSetChanged();
+            });
         }).start();
     }
 
@@ -232,10 +252,10 @@ public class SearchFragment extends BaseFragment implements IContextHelper {
             return;
         }
 
-        boolean[] isSearching = new boolean[] { true };
+        boolean[] isSearching = new boolean[]{true};
 
         ProgressDialog progressDialog = showProgress(getActivity(),
-            String.format(Locale.CHINA,"搜索 \"%s\" 中", pageData.currentQuestion),
+            String.format(Locale.CHINA, "搜索 \"%s\" 中", pageData.currentQuestion),
             true, (d) -> isSearching[0] = false);
 
         new Thread(() -> {
@@ -261,6 +281,7 @@ public class SearchFragment extends BaseFragment implements IContextHelper {
 
     /**
      * 显示长按菜单
+     *
      * @param searchItem 长按项
      */
     private void ListItem_LongClicked(SearchItem searchItem) {
@@ -279,30 +300,10 @@ public class SearchFragment extends BaseFragment implements IContextHelper {
 
         TextView label = root.findViewById(R.id.id_SearchFrag_PopupMenu_Label);
         label.setText(String.format("当前选中项: %s", searchItem.getTitle()));
+        ((Button) root.findViewById(R.id.id_SearchFrag_PopupMenu_Star)).setText(searchItem.isStar() ? "取消收藏" : "收藏");
 
-        ((Button) root.findViewById(R.id.id_SearchFrag_PopupMenu_Star)).setText("收藏");
-
-        ISearchItemInteract searchInteract = InteractStrategy.getInstance().getSearchInteract(getActivity());
-        ProgressHandler.process(searchInteract.querySearchItemById(searchItem.getId()), new InteractInterface<SearchItem>() {
-            @Override
-            public void onSuccess(SearchItem data) {
-                isNeedToStarOrDeleteStar = false;
-                ((Button) root.findViewById(R.id.id_SearchFrag_PopupMenu_Star)).setText("收藏");
-            }
-
-            @Override
-            public void onError(String message) { }
-
-            @Override
-            public void onFailed(Throwable throwable) { }
-        });
         m_itemPopupMenu.show();
     }
-
-    /**
-     * 记录当前选中项需要收藏还是取消收藏，防止多次访问网络
-     */
-    private boolean isNeedToStarOrDeleteStar = true;
 
     /**
      * 弹出菜单 收藏点击
@@ -312,16 +313,18 @@ public class SearchFragment extends BaseFragment implements IContextHelper {
 
         ISearchItemInteract searchInteract = InteractStrategy.getInstance().getSearchInteract(getActivity());
         ProgressHandler.process(
-            isNeedToStarOrDeleteStar ? searchInteract.insertSearchItem(searchItem) : searchInteract.deleteSearchItem(searchItem.getId()),
+            searchItem.isStar() ? searchInteract.deleteSearchItem(searchItem.getId()) : searchInteract.insertSearchItem(searchItem),
             new InteractInterface<Boolean>() {
                 @Override
                 public void onSuccess(Boolean data) {
-                    showToast(getActivity(), String.format(Locale.CHINA, "%s %s 成功", isNeedToStarOrDeleteStar ? "收藏" : "取消收藏", searchItem.getTitle()));
+                    showToast(getActivity(), String.format(Locale.CHINA, "%s %s 成功", !searchItem.isStar() ? "收藏" : "取消收藏", searchItem.getTitle()));
+                    searchItem.setStar(!searchItem.isStar());
+                    m_list_result.getAdapter().notifyDataSetChanged();
                 }
 
                 @Override
                 public void onError(String message) {
-                    showToast(getActivity(), String.format(Locale.CHINA, "%s %s 失败", isNeedToStarOrDeleteStar ? "收藏" : "取消收藏", searchItem.getTitle()));
+                    showToast(getActivity(), String.format(Locale.CHINA, "%s %s 失败", !searchItem.isStar() ? "收藏" : "取消收藏", searchItem.getTitle()));
                 }
 
                 @Override

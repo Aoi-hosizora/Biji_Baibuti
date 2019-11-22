@@ -16,6 +16,11 @@ public class SearchItem implements Serializable, ISearchEntity {
     private String content;
 
     /**
+     * 适配器中 当前项是否收藏
+     */
+    private boolean isStar = false;
+
+    /**
      * 加载更多
      */
     public static SearchItem MORE_ITEM = new SearchItem(-1, "加载更多...", "", SearchItemAdapter.ITEM_MORE_URL);

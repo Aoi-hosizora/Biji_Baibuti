@@ -259,11 +259,18 @@ public class FileFragment extends BaseFragment implements IContextHelper {
                 ProgressHandler.process(documentInteract.queryAllDocuments(), new InteractInterface<List<Document>>() {
                     @Override
                     public void onSuccess(List<Document> data) {
+                        DocClass curr = m_docClassAdapter.getCurrentItem();
+                        int currIdx = curr == null ? -1 : pageData.docClassListItems.indexOf(curr);
+
                         pageData.documentListItems.clear();
                         pageData.showDocumentList.clear();
                         pageData.documentListItems.addAll(data);
-                        if (pageData.docClassListItems.size() != 0)
+
+                        if (currIdx == -1 && pageData.docClassListItems.size() != 0)
                             onDocClassItemClicked(pageData.docClassListItems.get(0));
+                        else if (currIdx != -1 && pageData.docClassListItems.size() > currIdx)
+                            onDocClassItemClicked(pageData.docClassListItems.get(currIdx));
+
                         if (m_srl.isRefreshing())
                             m_srl.setRefreshing(false);
                     }
@@ -709,6 +716,7 @@ public class FileFragment extends BaseFragment implements IContextHelper {
                     pageData.documentListItems.addAll(uploaded);
                     pageData.showDocumentList.addAll(uploaded);
                     m_documentAdapter.notifyDataSetChanged();
+                    m_txt_document_header.setText(String.format(Locale.CHINA, "%s (共 %d 项)", docClass.getName(), pageData.showDocumentList.size()));
 
                     showToast(getContext(), "上传成功 " + uploaded.size() + " 个文件。");
                 }

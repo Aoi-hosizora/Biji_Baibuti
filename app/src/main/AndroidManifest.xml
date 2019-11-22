@@ -16,6 +16,7 @@
     <application
         android:name=".MyApplication"
         android:allowBackup="true"
+        android:largeHeap="true"
         android:icon="@mipmap/app_icon"
         android:supportsRtl="true"
         android:theme="@style/AppTheme"

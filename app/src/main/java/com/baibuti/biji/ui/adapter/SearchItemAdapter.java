@@ -10,7 +10,6 @@ import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
-import com.baibuti.biji.model.dao.local.SearchItemDao;
 import com.baibuti.biji.model.po.SearchItem;
 import com.baibuti.biji.R;
 import com.baibuti.biji.ui.widget.otherView.EllipsizeTextView;
@@ -141,8 +140,6 @@ public class SearchItemAdapter extends RecyclerViewEmptySupport.Adapter<SearchIt
          */
         private void setupNormalItemUI(SearchItem searchItem) {
 
-            SearchItemDao searchItemDao = new SearchItemDao(m_view.getContext());
-
             m_title.setGravity(Gravity.START);
             m_content.setVisibility(View.VISIBLE);
             m_url.setVisibility(View.VISIBLE);
@@ -154,14 +151,10 @@ public class SearchItemAdapter extends RecyclerViewEmptySupport.Adapter<SearchIt
             m_content.setText(searchItem.getContent());
             m_url.setText(searchItem.getUrl());
 
-            if (searchItemDao.querySearchItemById(searchItem.getId()) == null) {
-                // not star
-                m_stared.setImageDrawable(m_view.getContext().getDrawable(R.drawable.ic_star_border_theme_24dp));
-            }
-            else {
-                // stared
+            if (searchItem.isStar())
                 m_stared.setImageDrawable(m_view.getContext().getDrawable(R.drawable.ic_star_theme_24dp));
-            }
+            else
+                m_stared.setImageDrawable(m_view.getContext().getDrawable(R.drawable.ic_star_border_theme_24dp));
 
             // layout_marginEnd
             RelativeLayout.LayoutParams params = (RelativeLayout.LayoutParams) m_title.getLayoutParams();

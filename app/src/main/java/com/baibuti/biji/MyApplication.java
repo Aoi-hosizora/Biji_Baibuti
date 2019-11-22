@@ -15,10 +15,14 @@ public class MyApplication extends Application {
         super.onCreate();
         RxActivityResult.register(this);
 
-        // 初始化结巴分词
-        // JiebaSegmenter.init(getApplicationContext());
+        new Thread(() -> {
 
-        // FB 数据库查看
-        Stetho.initializeWithDefaults(getApplicationContext());
+            // 初始化结巴分词
+            JiebaSegmenter.init(getApplicationContext());
+
+            // FB 数据库查看
+            Stetho.initializeWithDefaults(getApplicationContext());
+
+        }).start();
     }
 }

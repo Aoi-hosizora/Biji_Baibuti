@@ -143,11 +143,11 @@ public class GroupEditDialog extends AlertDialog implements IContextHelper {
             return;
         }
 
-        String motoColor = currGroup.getColor();
-        String motoName = currGroup.getName();
-
         if (isNew)
             currGroup = new Group();
+
+        String motoColor = currGroup.getColor();
+        String motoName = currGroup.getName();
 
         currGroup.setName(newGroupName);
         currGroup.setColor(newGroupColor);

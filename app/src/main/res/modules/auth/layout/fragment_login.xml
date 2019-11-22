@@ -89,9 +89,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintVertical_bias="0.52">
+        app:layout_constraintBottom_toBottomOf="parent">
 
         <Button
             android:id="@+id/loginFrag_btn_login"
@@ -129,6 +127,7 @@
             android:textColor="@color/white"
             android:background="@drawable/btn_auth_ripple_bg"
             android:layout_marginTop="@dimen/RegLogButtonMarginTop"
+            android:layout_marginBottom="@dimen/RegLogButtonMarginLeftRight"
             android:layout_marginStart="@dimen/RegLogButtonMarginLeftRight"
             android:layout_marginEnd="@dimen/RegLogButtonMarginLeftRight"/>
 

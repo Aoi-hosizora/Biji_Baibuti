@@ -115,7 +115,7 @@ public class SearchItemActivity extends AppCompatActivity implements IContextHel
             @Override
             public void onItemClick(View view, SearchItem searchItem) {
                 showAlert(SearchItemActivity.this,
-                    "打开", "用浏览器打开链接 \"" + searchItem.getUrl() + "\" ？",
+                    "打开", "用浏览器打开链接 \"" + searchItem.getTitle() + "\" ？",
                     "打开", (v, d) -> showBrowser(SearchItemActivity.this, new String[] { searchItem.getUrl() }),
                     "取消", null
                 );
@@ -190,6 +190,10 @@ public class SearchItemActivity extends AppCompatActivity implements IContextHel
             // 更新标题
             updateTitle();
         }
+
+        for (SearchItem searchItem : pageData.currentList)
+            searchItem.setStar(true);
+        m_list_star.getAdapter().notifyDataSetChanged();
     }
 
     /**

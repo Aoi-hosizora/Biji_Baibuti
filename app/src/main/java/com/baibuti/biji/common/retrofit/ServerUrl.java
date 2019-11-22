@@ -1,8 +1,7 @@
-package com.baibuti.biji.common;
+package com.baibuti.biji.common.retrofit;
 
-public class Urls {
+public class ServerUrl {
 
-    // TODO dev env
     // https://blog.csdn.net/mazaiting/article/details/72822948
 
     /**

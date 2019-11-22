@@ -120,6 +120,9 @@ public class LoginFragment extends Fragment implements IContextHelper {
                 @Override
                 public void onSuccess(AuthRespDTO data) {
                     showToast(getContext(), String.format(Locale.CHINA, "用户 \"%s\" 登录成功", data.getUsername()));
+                    AuthActivity activity = (AuthActivity) getActivity();
+                    if (activity != null)
+                        activity.finish();
                 }
 
                 @Override

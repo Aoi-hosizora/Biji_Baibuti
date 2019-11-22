@@ -1,7 +1,5 @@
 package com.baibuti.biji.common.retrofit;
 
-import com.baibuti.biji.common.Urls;
-
 import java.util.HashMap;
 import java.util.Map;
 
@@ -45,7 +43,7 @@ public class RetrofitFactory {
      * @return Retrofit 实例
      */
     public synchronized ServerApi createRequest(Map<String, String> kv) {
-        return createRequest(kv, Urls.BaseServerEndPoint, ServerApi.class);
+        return createRequest(kv, ServerUrl.BaseServerEndPoint, ServerApi.class);
     }
 
     /**
