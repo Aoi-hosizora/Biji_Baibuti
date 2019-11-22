@@ -26,10 +26,10 @@ import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
 
-import com.baibuti.biji.model.dao.DaoStrategyHelper;
+import com.baibuti.biji.common.interact.InteractStrategy;
 import com.baibuti.biji.model.dao.DbStatusType;
-import com.baibuti.biji.model.dao.daoInterface.IGroupDao;
-import com.baibuti.biji.model.dao.daoInterface.INoteDao;
+import com.baibuti.biji.common.interact.contract.IGroupInteract;
+import com.baibuti.biji.common.interact.contract.INoteInteract;
 import com.baibuti.biji.model.dto.ServerException;
 import com.baibuti.biji.common.auth.AuthManager;
 import com.baibuti.biji.ui.IContextHelper;
@@ -292,7 +292,7 @@ public class NoteFragment extends BaseFragment implements IContextHelper {
         boolean[] cancel = new boolean[] { false };
         ProgressDialog progressDialog = showProgress(getContext(), "获取分组信息中...", true, v -> cancel[0] = true);
         try {
-            List<Group> groups = DaoStrategyHelper.getInstance().getGroupDao(getContext()).queryAllGroups();
+            List<Group> groups = InteractStrategy.getInstance().getGroupInteract(getContext()).queryAllGroups();
             if (cancel[0]) return;
 
             groups.add(0, Group.AllGroups);
@@ -376,7 +376,7 @@ public class NoteFragment extends BaseFragment implements IContextHelper {
 
         ProgressDialog progressDialog = showProgress(getContext(), "分组信息加载中...", false, null);
         try {
-            List<Group> groups = DaoStrategyHelper.getInstance().getGroupDao(getContext()).queryAllGroups();
+            List<Group> groups = InteractStrategy.getInstance().getGroupInteract(getContext()).queryAllGroups();
             progressDialog.dismiss();
             GroupAdapter groupAdapter = new GroupAdapter(getContext());
             groupAdapter.setList(groups);
@@ -386,7 +386,7 @@ public class NoteFragment extends BaseFragment implements IContextHelper {
                     Group motoGroup = note.getGroup();
                     note.setGroup(groups.get(w));
                     try {
-                        INoteDao noteDao = DaoStrategyHelper.getInstance().getNoteDao(getContext());
+                        INoteInteract noteDao = InteractStrategy.getInstance().getNoteInteract(getContext());
                         if (noteDao.updateNote(note) == DbStatusType.SUCCESS) {
                             m_note_adapter.notifyDataSetChanged();
                             showToast(getActivity(), "笔记 \"" + note.getTitle() + "\" 分组修改成功");
@@ -454,7 +454,7 @@ public class NoteFragment extends BaseFragment implements IContextHelper {
         m_drawerLayout.closeDrawer(Gravity.END);
         ProgressDialog progressDialog = showProgress(getContext(), "分组信息加载中...", false, null);
         try {
-            IGroupDao groupDao = DaoStrategyHelper.getInstance().getGroupDao(getActivity());
+            IGroupInteract groupDao = InteractStrategy.getInstance().getGroupInteract(getActivity());
             List<Group> groups = groupDao.queryAllGroups();
             Collections.sort(groups);
 
@@ -484,7 +484,7 @@ public class NoteFragment extends BaseFragment implements IContextHelper {
     private void newNote() {
         Note note = new Note();
         try {
-            Group defGroup = DaoStrategyHelper.getInstance().getGroupDao(getContext()).queryDefaultGroup();
+            Group defGroup = InteractStrategy.getInstance().getGroupInteract(getContext()).queryDefaultGroup();
             note.setGroup(defGroup);
         } catch (ServerException ex) {
             showAlert(getContext(), "错误", "获取默认分组错误：" + ex.getMessage());
@@ -566,7 +566,7 @@ public class NoteFragment extends BaseFragment implements IContextHelper {
     private void onInitNoteData() {
         ProgressDialog progressDialog = showProgress(getContext(), "加载数据中...", false, null);
         try {
-            pageData.allNotes = DaoStrategyHelper.getInstance().getNoteDao(getContext()).queryAllNotes();
+            pageData.allNotes = InteractStrategy.getInstance().getNoteInteract(getContext()).queryAllNotes();
             Collections.sort(pageData.allNotes);
 
             pageData.showNoteList.clear();
@@ -590,7 +590,7 @@ public class NoteFragment extends BaseFragment implements IContextHelper {
      */
     private void deleteNote(@NonNull Note note) {
         try {
-            INoteDao noteDao = DaoStrategyHelper.getInstance().getNoteDao(getContext());
+            INoteInteract noteDao = InteractStrategy.getInstance().getNoteInteract(getContext());
 
             // int idx = adapter.getNoteList().indexOf(note);
             if (noteDao.deleteNote(note.getId()) != DbStatusType.SUCCESS) {
@@ -625,7 +625,7 @@ public class NoteFragment extends BaseFragment implements IContextHelper {
 
         // 数据处理
         try {
-            List<Note> notes = DaoStrategyHelper.getInstance().getNoteDao(getContext()).queryNotesByGroupId(group.getId());
+            List<Note> notes = InteractStrategy.getInstance().getNoteInteract(getContext()).queryNotesByGroupId(group.getId());
             if (!cancel[0] && notes != null) {
 
                 progressDialog.dismiss();
@@ -703,7 +703,7 @@ public class NoteFragment extends BaseFragment implements IContextHelper {
         ProgressDialog progressDialog = showProgress(getContext(), "返回加载数据中...", false, null);
 
         try {
-            INoteDao noteDao = DaoStrategyHelper.getInstance().getNoteDao(getContext());
+            INoteInteract noteDao = InteractStrategy.getInstance().getNoteInteract(getContext());
             pageData.allNotes.clear();
             pageData.allNotes.addAll(noteDao.queryAllNotes());
         } catch (ServerException ex) {

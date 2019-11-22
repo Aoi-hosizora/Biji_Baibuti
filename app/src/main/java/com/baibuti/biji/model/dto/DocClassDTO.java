@@ -20,7 +20,7 @@ public class DocClassDTO implements Serializable {
     /**
      * DocClassDTO -> DocClass
      */
-    public DocClass toFileClass() {
+    public DocClass toDocClass() {
         return new DocClass(id, name);
     }
 
@@ -28,12 +28,12 @@ public class DocClassDTO implements Serializable {
     /**
      * DocClassDTO[] -> DocClass[]
      */
-    public static DocClass[] toFileClasses(DocClassDTO[] fileClassesDTO) {
-        if (fileClassesDTO == null)
+    public static DocClass[] toDocClasses(DocClassDTO[] docClassesDTO) {
+        if (docClassesDTO == null)
             return null;
-        DocClass[] docClasses = new DocClass[fileClassesDTO.length];
-        for (int i = 0; i < fileClassesDTO.length; i++)
-            docClasses[i] = fileClassesDTO[i].toFileClass();
+        DocClass[] docClasses = new DocClass[docClassesDTO.length];
+        for (int i = 0; i < docClassesDTO.length; i++)
+            docClasses[i] = docClassesDTO[i].toDocClass();
         return docClasses;
     }
 }

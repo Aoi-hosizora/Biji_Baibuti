@@ -10,7 +10,6 @@ import android.database.sqlite.SQLiteStatement;
 import com.baibuti.biji.model.dao.DbManager;
 import com.baibuti.biji.model.dao.DbOpenHelper;
 import com.baibuti.biji.model.dao.DbStatusType;
-import com.baibuti.biji.model.dao.daoInterface.IGroupDao;
 import com.baibuti.biji.model.po.Group;
 import com.baibuti.biji.model.po.Note;
 
@@ -18,7 +17,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-public class GroupDao implements IGroupDao {
+public class GroupDao {
 
     private final static String TBL_NAME = "tbl_group";
 
@@ -52,7 +51,6 @@ public class GroupDao implements IGroupDao {
      * 查询所有分组
      * @return 分组列表
      */
-    @Override
     public List<Group> queryAllGroups() {
 
         SQLiteDatabase db = dbMgr.getReadableDatabase();
@@ -87,7 +85,6 @@ public class GroupDao implements IGroupDao {
      * @param groupId 分组 id
      * @return 指定分组
      */
-    @Override
     public Group queryGroupById(int groupId) {
 
         SQLiteDatabase db = dbMgr.getReadableDatabase();
@@ -121,7 +118,6 @@ public class GroupDao implements IGroupDao {
      * @param groupName 分组名
      * @return 指定分组
      */
-    @Override
     public Group queryGroupByName(String groupName) {
         SQLiteDatabase db = dbMgr.getReadableDatabase();
         Cursor cursor = null;
@@ -154,7 +150,6 @@ public class GroupDao implements IGroupDao {
      * @return 返回数据库中的默认分组
     if (queryGroupBy
      */
-    @Override
     public Group queryDefaultGroup() {
         return queryGroupByName(Group.DEF_GROUP.getName());
     }
@@ -164,7 +159,6 @@ public class GroupDao implements IGroupDao {
      * @param group 新分组，自动编码
      * @return SUCCESS | FAILED | DUPLICATED
      */
-    @Override
     public DbStatusType insertGroup(Group group) {
 
         if (queryGroupByName(group.getName()) != null)
@@ -205,7 +199,6 @@ public class GroupDao implements IGroupDao {
      * @param group 覆盖更新
      * @return SUCCESS | FAILED | DUPLICATED | DEFAULT
      */
-    @Override
     public DbStatusType updateGroup(Group group) {
 
         Group sameNameGroup = queryGroupByName(group.getName());
@@ -236,7 +229,6 @@ public class GroupDao implements IGroupDao {
      * 只修改分组顺序
      * @return SUCCESS | FAILED
      */
-    @Override
     public DbStatusType updateGroupsOrder(Group[] groups) {
         Group def = queryDefaultGroup();
 
@@ -282,7 +274,6 @@ public class GroupDao implements IGroupDao {
      * @param isToDefault 是否转移到默认分组
      * @return SUCCESS | FAILED | DEFAULT
      */
-    @Override
     public DbStatusType deleteGroup(int id, boolean isToDefault) {
 
         Group defGroup = queryDefaultGroup();

@@ -17,9 +17,9 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 
-import com.baibuti.biji.model.dao.DaoStrategyHelper;
+import com.baibuti.biji.common.interact.InteractStrategy;
 import com.baibuti.biji.model.dao.DbStatusType;
-import com.baibuti.biji.model.dao.daoInterface.ISearchItemDao;
+import com.baibuti.biji.common.interact.contract.ISearchItemInteract;
 import com.baibuti.biji.model.dto.ServerException;
 import com.baibuti.biji.common.auth.AuthManager;
 import com.baibuti.biji.ui.IContextHelper;
@@ -281,7 +281,7 @@ public class SearchFragment extends BaseFragment implements IContextHelper {
         label.setText(String.format("当前选中项: %s", searchItem.getTitle()));
 
         ((Button) root.findViewById(R.id.id_SearchFrag_PopupMenu_Star)).setText("收藏");
-        ISearchItemDao searchItemDao = DaoStrategyHelper.getInstance().getSearchDao(getActivity());
+        ISearchItemInteract searchItemDao = InteractStrategy.getInstance().getSearchInteract(getActivity());
         try {
             if (searchItemDao.querySearchItemById(searchItem.getId()) != null)
                 ((Button) root.findViewById(R.id.id_SearchFrag_PopupMenu_Star)).setText("取消收藏");
@@ -298,7 +298,7 @@ public class SearchFragment extends BaseFragment implements IContextHelper {
     private void SearchItem_StarClick(SearchItem searchItem) {
         m_itemPopupMenu.dismiss();
 
-        ISearchItemDao searchItemDao = DaoStrategyHelper.getInstance().getSearchDao(getActivity());
+        ISearchItemInteract searchItemDao = InteractStrategy.getInstance().getSearchInteract(getActivity());
         try {
             if (searchItemDao.querySearchItemById(searchItem.getId()) == null) {
                 // 收藏

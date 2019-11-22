@@ -26,11 +26,11 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.baibuti.biji.model.dao.DaoStrategyHelper;
+import com.baibuti.biji.common.interact.InteractStrategy;
 import com.baibuti.biji.model.dao.DbStatusType;
-import com.baibuti.biji.model.dao.daoInterface.IDocClassDao;
-import com.baibuti.biji.model.dao.daoInterface.IDocumentDao;
-import com.baibuti.biji.model.dao.net.ShareCodeNetDao;
+import com.baibuti.biji.common.interact.contract.IDocClassInteract;
+import com.baibuti.biji.common.interact.contract.IDocumentInteract;
+import com.baibuti.biji.common.interact.server.ShareCodeNetInteract;
 import com.baibuti.biji.model.dto.ServerException;
 import com.baibuti.biji.model.po.DocClass;
 import com.baibuti.biji.common.auth.AuthManager;
@@ -237,8 +237,8 @@ public class FileFragment extends BaseFragment implements IContextHelper {
      */
     public void initData() {
 
-        IDocClassDao docClassDao = DaoStrategyHelper.getInstance().getDocClassDao(getActivity());
-        IDocumentDao documentDao = DaoStrategyHelper.getInstance().getDocumentDao(getActivity());
+        IDocClassInteract docClassDao = InteractStrategy.getInstance().getDocClassInteract(getActivity());
+        IDocumentInteract documentDao = InteractStrategy.getInstance().getDocumentInteract(getActivity());
 
         try {
             pageData.docClassListItems.clear();
@@ -378,7 +378,7 @@ public class FileFragment extends BaseFragment implements IContextHelper {
         showAlert(getActivity(),
             "删除", "确定删除文档资料 \"" + document.getBaseFilename() + "\" ？",
             "删除", (d, w) -> {
-                IDocumentDao documentDao = DaoStrategyHelper.getInstance().getDocumentDao(getContext());
+                IDocumentInteract documentDao = InteractStrategy.getInstance().getDocumentInteract(getContext());
                 try {
                     if (documentDao.deleteDocument(document.getId()) == DbStatusType.FAILED) {
                         showAlert(getActivity(), "错误", "删除文档错误");
@@ -451,7 +451,7 @@ public class FileFragment extends BaseFragment implements IContextHelper {
                 }
                 DocClass newDocClass = new DocClass(text);
 
-                IDocClassDao docClassDao = DaoStrategyHelper.getInstance().getDocClassDao(getActivity());
+                IDocClassInteract docClassDao = InteractStrategy.getInstance().getDocClassInteract(getActivity());
                 try {
                     // SUCCESS | FAILED | DUPLICATED
                     DbStatusType status = docClassDao.insertDocClass(newDocClass);
@@ -485,7 +485,7 @@ public class FileFragment extends BaseFragment implements IContextHelper {
         }
 
         try {
-            IDocClassDao docClassDao = DaoStrategyHelper.getInstance().getDocClassDao(getContext());
+            IDocClassInteract docClassDao = InteractStrategy.getInstance().getDocClassInteract(getContext());
             if (docClass.getId() == docClassDao.queryDefaultDocClass().getId()) {
                 showAlert(getActivity(), "错误", "无法修改默认分组名。");
                 return;
@@ -539,8 +539,8 @@ public class FileFragment extends BaseFragment implements IContextHelper {
             return;
         }
 
-        IDocClassDao docClassDao = DaoStrategyHelper.getInstance().getDocClassDao(getActivity());
-        IDocumentDao documentDao = DaoStrategyHelper.getInstance().getDocumentDao(getActivity());
+        IDocClassInteract docClassDao = InteractStrategy.getInstance().getDocClassInteract(getActivity());
+        IDocumentInteract documentDao = InteractStrategy.getInstance().getDocumentInteract(getActivity());
         try {
             if (docClass.getId() == docClassDao.queryDefaultDocClass().getId()) {
                 showAlert(getActivity(), "错误", "无法删除默认分组。");
@@ -646,7 +646,7 @@ public class FileFragment extends BaseFragment implements IContextHelper {
 
             ProgressDialog progressDialog = showProgress(getActivity(), "上传中...", false, null);
 
-            IDocumentDao documentDao = DaoStrategyHelper.getInstance().getDocumentDao(getContext());
+            IDocumentInteract documentDao = InteractStrategy.getInstance().getDocumentInteract(getContext());
             for (int i = 0; i < importedDocuments.size(); i++) {
 
                 FileItem f = importedDocuments.get(i);
@@ -736,9 +736,9 @@ public class FileFragment extends BaseFragment implements IContextHelper {
                         ProgressDialog progressDialog = showProgress(getActivity(), "生成共享码...", false, null);
 
                         String shareCode;
-                        ShareCodeNetDao shareCodeNetDao = new ShareCodeNetDao();
+                        ShareCodeNetInteract shareCodeNetInteract = new ShareCodeNetInteract();
                         try {
-                            shareCode = shareCodeNetDao.newShareCode(docClass, exp);
+                            shareCode = shareCodeNetInteract.newShareCode(docClass, exp);
                         } catch (ServerException ex) {
                             progressDialog.dismiss();
                             ex.printStackTrace();

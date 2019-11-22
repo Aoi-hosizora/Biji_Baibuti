@@ -14,9 +14,9 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.baibuti.biji.model.dao.DaoStrategyHelper;
+import com.baibuti.biji.common.interact.InteractStrategy;
 import com.baibuti.biji.model.dao.DbStatusType;
-import com.baibuti.biji.model.dao.daoInterface.ISearchItemDao;
+import com.baibuti.biji.common.interact.contract.ISearchItemInteract;
 import com.baibuti.biji.model.dto.ServerException;
 import com.baibuti.biji.ui.IContextHelper;
 import com.baibuti.biji.ui.adapter.SearchItemAdapter;
@@ -155,7 +155,7 @@ public class SearchItemActivity extends AppCompatActivity implements IContextHel
 
         if (searchItems == null || searchItems.isEmpty()) { // 加载数据库内的
 
-            ISearchItemDao searchItemDao = DaoStrategyHelper.getInstance().getSearchDao(this);
+            ISearchItemInteract searchItemDao = InteractStrategy.getInstance().getSearchInteract(this);
             try {
                 pageData.currentList.clear();
                 pageData.currentList.addAll(searchItemDao.queryAllSearchItems());
@@ -214,7 +214,7 @@ public class SearchItemActivity extends AppCompatActivity implements IContextHel
      */
     private void FindSearchItem_Click(String searchStr) {
         pageData.searchKeyWord = searchStr;
-        ISearchItemDao searchItemDao = DaoStrategyHelper.getInstance().getSearchDao(this);
+        ISearchItemInteract searchItemDao = InteractStrategy.getInstance().getSearchInteract(this);
 
         try {
             List<SearchItem> searchItems = searchItemDao.queryAllSearchItems();
@@ -249,7 +249,7 @@ public class SearchItemActivity extends AppCompatActivity implements IContextHel
     private void SearchItem_CancelStarClick(SearchItem searchItem) {
         m_LongClickItemPopupMenu.dismiss();
 
-        ISearchItemDao searchItemDao = DaoStrategyHelper.getInstance().getSearchDao(this);
+        ISearchItemInteract searchItemDao = InteractStrategy.getInstance().getSearchInteract(this);
         try {
              if (searchItemDao.deleteSearchItem(searchItem.getId()) == DbStatusType.FAILED) {
                  Toast.makeText(SearchItemActivity.this, String.format("取消收藏 \"%s\" 失败", searchItem.getTitle()), Toast.LENGTH_SHORT).show();
@@ -273,7 +273,7 @@ public class SearchItemActivity extends AppCompatActivity implements IContextHel
         showAlert(this,
             "提示", "确定要取消全部收藏吗？",
             "确定", (d, w) -> {
-                ISearchItemDao searchItemDao = DaoStrategyHelper.getInstance().getSearchDao(this);
+                ISearchItemInteract searchItemDao = InteractStrategy.getInstance().getSearchInteract(this);
                 try {
                     int deleteLen = searchItemDao.deleteSearchItems(pageData.currentList);
                     if (deleteLen == pageData.currentList.size()) {

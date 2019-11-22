@@ -10,8 +10,8 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
-import com.baibuti.biji.common.process.ProgressHandler;
-import com.baibuti.biji.common.process.ResponseInterface;
+import com.baibuti.biji.common.interact.ProgressHandler;
+import com.baibuti.biji.common.interact.InteractInterface;
 import com.baibuti.biji.common.auth.AuthService;
 import com.baibuti.biji.R;
 import com.baibuti.biji.common.auth.dto.AuthRespDTO;
@@ -82,7 +82,7 @@ public class RegisterFragment extends Fragment implements IContextHelper {
         }
 
         ProgressHandler.process(getContext(), "用户注册中...", true,
-            AuthService.register(username, password), new ResponseInterface<AuthRespDTO>() {
+            AuthService.register(username, password), new InteractInterface<AuthRespDTO>() {
 
                 @Override
                 public void onSuccess(AuthRespDTO auth) {

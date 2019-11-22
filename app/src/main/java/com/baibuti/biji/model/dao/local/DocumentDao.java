@@ -10,14 +10,13 @@ import android.database.sqlite.SQLiteStatement;
 import com.baibuti.biji.model.dao.DbManager;
 import com.baibuti.biji.model.dao.DbOpenHelper;
 import com.baibuti.biji.model.dao.DbStatusType;
-import com.baibuti.biji.model.dao.daoInterface.IDocumentDao;
 import com.baibuti.biji.model.po.DocClass;
 import com.baibuti.biji.model.po.Document;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class DocumentDao implements IDocumentDao {
+public class DocumentDao {
 
     final static String TBL_NAME = "tbl_document";
 
@@ -45,7 +44,6 @@ public class DocumentDao implements IDocumentDao {
      * 查询所有文件
      * @return 文件列表
      */
-    @Override
     public List<Document> queryAllDocuments() {
         return queryDocumentByClassId(-1);
     }
@@ -55,7 +53,6 @@ public class DocumentDao implements IDocumentDao {
      * @param cid 分类，-1 for all
      * @return 文件分类列表
      */
-    @Override
     public List<Document> queryDocumentByClassId(int cid) {
 
         SQLiteDatabase db = dbMgr.getReadableDatabase();
@@ -91,7 +88,6 @@ public class DocumentDao implements IDocumentDao {
      * @param id 归档文件 id
      * @return 一个文档
      */
-    @Override
     public Document queryDocumentById(int id) {
 
         SQLiteDatabase db = dbMgr.getReadableDatabase();
@@ -125,7 +121,6 @@ public class DocumentDao implements IDocumentDao {
      * @param document 新归档，自动编号
      * @return SUCCESS | FAILED
      */
-    @Override
     public DbStatusType insertDocument(Document document) {
 
         SQLiteDatabase db = dbMgr.getWritableDatabase();
@@ -163,7 +158,6 @@ public class DocumentDao implements IDocumentDao {
      * @param document 覆盖更新信息
      * @return SUCCESS | FAILED
      */
-    @Override
     public DbStatusType updateDocument(Document document) {
 
         if (docClassDao.queryDocClassById(document.getDocClass().getId()) == null)
@@ -186,7 +180,6 @@ public class DocumentDao implements IDocumentDao {
      * @param id 删除的资料 id
      * @return SUCCESS | FAILED
      */
-    @Override
     public DbStatusType deleteDocument(int id) {
         SQLiteDatabase db = dbMgr.getWritableDatabase();
 

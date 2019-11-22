@@ -17,10 +17,10 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.baibuti.biji.model.dao.DaoStrategyHelper;
+import com.baibuti.biji.common.interact.InteractStrategy;
 import com.baibuti.biji.model.dao.DbStatusType;
-import com.baibuti.biji.model.dao.daoInterface.IGroupDao;
-import com.baibuti.biji.model.dao.daoInterface.INoteDao;
+import com.baibuti.biji.common.interact.contract.IGroupInteract;
+import com.baibuti.biji.common.interact.contract.INoteInteract;
 import com.baibuti.biji.model.dto.ServerException;
 import com.baibuti.biji.model.po.Group;
 import com.baibuti.biji.ui.IContextHelper;
@@ -351,7 +351,7 @@ public class EditNoteActivity extends AppCompatActivity implements IContextHelpe
         currNote.setTitle(m_txt_title.getText().toString());
         currNote.setContent(Content);
 
-        IGroupDao groupDao = DaoStrategyHelper.getInstance().getGroupDao(this);
+        IGroupInteract groupDao = InteractStrategy.getInstance().getGroupInteract(this);
         try {
             Group newGroup = groupDao.queryGroupByName(m_txt_group.getText().toString());
             if (newGroup == null)
@@ -379,7 +379,7 @@ public class EditNoteActivity extends AppCompatActivity implements IContextHelpe
 
         // 保存操作
         try {
-            INoteDao noteDao = DaoStrategyHelper.getInstance().getNoteDao(this);
+            INoteInteract noteDao = InteractStrategy.getInstance().getNoteInteract(this);
             if (isNew) {
                 DbStatusType status = noteDao.insertNote(currNote);
                 if (status == DbStatusType.UPLOAD_FAILED) {
@@ -471,7 +471,7 @@ public class EditNoteActivity extends AppCompatActivity implements IContextHelpe
     private void ToolbarGroupSetting_Clicked() {
         boolean[] isContinue = new boolean[]{true};
 
-        IGroupDao groupDao = DaoStrategyHelper.getInstance().getGroupDao(this);
+        IGroupInteract groupDao = InteractStrategy.getInstance().getGroupInteract(this);
         final List<Group> groups = new ArrayList<>();
 
         try {

@@ -1,4 +1,4 @@
-package com.baibuti.biji.model.dao.net;
+package com.baibuti.biji.common.interact.server;
 
 import com.baibuti.biji.model.dto.OneFieldDTO;
 import com.baibuti.biji.model.dto.ResponseDTO;
@@ -8,7 +8,7 @@ import com.baibuti.biji.model.po.DocClass;
 import com.baibuti.biji.model.po.Document;
 import com.baibuti.biji.common.auth.AuthManager;
 import com.baibuti.biji.common.retrofit.RetrofitFactory;
-import com.baibuti.biji.common.retrofit.ServerErrorHandle;
+import com.baibuti.biji.common.interact.MessageErrorParser;
 
 import java.util.concurrent.ExecutionException;
 
@@ -16,7 +16,7 @@ import io.reactivex.Observable;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;
 
-public class ShareCodeNetDao {
+public class ShareCodeNetInteract {
 
     /**
      * 默认的期限
@@ -39,13 +39,13 @@ public class ShareCodeNetDao {
 
         try {
             ResponseDTO<ShareCodeDTO> response = observable.toFuture().get();
-            if (response.getCode() != ServerErrorHandle.SUCCESS)
-                throw ServerErrorHandle.parseErrorMessage(response);
+            if (response.getCode() != MessageErrorParser.SUCCESS)
+                throw MessageErrorParser.parseErrorMessage(response);
 
             return response.getData().getSc();
         } catch (ServerException | InterruptedException | ExecutionException ex) {
             ex.printStackTrace();
-            throw ServerErrorHandle.getClientError(ex);
+            throw MessageErrorParser.getClientError(ex);
         }
     }
 
@@ -61,13 +61,13 @@ public class ShareCodeNetDao {
 
         try {
             ResponseDTO<ShareCodeDTO> response = observable.toFuture().get();
-            if (response.getCode() != ServerErrorHandle.SUCCESS)
-                throw ServerErrorHandle.parseErrorMessage(response);
+            if (response.getCode() != MessageErrorParser.SUCCESS)
+                throw MessageErrorParser.parseErrorMessage(response);
 
             return response.getData().getSc();
         } catch (ServerException | InterruptedException | ExecutionException ex) {
             ex.printStackTrace();
-            throw ServerErrorHandle.getClientError(ex);
+            throw MessageErrorParser.getClientError(ex);
         }
     }
 
@@ -83,13 +83,13 @@ public class ShareCodeNetDao {
 
         try {
             ResponseDTO<ShareCodeDTO[]> response = observable.toFuture().get();
-            if (response.getCode() != ServerErrorHandle.SUCCESS)
-                throw ServerErrorHandle.parseErrorMessage(response);
+            if (response.getCode() != MessageErrorParser.SUCCESS)
+                throw MessageErrorParser.parseErrorMessage(response);
 
             return response.getData();
         } catch (ServerException | InterruptedException | ExecutionException ex) {
             ex.printStackTrace();
-            throw ServerErrorHandle.getClientError(ex);
+            throw MessageErrorParser.getClientError(ex);
         }
     }
 
@@ -105,13 +105,13 @@ public class ShareCodeNetDao {
 
         try {
             ResponseDTO<OneFieldDTO.CountDTO> response = observable.toFuture().get();
-            if (response.getCode() != ServerErrorHandle.SUCCESS)
-                throw ServerErrorHandle.parseErrorMessage(response);
+            if (response.getCode() != MessageErrorParser.SUCCESS)
+                throw MessageErrorParser.parseErrorMessage(response);
 
             return response.getData().getCount();
         } catch (ServerException | InterruptedException | ExecutionException ex) {
             ex.printStackTrace();
-            throw ServerErrorHandle.getClientError(ex);
+            throw MessageErrorParser.getClientError(ex);
         }
     }
 
@@ -127,13 +127,13 @@ public class ShareCodeNetDao {
 
         try {
             ResponseDTO<OneFieldDTO.CountDTO> response = observable.toFuture().get();
-            if (response.getCode() != ServerErrorHandle.SUCCESS)
-                throw ServerErrorHandle.parseErrorMessage(response);
+            if (response.getCode() != MessageErrorParser.SUCCESS)
+                throw MessageErrorParser.parseErrorMessage(response);
 
             return response.getData().getCount();
         } catch (ServerException | InterruptedException | ExecutionException ex) {
             ex.printStackTrace();
-            throw ServerErrorHandle.getClientError(ex);
+            throw MessageErrorParser.getClientError(ex);
         }
     }
 }

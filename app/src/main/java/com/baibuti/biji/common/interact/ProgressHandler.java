@@ -1,10 +1,10 @@
-package com.baibuti.biji.common.process;
+package com.baibuti.biji.common.interact;
 
 import android.app.ProgressDialog;
 import android.content.Context;
 
-import com.baibuti.biji.common.retrofit.ServerErrorHandle;
 import com.baibuti.biji.model.dto.ResponseDTO;
+import com.baibuti.biji.model.vo.MessageVO;
 import com.google.gson.Gson;
 
 import io.reactivex.Observable;
@@ -17,9 +17,16 @@ public class ProgressHandler {
     /**
      * 对于 Observable 显示加载框
      */
+    public static <T> void process(Observable<MessageVO<T>> observable, InteractInterface<T> handler) {
+        process(null, "", false, observable, handler);
+    }
+
+    /**
+     * 对于 Observable 显示加载框
+     */
     public static <T> void process(
         Context context, String message, boolean cancelable,
-        Observable<ResponseDTO<T>> observable, ResponseInterface<T> handler
+        Observable<MessageVO<T>> observable, InteractInterface<T> handler
     ) {
 
         boolean[] cancel = new boolean[] { false };
@@ -29,15 +36,15 @@ public class ProgressHandler {
         progressDialog.setCancelable(cancelable);
 
         Disposable disposable = observable.subscribe(
-            (ResponseDTO<T> response) -> {
+            (MessageVO<T> messageVO) -> {
                 if (cancel[0]) return;
                 progressDialog.dismiss();
 
                 // 应该都是 SUCCESS
-                if (response.getCode() != ServerErrorHandle.SUCCESS)
-                    handler.onError(ServerErrorHandle.fromResponseDTO(response));
+                if (messageVO.isSuccess())
+                    handler.onSuccess(messageVO.getData());
                 else
-                    handler.onSuccess(response.getData());
+                    handler.onError(MessageErrorParser.fromMessageVO(messageVO));
             },
             (throwable) -> {
                 if (cancel[0]) return;
@@ -52,7 +59,7 @@ public class ProgressHandler {
                     String res = responseBody.string();
                     ResponseDTO resp = gson.fromJson(res, ResponseDTO.class);
 
-                    handler.onError(ServerErrorHandle.fromResponseDTO(resp));
+                    handler.onError(MessageErrorParser.fromMessageVO(new MessageVO(false, resp.getMessage())));
                 } else {
                     // 网络的错误
                     throwable.printStackTrace();
@@ -66,4 +73,5 @@ public class ProgressHandler {
         });
         progressDialog.show();
     }
+
 }

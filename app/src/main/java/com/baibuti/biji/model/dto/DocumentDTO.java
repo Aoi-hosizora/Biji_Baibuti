@@ -25,7 +25,7 @@ public class DocumentDTO implements Serializable {
      * DocumentDTO -> Document
      */
     public Document toDocument() {
-        return new Document(id, filename, docClass.toFileClass(), uuid);
+        return new Document(id, filename, docClass.toDocClass(), uuid);
     }
 
     /**

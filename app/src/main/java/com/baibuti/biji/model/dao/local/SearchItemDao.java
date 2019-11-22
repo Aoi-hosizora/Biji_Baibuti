@@ -8,13 +8,12 @@ import android.database.sqlite.SQLiteStatement;
 import com.baibuti.biji.model.dao.DbManager;
 import com.baibuti.biji.model.dao.DbOpenHelper;
 import com.baibuti.biji.model.dao.DbStatusType;
-import com.baibuti.biji.model.dao.daoInterface.ISearchItemDao;
 import com.baibuti.biji.model.po.SearchItem;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class SearchItemDao implements ISearchItemDao {
+public class SearchItemDao {
 
     private final static String TBL_NAME = "tbl_search_item";
 
@@ -42,7 +41,6 @@ public class SearchItemDao implements ISearchItemDao {
      * 查询所有收藏项
      * @return 收藏列表
      */
-    @Override
     public List<SearchItem> queryAllSearchItems() {
 
         SQLiteDatabase db = dbMgr.getReadableDatabase();
@@ -77,7 +75,6 @@ public class SearchItemDao implements ISearchItemDao {
      * @param id 记录连接
      * @return 指定收藏项
      */
-    @Override
     public SearchItem querySearchItemById(int id) {
         SQLiteDatabase db = dbMgr.getReadableDatabase();
         String sql = "select * from " + TBL_NAME + " where " + COL_ID + " = " + id;
@@ -147,7 +144,6 @@ public class SearchItemDao implements ISearchItemDao {
      * @param id 收藏的链接
      * @return SUCCESS | FAILED
      */
-    @Override
     public DbStatusType deleteSearchItem(int id) {
 
         SQLiteDatabase db = dbMgr.getWritableDatabase();
@@ -163,7 +159,6 @@ public class SearchItemDao implements ISearchItemDao {
      * @param searchItems 收藏项集合
      * @return 删除的项数
      */
-    @Override
     public int deleteSearchItems(List<SearchItem> searchItems) {
         SQLiteDatabase db = dbMgr.getWritableDatabase();
         String[] id_str = new String[searchItems.size()];

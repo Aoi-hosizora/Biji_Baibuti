@@ -22,14 +22,14 @@ public class SearchItemDTO implements Serializable {
     }
 
     /**
-     * SearchItemNetDao -> SearchItem
+     * SearchItemNetInteract -> SearchItem
      */
     public SearchItem toSearchItem() {
         return new SearchItem(id, title, content, url);
     }
 
     /**
-     * SearchItemNetDao[] -> SearchItem[]
+     * SearchItemNetInteract[] -> SearchItem[]
      */
     public static SearchItem[] toSearchItems(SearchItemDTO[] searchItemsDTO) {
         if (searchItemsDTO == null) return null;

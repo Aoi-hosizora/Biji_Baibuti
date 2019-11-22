@@ -8,9 +8,9 @@ import android.util.Log;
 import android.widget.Button;
 import android.widget.ListView;
 
-import com.baibuti.biji.model.dao.DaoStrategyHelper;
+import com.baibuti.biji.common.interact.InteractStrategy;
 import com.baibuti.biji.model.dao.DbStatusType;
-import com.baibuti.biji.model.dao.daoInterface.IGroupDao;
+import com.baibuti.biji.common.interact.contract.IGroupInteract;
 import com.baibuti.biji.model.dto.ServerException;
 import com.baibuti.biji.model.po.Group;
 import com.baibuti.biji.ui.IContextHelper;
@@ -99,7 +99,7 @@ public class GroupDialog extends AlertDialog implements IContextHelper {
      */
     @OnClick(R.id.id_GroupDialog_ButtonOK)
     void ButtonOK_Clicked() {
-        IGroupDao groupDao = DaoStrategyHelper.getInstance().getGroupDao(activity);
+        IGroupInteract groupDao = InteractStrategy.getInstance().getGroupInteract(activity);
         try {
             if (groupDao.updateGroupsOrder(groupList.toArray(new Group[0])) == DbStatusType.SUCCESS) {
                 Log.i("", "ButtonOK_Clicked: order SUCCESS");

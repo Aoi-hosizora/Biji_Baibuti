@@ -10,14 +10,13 @@ import android.database.sqlite.SQLiteStatement;
 import com.baibuti.biji.model.dao.DbManager;
 import com.baibuti.biji.model.dao.DbOpenHelper;
 import com.baibuti.biji.model.dao.DbStatusType;
-import com.baibuti.biji.model.dao.daoInterface.IDocClassDao;
 import com.baibuti.biji.model.po.DocClass;
 import com.baibuti.biji.model.po.Document;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class DocClassDao implements IDocClassDao {
+public class DocClassDao {
 
     private static final String TBL_NAME = "tbl_file_class";
 
@@ -46,7 +45,6 @@ public class DocClassDao implements IDocClassDao {
      * 查询所有分类
      * @return 文件分类列表
      */
-    @Override
     public List<DocClass> queryAllDocClasses() {
 
         SQLiteDatabase db = dbMgr.getReadableDatabase();
@@ -79,7 +77,6 @@ public class DocClassDao implements IDocClassDao {
      * @param id 分类 id
      * @return 一个分类
      */
-    @Override
     public DocClass queryDocClassById(int id) {
 
         SQLiteDatabase db = dbMgr.getReadableDatabase();
@@ -105,7 +102,6 @@ public class DocClassDao implements IDocClassDao {
         return null;
     }
 
-    @Override
     public DocClass queryDocClassByName(String name) {
         SQLiteDatabase db = dbMgr.getReadableDatabase();
         String sql = "select * from " + TBL_NAME + " where " + COL_NAME + " = \"" + name + "\"";
@@ -134,7 +130,6 @@ public class DocClassDao implements IDocClassDao {
      * 查询默认分类
      * @return 返回数据库中的默认分类
      */
-    @Override
     public DocClass queryDefaultDocClass() {
 
         SQLiteDatabase db = dbMgr.getReadableDatabase();
@@ -167,7 +162,6 @@ public class DocClassDao implements IDocClassDao {
      * @param docClass 新分组
      * @return SUCCESS | FAILED | DUPLICATED
      */
-    @Override
     public DbStatusType insertDocClass(DocClass docClass) {
 
         if (queryDocClassByName(docClass.getName()) != null)
@@ -203,7 +197,6 @@ public class DocClassDao implements IDocClassDao {
      * @param docClass 覆盖更新
      * @return SUCCESS | FAILED | DUPLICATED | DEFAULT
      */
-    @Override
     public DbStatusType updateDocClass(DocClass docClass) {
 
         DocClass sameName = queryDocClassByName(docClass.getName());
@@ -230,7 +223,6 @@ public class DocClassDao implements IDocClassDao {
      * @param isToDefault 关联分组转移到默认 | 一块删除
      * @return SUCCESS | FAILED | DEFAULT
      */
-    @Override
     public DbStatusType deleteDocClass(int id, boolean isToDefault) {
 
         DocClass defDocclass = queryDefaultDocClass();

@@ -2,14 +2,13 @@ package com.baibuti.biji.model.dao.local;
 
 import android.content.Context;
 
-import com.baibuti.biji.model.dao.daoInterface.IScheduleDao;
 import com.baibuti.biji.util.filePathUtil.FileNameUtil;
 import com.baibuti.biji.util.imgTextUtil.StringUtil;
 
 import java.io.File;
 import java.io.IOException;
 
-public class ScheduleDao implements IScheduleDao {
+public class ScheduleDao {
 
     public ScheduleDao(Context context) { }
 
@@ -17,7 +16,6 @@ public class ScheduleDao implements IScheduleDao {
      * 查询本地课表
      * @return Json, empty for error
      */
-    @Override
     public String querySchedule() {
         String filename = FileNameUtil.getScheduleFileName(FileNameUtil.LOCAL);
         String content = StringUtil.readFromFile(filename);
@@ -29,7 +27,6 @@ public class ScheduleDao implements IScheduleDao {
      * @param json Json 格式课表
      * @return 是否新建 / 更新成功
      */
-    @Override
     public boolean updateSchedule(String json) {
         String filename = FileNameUtil.getScheduleFileName(FileNameUtil.LOCAL);
         return StringUtil.writeIntoFile(filename, json);
@@ -39,7 +36,6 @@ public class ScheduleDao implements IScheduleDao {
      * 删除本地课表文件
      * @return 是否成功删除
      */
-    @Override
     public boolean deleteSchedule() {
         String filename = FileNameUtil.getScheduleFileName(FileNameUtil.LOCAL);
         try {

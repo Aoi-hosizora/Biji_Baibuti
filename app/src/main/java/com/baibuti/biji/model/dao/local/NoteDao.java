@@ -10,7 +10,6 @@ import android.database.sqlite.SQLiteStatement;
 import com.baibuti.biji.model.dao.DbManager;
 import com.baibuti.biji.model.dao.DbOpenHelper;
 import com.baibuti.biji.model.dao.DbStatusType;
-import com.baibuti.biji.model.dao.daoInterface.INoteDao;
 import com.baibuti.biji.model.po.Group;
 import com.baibuti.biji.model.po.Note;
 import com.baibuti.biji.util.otherUtil.DateColorUtil;
@@ -19,7 +18,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-public class NoteDao implements INoteDao {
+public class NoteDao {
 
     final static String TBL_NAME = "tbl_note";
 
@@ -53,7 +52,6 @@ public class NoteDao implements INoteDao {
      * 查询所有笔记
      * @return 笔记列表
      */
-    @Override
     public List<Note> queryAllNotes() {
         return queryNotesByGroupId(-1);
     }
@@ -62,7 +60,6 @@ public class NoteDao implements INoteDao {
      * 根据分组查询所有笔记
      * @param groupId -1 for all
      */
-    @Override
     public List<Note> queryNotesByGroupId(int groupId) {
 
         SQLiteDatabase db = dbMgr.getReadableDatabase();
@@ -101,7 +98,6 @@ public class NoteDao implements INoteDao {
      * 根据 nid 查询笔记
      * @param noteId 笔记 id
      */
-    @Override
     public Note queryNoteById(int noteId) {
 
         SQLiteDatabase db = dbMgr.getReadableDatabase();
@@ -183,7 +179,6 @@ public class NoteDao implements INoteDao {
      * @param note 覆盖更新
      * @return SUCCESS | FAILED
      */
-    @Override
     public DbStatusType updateNote(Note note) {
 
         if (groupDao.queryGroupById(note.getGroup().getId()) == null)
@@ -208,7 +203,6 @@ public class NoteDao implements INoteDao {
      * @param id 删除笔记的 id
      * @return SUCCESS | FAILED
      */
-    @Override
     public DbStatusType deleteNote(int id) {
         SQLiteDatabase db = dbMgr.getWritableDatabase();
 
@@ -222,7 +216,6 @@ public class NoteDao implements INoteDao {
      * 删除多条笔记
      * @return 删除的数量
      */
-    @Override
     public int deleteNotes(int[] ids) {
         SQLiteDatabase db = dbMgr.getWritableDatabase();
         String[] id_str = new String[ids.length];

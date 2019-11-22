@@ -11,8 +11,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
-import com.baibuti.biji.model.dao.DaoStrategyHelper;
-import com.baibuti.biji.model.dao.daoInterface.IScheduleDao;
+import com.baibuti.biji.common.interact.InteractStrategy;
+import com.baibuti.biji.common.interact.contract.IScheduleInteract;
 import com.baibuti.biji.model.dto.ServerException;
 import com.baibuti.biji.model.po.MySubject;
 import com.baibuti.biji.R;
@@ -209,7 +209,7 @@ public class ScheduleFragment extends BaseFragment implements IContextHelper {
         m_timetableView.source(mySubjects).updateView();
 
         // save
-        IScheduleDao scheduleDao = DaoStrategyHelper.getInstance().getScheduleDao(getActivity());
+        IScheduleInteract scheduleDao = InteractStrategy.getInstance().getScheduleInteract(getActivity());
         try {
             if (!scheduleDao.updateSchedule(MySubject.toJsons(mySubjects))) {
                 showAlert(getActivity(), "错误", "课程表更新失败");
@@ -227,7 +227,7 @@ public class ScheduleFragment extends BaseFragment implements IContextHelper {
         ProgressDialog progressDialog = showProgress(getActivity(), "加載中...", false, null);
 
         // Load Dao
-        IScheduleDao scheduleDao = DaoStrategyHelper.getInstance().getScheduleDao(getContext());
+        IScheduleInteract scheduleDao = InteractStrategy.getInstance().getScheduleInteract(getContext());
         String scheduleJson;
         try {
             scheduleJson = scheduleDao.querySchedule();
@@ -262,7 +262,7 @@ public class ScheduleFragment extends BaseFragment implements IContextHelper {
         showAlert(getActivity(),
             "删除", "是否删除课程表？",
             "确定", (d, v) -> {
-                IScheduleDao scheduleDao = DaoStrategyHelper.getInstance().getScheduleDao(getActivity());
+                IScheduleInteract scheduleDao = InteractStrategy.getInstance().getScheduleInteract(getActivity());
                 try {
                     if (scheduleDao.deleteSchedule()) {
                         showToast(getActivity(), "删除课表成功");
