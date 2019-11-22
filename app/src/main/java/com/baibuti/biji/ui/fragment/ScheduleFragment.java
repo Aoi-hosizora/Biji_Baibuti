@@ -6,6 +6,7 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v7.widget.Toolbar;
+import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -22,7 +23,9 @@ import com.baibuti.biji.service.scut.ScheduleService;
 import com.baibuti.biji.ui.IContextHelper;
 import com.baibuti.biji.ui.activity.MainActivity;
 import com.baibuti.biji.ui.activity.WebViewActivity;
+import com.baibuti.biji.util.otherUtil.CommonUtil;
 import com.zhuangfei.timetable.TimetableView;
+import com.zhuangfei.timetable.model.Schedule;
 import com.zhuangfei.timetable.view.WeekView;
 
 import java.util.ArrayList;
@@ -48,6 +51,8 @@ public class ScheduleFragment extends BaseFragment implements IContextHelper {
 
     @BindView(R.id.schedulefragment_week_textview)
     TextView m_titleTextView;
+
+    List<MySubject> mySubjects = new ArrayList<>();
 
     @Nullable
     @Override
@@ -109,14 +114,31 @@ public class ScheduleFragment extends BaseFragment implements IContextHelper {
             .callback(this::ChangeCurrWeek_Clicked)
             .isShow(false)
             .showView();
-        // m_weekView.source(mySubjects).showView();
 
         // TimeTable
         m_timetableView.curWeek(1)
             .callback((int curWeek) ->
                 m_titleTextView.setText(String.format(Locale.CHINA, "第 %d 周", curWeek)))
+            .callback((View v, List<Schedule> scheduleList) -> {
+                if (scheduleList.size() == 0) return;
+                Schedule schedule = scheduleList.get(0);
+
+                StringBuilder sb = new StringBuilder();
+                String message = "老师：" + schedule.getTeacher() + "\n" +
+                    "教师：" + schedule.getRoom() + "\n" +
+                    "上课周次：" + schedule.getWeekList().toString() + "\n" +
+                    "上课节数：";
+                sb.append(message);
+                for (int s = schedule.getStart(); s <= schedule.getStart() + schedule.getStep(); s++)
+                    sb.append(s).append(", ");
+
+                showAlert(getContext(),
+                    schedule.getName(), sb.toString(),
+                    "复制", (d, w) -> CommonUtil.copyText(getContext(), sb.toString()),
+                    "返回", null
+                );
+            })
             .showView();
-        // m_timetableView.source(mySubjects).showView();
 
         // Load data
         ActionRefresh_Clicked(true);
@@ -150,6 +172,25 @@ public class ScheduleFragment extends BaseFragment implements IContextHelper {
             items, (v, w) -> {
                 m_weekView.curWeek(w + 1).updateView();
                 m_timetableView.changeWeekForce(w + 1);
+                IScheduleInteract scheduleInteract = InteractStrategy.getInstance().getScheduleInteract(getContext());
+                ProgressHandler.process(getContext(), "修改当前周...", true,
+                    scheduleInteract.updateSchedule(MySubject.toJsons(mySubjects), w + 1), new InteractInterface<Boolean>() {
+                        @Override
+                        public void onSuccess(Boolean data) {
+                            showToast(getContext(), "成功修改当前周为" + items[w]);
+                        }
+
+                        @Override
+                        public void onError(String message) {
+                            showAlert(getContext(), "错误", "当前周修改失败");
+                        }
+
+                        @Override
+                        public void onFailed(Throwable throwable) {
+                            showAlert(getContext(), "错误", "网络错误：" + throwable.getMessage());
+                        }
+                    }
+                );
             },
             "取消", null
         );
@@ -199,7 +240,7 @@ public class ScheduleFragment extends BaseFragment implements IContextHelper {
      * 活动返回，解析数据 (onActivityResult)
      */
     private void CbImportSchedule(String html) {
-        List<MySubject> mySubjects = ScheduleService.parseHtml(html);
+        mySubjects = ScheduleService.parseHtml(html);
         if (mySubjects.size() == 0) {
             showAlert(getActivity(), "错误", "返回的课程表数据无法解析。");
             return;
@@ -212,7 +253,7 @@ public class ScheduleFragment extends BaseFragment implements IContextHelper {
         // save
         IScheduleInteract scheduleInteract = InteractStrategy.getInstance().getScheduleInteract(getActivity());
         ProgressHandler.process(getActivity(), "上传课程表中...", true,
-            scheduleInteract.updateSchedule(MySubject.toJsons(mySubjects)), new InteractInterface<Boolean>() {
+            scheduleInteract.updateSchedule(MySubject.toJsons(mySubjects), m_timetableView.curWeek()), new InteractInterface<Boolean>() {
                 @Override
                 public void onSuccess(Boolean data) {
                     showToast(getActivity(), "课程表上传成功");
@@ -238,12 +279,15 @@ public class ScheduleFragment extends BaseFragment implements IContextHelper {
     private void ActionRefresh_Clicked(boolean isInit) {
         ProgressDialog progressDialog = showProgress(getActivity(), "加載中...", false, null);
 
-        // Load Dao
+        // Load Data
         IScheduleInteract scheduleInteract = InteractStrategy.getInstance().getScheduleInteract(getContext());
         ProgressHandler.process(getActivity(), "更新中...", true,
-            scheduleInteract.querySchedule(), new InteractInterface<String>() {
+            scheduleInteract.querySchedule(), new InteractInterface<Pair<String, Integer>>() {
                 @Override
-                public void onSuccess(String scheduleJson) {
+                public void onSuccess(Pair<String, Integer> pair) {
+                    String scheduleJson = pair.first;
+                    int currWeek = pair.second;
+
                     if (scheduleJson.trim().isEmpty()) {
                         if (progressDialog.isShowing()) progressDialog.dismiss();
                         if (!isInit)
@@ -253,9 +297,9 @@ public class ScheduleFragment extends BaseFragment implements IContextHelper {
                         MainActivity activity = (MainActivity) getActivity();
                         if (activity == null) return;
 
-                        List<MySubject> mySubjects = MySubject.fromJson(scheduleJson);
-                        m_weekView.source(mySubjects).showView();
-                        m_timetableView.source(mySubjects).updateView();
+                        mySubjects = MySubject.fromJson(scheduleJson);
+                        m_weekView.curWeek(currWeek).source(mySubjects).showView();
+                        m_timetableView.curWeek(currWeek).source(mySubjects).updateView();
 
                         if (progressDialog.isShowing())
                             progressDialog.dismiss();

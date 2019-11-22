@@ -1,5 +1,7 @@
 package com.baibuti.biji.common.interact.server;
 
+import android.util.Pair;
+
 import com.baibuti.biji.common.interact.contract.IScheduleInteract;
 import com.baibuti.biji.common.auth.AuthManager;
 import com.baibuti.biji.common.retrofit.RetrofitFactory;
@@ -12,24 +14,24 @@ import io.reactivex.schedulers.Schedulers;
 public class ScheduleNetInteract implements IScheduleInteract {
 
     @Override
-    public Observable<MessageVO<String>> querySchedule() {
+    public Observable<MessageVO<Pair<String, Integer>>> querySchedule() {
          return RetrofitFactory.getInstance()
             .createRequest(AuthManager.getInstance().getAuthorizationHead())
             .getSchedule()
             .map((responseDTO) -> {
                 if (responseDTO.getCode() != 200)
-                    return new MessageVO<String>(false, responseDTO.getMessage());
-                return new MessageVO<>(responseDTO.getData().getSchedule());
+                    return new MessageVO<Pair<String, Integer>>(false, responseDTO.getMessage());
+                return new MessageVO<>(new Pair<>(responseDTO.getData().getSchedule(), responseDTO.getData().getWeek()));
             })
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread());
     }
 
     @Override
-    public Observable<MessageVO<Boolean>> updateSchedule(String schedule) {
+    public Observable<MessageVO<Boolean>> updateSchedule(String schedule, int currWeek) {
         return RetrofitFactory.getInstance()
             .createRequest(AuthManager.getInstance().getAuthorizationHead())
-            .getSchedule()
+            .updateSchedule(schedule, currWeek)
             .map((responseDTO) -> {
                 if (responseDTO.getCode() != 200)
                     return new MessageVO<Boolean>(false, responseDTO.getMessage());
@@ -43,7 +45,7 @@ public class ScheduleNetInteract implements IScheduleInteract {
     public Observable<MessageVO<Boolean>> deleteSchedule() {
         return RetrofitFactory.getInstance()
             .createRequest(AuthManager.getInstance().getAuthorizationHead())
-            .getSchedule()
+            .deleteSchedule()
             .map((responseDTO) -> {
                 if (responseDTO.getCode() != 200)
                     return new MessageVO<Boolean>(false, responseDTO.getMessage());

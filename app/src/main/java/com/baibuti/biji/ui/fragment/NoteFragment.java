@@ -55,6 +55,7 @@ import com.wyt.searchbox.SearchFragment;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
@@ -390,14 +391,18 @@ public class NoteFragment extends BaseFragment implements IContextHelper {
 
                     showAlert(getContext(), "修改分组",
                         groupAdapter, (d, w) -> {
+                            Date motoUt = note.getUpdateTime();
                             Group motoGroup = note.getGroup();
                             note.setGroup(groups.get(w));
+                            note.setUpdateTime(new Date());
 
-                            INoteInteract noteDao = InteractStrategy.getInstance().getNoteInteract(getContext());
+                            INoteInteract noteInteract = InteractStrategy.getInstance().getNoteInteract(getContext());
                             ProgressHandler.process(getContext(), "修改笔记分组中...", true,
-                                noteDao.updateNote(note), new InteractInterface<Boolean>() {
+                                noteInteract.updateNote(note), new InteractInterface<Boolean>() {
                                     @Override
                                     public void onSuccess(Boolean data) {
+                                        Collections.sort(pageData.allNotes);
+                                        Collections.sort(pageData.showNoteList);
                                         m_note_adapter.notifyDataSetChanged();
                                         showToast(getActivity(), "笔记 \"" + note.getTitle() + "\" 分组修改成功");
                                         d.dismiss();
@@ -406,12 +411,14 @@ public class NoteFragment extends BaseFragment implements IContextHelper {
                                     @Override
                                     public void onError(String message) {
                                         note.setGroup(motoGroup);
+                                        note.setUpdateTime(motoUt);
                                         showAlert(getActivity(), "错误", message);
                                     }
 
                                     @Override
                                     public void onFailed(Throwable throwable) {
                                         note.setGroup(motoGroup);
+                                        note.setUpdateTime(motoUt);
                                         showAlert(getContext(), "错误", "网络错误：" + throwable.getMessage());
                                     }
                                 }
@@ -484,7 +491,10 @@ public class NoteFragment extends BaseFragment implements IContextHelper {
                 @Override
                 public void onSuccess(List<Group> groups) {
                     Collections.sort(groups);
-                    GroupDialog dialog = new GroupDialog(getActivity(), groups, NoteFragment.this::onInitNoteData);
+                    GroupDialog dialog = new GroupDialog(getActivity(), groups, () -> {
+                        onInitNoteData();
+                        // showToast(getContext(), "分组信息修改成功");
+                    });
                     dialog.setCancelable(true);
                     dialog.show();
                 }
@@ -540,6 +550,8 @@ public class NoteFragment extends BaseFragment implements IContextHelper {
                                 showToast(getContext(), String.format(Locale.CHINA, "笔记 \"%s\"新建成功", newNote.getTitle()));
                                 pageData.allNotes.add(newNote);
                                 pageData.showNoteList.add(newNote);
+                                Collections.sort(pageData.allNotes);
+                                Collections.sort(pageData.showNoteList);
                                 m_note_adapter.notifyDataSetChanged();
                             }
 

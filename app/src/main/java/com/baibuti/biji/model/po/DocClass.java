@@ -1,15 +1,16 @@
 package com.baibuti.biji.model.po;
 
 import java.io.Serializable;
+import java.util.HashMap;
 
+import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
 
+@Data
 public class DocClass implements Serializable {
 
-    @Getter @Setter
     private int id;
-    @Getter @Setter
     private String name;
 
     /**
@@ -37,5 +38,10 @@ public class DocClass implements Serializable {
         DocClass that = (DocClass) obj;
         return id == that.getId() &&
             name.equals(that.getName());
+    }
+
+    @Override
+    public int hashCode() {
+        return (id + name).hashCode();
     }
 }

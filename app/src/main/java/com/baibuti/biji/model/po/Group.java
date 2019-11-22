@@ -4,19 +4,18 @@ import android.graphics.Color;
 import android.support.annotation.NonNull;
 
 import java.io.Serializable;
+import java.util.HashMap;
 
+import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
 
+@Data
 public class Group implements Serializable, Comparable<Group> {
 
-    @Getter @Setter
     private int id;
-    @Getter @Setter
     private String name;
-    @Getter @Setter
     private int order;
-    @Getter @Setter
     private String color;
 
     private static String DEF_GROUP_NAME = "默认分组";
@@ -67,6 +66,11 @@ public class Group implements Serializable, Comparable<Group> {
             name.equals(that.name) &&
             order == that.order &&
             color.equals(that.color);
+    }
+
+    @Override
+    public int hashCode() {
+        return (id + name + order + color).hashCode();
     }
 
     public String getStringColor() {

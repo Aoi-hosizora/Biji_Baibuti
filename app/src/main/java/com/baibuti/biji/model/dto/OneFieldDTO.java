@@ -12,6 +12,7 @@ public class OneFieldDTO {
     @Data
     public static class ScheduleDTO {
         private String schedule;
+        private int week;
     }
 
     @Data

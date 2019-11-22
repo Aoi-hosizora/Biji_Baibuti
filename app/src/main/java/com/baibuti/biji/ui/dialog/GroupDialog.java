@@ -5,6 +5,7 @@ import android.app.AlertDialog;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ListView;
 
 import com.baibuti.biji.common.interact.InteractInterface;
@@ -189,11 +190,17 @@ public class GroupDialog extends AlertDialog implements IContextHelper {
         GroupEditDialog dialog = new GroupEditDialog(activity, inputGroup, new GroupEditDialog.OnUpdateGroupListener() {
 
             @Override
+            public void onAdded(Group group) {
+                groupList.add(group);
+                groupAdapter.setCurrentItem(group);
+                groupAdapter.notifyDataSetChanged();
+                if (m_listener != null)
+                    m_listener.onUpdated();
+            }
+
+            @Override
             public void onUpdated(Group group) {
-                if (inputGroup == null) { // 新建
-                    groupList.add(group);
-                    groupAdapter.setCurrentItem(group);
-                }
+                groupAdapter.setCurrentItem(group);
                 groupAdapter.notifyDataSetChanged();
                 if (m_listener != null)
                     m_listener.onUpdated();
@@ -207,6 +214,7 @@ public class GroupDialog extends AlertDialog implements IContextHelper {
                     m_listener.onUpdated();
             }
         });
+        dialog.setView(new EditText(activity)); // <<<
         dialog.setCancelable(false);
         dialog.show();
     }
@@ -216,6 +224,9 @@ public class GroupDialog extends AlertDialog implements IContextHelper {
      */
     private void deleteGroup(Group inputGroup) {
         GroupEditDialog dialog = new GroupEditDialog(activity, inputGroup, new GroupEditDialog.OnUpdateGroupListener() {
+
+            @Override
+            public void onAdded(Group group) { }
             @Override
             public void onUpdated(Group group) { }
 
@@ -228,6 +239,7 @@ public class GroupDialog extends AlertDialog implements IContextHelper {
                     m_listener.onUpdated();
             }
         });
+        dialog.setView(new EditText(activity)); // <<<
         dialog.DeleteButton_Clicked();
     }
 

@@ -93,6 +93,8 @@ public class GroupRadioAdapter extends BaseAdapter {
         ////////////
 
         // Text Color
+        if (getItem(position) == null) return view;
+
         holder.m_btn_radio.setText(getItem(position).getName());
         holder.m_img.setBackgroundColor(Color.parseColor(getItem(position).getColor()));
 

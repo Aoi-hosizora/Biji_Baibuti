@@ -37,6 +37,7 @@ import com.baibuti.biji.util.filePathUtil.FileNameUtil;
 import com.baibuti.biji.util.imgTextUtil.StringUtil;
 import com.sendtion.xrichtext.RichTextEditor;
 
+import java.util.Date;
 import java.util.List;
 
 
@@ -312,8 +313,10 @@ public class EditNoteActivity extends AppCompatActivity implements IContextHelpe
 
         // 获得笔记内容
         String Content = getRichTextContent(m_rich_content);
-        if (Content.isEmpty())
+        if (Content.isEmpty()) {
             showAlert(this, "提醒", "没有输入内容，请补全笔记内容。");
+            return;
+        }
 
         // 标题空
         if (m_txt_title.getText().toString().isEmpty()) {
@@ -350,10 +353,14 @@ public class EditNoteActivity extends AppCompatActivity implements IContextHelpe
         String motoTitle = currNote.getTitle();
         String motoContent = currNote.getContent();
         Group motoGroup = currNote.getGroup();
+        Date motoUt = currNote.getUpdateTime();
 
         currNote.setTitle(m_txt_title.getText().toString());
         currNote.setContent(Content);
         currNote.setGroup(currGroup);
+        currNote.setUpdateTime(new Date());
+        if (isNew) currNote.setCreateTime(new Date());
+
         INoteInteract noteInteract = InteractStrategy.getInstance().getNoteInteract(this);
 
         ProgressHandler.process(this, "保存笔记中...", true,
@@ -373,6 +380,7 @@ public class EditNoteActivity extends AppCompatActivity implements IContextHelpe
                     currNote.setTitle(motoTitle);
                     currNote.setContent(motoContent);
                     currNote.setGroup(motoGroup);
+                    currNote.setUpdateTime(motoUt);
                     showAlert(EditNoteActivity.this, "错误", message);
                 }
 
@@ -381,6 +389,7 @@ public class EditNoteActivity extends AppCompatActivity implements IContextHelpe
                     currNote.setTitle(motoTitle);
                     currNote.setContent(motoContent);
                     currNote.setGroup(motoGroup);
+                    currNote.setUpdateTime(motoUt);
                     showAlert(EditNoteActivity.this, "错误", "网络错误：" + throwable.getMessage());
                 }
             }

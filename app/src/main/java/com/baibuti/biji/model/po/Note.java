@@ -10,25 +10,16 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
 
-import lombok.Getter;
-import lombok.Setter;
+import lombok.Data;
 
+@Data
 public class Note implements Serializable, Comparable<Note>, ISearchEntity {
 
-    @Getter
     private int id;
-
-    @Getter
     private String title;
-    @Getter
     private String content;
-
-    @Getter @Setter
     private Group group;
-
-    @Getter @Setter
     private Date createTime;
-    @Getter @Setter
     private Date updateTime;
 
     public Note() {
@@ -62,29 +53,6 @@ public class Note implements Serializable, Comparable<Note>, ISearchEntity {
         if (ret == 0)
             return o.getTitle().compareTo(this.getTitle());
         return ret;
-    }
-
-    //////////////////////////////////////////////////
-
-    public void setId(int id) {
-        this.id = id;
-        this.updateTime = new Date();
-    }
-
-    public void setTitle(String title) {
-        this.title = title;
-        this.updateTime = new Date();
-    }
-
-    public void setContent(String content) {
-        this.content = content;
-        this.updateTime = new Date();
-    }
-
-    public void setGroup(Group group, boolean isChangeUt) {
-        this.group = group;
-        if (isChangeUt)
-            this.updateTime = new Date();
     }
 
     //////////////////////////////////////////////////

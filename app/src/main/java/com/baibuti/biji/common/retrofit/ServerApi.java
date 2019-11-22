@@ -199,9 +199,13 @@ public interface ServerApi {
     @GET("/schedule/")
     Observable<ResponseDTO<OneFieldDTO.ScheduleDTO>> getSchedule();
 
+    @Multipart
     @NeedAuth
     @PUT("/schedule/")
-    Observable<ResponseDTO<OneFieldDTO.ScheduleDTO>> updateSchedule();
+    Observable<ResponseDTO<OneFieldDTO.ScheduleDTO>> updateSchedule(
+        @Part("schedule") String schedule,
+        @Part("week") int currWeek
+    );
 
     @NeedAuth
     @DELETE("/schedule/")

@@ -8,6 +8,7 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.net.Uri;
 import android.util.DisplayMetrics;
+import android.view.View;
 import android.view.WindowManager;
 import android.view.inputmethod.InputMethodManager;
 
@@ -40,10 +41,20 @@ public class CommonUtil {
     }
 
     /**
+     * 打开软键盘
+     */
+    public static void openSoftKeyInput(View view) {
+        InputMethodManager imm = (InputMethodManager) view.getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
+        if (imm != null && imm.isActive())
+            imm.showSoftInput(view, InputMethodManager.RESULT_UNCHANGED_SHOWN);
+    }
+
+    /**
      * 复制文本
      * @return 是否存在 CLIPBOARD_SERVICE 服务
      */
     public static boolean copyText(Context context, String text) {
+        if (context == null) return false;
         ClipboardManager clipboardManager = (ClipboardManager) context.getSystemService(Context.CLIPBOARD_SERVICE);
         ClipData clip = ClipData.newPlainText("", text);
 

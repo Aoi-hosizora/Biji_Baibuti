@@ -114,7 +114,11 @@ public class SearchItemActivity extends AppCompatActivity implements IContextHel
         searchItemAdapter.setOnItemClickListener(new SearchItemAdapter.OnRecyclerViewItemClickListener() {
             @Override
             public void onItemClick(View view, SearchItem searchItem) {
-                showBrowser(SearchItemActivity.this, new String[] { searchItem.getUrl() });
+                showAlert(SearchItemActivity.this,
+                    "打开", "用浏览器打开链接 \"" + searchItem.getUrl() + "\" ？",
+                    "打开", (v, d) -> showBrowser(SearchItemActivity.this, new String[] { searchItem.getUrl() }),
+                    "取消", null
+                );
             }
 
             @Override
@@ -195,7 +199,7 @@ public class SearchItemActivity extends AppCompatActivity implements IContextHel
         if (pageData.pageState == PageData.PageState.SEARCHING)
             setTitle(String.format(Locale.CHINA, "\"%s\" 的搜索结果 (共 %d 项)", pageData.searchKeyWord, pageData.currentList.size()));
         else
-            setTitle(String.format(Locale.CHINA, "已收藏搜索结果 (共 %d 项)", pageData.currentList.size()));
+            setTitle(String.format(Locale.CHINA, "收藏 (共 %d 项)", pageData.currentList.size()));
     }
 
     @Override
@@ -297,26 +301,30 @@ public class SearchItemActivity extends AppCompatActivity implements IContextHel
      */
     private void SearchItem_CancelAllStarClick() {
         m_LongClickItemPopupMenu.dismiss();
-        ISearchItemInteract searchInteract = InteractStrategy.getInstance().getSearchInteract(this);
-        ProgressHandler.process(this, "取消收藏中...", true,
-            searchInteract.deleteSearchItems(pageData.currentList), new InteractInterface<Integer>() {
-                @Override
-                public void onSuccess(Integer data) {
-                    Toast.makeText(SearchItemActivity.this, String.format(Locale.CHINA, "成功取消收藏 %d 项", data), Toast.LENGTH_SHORT).show();
-                    pageData.currentList.clear();
-                    m_list_star.getAdapter().notifyDataSetChanged();
-                }
+        showAlert(this, "取消收藏", "确定取消全部收藏吗？", "取消全部收藏", (d, w) -> {
+                ISearchItemInteract searchInteract = InteractStrategy.getInstance().getSearchInteract(this);
+                ProgressHandler.process(this, "取消收藏中...", true,
+                    searchInteract.deleteSearchItems(pageData.currentList), new InteractInterface<Integer>() {
+                        @Override
+                        public void onSuccess(Integer data) {
+                            Toast.makeText(SearchItemActivity.this, String.format(Locale.CHINA, "成功取消收藏 %d 项", data), Toast.LENGTH_SHORT).show();
+                            pageData.currentList.clear();
+                            m_list_star.getAdapter().notifyDataSetChanged();
+                        }
 
-                @Override
-                public void onError(String message) {
-                    showAlert(SearchItemActivity.this, "错误", message);
-                }
+                        @Override
+                        public void onError(String message) {
+                            showAlert(SearchItemActivity.this, "错误", message);
+                        }
 
-                @Override
-                public void onFailed(Throwable throwable) {
-                    showAlert(SearchItemActivity.this, "错误", "网络错误：" + throwable.getMessage());
-                }
-            }
+                        @Override
+                        public void onFailed(Throwable throwable) {
+                            showAlert(SearchItemActivity.this, "错误", "网络错误：" + throwable.getMessage());
+                        }
+                    }
+                );
+            },
+            "返回", null
         );
     }
 }

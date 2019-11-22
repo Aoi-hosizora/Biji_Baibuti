@@ -4,6 +4,7 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteStatement;
+import android.text.TextUtils;
 
 import com.baibuti.biji.model.dao.DbManager;
 import com.baibuti.biji.model.dao.DbOpenHelper;
@@ -148,8 +149,7 @@ public class SearchItemDao {
 
         SQLiteDatabase db = dbMgr.getWritableDatabase();
 
-        int ret = db.delete(TBL_NAME,
-            COL_ID + " = ?", new String[] { String.valueOf(id) });
+        int ret = db.delete(TBL_NAME, COL_ID + " = " + id, null);
         dbMgr.closeDatabase();
         return ret == 0 ? DbStatusType.FAILED : DbStatusType.SUCCESS;
     }
@@ -165,7 +165,7 @@ public class SearchItemDao {
         for (int i = 0; i < id_str.length; i++)
             id_str[i] = String.valueOf(searchItems.get(i).getId());
 
-        int ret = db.delete(TBL_NAME, COL_ID + " in (?)", id_str);
+        int ret = db.delete(TBL_NAME, COL_ID + " in (" +  TextUtils.join(", ", id_str) + ")", null);
         dbMgr.closeDatabase();
         return ret;
     }

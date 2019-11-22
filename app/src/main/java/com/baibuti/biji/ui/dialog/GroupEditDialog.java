@@ -57,6 +57,11 @@ public class GroupEditDialog extends AlertDialog implements IContextHelper {
     public interface OnUpdateGroupListener {
 
         /**
+         * 新建分组
+         */
+        void onAdded(Group group);
+
+        /**
          * 分组数据修改
          */
         void onUpdated(Group group);
@@ -78,7 +83,6 @@ public class GroupEditDialog extends AlertDialog implements IContextHelper {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.dialog_group_add);
-        setView(new EditText(activity));
         ButterKnife.bind(this);
 
         m_color_picker.addSaturationBar(findViewById(R.id.id_ColorPicker_SaturationBar));
@@ -109,10 +113,16 @@ public class GroupEditDialog extends AlertDialog implements IContextHelper {
             m_txt_label.setText("添加分组");
             // 根据是否为新建分组而显示删除按钮
             m_btn_delete.setVisibility(View.GONE);
-        }
-        else {
+        } else {
             m_txt_label.setText("修改分组");
             m_btn_delete.setVisibility(View.VISIBLE);
+        }
+
+        if (m_edt_title != null) {
+            m_edt_title.setFocusable(true);
+            m_edt_title.setFocusableInTouchMode(true);
+            m_edt_title.requestFocus();
+            CommonUtil.openSoftKeyInput(m_edt_title);
         }
     }
 
@@ -121,8 +131,9 @@ public class GroupEditDialog extends AlertDialog implements IContextHelper {
      */
     @OnClick(R.id.id_btn_ok)
     void UpdateGroup_Clicked() {
-
+        boolean isNew = currGroup == null;
         String newGroupName = m_edt_title.getText().toString();
+        String newGroupColor = DateColorUtil.ColorInt_HexEncoding(m_color_picker.getColor());
         if (newGroupName.isEmpty()) {
             showAlert(activity, "错误", "没有输入分组名，请补全内容。");
             return;
@@ -131,28 +142,44 @@ public class GroupEditDialog extends AlertDialog implements IContextHelper {
             showAlert(activity, "错误", "分组名不合法，仅允许由1-30个中文、字母、数字和下划线组成。");
             return;
         }
-        String newGroupColor = DateColorUtil.ColorInt_HexEncoding(m_color_picker.getColor());
+
+        String motoColor = currGroup.getColor();
+        String motoName = currGroup.getName();
+
+        if (isNew)
+            currGroup = new Group();
+
+        currGroup.setName(newGroupName);
+        currGroup.setColor(newGroupColor);
+
         IGroupInteract groupInteract = InteractStrategy.getInstance().getGroupInteract(activity);
+        ProgressHandler.process((isNew) ? groupInteract.insertGroup(currGroup) : groupInteract.updateGroup(currGroup),
+            new InteractInterface<Boolean>() {
+                @Override
+                public void onSuccess(Boolean data) {
+                    if (m_listener != null) {
+                        if (isNew)
+                            m_listener.onAdded(currGroup);
+                        else
+                            m_listener.onUpdated(currGroup);
+                    }
+                    dismiss();
+                }
 
-        ProgressHandler.process((currGroup == null) ?
-            groupInteract.insertGroup(new Group(newGroupName, newGroupColor)) : groupInteract.updateGroup(currGroup), new InteractInterface<Boolean>() {
-            @Override
-            public void onSuccess(Boolean data) {
-                if (m_listener != null)
-                    m_listener.onUpdated(currGroup);
-                dismiss();
-            }
+                @Override
+                public void onError(String message) {
+                    currGroup.setName(motoName);
+                    currGroup.setColor(motoColor);
+                    showAlert(activity, "错误", message);
+                }
 
-            @Override
-            public void onError(String message) {
-                showAlert(activity, "错误", message);
-            }
-
-            @Override
-            public void onFailed(Throwable throwable) {
-                showAlert(activity, "错误", "网络错误：" + throwable.getMessage());
-            }
-        });
+                @Override
+                public void onFailed(Throwable throwable) {
+                    currGroup.setName(motoName);
+                    currGroup.setColor(motoColor);
+                    showAlert(activity, "错误", "网络错误：" + throwable.getMessage());
+                }
+            });
     }
 
     /**

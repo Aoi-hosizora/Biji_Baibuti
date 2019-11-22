@@ -1,6 +1,7 @@
 package com.baibuti.biji.common.interact.client;
 
 import android.content.Context;
+import android.util.Pair;
 
 import com.baibuti.biji.common.interact.contract.IScheduleInteract;
 import com.baibuti.biji.model.dao.local.ScheduleDao;
@@ -20,9 +21,9 @@ public class ScheduleInteract implements IScheduleInteract {
     }
 
     @Override
-    public Observable<MessageVO<String>> querySchedule() {
+    public Observable<MessageVO<Pair<String, Integer>>> querySchedule() {
         return Observable.create(
-            (ObservableEmitter<MessageVO<String>> emitter) -> {
+            (ObservableEmitter<MessageVO<Pair<String, Integer>>> emitter) -> {
                 ScheduleDao scheduleDao = new ScheduleDao(context);
                 emitter.onNext(new MessageVO<>(scheduleDao.querySchedule()));
             })
@@ -31,11 +32,11 @@ public class ScheduleInteract implements IScheduleInteract {
     }
 
     @Override
-    public Observable<MessageVO<Boolean>> updateSchedule(String schedule) {
+    public Observable<MessageVO<Boolean>> updateSchedule(String schedule, int curWeek) {
         return Observable.create(
             (ObservableEmitter<MessageVO<Boolean>> emitter) -> {
                 ScheduleDao scheduleDao = new ScheduleDao(context);
-                boolean status = scheduleDao.updateSchedule(schedule);
+                boolean status = scheduleDao.updateSchedule(schedule, curWeek);
                 if (!status)
                     emitter.onNext(new MessageVO<>(false, "Update Schedule Failed"));
                 else

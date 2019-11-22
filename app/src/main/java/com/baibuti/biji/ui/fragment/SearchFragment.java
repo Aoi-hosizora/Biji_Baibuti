@@ -149,9 +149,9 @@ public class SearchFragment extends BaseFragment implements IContextHelper {
             @Override
             public void onItemClick(View view, SearchItem searchItem) {
                 // 浏览器打开
-                showAlert(getActivity(),
-                    "用浏览器打开", "确定使用浏览器打开 \"" + searchItem.getTitle() + "\" 吗？",
-                    "打开", (d, w) -> showBrowser(getActivity(), new String[] { searchItem.getUrl() }),
+                showAlert(getContext(),
+                    "打开", "用浏览器打开链接 \"" + searchItem.getUrl() + "\" ？",
+                    "打开", (v, d) -> showBrowser(getContext(), new String[] { searchItem.getUrl() }),
                     "取消", null
                 );
             }
@@ -287,7 +287,7 @@ public class SearchFragment extends BaseFragment implements IContextHelper {
             @Override
             public void onSuccess(SearchItem data) {
                 isNeedToStarOrDeleteStar = false;
-                ((Button) root.findViewById(R.id.id_SearchFrag_PopupMenu_Star)).setText("取消收藏");
+                ((Button) root.findViewById(R.id.id_SearchFrag_PopupMenu_Star)).setText("收藏");
             }
 
             @Override

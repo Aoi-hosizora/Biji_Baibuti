@@ -31,7 +31,7 @@ public class ProgressHandler {
 
         boolean[] cancel = new boolean[] { false };
         ProgressDialog[] progressDialog = new ProgressDialog[1];
-        if (context == null || message.isEmpty()) { // << 可选
+        if (context != null && !message.isEmpty()) { // << 可选
             progressDialog[0] = new ProgressDialog(context);
             progressDialog[0].setMessage(message);
             progressDialog[0].setCancelable(cancelable);

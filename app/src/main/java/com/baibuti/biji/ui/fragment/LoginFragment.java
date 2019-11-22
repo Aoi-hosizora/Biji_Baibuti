@@ -1,8 +1,5 @@
 package com.baibuti.biji.ui.fragment;
 
-import android.app.Activity;
-import android.app.ProgressDialog;
-import android.content.Intent;
 import android.support.annotation.NonNull;
 import android.support.design.widget.TextInputEditText;
 import android.support.design.widget.TextInputLayout;
@@ -17,7 +14,6 @@ import android.widget.Spinner;
 
 import com.baibuti.biji.common.interact.InteractInterface;
 import com.baibuti.biji.common.interact.ProgressHandler;
-import com.baibuti.biji.model.dto.ServerException;
 import com.baibuti.biji.common.auth.AuthManager;
 import com.baibuti.biji.common.auth.AuthService;
 import com.baibuti.biji.R;
