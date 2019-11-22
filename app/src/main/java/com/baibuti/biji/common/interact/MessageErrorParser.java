@@ -35,7 +35,7 @@ public class MessageErrorParser {
     /**
      * 服务器端的错误
      */
-    static String fromMessageVO(MessageVO messageVO) {
+    public static String fromMessageVO(MessageVO messageVO) {
 
         switch (messageVO.getMessage()) {
             // Global

@@ -169,11 +169,10 @@ public class GroupEditDialog extends AlertDialog implements IContextHelper {
         ProgressHandler.process(noteInteract.queryNotesByGroupId(currGroup.getId()), new InteractInterface<List<Note>>() {
             @Override
             public void onSuccess(List<Note> groupNotes) {
-
                 if (groupNotes.isEmpty()) {
                     // 不包含笔记
                     showAlert(activity, "删除", String.format("是否删除分组 %s？", currGroup.getName()),
-                        "删除", (d, w) -> onDelete(currGroup.getId(), false),
+                        "删除", (d, w) -> onDelete(currGroup.getId(), true),
                         "返回", null
                     );
                 } else {

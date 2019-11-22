@@ -26,14 +26,16 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.baibuti.biji.common.interact.InteractInterface;
 import com.baibuti.biji.common.interact.InteractStrategy;
-import com.baibuti.biji.model.dao.DbStatusType;
+import com.baibuti.biji.common.interact.ProgressHandler;
 import com.baibuti.biji.common.interact.contract.IDocClassInteract;
 import com.baibuti.biji.common.interact.contract.IDocumentInteract;
 import com.baibuti.biji.common.interact.server.ShareCodeNetInteract;
-import com.baibuti.biji.model.dto.ServerException;
+import com.baibuti.biji.model.dto.ResponseDTO;
 import com.baibuti.biji.model.po.DocClass;
 import com.baibuti.biji.common.auth.AuthManager;
+import com.baibuti.biji.model.vo.MessageVO;
 import com.baibuti.biji.service.doc.DocService;
 import com.baibuti.biji.ui.IContextHelper;
 import com.baibuti.biji.ui.adapter.DocumentAdapter;
@@ -48,6 +50,7 @@ import com.baibuti.biji.util.filePathUtil.AppPathUtil;
 import com.baibuti.biji.util.imgTextUtil.SearchUtil;
 import com.baibuti.biji.util.otherUtil.CommonUtil;
 import com.baibuti.biji.util.otherUtil.LayoutUtil;
+import com.google.gson.Gson;
 import com.jwsd.libzxing.OnQRCodeScanCallback;
 import com.jwsd.libzxing.QRCodeManager;
 
@@ -62,6 +65,12 @@ import java.util.Map;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
+import io.reactivex.Observable;
+import io.reactivex.ObservableEmitter;
+import io.reactivex.disposables.CompositeDisposable;
+import io.reactivex.disposables.Disposable;
+import okhttp3.ResponseBody;
+import retrofit2.HttpException;
 
 public class FileFragment extends BaseFragment implements IContextHelper {
 
@@ -237,27 +246,50 @@ public class FileFragment extends BaseFragment implements IContextHelper {
      */
     public void initData() {
 
-        IDocClassInteract docClassDao = InteractStrategy.getInstance().getDocClassInteract(getActivity());
-        IDocumentInteract documentDao = InteractStrategy.getInstance().getDocumentInteract(getActivity());
+        IDocClassInteract docClassInteract = InteractStrategy.getInstance().getDocClassInteract(getActivity());
+        IDocumentInteract documentInteract = InteractStrategy.getInstance().getDocumentInteract(getActivity());
 
-        try {
-            pageData.docClassListItems.clear();
-            pageData.documentListItems.clear();
-            pageData.showDocumentList.clear();
-            pageData.docClassListItems.addAll(docClassDao.queryAllDocClasses());
-            pageData.documentListItems.addAll(documentDao.queryAllDocuments());
-            m_docClassAdapter.notifyDataSetChanged();
+        ProgressHandler.process(docClassInteract.queryAllDocClasses(), new InteractInterface<List<DocClass>>() {
+            @Override
+            public void onSuccess(List<DocClass> data) {
+                pageData.docClassListItems.clear();
+                pageData.docClassListItems.addAll(data);
+                m_docClassAdapter.notifyDataSetChanged();
 
-            if (pageData.docClassListItems.size() != 0)
-                onDocClassItemClicked(pageData.docClassListItems.get(0));
+                ProgressHandler.process(documentInteract.queryAllDocuments(), new InteractInterface<List<Document>>() {
+                    @Override
+                    public void onSuccess(List<Document> data) {
+                        pageData.documentListItems.clear();
+                        pageData.showDocumentList.clear();
+                        pageData.documentListItems.addAll(data);
+                        if (pageData.docClassListItems.size() != 0)
+                            onDocClassItemClicked(pageData.docClassListItems.get(0));
+                        if (m_srl.isRefreshing())
+                            m_srl.setRefreshing(false);
+                    }
 
-        } catch (ServerException ex) {
-            ex.printStackTrace();
-            showAlert(getActivity(), "错误", "加载数据错误：" + ex.getMessage());
-        }
+                    @Override
+                    public void onError(String message) {
+                        showAlert(getContext(), "错误", message);
+                    }
 
-        if (m_srl.isRefreshing())
-            m_srl.setRefreshing(false);
+                    @Override
+                    public void onFailed(Throwable throwable) {
+                        showAlert(getContext(), "错误", "网路错误：" + throwable.getMessage());
+                    }
+                });
+            }
+
+            @Override
+            public void onError(String message) {
+                showAlert(getContext(), "错误", message);
+            }
+
+            @Override
+            public void onFailed(Throwable throwable) {
+                showAlert(getContext(), "错误", "网路错误：" + throwable.getMessage());
+            }
+        });
     }
 
     /**
@@ -378,21 +410,30 @@ public class FileFragment extends BaseFragment implements IContextHelper {
         showAlert(getActivity(),
             "删除", "确定删除文档资料 \"" + document.getBaseFilename() + "\" ？",
             "删除", (d, w) -> {
-                IDocumentInteract documentDao = InteractStrategy.getInstance().getDocumentInteract(getContext());
-                try {
-                    if (documentDao.deleteDocument(document.getId()) == DbStatusType.FAILED) {
-                        showAlert(getActivity(), "错误", "删除文档错误");
-                    } else {
-                        pageData.documentListItems.remove(document);
-                        pageData.showDocumentList.remove(document);
-                        m_documentAdapter.notifyDataSetChanged();
-                        m_txt_document_header.setText(String.format(Locale.CHINA,
-                            "%s (共 %d 项)", m_docClassAdapter.getCurrentItem().getName(), pageData.showDocumentList.size()));
+                IDocumentInteract documentInteract = InteractStrategy.getInstance().getDocumentInteract(getContext());
+
+                ProgressHandler.process(getContext(), "删除记录中...", true,
+                    documentInteract.deleteDocument(document.getId()), new InteractInterface<Boolean>() {
+                        @Override
+                        public void onSuccess(Boolean data) {
+                            pageData.documentListItems.remove(document);
+                            pageData.showDocumentList.remove(document);
+                            m_documentAdapter.notifyDataSetChanged();
+                            m_txt_document_header.setText(String.format(Locale.CHINA,
+                                "%s (共 %d 项)", m_docClassAdapter.getCurrentItem().getName(), pageData.showDocumentList.size()));
+                        }
+
+                        @Override
+                        public void onError(String message) {
+                            showAlert(getActivity(), "错误", message);
+                        }
+
+                        @Override
+                        public void onFailed(Throwable throwable) {
+                            showAlert(getActivity(), "错误", "网络错误：" + throwable);
+                        }
                     }
-                } catch (ServerException ex) {
-                    ex.printStackTrace();
-                    showAlert(getActivity(), "错误", "删除文档错误：" + ex.getMessage());
-                }
+                );
             },
             "取消", null
         );
@@ -451,25 +492,28 @@ public class FileFragment extends BaseFragment implements IContextHelper {
                 }
                 DocClass newDocClass = new DocClass(text);
 
-                IDocClassInteract docClassDao = InteractStrategy.getInstance().getDocClassInteract(getActivity());
-                try {
-                    // SUCCESS | FAILED | DUPLICATED
-                    DbStatusType status = docClassDao.insertDocClass(newDocClass);
-                    if (status == DbStatusType.SUCCESS) {
-                        showToast(getActivity(), "分组 \"" + newDocClass.getName() + "\" 新建成功");
-                        pageData.docClassListItems.add(newDocClass);
-                        onDocClassItemClicked(newDocClass);
-                        m_docClassAdapter.notifyDataSetChanged();
-                        return;
+                IDocClassInteract docClassInteract = InteractStrategy.getInstance().getDocClassInteract(getActivity());
+                ProgressHandler.process(getContext(), "新建分组中...", true,
+                    docClassInteract.insertDocClass(newDocClass), new InteractInterface<Boolean>() {
+                        @Override
+                        public void onSuccess(Boolean data) {
+                            showToast(getActivity(), "分组 \"" + newDocClass.getName() + "\" 新建成功");
+                            pageData.docClassListItems.add(newDocClass);
+                            onDocClassItemClicked(newDocClass);
+                            m_docClassAdapter.notifyDataSetChanged();
+                        }
+
+                        @Override
+                        public void onError(String message) {
+                            showAlert(getContext(), "错误", message);
+                        }
+
+                        @Override
+                        public void onFailed(Throwable throwable) {
+                            showAlert(getContext(), "错误", "网络错误：" + throwable.getMessage());
+                        }
                     }
-                    if (status == DbStatusType.DUPLICATED)
-                        showAlert(getActivity(), "错误", "分组名 \"" + newDocClass.getName() + "\" 重复，请重新输入。");
-                    else if (status == DbStatusType.FAILED)
-                        showAlert(getActivity(), "错误", "新建分组错误，请重试。");
-                } catch (ServerException ex) {
-                    ex.printStackTrace();
-                    showAlert(getActivity(), "错误", "新建分组错误：" + ex.getMessage());
-                }
+                );
             },
             "取消", null
         );
@@ -483,51 +527,46 @@ public class FileFragment extends BaseFragment implements IContextHelper {
             showAlert(getActivity(), "错误", "没有选择分组。");
             return;
         }
-
-        try {
-            IDocClassInteract docClassDao = InteractStrategy.getInstance().getDocClassInteract(getContext());
-            if (docClass.getId() == docClassDao.queryDefaultDocClass().getId()) {
-                showAlert(getActivity(), "错误", "无法修改默认分组名。");
-                return;
-            }
-
-            showInputDialog(getActivity(),
-                "重命名分组", docClass.getName(), "", 1,
-                "重命名", (v, d, text) -> {
-                    text = text.trim();
-                    if (text.isEmpty()) {
-                        showAlert(getActivity(), "错误", "没有输入分组名。");
-                        return;
-                    }
-                    if (CommonUtil.isIllegalName(text)) {
-                        showAlert(getActivity(), "错误", "分组名不合法，仅允许由1-30个中文、字母、数字和下划线组成。");
-                        return;
-                    }
-                    try {
-                        // SUCCESS | FAILED | DUPLICATED | DEFAULT
-                        DbStatusType status = docClassDao.updateDocClass(new DocClass(docClass.getId(), text));
-                        if (status == DbStatusType.SUCCESS) {
-                            docClass.setName(text);
-                            showToast(getActivity(), "分组 \"" + text + "\" 修改成功");
-                            m_docClassAdapter.notifyDataSetChanged();
-                            return;
-                        }
-                        if (status == DbStatusType.DUPLICATED)
-                            showAlert(getActivity(), "错误", "分组名 \"" + docClass.getName() + "\" 重复，请重新输入。");
-                        else if (status == DbStatusType.DEFAULT)
-                            showAlert(getActivity(), "错误", "无法修改默认分组。");
-                        else
-                            showAlert(getActivity(), "错误", "分组名修改错误，请重试。");
-                    } catch (ServerException ex) {
-                        ex.printStackTrace();
-                    }
-                },
-                "返回", null
-            );
-        } catch (ServerException ex) {
-            ex.printStackTrace();
-            showAlert(getActivity(), "错误", "修改分组名错误：" + ex.getMessage());
+        if (docClass.getName().equals(DocClass.DEF_CLASS_NAME)) {
+            showAlert(getActivity(), "错误", "无法修改默认分组名。");
+            return;
         }
+
+        showInputDialog(getActivity(),
+            "重命名分组", docClass.getName(), "", 1,
+            "重命名", (v, d, text) -> {
+                if (text.trim().isEmpty()) {
+                    showAlert(getActivity(), "错误", "没有输入分组名。");
+                    return;
+                }
+                if (CommonUtil.isIllegalName(text)) {
+                    showAlert(getActivity(), "错误", "分组名不合法，仅允许由1-30个中文、字母、数字和下划线组成。");
+                    return;
+                }
+                IDocClassInteract docClassInteract = InteractStrategy.getInstance().getDocClassInteract(getContext());
+                ProgressHandler.process(getContext(), "重命名分组中...", true,
+                    docClassInteract.updateDocClass(new DocClass(docClass.getId(), text.trim())), new InteractInterface<Boolean>() {
+                        @Override
+                        public void onSuccess(Boolean data) {
+                            docClass.setName(text.trim());
+                            showToast(getActivity(), "分组 \"" + text.trim() + "\" 修改成功");
+                            m_docClassAdapter.notifyDataSetChanged();
+                        }
+
+                        @Override
+                        public void onError(String message) {
+                            showAlert(getContext(), "错误", message);
+                        }
+
+                        @Override
+                        public void onFailed(Throwable throwable) {
+                            showAlert(getContext(), "错误", "网络错误：" + throwable.getMessage());
+                        }
+                    }
+                );
+            },
+            "返回", null
+        );
     }
 
     /**
@@ -538,92 +577,66 @@ public class FileFragment extends BaseFragment implements IContextHelper {
             showAlert(getActivity(), "错误", "没有选择分组。");
             return;
         }
-
-        IDocClassInteract docClassDao = InteractStrategy.getInstance().getDocClassInteract(getActivity());
-        IDocumentInteract documentDao = InteractStrategy.getInstance().getDocumentInteract(getActivity());
-        try {
-            if (docClass.getId() == docClassDao.queryDefaultDocClass().getId()) {
-                showAlert(getActivity(), "错误", "无法删除默认分组。");
-                return;
-            }
-            List<Document> documents = documentDao.queryDocumentByClassId(docClass.getId());
-            if (documents.isEmpty()) { // 无关联
-                showAlert(getActivity(),
-                    "删除", "是否删除分组 \"" + docClass.getName() + "\"？",
-                    "删除", (d, w) -> {
-                        try {
-                            // SUCCESS | FAILED | DEFAULT
-                            DbStatusType status = docClassDao.deleteDocClass(docClass.getId(), false);
-                            if (status == DbStatusType.SUCCESS) {
-                                showToast(getActivity(), "分组 \"" + docClass.getName() + "\" 删除成功");
-                                pageData.docClassListItems.remove(docClass);
-                                m_docClassAdapter.notifyDataSetChanged();
-                                //
-                                onDocClassItemClicked(pageData.docClassListItems.get(0));
-                            }
-                            else if (status == DbStatusType.DEFAULT)
-                                showAlert(getActivity(), "错误", "无法删除默认分组。");
-                            else
-                                showAlert(getActivity(), "错误", "分组名删除错误，请重试。");
-                        } catch (ServerException ex) {
-                            ex.printStackTrace();
-                            showAlert(getActivity(), "错误", "删除分组错误：" + ex.getMessage());
-                        }
-                    },
-                    "取消", null
-                );
-            } else { // 有关联
-                showAlert(getActivity(),
-                    "删除", "分组 \"" + docClass.getName() + "\" 有相关联的 " + documents.size() + " 条文档，是否同时删除？",
-                    "删除分组及文档记录", (d, w) -> {
-                        try {
-                            // SUCCESS | FAILED | DEFAULT
-                            DbStatusType status = docClassDao.deleteDocClass(docClass.getId(), false);
-                            if (status == DbStatusType.SUCCESS) {
-                                showToast(getActivity(), "分组 \"" + docClass.getName() + "\" 删除成功，并删除关联文档记录。");
-                                pageData.docClassListItems.remove(docClass);
-                                m_docClassAdapter.notifyDataSetChanged();
-                                m_documentAdapter.notifyDataSetChanged();
-                                //
-                                onDocClassItemClicked(pageData.docClassListItems.get(0));
-                            }
-                            else if (status == DbStatusType.DEFAULT)
-                                showAlert(getActivity(), "错误", "无法删除默认分组。");
-                            else
-                                showAlert(getActivity(), "错误", "分组名删除错误，请重试。");
-                        } catch (ServerException ex) {
-                            ex.printStackTrace();
-                            showAlert(getActivity(), "错误", "删除分组错误：" + ex.getMessage());
-                        }
-                    },
-                    "删除分组并修改为默认分组", (d, w) -> {
-                        try {
-                            // SUCCESS | FAILED | DEFAULT
-                            DbStatusType status = docClassDao.deleteDocClass(docClass.getId(), true);
-                            if (status == DbStatusType.SUCCESS) {
-                                showToast(getActivity(), "分组 \"" + docClass.getName() + "\" 删除成功，并将关联文档记录移至默认分组。");
-                                pageData.docClassListItems.remove(docClass);
-                                m_docClassAdapter.notifyDataSetChanged();
-                                m_documentAdapter.notifyDataSetChanged();
-                                //
-                                onDocClassItemClicked(pageData.docClassListItems.get(0));
-                            }
-                            else if (status == DbStatusType.DEFAULT)
-                                showAlert(getActivity(), "错误", "无法删除默认分组。");
-                            else
-                                showAlert(getActivity(), "错误", "分组名删除错误，请重试。");
-                        } catch (ServerException ex) {
-                            ex.printStackTrace();
-                            showAlert(getActivity(), "错误", "删除分组错误：" + ex.getMessage());
-                        }
-                    },
-                    "取消", null
-                );
-            }
-        } catch (ServerException ex) {
-            ex.printStackTrace();
-            showAlert(getActivity(), "错误", "删除文档错误：" + ex.getMessage());
+        if (docClass.getName().equals(DocClass.DEF_CLASS_NAME)) {
+            showAlert(getActivity(), "错误", "无法删除默认分组。");
+            return;
         }
+
+        IDocumentInteract documentInteract = InteractStrategy.getInstance().getDocumentInteract(getActivity());
+        ProgressHandler.process(getContext(), "获取分组信息中...", true,
+            documentInteract.queryDocumentByClassId(docClass.getId()), new InteractInterface<List<Document>>() {
+                @Override
+                public void onSuccess(List<Document> documents) {
+                    if (documents.isEmpty()) {
+                        showAlert(getActivity(), "删除", "是否删除分组 \"" + docClass.getName() + "\"？",
+                            "删除", (d, w) -> onDeleteDocClass(docClass.getId()),
+                            "取消", null
+                        );
+                    } else {
+                        showAlert(getActivity(), "删除", "分组 \"" + docClass.getName() + "\" 有相关联的 " + documents.size() + " 条文档，是否同时删除？",
+                            "删除分组及文档记录", (d, w) -> onDeleteDocClass(docClass.getId(), false),
+                            "删除分组并修改为默认分组", (d, w) -> onDeleteDocClass(docClass.getId(), true),
+                            "取消", null
+                        );
+                    }
+                }
+
+                @Override
+                public void onError(String message) {
+                    showAlert(getContext(), "错误", message);
+                }
+
+                @Override
+                public void onFailed(Throwable throwable) {
+                    showAlert(getContext(), "错误", "网络错误：" + throwable.getMessage());
+                }
+            }
+        );
+    }
+
+    private void onDeleteDocClass(int id) {
+        onDeleteDocClass(id, true);
+    }
+    private void onDeleteDocClass(int id, boolean isToDefault) {
+        IDocClassInteract docClassInteract = InteractStrategy.getInstance().getDocClassInteract(getContext());
+        ProgressHandler.process(getContext(), "删除分组中...", true,
+            docClassInteract.deleteDocClass(id, isToDefault), new InteractInterface<Boolean>() {
+                @Override
+                public void onSuccess(Boolean data) {
+                    showToast(getContext(), "分组删除成功");
+                }
+
+                @Override
+                public void onError(String message) {
+                    showAlert(getContext(), "错误", message);
+                }
+
+                @Override
+                public void onFailed(Throwable throwable) {
+                    showAlert(getContext(), "错误", "网络错误：" + throwable.getMessage());
+                }
+            }
+        );
     }
 
     // endregion
@@ -631,6 +644,7 @@ public class FileFragment extends BaseFragment implements IContextHelper {
     // region Share
 
     /**
+     * !!! TODO 加入每个文件的进度判断
      * 导入分组
      */
     private void scanDocumentIntoDocClass() {
@@ -643,42 +657,73 @@ public class FileFragment extends BaseFragment implements IContextHelper {
         List<FileItem> importedDocuments = new ArrayList<>();
         FileImportDialog importDialog = new FileImportDialog(getActivity(), importedDocuments);
         importDialog.setOnFinishScanListener(() -> {
+            List<FileItem> fileItems = new ArrayList<>();
+            for (FileItem fileItem : importedDocuments)
+                if (fileItem.getTag() == FileItem.CHECKED)
+                    fileItems.add(fileItem);
+            IDocumentInteract documentInteract = InteractStrategy.getInstance().getDocumentInteract(getContext());
 
-            ProgressDialog progressDialog = showProgress(getActivity(), "上传中...", false, null);
+            // 上传等待框
+            final ProgressDialog[] progressDialog = new ProgressDialog[1];
+            // 完成的个数
+            int[] complete = new int[]{0};
+            // 上传的每一个文件
+            CompositeDisposable compositeDisposable = new CompositeDisposable();
+            // 上传成功的文件
+            List<Document> uploaded = new ArrayList<>();
 
-            IDocumentInteract documentDao = InteractStrategy.getInstance().getDocumentInteract(getContext());
-            for (int i = 0; i < importedDocuments.size(); i++) {
-
-                FileItem f = importedDocuments.get(i);
-                if (f.getTag() == FileItem.CHECKED) {
+            // 订阅 所有文件的上传进度
+            Disposable disposable = Observable.create((ObservableEmitter<MessageVO<Document>> emitter) -> {
+                for (FileItem f : fileItems) {
                     Document newDocument = new Document(-1, f.getFilePath(), docClass);
-                    // TODO
-                    try {
-                        // 顺便上传
-                        DbStatusType status = documentDao.insertDocument(newDocument);
-                        if (status == DbStatusType.UPLOAD_FAILED) {
-                            showAlert(getActivity(), "错误", "文件上传失败，服务器错误。");
-                            return;
-                        } else if (status == DbStatusType.FAILED) {
-                            showAlert(getActivity(), "错误", "文档记录更新失败。");
-                            return;
-                        } else {
-                            pageData.documentListItems.add(newDocument);
-                            pageData.showDocumentList.add(newDocument);
-                        }
-                    } catch (ServerException ex) {
-                        ex.printStackTrace();
-                        showAlert(getActivity(), "错误", "文件上传失败：" + ex.getMessage());
-                        return;
-                    }
-                }
 
-                m_txt_document_header.setText(String.format(Locale.CHINA,
-                    "%s (共 %d 项)", m_docClassAdapter.getCurrentItem().getName(), pageData.showDocumentList.size()));
-                showToast(getActivity(), "成功导入 " + importedDocuments.size() + " 个文档");
-            }
-            progressDialog.dismiss();
-            m_documentAdapter.notifyDataSetChanged();
+                    // 每一个文件的 Observable
+                    Disposable d = documentInteract.insertDocument(newDocument).subscribe(
+                        (MessageVO<Boolean> msg) -> {
+                            if (msg.isSuccess())
+                                emitter.onNext(new MessageVO<>(newDocument)); // 上传成功一个
+                        }, throwable -> {
+                            if (throwable instanceof HttpException) {
+                                ResponseBody responseBody = ((HttpException) throwable).response().errorBody();
+
+                                Gson gson = new Gson();
+                                String res = responseBody.string();
+                                ResponseDTO resp = gson.fromJson(res, ResponseDTO.class);
+                                emitter.onNext(new MessageVO<>(false, resp.getMessage())); // 上传失败一个
+                            } else {
+                                throwable.printStackTrace();
+                                emitter.onError(throwable); // 网络出错
+                            }
+                        });
+                    compositeDisposable.add(d);
+                }
+            }).subscribe((MessageVO<Document> msg) -> {
+                // 每上传得到一次响应 onNext
+                complete[0]++;
+                progressDialog[0].setMessage(String.format(Locale.CHINA, "上传 %d/%d 个文件中...", complete[0], fileItems.size()));
+                if (msg.isSuccess())
+                    uploaded.add(msg.getData());
+                if (complete[0] == fileItems.size()) { // 所有
+                    progressDialog[0].dismiss();
+
+                    pageData.documentListItems.addAll(uploaded);
+                    pageData.showDocumentList.addAll(uploaded);
+                    m_documentAdapter.notifyDataSetChanged();
+
+                    showToast(getContext(), "上传成功 " + uploaded.size() + " 个文件。");
+                }
+            }, (throwable) -> { // 网络出错，暂停所有
+                progressDialog[0].dismiss();
+                showAlert(getContext(), "错误", "网络出错：" + throwable.getMessage());
+            });
+
+            progressDialog[0] = showProgress(getContext(),
+                String.format(Locale.CHINA, "上传 0/%d 个文件中...", fileItems.size()), true,
+                (v) -> {
+                    disposable.dispose();
+                    compositeDisposable.dispose();
+                }
+            );
         });
         importDialog.show();
     }
@@ -735,30 +780,36 @@ public class FileFragment extends BaseFragment implements IContextHelper {
 
                         ProgressDialog progressDialog = showProgress(getActivity(), "生成共享码...", false, null);
 
-                        String shareCode;
                         ShareCodeNetInteract shareCodeNetInteract = new ShareCodeNetInteract();
-                        try {
-                            shareCode = shareCodeNetInteract.newShareCode(docClass, exp);
-                        } catch (ServerException ex) {
-                            progressDialog.dismiss();
-                            ex.printStackTrace();
-                            showAlert(getActivity(), "错误", "获取共享码错误：" + ex.getMessage());
-                            return;
-                        }
+                        ProgressHandler.process(getContext(), "生成共享码...", true,
+                            shareCodeNetInteract.newShareCode(docClass, exp), new InteractInterface<String>() {
+                                @Override
+                                public void onSuccess(String shareCode) {
+                                    Bitmap qrCode = CommonUtil.generateQrCode(shareCode, 800, Color.BLACK);
+                                    progressDialog.dismiss();
+                                    if (qrCode == null) {
+                                        showAlert(getContext(), "错误", "二维码生成错误。");
+                                        return;
+                                    }
 
-                        Bitmap qrCode = CommonUtil.generateQrCode(shareCode, 800, Color.BLACK);
-                        progressDialog.dismiss();
-                        if (qrCode == null) {
-                            showAlert(getContext(), "错误", "二维码生成错误。");
-                            return;
-                        }
+                                    ImageView qrCodeImageView = new ImageView(getActivity());
+                                    qrCodeImageView.setImageBitmap(qrCode);
+                                    qrCodeImageView.setMinimumWidth(qrCode.getWidth());
+                                    qrCodeImageView.setMinimumHeight(qrCode.getHeight());
+                                    showAlert(getActivity(), "共享二维码", qrCodeImageView, "返回", null);
+                                }
 
-                        ImageView qrCodeImageView = new ImageView(getActivity());
-                        qrCodeImageView.setImageBitmap(qrCode);
-                        qrCodeImageView.setMinimumWidth(qrCode.getWidth());
-                        qrCodeImageView.setMinimumHeight(qrCode.getHeight());
-                        showAlert(getActivity(), "共享二维码", qrCodeImageView, "返回", null);
+                                @Override
+                                public void onError(String message) {
+                                    showAlert(getActivity(), "错误", message);
+                                }
 
+                                @Override
+                                public void onFailed(Throwable throwable) {
+                                    showAlert(getActivity(), "错误", "网络错误：" + throwable.getMessage());
+                                }
+                            }
+                        );
                     },
                     "取消", null
                 );

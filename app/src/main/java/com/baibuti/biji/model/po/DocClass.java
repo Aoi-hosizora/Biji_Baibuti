@@ -15,7 +15,7 @@ public class DocClass implements Serializable {
     /**
      * 默认分类
      */
-    public static final String DEF_CLASS_NAME = "默认";
+    public static final String DEF_CLASS_NAME = "默认分组";
 
     public DocClass() {
         this(0, DEF_CLASS_NAME);
