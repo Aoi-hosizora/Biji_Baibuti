@@ -62,6 +62,7 @@
 
 
     <!-- ActionBar -->
+    <string name="StarSearchItemAct_ActionBar_ClearStar">清空收藏</string>
     <string name="StarSearchItemAct_ActionBar_FindStar">查找收藏</string>
 
 </resources>

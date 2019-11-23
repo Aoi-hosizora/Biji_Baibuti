@@ -52,7 +52,7 @@ public class DownloadedDao {
     }
 
     /**
-     * 新的下载记录
+     * 删除下载记录
      * @param path 完整路径
      * @return 是否删除成功
      */
@@ -71,4 +71,14 @@ public class DownloadedDao {
         sp.edit().putStringSet(SP_KEY_DOCS, new TreeSet<>(new_contents)).apply();
         return deleted;
     }
+
+    // /**
+    //  * 删除所有下载记录
+    //  * @return 是否清空成功
+    //  */
+    // public boolean DeleteAllDownloadItem() {
+    //     SharedPreferences sp = context.getSharedPreferences(SP_DOWNLOAD, Context.MODE_PRIVATE);
+    //     sp.edit().putStringSet(SP_KEY_DOCS, new TreeSet<>()).apply();
+    //     return sp.getStringSet(SP_KEY_DOCS, new TreeSet<>()).isEmpty();
+    // }
 }

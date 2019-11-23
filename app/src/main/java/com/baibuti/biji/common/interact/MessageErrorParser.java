@@ -35,7 +35,7 @@ public class MessageErrorParser {
     /**
      * 服务器端的错误
      */
-    public static String fromMessageVO(MessageVO messageVO) {
+    static String fromMessageVO(MessageVO messageVO) {
 
         switch (messageVO.getMessage()) {
             // Global
@@ -142,6 +142,8 @@ public class MessageErrorParser {
             case "File Extension Error":
                 return "上传的文件后缀名不支持，仅支持 " +
                     "[txt, md, pdf, doc, docx, ppt, pptx, xls, xlsx, zip, rar, jpg, png, jpeg, bmp]";
+            case "File Out Of Size":
+                return "文件大小超过限制";
             case "Save Document Failed":
                 return "保存文档失败";
             ////////////////////////////////////////////////////

@@ -33,6 +33,7 @@ import com.baibuti.biji.common.interact.ProgressHandler;
 import com.baibuti.biji.common.interact.contract.IDocClassInteract;
 import com.baibuti.biji.common.interact.contract.IDocumentInteract;
 import com.baibuti.biji.common.interact.server.ShareCodeNetInteract;
+import com.baibuti.biji.model.dao.local.DownloadedDao;
 import com.baibuti.biji.model.dto.ResponseDTO;
 import com.baibuti.biji.model.po.DocClass;
 import com.baibuti.biji.common.auth.AuthManager;
@@ -59,6 +60,7 @@ import com.jwsd.libzxing.QRCodeManager;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
@@ -671,7 +673,7 @@ public class FileFragment extends BaseFragment implements IContextHelper {
     // region Share
 
     /**
-     * !!! TODO 加入每个文件的进度判断
+     * !!! TODO 加入每个文件的进度判断，放在服务里上传
      * 导入分组
      */
     private void scanDocumentIntoDocClass() {
@@ -863,10 +865,11 @@ public class FileFragment extends BaseFragment implements IContextHelper {
                     if (shareCode.isEmpty())
                         showAlert(getContext(), "错误", "共享码错误。");
                     else {
-                        showAlert(getContext(),
-                            "文件共享", "是否下载共享码中的文件？",
+                        showAlert(getContext(), "文件共享", "是否下载共享码中的文件？",
                             "下载", (d, w) -> {
                                 // TODO 下载
+                                // 成功
+                                new DownloadedDao(getContext()).InsertDownloadItem("", new Date()); // 本地路径
                             },
                             "取消", null
                         );
@@ -891,25 +894,24 @@ public class FileFragment extends BaseFragment implements IContextHelper {
      * Popup / List 打开文档
      */
     private void OpenDocument(Document document) {
-        showAlert(getContext(),
-            "打开文档", "是否打开文档 \"" + document.getBaseFilename() + "\"？",
+        showAlert(getContext(), "打开文档", "是否打开文档 \"" + document.getBaseFilename() + "\"？",
             "打开", (d, w) -> {
 
                 File file = new File(document.getFilename());
                 String path = AppPathUtil.getFilePathByUri(getContext(), Uri.fromFile(file));
-
-                if (!file.exists() || path == null) { // 本地文件不存在
-                    showAlert(getContext(),
-                        "错误", "文档 \"" + document.getBaseFilename() + "\" 不存在，是否下载？",
-                        "下载", (d1, w1) -> { // 保存到默认路径并更新文件路径
-
-
+                if (file.exists() && path != null) {// 打开文件
+                    if (!DocService.openFile(getActivity(), file))
+                        showAlert(getContext(), "错误", "打开文件错误，文件格式不支持。");
+                } else { // 下载文件
+                    showAlert(getContext(), "错误", "文档 \"" + document.getBaseFilename() + "\" 为上传的文件，是否下载？",
+                        "下载", (d1, w1) -> {
                             // TODO api 下载
+                            // 成功
+                            new DownloadedDao(getContext()).InsertDownloadItem("", new Date()); // 本地路径
 
                         }, "取消", null
                     );
-                } else if (!DocService.openFile(getActivity(), file)) // 打开文件
-                    showAlert(getContext(), "错误", "打开文件错误，文件格式不支持。");
+                }
             },
             "取消", null
         );

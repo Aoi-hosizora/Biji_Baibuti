@@ -36,7 +36,7 @@ public class DocumentNetInteract implements IDocumentInteract {
     public Observable<MessageVO<List<Document>>> queryDocumentByClassId(int cid) {
         return RetrofitFactory.getInstance()
             .createRequest(AuthManager.getInstance().getAuthorizationHead())
-            .getAllDocuments()
+            .getDocumentByClassId(cid)
             .map(responseDTO -> {
                 if (responseDTO.getCode() != 200)
                     return new MessageVO<List<Document>>(false, responseDTO.getMessage());

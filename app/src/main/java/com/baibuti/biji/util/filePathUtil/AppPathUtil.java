@@ -84,10 +84,11 @@ public class AppPathUtil {
 
     /**
      * 删除文件
-     * @return isOk
+     * @return 文件不存在 / isOk
      */
     public static boolean deleteFile(String filePath) {
         File file = new File(filePath);
+        if (!file.exists()) return true;
         boolean isOk = false;
         if (file.isFile() && file.exists())
             isOk = file.delete();

@@ -212,6 +212,9 @@ public class SearchItemActivity extends AppCompatActivity implements IContextHel
             case R.id.action_FindSearchStar:
                 FindSearch_Clicked();
                 break;
+            case R.id.action_ClearSearchStar:
+                SearchItem_CancelAllStarClick();
+                break;
             case android.R.id.home:
                 onBackPressed();
                 break;
@@ -230,6 +233,7 @@ public class SearchItemActivity extends AppCompatActivity implements IContextHel
      * 点击搜索内容
      */
     private void FindSearchItem_Click(String searchStr) {
+        // TODO 有错
         pageData.searchKeyWord = searchStr;
         ISearchItemInteract searchInteract = InteractStrategy.getInstance().getSearchInteract(this);
         ProgressHandler.process(this, "刷新中...", true,

@@ -522,6 +522,7 @@ public class NoteFragment extends BaseFragment implements IContextHelper {
 
     /**
      * 新建笔记
+     * TODO 使用 id 传参数
      */
     private void newNote() {
 
@@ -574,6 +575,7 @@ public class NoteFragment extends BaseFragment implements IContextHelper {
 
     /**
      * 查看已经存在的笔记
+     * TODO 使用 id 传参
      */
     private void openViewNote(@NonNull Note note) {
         Intent intent = new Intent(getActivity(), ViewNoteActivity.class);
