@@ -23,6 +23,7 @@
     <string name="FileFragment_Item_Import_Title">导入资料</string>
     <string name="FileFragment_Item_Share_Title">共享资料</string>
     <string name="FileFragment_Item_Scan_Title">扫描共享码</string>
+    <string name="FileFragment_Item_Downloaded_Title">已下载</string>
 
     <!-- FileFragment Fileclass not selected Hint -->
     <string name="FileFragment_UnselectedText">未选择分组</string>

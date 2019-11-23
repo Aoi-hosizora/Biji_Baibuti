@@ -42,6 +42,7 @@
         <activity android:name=".ui.activity.OCRActivity" android:screenOrientation="portrait" />
         <activity android:name=".ui.activity.SearchItemActivity" android:screenOrientation="portrait" />
         <activity android:name=".ui.activity.WebViewActivity" android:screenOrientation="portrait" />
+        <activity android:name=".ui.activity.FileDownloadActivity" android:screenOrientation="portrait" />
 
         <!-- PreLoad Font -->
         <meta-data

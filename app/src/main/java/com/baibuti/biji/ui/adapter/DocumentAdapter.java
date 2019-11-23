@@ -14,18 +14,19 @@ import com.baibuti.biji.R;
 
 import java.util.List;
 
+import lombok.Getter;
+import lombok.Setter;
+
 public class DocumentAdapter extends RecyclerView.Adapter<DocumentAdapter.ViewHolder>
     implements View.OnClickListener, View.OnLongClickListener {
 
     private Context context;
+
+    @Getter @Setter
     private List<Document> documentList;
 
     public DocumentAdapter(Context context) {
         this.context = context;
-    }
-
-    public void setDocumentList(List<Document> documentList) {
-        this.documentList = documentList;
     }
 
     //////

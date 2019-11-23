@@ -5,12 +5,17 @@
     <item android:id="@+id/action_scan_share_code"
         android:title="@string/FileFragment_Item_Scan_Title"
         android:icon="@drawable/ic_scan_share_code"
-        app:showAsAction="ifRoom" />
+        app:showAsAction="always" />
 
     <item android:id="@+id/action_import_documents"
         android:title="@string/FileFragment_Item_Import_Title"
         android:icon="@drawable/ic_folder_open_white_24dp"
-        app:showAsAction="ifRoom"/>
+        app:showAsAction="always"/>
+
+    <item android:id="@+id/action_downloaded_documents"
+        android:title="@string/FileFragment_Item_Downloaded_Title"
+        android:icon="@drawable/ic_download_white_24dp"
+        app:showAsAction="always"/>
 
     <item android:id="@+id/action_new_fileclass"
         android:title="@string/FileFragment_Item_New_Title"

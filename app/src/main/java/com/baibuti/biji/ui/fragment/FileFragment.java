@@ -3,6 +3,7 @@ package com.baibuti.biji.ui.fragment;
 import android.app.Dialog;
 import android.app.ProgressDialog;
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.net.Uri;
@@ -38,6 +39,7 @@ import com.baibuti.biji.common.auth.AuthManager;
 import com.baibuti.biji.model.vo.MessageVO;
 import com.baibuti.biji.service.doc.DocService;
 import com.baibuti.biji.ui.IContextHelper;
+import com.baibuti.biji.ui.activity.FileDownloadActivity;
 import com.baibuti.biji.ui.adapter.DocumentAdapter;
 import com.baibuti.biji.ui.adapter.DocClassAdapter;
 import com.baibuti.biji.model.po.Document;
@@ -71,6 +73,7 @@ import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.disposables.Disposable;
 import okhttp3.ResponseBody;
 import retrofit2.HttpException;
+import rx_activity_result2.RxActivityResult;
 
 public class FileFragment extends BaseFragment implements IContextHelper {
 
@@ -489,6 +492,9 @@ public class FileFragment extends BaseFragment implements IContextHelper {
             case R.id.action_scan_share_code:
                 scanShareCodeQrCode();
                 break;
+            case R.id.action_downloaded_documents:
+                RxActivityResult.on(this).startIntent(new Intent(getActivity(), FileDownloadActivity.class));
+                break;
         }
         return true;
     };
@@ -637,6 +643,7 @@ public class FileFragment extends BaseFragment implements IContextHelper {
     private void onDeleteDocClass(int id) {
         onDeleteDocClass(id, true);
     }
+
     private void onDeleteDocClass(int id, boolean isToDefault) {
         IDocClassInteract docClassInteract = InteractStrategy.getInstance().getDocClassInteract(getContext());
         ProgressHandler.process(getContext(), "删除分组中...", true,
@@ -682,20 +689,16 @@ public class FileFragment extends BaseFragment implements IContextHelper {
                 if (fileItem.getTag() == FileItem.CHECKED)
                     fileItems.add(fileItem);
             IDocumentInteract documentInteract = InteractStrategy.getInstance().getDocumentInteract(getContext());
+            final ProgressDialog[] progressDialog = new ProgressDialog[1]; // 上传等待框
 
-            // 上传等待框
-            final ProgressDialog[] progressDialog = new ProgressDialog[1];
-            // 完成的个数
-            int[] complete = new int[]{0};
-            // 上传的每一个文件
-            CompositeDisposable compositeDisposable = new CompositeDisposable();
-            // 上传成功的文件
-            List<Document> uploaded = new ArrayList<>();
+            int[] complete = new int[]{0}; // 完成的个数
+            CompositeDisposable compositeDisposable = new CompositeDisposable(); // 上传的每一个文件
+            List<Document> uploaded = new ArrayList<>(); // 上传成功的文件
 
             // 订阅 所有文件的上传进度
             Disposable disposable = Observable.create((ObservableEmitter<MessageVO<Document>> emitter) -> {
                 for (FileItem f : fileItems) {
-                    Document newDocument = new Document(-1, f.getFilePath(), docClass);
+                    Document newDocument = new Document(-1, f.getFilePath(), docClass); // 完整路径
 
                     // 每一个文件的 Observable
                     Disposable d = documentInteract.insertDocument(newDocument).subscribe(
@@ -705,10 +708,7 @@ public class FileFragment extends BaseFragment implements IContextHelper {
                         }, throwable -> {
                             if (throwable instanceof HttpException) {
                                 ResponseBody responseBody = ((HttpException) throwable).response().errorBody();
-
-                                Gson gson = new Gson();
-                                String res = responseBody.string();
-                                ResponseDTO resp = gson.fromJson(res, ResponseDTO.class);
+                                ResponseDTO resp = new Gson().fromJson(responseBody.string(), ResponseDTO.class);
                                 emitter.onNext(new MessageVO<>(false, resp.getMessage())); // 上传失败一个
                             } else {
                                 throwable.printStackTrace();
@@ -717,20 +717,19 @@ public class FileFragment extends BaseFragment implements IContextHelper {
                         });
                     compositeDisposable.add(d);
                 }
-            }).subscribe((MessageVO<Document> msg) -> {
+            }).subscribe((MessageVO<Document> msg) -> { // msg 可能为 false
                 // 每上传得到一次响应 onNext
                 complete[0]++;
                 progressDialog[0].setMessage(String.format(Locale.CHINA, "上传 %d/%d 个文件中...", complete[0], fileItems.size()));
-                if (msg.isSuccess())
+                if (msg.isSuccess()) // 未上传完，添加上传成功到 uploaded
                     uploaded.add(msg.getData());
-                if (complete[0] == fileItems.size()) { // 所有
-                    progressDialog[0].dismiss();
 
+                if (complete[0] >= fileItems.size()) { // 所有上传完毕
+                    progressDialog[0].dismiss();
                     pageData.documentListItems.addAll(uploaded);
                     pageData.showDocumentList.addAll(uploaded);
                     m_documentAdapter.notifyDataSetChanged();
                     m_txt_document_header.setText(String.format(Locale.CHINA, "%s (共 %d 项)", docClass.getName(), pageData.showDocumentList.size()));
-
                     showToast(getContext(), "上传成功 " + uploaded.size() + " 个文件。");
                 }
             }, (throwable) -> { // 网络出错，暂停所有
