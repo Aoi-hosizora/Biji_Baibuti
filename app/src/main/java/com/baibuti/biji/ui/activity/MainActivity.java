@@ -43,7 +43,7 @@ import java.util.List;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
-public class MainActivity extends FragmentActivity implements IContextHelper, AuthManager.OnLoginChangeListener {
+public class MainActivity extends FragmentActivity implements IContextHelper {
 
     @BindView(R.id.mainAct_view_pager)
     ViewPager m_viewPager;
@@ -95,7 +95,20 @@ public class MainActivity extends FragmentActivity implements IContextHelper, Au
         initNav();   // 滑动栏
 
         // 登陆注销订阅
-        AuthManager.getInstance().addLoginChangeListener(this);
+        AuthManager.getInstance().addLoginChangeListener(new AuthManager.OnLoginChangeListener() {
+
+            @Override
+            public void onLogin(String username) {
+                m_navigationView.getMenu().findItem(R.id.nav_left_login).setTitle(R.string.nav_logout);
+                setTitle("笔迹 - " + username); // 无用
+            }
+
+            @Override
+            public void onLogout() {
+                m_navigationView.getMenu().findItem(R.id.nav_left_login).setTitle(R.string.nav_login);
+                setTitle("笔迹 - 未登录用户"); // 无用
+            }
+        });
     }
 
     @Override
@@ -308,8 +321,11 @@ public class MainActivity extends FragmentActivity implements IContextHelper, Au
                 AuthService.logout(), new InteractInterface<Boolean>() {
                     @Override
                     public void onSuccess(Boolean data) {
-                        if (data)
+                        if (data) {
                             showToast(MainActivity.this, "注销成功");
+                            AuthManager.getInstance().logout();
+                            AuthManager.getInstance().setSpToken(MainActivity.this, "");
+                        }
                     }
 
                     @Override
@@ -348,27 +364,5 @@ public class MainActivity extends FragmentActivity implements IContextHelper, Au
 
         String feedbackUrl = "https://github.com/Aoi-hosizora/Biji_Baibuti/issues";
         showBrowser(this, new String[] { feedbackUrl });
-    }
-
-    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    // 登陆注销
-
-    /**
-     * 登录订阅器
-     */
-    @Override
-    public void onLogin(String username) {
-        m_navigationView.getMenu().findItem(R.id.nav_left_login).setTitle(R.string.nav_logout);
-        setTitle("笔迹 - " + username);
-    }
-
-    /**
-     * 注销订阅器
-     */
-    @Override
-    public void onLogout() {
-        m_navigationView.getMenu().findItem(R.id.nav_left_login).setTitle(R.string.nav_login);
-        setTitle("笔迹 - 未登录用户");
     }
 }

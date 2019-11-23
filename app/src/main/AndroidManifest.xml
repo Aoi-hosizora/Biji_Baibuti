@@ -22,11 +22,10 @@
         android:theme="@style/AppTheme"
         tools:ignore="GoogleAppIndexingWarning">
 
-        <activity
-            android:name=".ui.activity.MainActivity"
+        <!-- Launch Act -->
+        <activity android:name=".ui.activity.LauncherActivity"
             android:screenOrientation="portrait"
             android:windowSoftInputMode="adjustPan">
-
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <action android:name="android.intent.action.VIEW" />
@@ -34,16 +33,14 @@
             </intent-filter>
         </activity>
 
+        <!-- Other Act -->
+        <activity android:name=".ui.activity.MainActivity" android:screenOrientation="portrait" />
         <activity android:name=".ui.activity.AuthActivity" android:screenOrientation="portrait" />
-
         <activity android:name=".ui.activity.EditNoteActivity" android:screenOrientation="portrait" />
         <activity android:name=".ui.activity.ViewNoteActivity" android:screenOrientation="portrait" />
         <activity android:name=".ui.activity.OpenSaveFileActivity" android:screenOrientation="portrait" />
-
         <activity android:name=".ui.activity.OCRActivity" android:screenOrientation="portrait" />
-
         <activity android:name=".ui.activity.SearchItemActivity" android:screenOrientation="portrait" />
-
         <activity android:name=".ui.activity.WebViewActivity" android:screenOrientation="portrait" />
 
         <!-- PreLoad Font -->

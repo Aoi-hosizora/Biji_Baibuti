@@ -1,5 +1,6 @@
 package com.baibuti.biji.ui.fragment;
 
+import android.content.Context;
 import android.support.annotation.NonNull;
 import android.support.design.widget.TextInputEditText;
 import android.support.design.widget.TextInputLayout;
@@ -120,6 +121,12 @@ public class LoginFragment extends Fragment implements IContextHelper {
                 @Override
                 public void onSuccess(AuthRespDTO data) {
                     showToast(getContext(), String.format(Locale.CHINA, "用户 \"%s\" 登录成功", data.getUsername()));
+
+                    AuthManager.getInstance().login(data.getUsername(), data.getToken());
+                    Context context = getContext();
+                    if (context != null)
+                        AuthManager.getInstance().setSpToken(context, data.getToken());
+
                     AuthActivity activity = (AuthActivity) getActivity();
                     if (activity != null)
                         activity.finish();

@@ -14,7 +14,7 @@ public class AuthService {
     /**
      * 获取当前登录用户
      */
-    private static Observable<MessageVO<AuthRespDTO>> currentAuth() {
+    public static Observable<MessageVO<AuthRespDTO>> currentAuth() {
         return RetrofitFactory.getInstance()
             .createRequest(AuthManager.getInstance().getAuthorizationHead())
             .currentUser()

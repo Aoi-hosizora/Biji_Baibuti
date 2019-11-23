@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Build;
+import android.os.StrictMode;
 import android.support.v4.content.FileProvider;
 
 import com.baibuti.biji.R;
@@ -15,14 +16,37 @@ import java.io.File;
  */
 public class DocService {
 
+    /**
+     * 从文件获取 Uri
+     */
+    private static Uri getUriForFile(Context context, File file) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            StrictMode.VmPolicy.Builder builder = new StrictMode.VmPolicy.Builder();
+            StrictMode.setVmPolicy(builder.build());
+        }
+        return Uri.fromFile(file);
+        // Uri uri = null;
+        // if (context != null && file != null) {
+        //     if (Build.VERSION.SDK_INT >= 24)
+        //         uri = FileProvider.getUriForFile(context.getApplicationContext(), context.getString(R.string.file_provider), file);
+        //     else
+        //         uri = Uri.fromFile(file);
+        // }
+        // return uri;
+    }
+
+    /**
+     * 根据后缀名选择 setDataAndType 打开文件
+     */
     public static boolean openFile(Context context, File file) {
 
+        // SDK24 以上，不允许使用 file:// 传递 url
         // FileUriExposedException
+        // https://blog.csdn.net/houxuehan/article/details/80176042
+
         // android.content.ActivityNotFoundException:
         // No Activity found to handle Intent
         // { act=android.intent.action.VIEW cat=[android.intent.category.DEFAULT] dat=content://com.baibuti.biji.FileProvider/ }
-
-        // SDK24 以上，不允许使用 file:// 传递 url
 
         String path = file.getAbsolutePath();
         String format = path.substring(path.lastIndexOf(".") + 1);
@@ -67,17 +91,6 @@ public class DocService {
             e.printStackTrace();
             return false;
         }
-    }
-
-    private static Uri getUriForFile(Context context, File file) {
-        Uri uri = null;
-        if (context != null && file != null) {
-            if (Build.VERSION.SDK_INT >= 24)
-                uri = FileProvider.getUriForFile(context.getApplicationContext(), context.getString(R.string.file_provider), file);
-            else
-                uri = Uri.fromFile(file);
-        }
-        return uri;
     }
 
     private static Intent getPptFileIntent(Context context, File file) {

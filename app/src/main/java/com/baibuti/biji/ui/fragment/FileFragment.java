@@ -127,6 +127,19 @@ public class FileFragment extends BaseFragment implements IContextHelper {
 
             initView();
             initData();
+
+            AuthManager.getInstance().addLoginChangeListener(new AuthManager.OnLoginChangeListener() {
+
+                @Override
+                public void onLogin(String username) {
+                    initData();
+                }
+
+                @Override
+                public void onLogout() {
+                    initData();
+                }
+            });
         }
         return view;
     }
