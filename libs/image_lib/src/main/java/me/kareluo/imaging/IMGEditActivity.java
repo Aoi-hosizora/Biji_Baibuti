@@ -10,6 +10,7 @@ import android.util.Log;
 import me.kareluo.imaging.core.IMGMode;
 import me.kareluo.imaging.core.IMGText;
 import me.kareluo.imaging.core.file.IMGAssetFileDecoder;
+import me.kareluo.imaging.core.file.IMGContentFileDecoder;
 import me.kareluo.imaging.core.file.IMGDecoder;
 import me.kareluo.imaging.core.file.IMGFileDecoder;
 import me.kareluo.imaging.core.util.IMGUtils;
@@ -18,15 +19,12 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.Locale;
 
 /**
- * Created by felix on 2017/11/14 下午2:26.
+ * Created by felix on 2017/11/14 下午2:26
  *
- * onDoneClick(): Modified By Aoihosizora
- * saveEditedImgToSdCard(): Add By AoiHosizora
+ * getBitmap(): Modified By AoiHosizora
+ * onDoneClick(): Modified By AoiHosizora
  */
 
 public class IMGEditActivity extends IMGEditBaseActivity {
@@ -39,30 +37,28 @@ public class IMGEditActivity extends IMGEditBaseActivity {
     public static final String INT_IMAGE_SAVE_URI = "IMAGE_SAVE_URI";
 
     @Override
-    public void onCreated() {
-        Log.e("TAG", "onCreated: IMGEditActivity");
-    }
+    public void onCreated() { }
 
     @Override
     public Bitmap getBitmap() {
         Intent intent = getIntent();
-        if (intent == null) {
-            return null;
-        }
-
         Uri uri = intent.getParcelableExtra(INT_IMAGE_URI);
-
-        if (uri == null) {
+        if (uri == null || uri.getScheme() == null)
             return null;
-        }
 
         IMGDecoder decoder = null;
 
         String path = uri.getPath();
+        Log.i("IMGEditActivity", "getBitmap uri.getScheme(): " + uri.getScheme());
+
         if (!TextUtils.isEmpty(path)) {
             switch (uri.getScheme()) {
                 case "asset":
                     decoder = new IMGAssetFileDecoder(this, uri);
+                    break;
+                case "content":
+                    // content://media/external/images/media/40
+                    decoder = new IMGContentFileDecoder(this, uri);
                     break;
                 case "file":
                     decoder = new IMGFileDecoder(uri);
@@ -70,9 +66,8 @@ public class IMGEditActivity extends IMGEditBaseActivity {
             }
         }
 
-        if (decoder == null) {
+        if (decoder == null)
             return null;
-        }
 
         BitmapFactory.Options options = new BitmapFactory.Options();
         options.inSampleSize = 1;
@@ -80,14 +75,10 @@ public class IMGEditActivity extends IMGEditBaseActivity {
 
         decoder.decode(options);
 
-        if (options.outWidth > MAX_WIDTH) {
+        if (options.outWidth > MAX_WIDTH)
             options.inSampleSize = IMGUtils.inSampleSize(Math.round(1f * options.outWidth / MAX_WIDTH));
-        }
-
-        if (options.outHeight > MAX_HEIGHT) {
-            options.inSampleSize = Math.max(options.inSampleSize,
-                    IMGUtils.inSampleSize(Math.round(1f * options.outHeight / MAX_HEIGHT)));
-        }
+        if (options.outHeight > MAX_HEIGHT)
+            options.inSampleSize = Math.max(options.inSampleSize, IMGUtils.inSampleSize(Math.round(1f * options.outHeight / MAX_HEIGHT)));
 
         options.inJustDecodeBounds = false;
         return decoder.decode(options);
@@ -127,48 +118,36 @@ public class IMGEditActivity extends IMGEditBaseActivity {
         finish();
     }
 
-    /**
-     * Add By AoiHosizora
-     * 保存编辑后的图片
-     * @return 保存的绝对路径
-     */
-    public String saveEditedImgToSdCard(Bitmap bitmap) {
-
-        Intent intent = getIntent();
-        String save_file_name = intent.getStringExtra(INT_IMAGE_SAVE_URI);
-
-        File file = new File(save_file_name);
-        try {
-            FileOutputStream out = new FileOutputStream(file);
-            if (bitmap.compress(Bitmap.CompressFormat.JPEG, 100, out)) {
-                out.flush();
-                out.close();
-            }
-        }
-        catch (FileNotFoundException e) {
-            e.printStackTrace();
-        }
-        catch (IOException e) {
-            e.printStackTrace();
-        }
-
-        return file.getAbsolutePath();
-    }
-
     @Override
     public void onDoneClick() {
-        Bitmap bitmap = mImgView.saveBitmap();
-        if (bitmap != null) {
+        String path = getIntent().getStringExtra(INT_IMAGE_SAVE_URI);
+        if (!TextUtils.isEmpty(path)) {
+            Bitmap bitmap = mImgView.saveBitmap();
+            if (bitmap != null) {
+                FileOutputStream fos = null;
+                try {
+                    fos = new FileOutputStream(path);
+                    bitmap.compress(Bitmap.CompressFormat.JPEG, 80, fos);
+                } catch (FileNotFoundException e) {
+                    e.printStackTrace();
+                } finally {
+                    if (fos != null) {
+                        try {
+                            fos.close();
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                }
 
-            String str = saveEditedImgToSdCard(bitmap);
-            Log.i("", "onDoneClick: " + str);
-
-            Intent intent = new Intent();
-            intent.setData(Uri.parse(str));
-
-            setResult(RESULT_OK, intent);
-            finish();
-            return;
+                Intent intent = new Intent();
+                File f = new File(path);
+                if (f.exists())
+                    intent.setData(Uri.fromFile(f));
+                setResult(RESULT_OK, intent);
+                finish();
+                return;
+            }
         }
         setResult(RESULT_CANCELED);
         finish();

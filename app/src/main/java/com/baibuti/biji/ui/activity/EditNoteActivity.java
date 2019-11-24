@@ -191,27 +191,35 @@ public class EditNoteActivity extends AppCompatActivity implements IContextHelpe
         // Gallery
         RxActivityResult.on(this).startIntent(galleryIntent)
             .map(Result::data)
-            .subscribe((returnIntent) -> {
-
+            .concatMap((returnIntent) -> {
                 Uri uri = returnIntent.getData(); // content://media/external/images/media/221
-                if (uri == null) return;
-                String imgPath = AppPathUtil.getFilePathByUri(this, uri); // /storage/emulated/0/Others/007.jpg
-                if (imgPath == null || imgPath.isEmpty()) {
-                    showAlert(this, "插入图片", "从相册获取的图片不存在，请重试。");
-                    return;
-                }
+                if (uri == null)
+                    throw new Exception("404");
+                String imgPath = AppPathUtil.getFilePathByUri(this, uri);
+                if (imgPath == null || imgPath.isEmpty())
+                    throw new Exception("404");
 
                 // Edit
                 Intent imgEditIntent = new Intent(EditNoteActivity.this, IMGEditActivity.class);
                 imgEditIntent.putExtra(IMGEditActivity.INT_IMAGE_URI, uri);
                 imgEditIntent.putExtra(IMGEditActivity.INT_IMAGE_SAVE_URI, FileNameUtil.getImageFileName(FileNameUtil.SaveType.EDITED));
 
-                Result<EditNoteActivity> result1 = RxActivityResult.on(EditNoteActivity.this).startIntent(imgEditIntent).toFuture().get();
-                if (result1.resultCode() != RESULT_OK) return;
-                Uri editedUri = result1.data().getData();
-                if (editedUri != null)
-                    insertImagesSync(editedUri);
-
+                return RxActivityResult.on(EditNoteActivity.this).startIntent(imgEditIntent);
+            })
+            .subscribe((result) -> {
+                if (result.resultCode() != RESULT_OK) return;
+                Uri editedUri = result.data().getData();
+                if (editedUri == null)
+                    throw new Exception("404");
+                insertImagesSync(editedUri);
+            },
+            (throwable) -> {
+                if (throwable.getMessage().equals("404"))
+                    showToast(this, "未找到图片");
+                else {
+                    throwable.printStackTrace();
+                    showToast(this, "未知错误：" + throwable.getMessage());
+                }
             }).isDisposed();
     }
 
@@ -231,38 +239,40 @@ public class EditNoteActivity extends AppCompatActivity implements IContextHelpe
         cameraIntent.addFlags(Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION);
         cameraIntent.putExtra(MediaStore.EXTRA_OUTPUT, imgUri);
 
-        // 打开相机
+        // Camera
+        Uri[] cameraUri = new Uri[1];
         RxActivityResult.on(this).startIntent(cameraIntent)
             .map(Result::data)
-            .subscribe((returnIntent) -> {
-                // 编辑拍摄图片，并删除原图
-                Uri uri = returnIntent.getData();
-                if (uri != null) {
-                    String imgPath = AppPathUtil.getFilePathByUri(this, uri);
-                    if (imgPath == null || imgPath.isEmpty()) {
-                        showAlert(this, "插入图片", "拍照得到的图片不存在，请重试。");
-                        return;
-                    }
+            .concatMap((returnIntent) -> {
+                cameraUri[0] = returnIntent.getData();
+                if (cameraUri[0] == null)
+                    throw new Exception("404");
+                String imgPath = AppPathUtil.getFilePathByUri(this, cameraUri[0]);
+                if (imgPath == null || imgPath.isEmpty())
+                    throw new Exception("404");
 
-                    Intent imgEditIntent = new Intent(this, IMGEditActivity.class);
-                    imgEditIntent.putExtra(IMGEditActivity.INT_IMAGE_URI, uri);
-                    imgEditIntent.putExtra(IMGEditActivity.INT_IMAGE_SAVE_URI, FileNameUtil.getImageFileName(FileNameUtil.SaveType.EDITED));
-
-                    RxActivityResult.on(this).startIntent(imgEditIntent)
-                        .map(Result::data)
-                        .subscribe((returnIntent2) -> {
-                            Uri uri1 = returnIntent2.getData();
-                            if (uri1 != null) {
-                                // 拍照删除图片
-                                AppPathUtil.deleteFile(AppPathUtil.getFilePathByUri(this, imgUri));
-                                insertImagesSync(uri1);
-                            }
-                        }).isDisposed();
+                // Edit
+                Intent imgEditIntent = new Intent(this, IMGEditActivity.class);
+                imgEditIntent.putExtra(IMGEditActivity.INT_IMAGE_URI, cameraUri[0]);
+                imgEditIntent.putExtra(IMGEditActivity.INT_IMAGE_SAVE_URI, FileNameUtil.getImageFileName(FileNameUtil.SaveType.EDITED));
+                return RxActivityResult.on(this).startIntent(imgEditIntent);
+            })
+            .subscribe((result) -> {
+                if (result.resultCode() != RESULT_OK) return;
+                Uri editedUri = result.data().getData();
+                if (editedUri == null)
+                    throw new Exception("404");
+                // Delete Camera
+                AppPathUtil.deleteFile(AppPathUtil.getFilePathByUri(this, cameraUri[0]));
+                insertImagesSync(editedUri);
+            },
+            (throwable) -> {
+                if (throwable.getMessage().equals("404"))
+                    showToast(this, "未找到图片");
+                else {
+                    throwable.printStackTrace();
+                    showToast(this, "相机打开失败");
                 }
-
-            }, (throwable) -> {
-                throwable.printStackTrace();
-                showAlert(this, "错误", "相机打开失败，可能该设备没有相机或者设备出错，拍照插入图片功能暂时不可用。");
             }).isDisposed();
     }
 

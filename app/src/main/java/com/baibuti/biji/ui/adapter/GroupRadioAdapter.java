@@ -96,7 +96,13 @@ public class GroupRadioAdapter extends BaseAdapter {
         if (getItem(position) == null) return view;
 
         holder.m_btn_radio.setText(getItem(position).getName());
-        holder.m_img.setBackgroundColor(Color.parseColor(getItem(position).getColor()));
+        try {
+            holder.m_img.setBackgroundColor(Color.parseColor(getItem(position).getColor()));
+        } catch (Exception ex) {
+            // java.lang.IllegalArgumentException: Unknown color
+            ex.printStackTrace();
+            holder.m_img.setBackgroundColor(Group.DEF_GROUP.getIntColor());
+        }
 
         // State
         holder.m_btn_radio.setChecked(currentItem == groupList.get(position));
