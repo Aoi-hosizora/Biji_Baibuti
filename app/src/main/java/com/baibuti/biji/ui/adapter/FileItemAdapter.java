@@ -6,7 +6,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.CheckBox;
-import android.widget.CompoundButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -38,20 +37,9 @@ public class FileItemAdapter extends RecyclerView.Adapter<FileItemAdapter.ViewHo
 
         final ViewHolder holder = new ViewHolder(view);
 
-        // view.setOnClickListener((View v) -> {
-        //     int position = holder.getAdapterPosition();
-        //     Toast.makeText(v.getContext(), "Click on file" + fileItemList.get(position).getFileName(), Toast.LENGTH_LONG).show();
-        // });
-
-        holder.checkBox.setOnCheckedChangeListener((CompoundButton whichButton, boolean isChecked) -> {
-            if (whichButton.isPressed()) {
-                if (isChecked) {
-                    // Toast.makeText(parent.getContext(), "Click on " + holder.getAdapterPosition(), Toast.LENGTH_LONG).show();
-                    fileItemList.get(holder.getAdapterPosition()).setTag(CHECKED);
-                } else {
-                    fileItemList.get(holder.getAdapterPosition()).setTag(UNCHECKED);
-                }
-            }
+        view.setOnClickListener((v) -> {
+            holder.checkBox.setChecked(!holder.checkBox.isChecked());
+            fileItemList.get(holder.getAdapterPosition()).setTag(holder.checkBox.isChecked() ? CHECKED : UNCHECKED);
         });
 
         return holder;

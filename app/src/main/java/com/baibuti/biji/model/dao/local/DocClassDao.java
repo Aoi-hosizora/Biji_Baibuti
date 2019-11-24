@@ -30,8 +30,8 @@ public class DocClassDao {
         this.context = context;
         this.dbMgr = DbManager.getInstance(new DbOpenHelper(context));
 
-        if (queryAllDocClasses().isEmpty())
-            insertDocClass(new DocClass());
+        if (queryAllDocClasses().isEmpty() || queryDefaultDocClass() == null)
+            insertDocClass(DocClass.DEF_DOCCLASS);
     }
 
     public static void create_tbl(SQLiteDatabase db) {
@@ -134,18 +134,17 @@ public class DocClassDao {
 
         SQLiteDatabase db = dbMgr.getReadableDatabase();
         Cursor cursor = null;
-        String sql = "select * from " + TBL_NAME + " where " + COL_NAME + " = \"" + DocClass.DEF_CLASS_NAME + "\"";
+        String sql = "select * from " + TBL_NAME + " where " + COL_NAME + " = \"" + DocClass.DEF_DOCCLASS.getName() + "\"";
 
         DocClass docClass = null;
         try {
             cursor = db.rawQuery(sql, null);
 
-            if (cursor.moveToFirst()) {
-
-                docClass = new DocClass();
-                docClass.setId(cursor.getInt(cursor.getColumnIndex(COL_ID)));
-                docClass.setName(cursor.getString(cursor.getColumnIndex(COL_NAME)));
-            }
+            if (cursor.moveToFirst())
+                docClass = new DocClass(
+                    cursor.getInt(cursor.getColumnIndex(COL_ID)),
+                    cursor.getString(cursor.getColumnIndex(COL_NAME))
+                );
 
         } catch (Exception e) {
             e.printStackTrace();
@@ -262,6 +261,7 @@ public class DocClassDao {
                     return DbStatusType.FAILED;
                 } else {
                     db.setTransactionSuccessful();
+                    db.endTransaction();
                     return DbStatusType.SUCCESS;
                 }
             }

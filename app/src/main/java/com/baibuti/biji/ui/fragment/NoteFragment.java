@@ -391,6 +391,9 @@ public class NoteFragment extends BaseFragment implements IContextHelper {
 
                     showAlert(getContext(), "修改分组",
                         groupAdapter, (d, w) -> {
+                            if (note.getGroup().getId() == groups.get(w).getId())
+                                return;
+
                             Date motoUt = note.getUpdateTime();
                             Group motoGroup = note.getGroup();
                             note.setGroup(groups.get(w));

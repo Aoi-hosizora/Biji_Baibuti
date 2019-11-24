@@ -106,7 +106,7 @@ public class FileDownloadActivity extends AppCompatActivity implements IContextH
                 String path = AppPathUtil.getFilePathByUri(this, Uri.fromFile(file));
 
                 if (!file.exists() || path == null) {
-                    showAlert(this, "错误", "文档 \"" + document.getBaseFilename() + "\" 不存在，是否删除下载记录？",
+                    showAlert(this, "打开", "文档 \"" + document.getBaseFilename() + "\" 不存在，是否删除下载记录？",
                         "删除", (d1, w1) -> {
                             DownloadedDao downloadedDao = new DownloadedDao(this);
                             if (downloadedDao.DeleteDownloadItem(document.getFilename())) {

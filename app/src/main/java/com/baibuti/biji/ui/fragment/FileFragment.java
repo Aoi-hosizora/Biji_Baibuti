@@ -15,6 +15,7 @@ import android.support.v4.content.ContextCompat;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
@@ -26,7 +27,6 @@ import android.widget.ListView;
 import android.widget.SearchView;
 import android.widget.Spinner;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.baibuti.biji.common.interact.InteractInterface;
 import com.baibuti.biji.common.interact.InteractStrategy;
@@ -34,7 +34,6 @@ import com.baibuti.biji.common.interact.ProgressHandler;
 import com.baibuti.biji.common.interact.contract.IDocClassInteract;
 import com.baibuti.biji.common.interact.contract.IDocumentInteract;
 import com.baibuti.biji.common.interact.server.ShareCodeNetInteract;
-import com.baibuti.biji.model.dao.local.DownloadedDao;
 import com.baibuti.biji.model.dto.ResponseDTO;
 import com.baibuti.biji.model.po.DocClass;
 import com.baibuti.biji.common.auth.AuthManager;
@@ -61,7 +60,6 @@ import com.jwsd.libzxing.QRCodeManager;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
@@ -254,7 +252,7 @@ public class FileFragment extends BaseFragment implements IContextHelper {
 
     @Override
     public boolean onBackPressed() {
-        if ((boolean) m_searchIcon.getTag()) {
+        if (m_searchIcon != null && (boolean) m_searchIcon.getTag()) {
             m_searchIcon.callOnClick();
             return true;
         }
@@ -280,7 +278,8 @@ public class FileFragment extends BaseFragment implements IContextHelper {
                 ProgressHandler.process(documentInteract.queryAllDocuments(), new InteractInterface<List<Document>>() {
                     @Override
                     public void onSuccess(List<Document> data) {
-                        DocClass curr = m_docClassAdapter.getCurrentItem();
+
+                        DocClass curr = m_docClassAdapter.getCurrentItem(); // <<<
                         int currIdx = curr == null ? -1 : pageData.docClassListItems.indexOf(curr);
 
                         pageData.documentListItems.clear();
@@ -288,8 +287,10 @@ public class FileFragment extends BaseFragment implements IContextHelper {
                         pageData.documentListItems.addAll(data);
                         m_toolBar.setTitle("文档资料");
 
-                        if (currIdx == -1 && pageData.docClassListItems.size() != 0)
+                        if (currIdx == -1 && pageData.docClassListItems.size() != 0) {
+                            m_docClassAdapter.setCurrentItem(pageData.docClassListItems.get(0));
                             onDocClassItemClicked(pageData.docClassListItems.get(0));
+                        }
                         else if (currIdx != -1 && pageData.docClassListItems.size() > currIdx)
                             onDocClassItemClicked(pageData.docClassListItems.get(currIdx));
 
@@ -347,11 +348,13 @@ public class FileFragment extends BaseFragment implements IContextHelper {
     }
 
     /**
-    /**
      * 点击分组，更新显示
      */
     private void onDocClassItemClicked(DocClass docClass) {
-        ProgressDialog progressDialog = showProgress(getContext(), "加载数据中...", false, null);
+        // if (docClass.getId() == m_docClassAdapter.getCurrentItem().getId())
+        //     return;
+
+        // ProgressDialog progressDialog = showProgress(getContext(), "加载数据中...", false, null);
 
         m_docClassAdapter.setCurrentItem(docClass);
         pageData.showDocumentList.clear();
@@ -359,7 +362,7 @@ public class FileFragment extends BaseFragment implements IContextHelper {
         m_txt_document_header.setText(String.format(Locale.CHINA, "%s (共 %d 项)", docClass.getName(), pageData.showDocumentList.size()));
         m_documentAdapter.notifyDataSetChanged();
 
-        new Handler().postDelayed(progressDialog::dismiss, 50);
+        // new Handler().postDelayed(progressDialog::dismiss, 50);
     }
 
     /**
@@ -385,21 +388,10 @@ public class FileFragment extends BaseFragment implements IContextHelper {
         m_popup_docclass = new Dialog(activity, R.style.BottomDialog);
         LinearLayout root = LayoutUtil.initPopupMenu(activity, m_popup_docclass, R.layout.popup_doc_long_click_class);
 
-        TextView label = root.findViewById(R.id.id_doc_class_popup_label);
-        label.setText(String.format("当前选中分组: %s", docClass.getName()));
-
-        root.findViewById(R.id.id_doc_class_popup_rename).setOnClickListener((v) -> {
-            m_popup_docclass.dismiss();
-            renameDocClass(docClass);
-        });
-        root.findViewById(R.id.id_doc_class_popup_delete).setOnClickListener((v) -> {
-            m_popup_docclass.dismiss();
-            deleteDocClass(docClass);
-        });
-        root.findViewById(R.id.id_doc_class_popup_share).setOnClickListener((v) -> {
-            m_popup_docclass.dismiss();
-            shareTheWholeClassDocuments(docClass);
-        });
+        ((TextView) root.findViewById(R.id.id_doc_class_popup_label)).setText(String.format("当前选中分组: %s", docClass.getName()));
+        root.findViewById(R.id.id_doc_class_popup_rename).setOnClickListener((v) -> ToolbarRenameDocClass_Clicked(docClass));
+        root.findViewById(R.id.id_doc_class_popup_delete).setOnClickListener((v) -> ToolDeleteDocClass_Clicked(docClass));
+        root.findViewById(R.id.id_doc_class_popup_share).setOnClickListener((v) -> ToolbarShareWholeDocClassDoc_Clicked(docClass));
         root.findViewById(R.id.id_doc_class_popup_cancel).setOnClickListener((v) -> m_popup_docclass.dismiss());
 
         m_popup_docclass.show();
@@ -415,14 +407,11 @@ public class FileFragment extends BaseFragment implements IContextHelper {
         m_popup_document = new Dialog(activity, R.style.BottomDialog);
         LinearLayout root = LayoutUtil.initPopupMenu(activity, m_popup_document, R.layout.popup_doc_long_click_item);
 
-        TextView label = root.findViewById(R.id.id_doc_popup_label);
-        label.setText(String.format("当前选中文档: %s (%s)", document.getBaseFilename(), document.getDocClass().getName()));
-
-        root.findViewById(R.id.id_doc_popup_delete).setOnClickListener((v) -> PopupDeleteDoc_Clicked(document));
-        root.findViewById(R.id.id_doc_popup_open).setOnClickListener((v) -> {
-            m_popup_document.dismiss();
-            OpenDocument(document);
-        });
+        ((TextView) root.findViewById(R.id.id_doc_popup_label)).setText(String.format("当前选中文档: %s (%s)", document.getBaseFilename(), document.getDocClass().getName()));
+        root.findViewById(R.id.id_doc_popup_open).setOnClickListener((v) -> OpenDocument(document));
+        root.findViewById(R.id.id_doc_popup_move).setOnClickListener((v) -> PopupMoveDocument_Clicked(document));
+        root.findViewById(R.id.id_doc_popup_delete).setOnClickListener((v) -> PopupDeleteDoc_Clicked(document, false));
+        root.findViewById(R.id.id_doc_popup_delete_file).setOnClickListener((v) -> PopupDeleteDoc_Clicked(document, true));
         root.findViewById(R.id.id_doc_popup_cancel).setOnClickListener((v) -> m_popup_document.dismiss());
 
         m_popup_document.show();
@@ -431,11 +420,12 @@ public class FileFragment extends BaseFragment implements IContextHelper {
     /**
      * Popup 删除文档
      */
-    private void PopupDeleteDoc_Clicked(Document document) {
+    private void PopupDeleteDoc_Clicked(Document document, boolean isDeleteFile) {
         m_popup_document.dismiss();
-
-        showAlert(getActivity(),
-            "删除", "确定删除文档资料 \"" + document.getBaseFilename() + "\" ？",
+        String message = (isDeleteFile)
+            ? "确定删除列表中的文档记录 \"" + document.getBaseFilename() + "\"，若为本地文件，则该操作不会删除源文件？"
+            : "确定删除列表中的文档记录以及文件 \"" + document.getBaseFilename() + "\"？";
+        showAlert(getActivity(), "删除", message,
             "删除", (d, w) -> {
                 IDocumentInteract documentInteract = InteractStrategy.getInstance().getDocumentInteract(getContext());
 
@@ -443,11 +433,16 @@ public class FileFragment extends BaseFragment implements IContextHelper {
                     documentInteract.deleteDocument(document.getId()), new InteractInterface<Boolean>() {
                         @Override
                         public void onSuccess(Boolean data) {
+                            if (isDeleteFile)
+                                AppPathUtil.deleteFile(document.getFilename());
+
                             pageData.documentListItems.remove(document);
                             pageData.showDocumentList.remove(document);
                             m_documentAdapter.notifyDataSetChanged();
+
                             m_txt_document_header.setText(String.format(Locale.CHINA,
                                 "%s (共 %d 项)", m_docClassAdapter.getCurrentItem().getName(), pageData.showDocumentList.size()));
+                            showToast(getContext(), "文档 \"" + document.getBaseFilename() + "\" 删除成功");
                         }
 
                         @Override
@@ -466,6 +461,70 @@ public class FileFragment extends BaseFragment implements IContextHelper {
         );
     }
 
+    /**
+     * Popup 移动至分组
+     */
+    private void PopupMoveDocument_Clicked(Document document) {
+        m_popup_document.dismiss();
+        IDocClassInteract docClassInteract = InteractStrategy.getInstance().getDocClassInteract(getContext());
+        IDocumentInteract documentInteract = InteractStrategy.getInstance().getDocumentInteract(getContext());
+
+        ProgressHandler.process(getContext(), "加载分组信息...", true,
+            docClassInteract.queryAllDocClasses(), new InteractInterface<List<DocClass>>() {
+                @Override
+                public void onSuccess(List<DocClass> docClasses) {
+                    String[] titles = new String[docClasses.size()];
+                    for (int i = 0; i < docClasses.size(); i++)
+                        titles[i] = docClasses.get(i).getName();
+
+                    showAlert(getContext(), "修改分组",
+                        titles, (d, w) -> {
+                            if (document.getDocClass().getId() == docClasses.get(w).getId())
+                                return;
+
+                            DocClass motoClass = document.getDocClass();
+                            document.setDocClass(docClasses.get(w));
+                            ProgressHandler.process(getContext(), "修改文档分组中...", true,
+                                documentInteract.updateDocument(document), new InteractInterface<Boolean>() {
+                                    @Override
+                                    public void onSuccess(Boolean data) {
+                                        pageData.showDocumentList.remove(document);
+                                        m_docClassAdapter.notifyDataSetChanged();
+                                        showToast(getActivity(), "文档 \"" + document.getBaseFilename() + "\" 成功移动至 \"" + docClasses.get(w).getName() + " \"");
+                                        d.dismiss();
+                                    }
+
+                                    @Override
+                                    public void onError(String message) {
+                                        document.setDocClass(motoClass);
+                                        showAlert(getActivity(), "错误", message);
+                                    }
+
+                                    @Override
+                                    public void onFailed(Throwable throwable) {
+                                        document.setDocClass(motoClass);
+                                        showAlert(getContext(), "错误", "网络错误：" + throwable.getMessage());
+                                    }
+                                }
+                            );
+                        },
+                        "返回", null
+                    );
+                }
+
+                @Override
+                public void onError(String message) {
+                    showAlert(getContext(), "错误", "分组信息加载失败：" + message);
+                }
+
+                @Override
+                public void onFailed(Throwable throwable) {
+                    showAlert(getContext(), "错误", "网络错误：" + throwable.getMessage());
+                }
+            }
+        );
+    }
+
     // endregion
 
     // region Toolbar
@@ -478,20 +537,20 @@ public class FileFragment extends BaseFragment implements IContextHelper {
         switch (item.getItemId()) {
 
             case R.id.action_new_fileclass:
-                addDocClass();
+                ToolbarAddDocClass_Clicked();
                 break;
             case R.id.action_rename_fileclass:
-                renameDocClass(m_docClassAdapter.getCurrentItem());
+                ToolbarRenameDocClass_Clicked(m_docClassAdapter.getCurrentItem());
                 break;
             case R.id.action_delete_fileclass:
-                deleteDocClass(m_docClassAdapter.getCurrentItem());
+                ToolDeleteDocClass_Clicked(m_docClassAdapter.getCurrentItem());
                 break;
 
             case R.id.action_share_documents:
-                shareTheWholeClassDocuments(m_docClassAdapter.getCurrentItem());
+                ToolbarShareWholeDocClassDoc_Clicked(m_docClassAdapter.getCurrentItem());
                 break;
             case R.id.action_import_documents:
-                scanDocumentIntoDocClass();
+                ToolbarImportFile_Clicked();
                 break;
             case R.id.action_scan_share_code:
                 scanShareCodeQrCode();
@@ -507,7 +566,7 @@ public class FileFragment extends BaseFragment implements IContextHelper {
      * 新建分组
      */
     @OnClick(R.id.id_docclass_list_view_add)
-    void addDocClass() {
+    void ToolbarAddDocClass_Clicked() {
         showInputDialog(getActivity(),
             "新建文档分组", "", "新文档分组名...", 1,
             "确定", (d, w, text) -> {
@@ -552,12 +611,15 @@ public class FileFragment extends BaseFragment implements IContextHelper {
     /**
      * 重命名分组
      */
-    private void renameDocClass(DocClass docClass) {
+    private void ToolbarRenameDocClass_Clicked(DocClass docClass) {
+        if (m_popup_docclass != null && m_popup_docclass.isShowing())
+            m_popup_docclass.dismiss();
+
         if (docClass == null) {
             showAlert(getActivity(), "错误", "没有选择分组。");
             return;
         }
-        if (docClass.getName().equals(DocClass.DEF_CLASS_NAME)) {
+        if (docClass.getName().equals(DocClass.DEF_DOCCLASS.getName())) {
             showAlert(getActivity(), "错误", "无法修改默认分组名。");
             return;
         }
@@ -602,12 +664,15 @@ public class FileFragment extends BaseFragment implements IContextHelper {
     /**
      * 删除分组
      */
-    private void deleteDocClass(DocClass docClass) {
+    private void ToolDeleteDocClass_Clicked(DocClass docClass) {
+        if (m_popup_docclass != null && m_popup_docclass.isShowing())
+            m_popup_docclass.dismiss();
+
         if (docClass == null) {
             showAlert(getActivity(), "错误", "没有选择分组。");
             return;
         }
-        if (docClass.getName().equals(DocClass.DEF_CLASS_NAME)) {
+        if (docClass.getName().equals(DocClass.DEF_DOCCLASS.getName())) {
             showAlert(getActivity(), "错误", "无法删除默认分组。");
             return;
         }
@@ -619,13 +684,13 @@ public class FileFragment extends BaseFragment implements IContextHelper {
                 public void onSuccess(List<Document> documents) {
                     if (documents.isEmpty()) {
                         showAlert(getActivity(), "删除", "是否删除分组 \"" + docClass.getName() + "\"？",
-                            "删除", (d, w) -> onDeleteDocClass(docClass.getId()),
+                            "删除", (d, w) -> onDeleteDocClass(docClass),
                             "取消", null
                         );
                     } else {
-                        showAlert(getActivity(), "删除", "分组 \"" + docClass.getName() + "\" 有相关联的 " + documents.size() + " 条文档，是否同时删除？",
-                            "删除分组及文档记录", (d, w) -> onDeleteDocClass(docClass.getId(), false),
-                            "删除分组并修改为默认分组", (d, w) -> onDeleteDocClass(docClass.getId(), true),
+                        showAlert(getActivity(), "删除", "分组 \"" + docClass.getName() + "\" 有相关联的 " + documents.size() + " 条文档，是否同时删除？该操作不会删除本地文件。",
+                            "删除分组及文档记录", (d, w) -> onDeleteDocClass(docClass, false),
+                            "删除分组并修改为默认分组", (d, w) -> onDeleteDocClass(docClass, true),
                             "取消", null
                         );
                     }
@@ -644,16 +709,17 @@ public class FileFragment extends BaseFragment implements IContextHelper {
         );
     }
 
-    private void onDeleteDocClass(int id) {
-        onDeleteDocClass(id, true);
+    private void onDeleteDocClass(DocClass docClass) {
+        onDeleteDocClass(docClass, true);
     }
 
-    private void onDeleteDocClass(int id, boolean isToDefault) {
+    private void onDeleteDocClass(DocClass docClass, boolean isToDefault) {
         IDocClassInteract docClassInteract = InteractStrategy.getInstance().getDocClassInteract(getContext());
         ProgressHandler.process(getContext(), "删除分组中...", true,
-            docClassInteract.deleteDocClass(id, isToDefault), new InteractInterface<Boolean>() {
+            docClassInteract.deleteDocClass(docClass.getId(), isToDefault), new InteractInterface<Boolean>() {
                 @Override
                 public void onSuccess(Boolean data) {
+                    initData(); // 文档也可能删除，需要全部加载
                     showToast(getContext(), "分组删除成功");
                 }
 
@@ -676,9 +742,9 @@ public class FileFragment extends BaseFragment implements IContextHelper {
 
     /**
      * !!! TODO 加入每个文件的进度判断，放在服务里上传
-     * 导入分组
+     * 导入资料
      */
-    private void scanDocumentIntoDocClass() {
+    private void ToolbarImportFile_Clicked() {
         if (m_docClassAdapter.getCurrentIndex() == -1) {
             showAlert(getActivity(), "错误", "未选择文档分组，无法导入。");
             return;
@@ -772,13 +838,16 @@ public class FileFragment extends BaseFragment implements IContextHelper {
     /**
      * 共享整个分组的文档
      */
-    private void shareTheWholeClassDocuments(DocClass docClass) {
+    private void ToolbarShareWholeDocClassDoc_Clicked(DocClass docClass) {
+        if (m_popup_docclass != null && m_popup_docclass.isShowing())
+            m_popup_docclass.dismiss();
+
         if (docClass == null) {
             showAlert(getActivity(), "错误", "没有选择分组。");
             return;
         }
         if (!AuthManager.getInstance().isLogin()) {
-            showAlert(getActivity(), "错误", "未登录，无法共享文档。");
+            showToast(getContext(), "未登录");
             return;
         }
 
@@ -852,10 +921,10 @@ public class FileFragment extends BaseFragment implements IContextHelper {
      * 扫描共享码
      */
     private void scanShareCodeQrCode() {
-        if (!AuthManager.getInstance().isLogin()) {
-            Toast.makeText(getContext(), "未登录", Toast.LENGTH_SHORT).show();
-            return;
-        }
+        // if (!AuthManager.getInstance().isLogin()) {
+        //     Toast.makeText(getContext(), "未登录", Toast.LENGTH_SHORT).show();
+        //     return;
+        // }
 
         QRCodeManager.getInstance()
             .with(getActivity())
@@ -870,8 +939,7 @@ public class FileFragment extends BaseFragment implements IContextHelper {
                         showAlert(getContext(), "文件共享", "是否下载共享码中的文件？",
                             "下载", (d, w) -> {
                                 // TODO 下载
-                                // 成功
-                                new DownloadedDao(getContext()).InsertDownloadItem("", new Date()); // 本地路径
+                                // new DownloadedDao(getContext()).InsertDownloadItem("", new Date()); // 本地路径
                             },
                             "取消", null
                         );
@@ -896,20 +964,58 @@ public class FileFragment extends BaseFragment implements IContextHelper {
      * Popup / List 打开文档
      */
     private void OpenDocument(Document document) {
+        if (m_popup_document != null && m_popup_document.isShowing())
+            m_popup_document.dismiss();
+
         showAlert(getContext(), "打开文档", "是否打开文档 \"" + document.getBaseFilename() + "\"？",
             "打开", (d, w) -> {
 
                 File file = new File(document.getFilename());
                 String path = AppPathUtil.getFilePathByUri(getContext(), Uri.fromFile(file));
-                if (file.exists() && path != null) {// 打开文件
-                    if (!DocService.openFile(getActivity(), file))
-                        showAlert(getContext(), "错误", "打开文件错误，文件格式不支持。");
-                } else { // 下载文件
+                Log.i("", "document.getFilename(): " + document.getFilename());
+                Log.i("", "file: " + file.getAbsolutePath());
+                Log.i("", "Uri: " + Uri.fromFile(file));
+                Log.i("", "path: " + path);
+
+                /*
+                    I/: document.getFilename(): /storage/emulated/0/Biji/NoteFile/5555255512125.docx
+                    I/: file: /storage/emulated/0/Biji/NoteFile/5555255512125.docx
+                    I/: Uri: file:///storage/emulated/0/Biji/NoteFile/5555255512125.docx
+                    I/: path: /storage/emulated/0/Biji/NoteFile/5555255512125.docx
+                 */
+
+                if (path != null) { // 本地文件
+                    if (file.exists()) { // 打开文件
+                        if (!DocService.openFile(getActivity(), file)) {
+                            showAlert(getContext(), "错误", "打开文件错误，文件格式不支持。");
+                        }
+                    } else { // 文件不存在
+                        showAlert(getContext(), "打开文档", "文件 \"" + document.getBaseFilename() +"\" 不存在，是否删除记录？",
+                            "删除", (d1, w1) -> {
+                                IDocumentInteract documentInteract = InteractStrategy.getInstance().getDocumentInteract(getContext());
+                                ProgressHandler.process(getContext(), "删除记录...", true,
+                                    documentInteract.deleteDocument(document.getId()), new InteractInterface<Boolean>() {
+                                        @Override
+                                        public void onSuccess(Boolean data) {
+                                            pageData.documentListItems.remove(document);
+                                            pageData.showDocumentList.remove(document);
+                                            m_documentAdapter.notifyDataSetChanged();
+                                            showToast(getContext(), "记录 \"" + document.getBaseFilename() + "\" 删除成功");
+                                        }
+
+                                        public void onError(String message) { showAlert(getContext(), "错误", message); } // 应该不会出现
+                                        public void onFailed(Throwable throwable) { showAlert(getContext(), "错误", "网络错误：" + throwable.getMessage()); }
+                                    }
+                                );
+                            },
+                            "取消", null
+                        );
+                    }
+                } else { // 远程文件
                     showAlert(getContext(), "错误", "文档 \"" + document.getBaseFilename() + "\" 为上传的文件，是否下载？",
                         "下载", (d1, w1) -> {
                             // TODO api 下载
-                            // 成功
-                            new DownloadedDao(getContext()).InsertDownloadItem("", new Date()); // 本地路径
+                            // new DownloadedDao(getContext()).InsertDownloadItem("", new Date()); // 本地路径
 
                         }, "取消", null
                     );

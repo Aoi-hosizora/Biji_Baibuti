@@ -33,7 +33,7 @@ public class GroupDao {
         this.context = context;
         this.dbMgr = DbManager.getInstance(new DbOpenHelper(context));
 
-        if (queryAllGroups().isEmpty())
+        if (queryAllGroups().isEmpty() || queryAllGroups() == null)
             insertGroup(Group.DEF_GROUP);
         precessOrder();
     }
