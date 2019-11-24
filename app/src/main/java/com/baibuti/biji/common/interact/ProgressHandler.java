@@ -2,6 +2,7 @@ package com.baibuti.biji.common.interact;
 
 import android.app.ProgressDialog;
 import android.content.Context;
+import android.os.Handler;
 
 import com.baibuti.biji.model.dto.ResponseDTO;
 import com.baibuti.biji.model.vo.MessageVO;
@@ -13,6 +14,8 @@ import okhttp3.ResponseBody;
 import retrofit2.HttpException;
 
 public class ProgressHandler {
+
+    private static final int MIN_PROGRESS_TIME = 50; // 50ms
 
     /**
      * 对于 Observable 显示加载框
@@ -40,8 +43,11 @@ public class ProgressHandler {
         Disposable disposable = observable.subscribe(
             (MessageVO<T> messageVO) -> {
                 if (cancel[0]) return;
-                if (progressDialog[0] != null) // <<
-                    progressDialog[0].dismiss();
+
+                new Handler().postDelayed(() -> {
+                    if (progressDialog[0] != null) // <<
+                        progressDialog[0].dismiss();
+                }, MIN_PROGRESS_TIME);
 
                 // 应该都是 SUCCESS
                 if (messageVO.isSuccess())

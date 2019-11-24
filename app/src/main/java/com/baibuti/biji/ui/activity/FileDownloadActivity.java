@@ -6,6 +6,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.widget.SwipeRefreshLayout;
+import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -38,8 +39,6 @@ public class FileDownloadActivity extends AppCompatActivity implements IContextH
     @BindView(R.id.id_download_srl)
     SwipeRefreshLayout m_srl;
 
-    private com.wyt.searchbox.SearchFragment m_searchFragment;
-
     private Dialog m_LongClickItemPopupMenu;
 
     @Override
@@ -47,6 +46,11 @@ public class FileDownloadActivity extends AppCompatActivity implements IContextH
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_downloaded);
         ButterKnife.bind(this);
+
+        ActionBar actionBar = getSupportActionBar();
+        if (actionBar != null)
+            actionBar.setDisplayHomeAsUpEnabled(true);
+        setTitle("文件下载");
 
         m_documentAdapter = new DocumentAdapter(this);
         RecyclerViewEmptySupport itemListView = findViewById(R.id.id_download_recycler_view);
@@ -57,18 +61,6 @@ public class FileDownloadActivity extends AppCompatActivity implements IContextH
         m_documentAdapter.setOnDocumentClickListener(this::DocumentListItem_Clicked);
         m_documentAdapter.setOnDocumentLongClickListener(this::DocumentListItem_LongClicked);
         m_srl.setOnRefreshListener(this::initData);
-
-        // Search Frag
-        m_searchFragment = com.wyt.searchbox.SearchFragment.newInstance();
-        m_searchFragment.setAllowReturnTransitionOverlap(true);
-        m_searchFragment.setOnSearchClickListener((keyword) -> {
-            if (keyword.trim().isEmpty()) {
-                showToast(this, "搜索内容不为空");
-                return;
-            }
-            // TODO
-            showToast(this, "未实现");
-        });
 
         initData();
     }
@@ -81,14 +73,10 @@ public class FileDownloadActivity extends AppCompatActivity implements IContextH
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()) {
-            case R.id.action_DownloadSearch:
-                m_searchFragment.show(getSupportFragmentManager(), com.wyt.searchbox.SearchFragment.TAG);
-                break;
-            case R.id.action_DownloadClear:
-                ActionClear_Clicked();
-                break;
-        }
+        if (item.getItemId() == R.id.action_DownloadClear)
+            ActionClear_Clicked();
+        else if (item.getItemId() == android.R.id.home)
+            onBackPressed();
         return true;
     }
 
@@ -101,8 +89,10 @@ public class FileDownloadActivity extends AppCompatActivity implements IContextH
         Collections.sort(documentList);
         m_documentAdapter.setDocumentList(documentList);
         m_documentAdapter.notifyDataSetChanged();
-        if (m_srl.isRefreshing())
-            m_srl.setRefreshing(false);
+
+        setTitle("文件下载 (共 " + m_documentAdapter.getDocumentList().size() + " 项)");
+        m_srl.setEnabled(true);
+        m_srl.setRefreshing(false);
     }
 
     /**

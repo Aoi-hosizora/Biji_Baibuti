@@ -8,6 +8,7 @@ import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.content.ContextCompat;
@@ -92,6 +93,9 @@ public class FileFragment extends BaseFragment implements IContextHelper {
     @BindView(R.id.id_document_header)
     TextView m_txt_document_header;
 
+    @BindView(R.id.tab_file_toolbar)
+    Toolbar m_toolBar;
+
     DocumentAdapter m_documentAdapter;
     DocClassAdapter m_docClassAdapter;
 
@@ -152,15 +156,14 @@ public class FileFragment extends BaseFragment implements IContextHelper {
     private void initView() {
 
         // Toolbar
-        Toolbar m_toolbar = view.findViewById(R.id.tab_file_toolbar);
-        m_toolbar.setTitle("文档资料");
-        m_toolbar.inflateMenu(R.menu.file_frag_action);
-        m_toolbar.setNavigationIcon(R.drawable.tab_menu);
-        m_toolbar.setNavigationOnClickListener((View view) -> {
+        m_toolBar.setTitle("文档资料");
+        m_toolBar.inflateMenu(R.menu.file_frag_action);
+        m_toolBar.setNavigationIcon(R.drawable.tab_menu);
+        m_toolBar.setNavigationOnClickListener((View view) -> {
             MainActivity activity = (MainActivity) getActivity();
             if (activity != null) activity.openNavMenu();
         });
-        m_toolbar.setOnMenuItemClickListener(menuItemClickListener);
+        m_toolBar.setOnMenuItemClickListener(menuItemClickListener);
 
         // Empty View
         RecyclerViewEmptySupport m_documentListView = view.findViewById(R.id.id_document_list_view);
@@ -283,6 +286,7 @@ public class FileFragment extends BaseFragment implements IContextHelper {
                         pageData.documentListItems.clear();
                         pageData.showDocumentList.clear();
                         pageData.documentListItems.addAll(data);
+                        m_toolBar.setTitle("文档资料");
 
                         if (currIdx == -1 && pageData.docClassListItems.size() != 0)
                             onDocClassItemClicked(pageData.docClassListItems.get(0));
@@ -332,15 +336,13 @@ public class FileFragment extends BaseFragment implements IContextHelper {
                 pageData.showDocumentList.clear();
                 pageData.showDocumentList.addAll(searchResult);
                 m_documentAdapter.notifyDataSetChanged();
+                m_toolBar.setTitle("\"" + query + "\" 的搜索结果");
             }
-            progressDialog.dismiss();
+            new Handler().postDelayed(progressDialog::dismiss, 50);
         } else {
             ProgressDialog progressDialog = showProgress(getContext(), "返回中...", false, null);
             initData();
-            // pageData.showDocumentList.clear();
-            // pageData.showDocumentList.addAll(pageData.documentListItems);
-            // m_documentAdapter.notifyDataSetChanged();
-            progressDialog.dismiss();
+            new Handler().postDelayed(progressDialog::dismiss, 50);
         }
     }
 
@@ -357,7 +359,7 @@ public class FileFragment extends BaseFragment implements IContextHelper {
         m_txt_document_header.setText(String.format(Locale.CHINA, "%s (共 %d 项)", docClass.getName(), pageData.showDocumentList.size()));
         m_documentAdapter.notifyDataSetChanged();
 
-        progressDialog.dismiss();
+        new Handler().postDelayed(progressDialog::dismiss, 50);
     }
 
     /**

@@ -35,11 +35,10 @@ import butterknife.ButterKnife;
 
 public class SearchItemActivity extends AppCompatActivity implements IContextHelper {
 
-    @BindView(R.id.id_StarSearchItemActivity_StarListView)
-    RecyclerViewEmptySupport m_list_star;
-
     @BindView(R.id.id_StarSearchItemActivity_Srl)
     SwipeRefreshLayout m_srl;
+
+    private SearchItemAdapter m_searchItemAdapter;
 
     // com.wyt.searchbox.SearchFragment.newInstance()
     private com.wyt.searchbox.SearchFragment m_searchFragment;
@@ -87,8 +86,11 @@ public class SearchItemActivity extends AppCompatActivity implements IContextHel
         m_searchFragment.setAllowReturnTransitionOverlap(true);
         m_searchFragment.setOnSearchClickListener((keyword) -> {
             try {
-                if (!keyword.trim().isEmpty()) {
-                    FindSearchItem_Click(keyword.trim());
+                if (keyword.trim().isEmpty())
+                    showToast(this, "搜索内容不为空");
+                else {
+                    searchData(keyword);
+                    m_srl.setEnabled(false);
                 }
             } catch (Exception ex) {
                 ex.printStackTrace();
@@ -97,10 +99,11 @@ public class SearchItemActivity extends AppCompatActivity implements IContextHel
 
         // Srl
         m_srl.setColorSchemeResources(R.color.colorPrimary);
-        m_srl.setOnRefreshListener(() -> refreshListData(null));
+        m_srl.setOnRefreshListener(this::initData);
 
         ////////////
         // EmptyView:
+        RecyclerViewEmptySupport m_list_star = findViewById(R.id.id_StarSearchItemActivity_StarListView);
         m_list_star.setEmptyView(findViewById(R.id.id_StarSearchItemActivity_StarListView_EmptyView));
 
         // LayoutMgr:
@@ -109,9 +112,9 @@ public class SearchItemActivity extends AppCompatActivity implements IContextHel
         layoutManager.setOrientation(LinearLayoutManager.VERTICAL);
         m_list_star.setLayoutManager(layoutManager);
 
-        SearchItemAdapter searchItemAdapter = new SearchItemAdapter(this);
-        searchItemAdapter.setSearchItems(pageData.currentList);
-        searchItemAdapter.setOnItemClickListener(new SearchItemAdapter.OnRecyclerViewItemClickListener() {
+        m_searchItemAdapter = new SearchItemAdapter(this);
+        m_searchItemAdapter.setSearchItems(pageData.currentList);
+        m_searchItemAdapter.setOnItemClickListener(new SearchItemAdapter.OnRecyclerViewItemClickListener() {
             @Override
             public void onItemClick(View view, SearchItem searchItem) {
                 showAlert(SearchItemActivity.this,
@@ -124,86 +127,19 @@ public class SearchItemActivity extends AppCompatActivity implements IContextHel
             @Override
             public void onMoreClick(View view) { }
         });
-        searchItemAdapter.setOnItemLongClickListener((View view, SearchItem searchItem) -> ListItem_LongClicked(searchItem));
+        m_searchItemAdapter.setOnItemLongClickListener((View view, SearchItem searchItem) -> ListItem_LongClicked(searchItem));
 
-        m_list_star.setAdapter(searchItemAdapter);
+        m_list_star.setAdapter(m_searchItemAdapter);
 
-        refreshListData(null);
+        initData();
     }
 
     @Override
     public void onBackPressed() {
         if (pageData.pageState == PageData.PageState.SEARCHING)
-            refreshListData(null);
+            initData();
         else
             finish();
-    }
-
-    /**
-     * 新建菜单
-     */
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.star_act_action, menu);
-        return true;
-    }
-
-    /**
-     * 加载数据 并更新页面状态
-     * @param searchItems 加载数据库或者搜索
-     */
-    private void refreshListData(List<SearchItem> searchItems) {
-        if (searchItems == null || searchItems.isEmpty()) { // 加载数据库内的
-            ISearchItemInteract searchInteract = InteractStrategy.getInstance().getSearchInteract(this);
-            ProgressHandler.process(this, "刷新中...", true,
-                searchInteract.queryAllSearchItems(), new InteractInterface<List<SearchItem>>() {
-                    @Override
-                    public void onSuccess(List<SearchItem> data) {
-                        pageData.currentList.clear();
-                        pageData.currentList.addAll(data);
-                        for (SearchItem searchItem : pageData.currentList)
-                            searchItem.setStar(true);
-                        m_list_star.getAdapter().notifyDataSetChanged();
-                        pageData.pageState = PageData.PageState.NORMAL;
-                        m_srl.setRefreshing(false);
-                        // 更新标题
-                        updateTitle();
-                    }
-
-                    @Override
-                    public void onError(String message) {
-                        m_srl.setRefreshing(false);
-                        showAlert(SearchItemActivity.this, "错误", message);
-                    }
-
-                    @Override
-                    public void onFailed(Throwable throwable) {
-                        m_srl.setRefreshing(false);
-                        showAlert(SearchItemActivity.this, "错误", "网络错误：" + throwable.getMessage());
-                    }
-                }
-            );
-        } else { // 加载搜索结果
-            m_srl.setRefreshing(false);
-            pageData.currentList.clear();
-            pageData.currentList.addAll(searchItems);
-            for (SearchItem searchItem : pageData.currentList)
-                searchItem.setStar(true);
-            m_list_star.getAdapter().notifyDataSetChanged();
-            pageData.pageState = PageData.PageState.SEARCHING;
-            // 更新标题
-            updateTitle();
-        }
-    }
-
-    /**
-     * 更新标题
-     */
-    private void updateTitle() {
-        if (pageData.pageState == PageData.PageState.SEARCHING)
-            setTitle(String.format(Locale.CHINA, "\"%s\" 的搜索结果 (共 %d 项)", pageData.searchKeyWord, pageData.currentList.size()));
-        else
-            setTitle(String.format(Locale.CHINA, "收藏 (共 %d 项)", pageData.currentList.size()));
     }
 
     @Override
@@ -223,18 +159,18 @@ public class SearchItemActivity extends AppCompatActivity implements IContextHel
     }
 
     /**
-     * 菜单 搜索
+     * 新建菜单
      */
-    private void FindSearch_Clicked() {
-        m_searchFragment.show(getSupportFragmentManager(), com.wyt.searchbox.SearchFragment.TAG);
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.star_act_action, menu);
+        return true;
     }
 
     /**
-     * 点击搜索内容
+     * 加载数据
      */
-    private void FindSearchItem_Click(String searchStr) {
-        // TODO 有错
-        pageData.searchKeyWord = searchStr;
+    private void initData() {
         ISearchItemInteract searchInteract = InteractStrategy.getInstance().getSearchInteract(this);
         ProgressHandler.process(this, "刷新中...", true,
             searchInteract.queryAllSearchItems(), new InteractInterface<List<SearchItem>>() {
@@ -242,20 +178,81 @@ public class SearchItemActivity extends AppCompatActivity implements IContextHel
                 public void onSuccess(List<SearchItem> data) {
                     pageData.currentList.clear();
                     pageData.currentList.addAll(data);
-                    refreshListData(SearchUtil.getSearchItems(data.toArray(new SearchItem[0]), searchStr));
+                    for (SearchItem searchItem : pageData.currentList)
+                        searchItem.setStar(true);
+                    m_searchItemAdapter.notifyDataSetChanged();
+
+                    pageData.pageState = PageData.PageState.NORMAL;
+                    m_srl.setEnabled(true);
+                    m_srl.setRefreshing(false);
+                    updateTitle();
                 }
 
                 @Override
                 public void onError(String message) {
+                    m_srl.setRefreshing(false);
                     showAlert(SearchItemActivity.this, "错误", message);
                 }
 
                 @Override
                 public void onFailed(Throwable throwable) {
+                    m_srl.setRefreshing(false);
                     showAlert(SearchItemActivity.this, "错误", "网络错误：" + throwable.getMessage());
                 }
             }
         );
+    }
+
+    /**
+     * 更新标题
+     */
+    private void updateTitle() {
+        if (pageData.pageState == PageData.PageState.SEARCHING)
+            setTitle(String.format(Locale.CHINA, "\"%s\" 的搜索结果 (共 %d 项)", pageData.searchKeyWord, pageData.currentList.size()));
+        else
+            setTitle(String.format(Locale.CHINA, "收藏 (共 %d 项)", pageData.currentList.size()));
+    }
+
+    private void searchData(String keyword) {
+        ISearchItemInteract searchInteract = InteractStrategy.getInstance().getSearchInteract(this);
+        ProgressHandler.process(this, "搜索 \"" + keyword + "\" 中...", true,
+            searchInteract.queryAllSearchItems(), new InteractInterface<List<SearchItem>>() {
+                @Override
+                public void onSuccess(List<SearchItem> data) {
+                    List<SearchItem> result = SearchUtil.getSearchItems(data.toArray(new SearchItem[0]), keyword);
+                    pageData.currentList.clear();
+                    pageData.currentList.addAll(result);
+                    for (SearchItem searchItem : pageData.currentList)
+                        searchItem.setStar(true);
+                    m_searchItemAdapter.notifyDataSetChanged();
+
+                    showToast(SearchItemActivity.this, "共找到 " + result.size() + " 项");
+                    pageData.searchKeyWord = keyword;
+                    pageData.pageState = PageData.PageState.SEARCHING;
+                    m_srl.setRefreshing(false);
+                    updateTitle();
+                }
+
+                @Override
+                public void onError(String message) {
+                    m_srl.setRefreshing(false);
+                    showAlert(SearchItemActivity.this, "错误", message);
+                }
+
+                @Override
+                public void onFailed(Throwable throwable) {
+                    m_srl.setRefreshing(false);
+                    showAlert(SearchItemActivity.this, "错误", "网络错误：" + throwable.getMessage());
+                }
+            }
+        );
+    }
+
+    /**
+     * 菜单 搜索
+     */
+    private void FindSearch_Clicked() {
+        m_searchFragment.show(getSupportFragmentManager(), com.wyt.searchbox.SearchFragment.TAG);
     }
 
     /**
@@ -288,7 +285,8 @@ public class SearchItemActivity extends AppCompatActivity implements IContextHel
                 public void onSuccess(Boolean data) {
                     Toast.makeText(SearchItemActivity.this, String.format("取消收藏 \"%s\" 成功", searchItem.getTitle()), Toast.LENGTH_SHORT).show();
                     pageData.currentList.remove(searchItem);
-                    m_list_star.getAdapter().notifyDataSetChanged();
+                    m_searchItemAdapter.notifyDataSetChanged();
+                    updateTitle();
                 }
 
                 @Override
@@ -308,7 +306,9 @@ public class SearchItemActivity extends AppCompatActivity implements IContextHel
      * 取消全部收藏
      */
     private void SearchItem_CancelAllStarClick() {
-        m_LongClickItemPopupMenu.dismiss();
+        if (m_LongClickItemPopupMenu != null && m_LongClickItemPopupMenu.isShowing())
+            m_LongClickItemPopupMenu.dismiss();
+
         showAlert(this, "取消收藏", "确定取消全部收藏吗？", "取消全部收藏", (d, w) -> {
                 ISearchItemInteract searchInteract = InteractStrategy.getInstance().getSearchInteract(this);
                 ProgressHandler.process(this, "取消收藏中...", true,
@@ -317,7 +317,8 @@ public class SearchItemActivity extends AppCompatActivity implements IContextHel
                         public void onSuccess(Integer data) {
                             Toast.makeText(SearchItemActivity.this, String.format(Locale.CHINA, "成功取消收藏 %d 项", data), Toast.LENGTH_SHORT).show();
                             pageData.currentList.clear();
-                            m_list_star.getAdapter().notifyDataSetChanged();
+                            m_searchItemAdapter.notifyDataSetChanged();
+                            updateTitle();
                         }
 
                         @Override

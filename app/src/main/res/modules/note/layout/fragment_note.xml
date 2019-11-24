@@ -75,7 +75,6 @@
                     android:scrollbars="vertical"
                     android:visibility="visible" />
 
-
             </android.support.v4.widget.SwipeRefreshLayout>
 
             <View
