@@ -32,7 +32,8 @@ public class SearchItemDTO implements Serializable {
      * SearchItemNetInteract[] -> SearchItem[]
      */
     public static SearchItem[] toSearchItems(SearchItemDTO[] searchItemsDTO) {
-        if (searchItemsDTO == null) return null;
+        if (searchItemsDTO == null)
+            return new SearchItem[0];
 
         SearchItem[] searchItems = new SearchItem[searchItemsDTO.length];
         for (int i = 0; i < searchItemsDTO.length; i++)

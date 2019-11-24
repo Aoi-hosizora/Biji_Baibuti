@@ -28,12 +28,12 @@ public class WebViewActivity extends AppCompatActivity implements IContextHelper
         super.onCreate(savedInstanceState);
         try {
             setContentView(R.layout.activity_webview);
+            ButterKnife.bind(this);
         } catch (RuntimeException ex) {
             //  java.lang.RuntimeException: Unable to start activity ComponentInfo{com.baibuti.biji/com.baibuti.biji.ui.activity.WebViewActivity}: android.view.InflateException: Binary XML file line #22: Binary XML file line #22: Error inflating class android.webkit.WebView
             showAlert(this, "错误", "Android WebView 加载错误");
             finish();
         }
-        ButterKnife.bind(this);
 
         ActionBar actionBar = getSupportActionBar();
         if (actionBar != null)

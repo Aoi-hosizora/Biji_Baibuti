@@ -66,7 +66,7 @@ public class ProgressHandler {
                     ResponseBody responseBody = ((HttpException) throwable).response().errorBody();
 
                     Gson gson = new Gson();
-                    String res = responseBody.string();
+                    String res = responseBody == null ? "Null Response Error" : responseBody.string();
                     ResponseDTO resp = gson.fromJson(res, ResponseDTO.class);
 
                     handler.onError(MessageErrorParser.fromMessageVO(new MessageVO(false, resp.getMessage())));

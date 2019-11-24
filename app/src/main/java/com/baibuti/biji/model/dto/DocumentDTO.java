@@ -33,7 +33,7 @@ public class DocumentDTO implements Serializable {
      */
     public static Document[] toDocuments(DocumentDTO[] documentsDTO) {
         if (documentsDTO == null)
-            return null;
+            return new Document[0];
         Document[] documents = new Document[documentsDTO.length];
         for (int i = 0; i < documentsDTO.length; i++)
             documents[i] = documentsDTO[i].toDocument();

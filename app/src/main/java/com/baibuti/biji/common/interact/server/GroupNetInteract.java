@@ -7,7 +7,9 @@ import com.baibuti.biji.model.dto.GroupDTO;
 import com.baibuti.biji.model.po.Group;
 import com.baibuti.biji.model.vo.MessageVO;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 import io.reactivex.Observable;
@@ -24,7 +26,9 @@ public class GroupNetInteract implements IGroupInteract {
             .map(responseDTO -> {
                 if (responseDTO.getCode() != 200)
                     return new MessageVO<List<Group>>(false, responseDTO.getMessage());
-                return new MessageVO<>(Arrays.asList(GroupDTO.toGroups(responseDTO.getData())));
+                List<Group> fromGroups = new ArrayList<>();
+                Collections.addAll(fromGroups, GroupDTO.toGroups(responseDTO.getData()));
+                return new MessageVO<>(fromGroups);
             })
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread());

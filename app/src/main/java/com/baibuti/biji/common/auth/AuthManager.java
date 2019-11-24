@@ -6,11 +6,12 @@ import android.content.SharedPreferences;
 import com.baibuti.biji.common.retrofit.RetrofitFactory;
 
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
 import lombok.Getter;
+import lombok.Setter;
 
 import static android.content.Context.MODE_PRIVATE;
 
@@ -25,8 +26,11 @@ public class AuthManager {
         return Instance;
     }
 
-    @Getter private String username;
-    @Getter private String token;
+    @Getter
+    private String username;
+
+    @Getter @Setter
+    private String token; // 不加 Bearer
 
     public boolean isLogin() {
         return username != null && !username.isEmpty() &&
@@ -34,12 +38,12 @@ public class AuthManager {
     }
 
     public Map<String, String> getAuthorizationHead(String... otherHead) {
-        if (isLogin()) {
-            List<String> vararg = Arrays.asList(otherHead);
-            vararg.add("Authorization");
-            vararg.add(getToken());
-            otherHead = vararg.toArray(new String[0]);
-        }
+        // java.lang.UnsupportedOperationException
+        List<String> vararg = new ArrayList<>();
+        Collections.addAll(vararg, otherHead);
+        vararg.add("Authorization");
+        vararg.add("Bearer " + token);
+        otherHead = vararg.toArray(new String[0]);
         return RetrofitFactory.getHeader(otherHead);
     }
 
@@ -76,6 +80,10 @@ public class AuthManager {
 
     public void addLoginChangeListener(OnLoginChangeListener onLoginChangeListener) {
         this.onLoginChangeListeners.add(onLoginChangeListener);
+        if (isLogin())
+            onLoginChangeListener.onLogin(username);
+        else
+            onLoginChangeListener.onLogout();
     }
 
     private static final String AuthSP = "biji_auth";

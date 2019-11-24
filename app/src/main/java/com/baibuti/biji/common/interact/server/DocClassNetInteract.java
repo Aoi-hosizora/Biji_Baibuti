@@ -1,6 +1,5 @@
 package com.baibuti.biji.common.interact.server;
 
-import com.baibuti.biji.model.dao.DbStatusType;
 import com.baibuti.biji.common.interact.contract.IDocClassInteract;
 import com.baibuti.biji.model.dto.DocClassDTO;
 import com.baibuti.biji.model.po.DocClass;
@@ -8,7 +7,8 @@ import com.baibuti.biji.common.auth.AuthManager;
 import com.baibuti.biji.common.retrofit.RetrofitFactory;
 import com.baibuti.biji.model.vo.MessageVO;
 
-import java.util.Arrays;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import io.reactivex.Observable;
@@ -25,7 +25,9 @@ public class DocClassNetInteract implements IDocClassInteract {
             .map(responseDTO -> {
                 if (responseDTO.getCode() != 200)
                     return new MessageVO<List<DocClass>>(false, responseDTO.getMessage());
-                return new MessageVO<>(Arrays.asList(DocClassDTO.toDocClasses(responseDTO.getData())));
+                List<DocClass> fromDocClasses = new ArrayList<>();
+                Collections.addAll(fromDocClasses, DocClassDTO.toDocClasses(responseDTO.getData()));
+                return new MessageVO<>(fromDocClasses);
             })
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread());

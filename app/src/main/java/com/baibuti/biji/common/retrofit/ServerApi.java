@@ -18,7 +18,6 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 import io.reactivex.Observable;
-import retrofit2.Response;
 import retrofit2.http.DELETE;
 import retrofit2.http.FormUrlEncoded;
 import retrofit2.http.GET;
@@ -43,10 +42,10 @@ public interface ServerApi {
 
     @Multipart
     @POST("/auth/login")
-    Observable<Response<ResponseDTO<AuthRespDTO>>> login(
+    Observable<ResponseDTO<AuthRespDTO>> login(
         @Part("username") String username,
         @Part("password") String password,
-        @Part("expiration") int expiration
+        @Part("expiration") Integer expiration
     );
 
     @Multipart
@@ -74,11 +73,11 @@ public interface ServerApi {
 
     @NeedAuth
     @GET("/note/group/{gid}")
-    Observable<ResponseDTO<NoteDTO[]>> getNotesByGroupId(@Path("gid") int id);
+    Observable<ResponseDTO<NoteDTO[]>> getNotesByGroupId(@Path("gid") Integer id);
 
     @NeedAuth
     @GET("/note/{nid}")
-    Observable<ResponseDTO<NoteDTO>> getNoteById(@Path("nid") int id);
+    Observable<ResponseDTO<NoteDTO>> getNoteById(@Path("nid") Integer id);
 
     @NeedAuth
     @Multipart
@@ -86,7 +85,7 @@ public interface ServerApi {
     Observable<ResponseDTO<NoteDTO>> insertNote(
         @Part("title") String title,
         @Part("content") String content,
-        @Part("group_id") int groupId,
+        @Part("group_id") Integer groupId,
         @Part("create_time") String createTime,
         @Part("update_time") String updateTime
     );
@@ -95,21 +94,21 @@ public interface ServerApi {
     @Multipart
     @PUT("/note/")
     Observable<ResponseDTO<NoteDTO>> updateNote(
-        @Part("id") int id,
+        @Part("id") Integer id,
         @Part("title") String title,
         @Part("content") String content,
-        @Part("group_id") int groupId
+        @Part("group_id") Integer groupId
     );
 
     @NeedAuth
     @DELETE("/note/delete/{id}")
-    Observable<ResponseDTO<NoteDTO>> deleteNote(@Path("id") int id);
+    Observable<ResponseDTO<NoteDTO>> deleteNote(@Path("id") Integer id);
 
     @NeedAuth
     @Multipart
     @DELETE("/note/delete/")
     Observable<ResponseDTO<OneFieldDTO.CountDTO>> deleteNotes(
-        @Part("id") int[] id
+        @Part("id") Integer[] id
     );
 
     // endregion Note
@@ -122,7 +121,7 @@ public interface ServerApi {
 
     @NeedAuth
     @GET("/group/{gid}")
-    Observable<ResponseDTO<GroupDTO>> getGroupById(@Path("gid") int id);
+    Observable<ResponseDTO<GroupDTO>> getGroupById(@Path("gid") Integer id);
 
     @NeedAuth
     @GET("/group/")
@@ -142,9 +141,9 @@ public interface ServerApi {
     @NeedAuth
     @PUT("/group/")
     Observable<ResponseDTO<GroupDTO>> updateGroup(
-        @Part("id") int id,
+        @Part("id") Integer id,
         @Part("name") String name,
-        @Part("order") int order,
+        @Part("order") Integer order,
         @Part("color") String color
     );
 
@@ -156,7 +155,7 @@ public interface ServerApi {
 
     @NeedAuth
     @DELETE("/group/{gid}")
-    Observable<ResponseDTO<GroupDTO>> deleteGroup(@Path("gid") int id, @Query("default") boolean isToDefault);
+    Observable<ResponseDTO<GroupDTO>> deleteGroup(@Path("gid") Integer id, @Query("default") Boolean isToDefault);
 
     // endregion Group
 
@@ -168,7 +167,7 @@ public interface ServerApi {
 
     @NeedAuth
     @GET("/star/{sid}")
-    Observable<ResponseDTO<SearchItemDTO>> getStarById(@Path("sid") int id);
+    Observable<ResponseDTO<SearchItemDTO>> getStarById(@Path("sid") Integer id);
 
     @NeedAuth
     @Multipart
@@ -182,13 +181,13 @@ public interface ServerApi {
     @NeedAuth
     @DELETE("/star/{sid}")
     @FormUrlEncoded
-    Observable<ResponseDTO<SearchItemDTO>> deleteStar(@Path("sid") int id);
+    Observable<ResponseDTO<SearchItemDTO>> deleteStar(@Path("sid") Integer id);
 
     @NeedAuth
     @Multipart
     @DELETE("/star/")
     Observable<ResponseDTO<OneFieldDTO.CountDTO>> deleteStars(
-        @Part("id") int[] id
+        @Part("id") Integer[] id
     );
 
     // endregion SearchItem
@@ -204,7 +203,7 @@ public interface ServerApi {
     @PUT("/schedule/")
     Observable<ResponseDTO<OneFieldDTO.ScheduleDTO>> updateSchedule(
         @Part("schedule") String schedule,
-        @Part("week") int currWeek
+        @Part("week") Integer currWeek
     );
 
     @NeedAuth
@@ -221,7 +220,7 @@ public interface ServerApi {
 
     @NeedAuth
     @GET("/docclass/{cid}")
-    Observable<ResponseDTO<DocClassDTO>> getDocClassById(@Path("cid") int id);
+    Observable<ResponseDTO<DocClassDTO>> getDocClassById(@Path("cid") Integer id);
 
     @NeedAuth
     @GET("/docclass/}")
@@ -242,13 +241,13 @@ public interface ServerApi {
     @Multipart
     @PUT("/docclass/")
     Observable<ResponseDTO<DocClassDTO>> updateDocClass(
-        @Part("id") int id,
+        @Part("id") Integer id,
         @Part("name") String name
     );
 
     @NeedAuth
     @DELETE("/docclass/{cid}")
-    Observable<ResponseDTO<DocClassDTO>> deleteDocClass(@Path("cid") int id, @Query("default") boolean isToDefault);
+    Observable<ResponseDTO<DocClassDTO>> deleteDocClass(@Path("cid") Integer id, @Query("default") Boolean isToDefault);
 
     // endregion DocClass
 
@@ -260,32 +259,32 @@ public interface ServerApi {
 
     @NeedAuth
     @GET("/document/class/{cid}")
-    Observable<ResponseDTO<DocumentDTO[]>> getDocumentByClassId(@Path("cid") int cid);
+    Observable<ResponseDTO<DocumentDTO[]>> getDocumentByClassId(@Path("cid") Integer cid);
 
     @NeedAuth
     @GET("/document/{did}")
-    Observable<ResponseDTO<DocumentDTO>> getDocumentById(@Path("did") int id);
+    Observable<ResponseDTO<DocumentDTO>> getDocumentById(@Path("did") Integer id);
 
     @NeedAuth
     @Multipart
     @POST("/document/")
     Observable<ResponseDTO<DocumentDTO>> insertDocument(
         @Part("file") File file,
-        @Part("doc_class_id") int classId
+        @Part("doc_class_id") Integer classId
     );
 
     @NeedAuth
     @Multipart
     @PUT("/document/")
     Observable<ResponseDTO<DocumentDTO>> updateDocument(
-        @Part("id") int id,
+        @Part("id") Integer id,
         @Part("filename") String filename,
-        @Part("doc_class_id") int classId
+        @Part("doc_class_id") Integer classId
     );
 
     @NeedAuth
     @DELETE("/document/{did}")
-    Observable<ResponseDTO<DocumentDTO>> deleteDocument(@Path("did") int id);
+    Observable<ResponseDTO<DocumentDTO>> deleteDocument(@Path("did") Integer id);
 
     // endregion Document
 
@@ -326,8 +325,8 @@ public interface ServerApi {
     @Multipart
     @POST("/share/")
     Observable<ResponseDTO<ShareCodeDTO>> putDocToShare(
-        @Part("ex") int ex,
-        @Part("did") int[] ids
+        @Part("ex") Integer ex,
+        @Part("did") Integer[] ids
     );
 
     /**
@@ -337,8 +336,8 @@ public interface ServerApi {
     @Multipart
     @POST("/share/")
     Observable<ResponseDTO<ShareCodeDTO>> putDocClassToShare(
-        @Part("ex") int ex,
-        @Query("cid") int cid
+        @Part("ex") Integer ex,
+        @Query("cid") Integer cid
     );
 
     // /**

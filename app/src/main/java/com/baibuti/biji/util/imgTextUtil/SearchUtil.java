@@ -3,7 +3,7 @@ package com.baibuti.biji.util.imgTextUtil;
 import com.baibuti.biji.model.vo.ISearchEntity;
 
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 import javax.annotation.Nonnull;
@@ -23,7 +23,9 @@ public class SearchUtil {
             return JiebaSegmenter.getJiebaSegmenterSingleton().getDividedString(str);
         } catch (Exception ex) {
             ex.printStackTrace();
-            return Arrays.asList(str.split("[ \t,\\\\.，。]"));
+            List<String> strings = new ArrayList<>();
+            Collections.addAll(strings, str.split("[ \t,\\\\.，。]"));
+            return strings;
         }
     }
 

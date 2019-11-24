@@ -74,6 +74,7 @@ public class LoginFragment extends Fragment implements IContextHelper {
     private void initView() {
         if (AuthManager.getInstance().isLogin())
             m_LoginEditText.setText(AuthManager.getInstance().getUsername());
+
         AuthActivity activity = (AuthActivity) getActivity();
         if (activity != null) {
             ArrayAdapter<String> spinnerAdapter = new ArrayAdapter<>(activity, R.layout.layout_common_spinner, exTexts);
@@ -123,7 +124,9 @@ public class LoginFragment extends Fragment implements IContextHelper {
                     showToast(getContext(), String.format(Locale.CHINA, "用户 \"%s\" 登录成功", data.getUsername()));
 
                     AuthManager.getInstance().login(data.getUsername(), data.getToken());
+
                     Context context = getContext();
+                    // 放 SP
                     if (context != null)
                         AuthManager.getInstance().setSpToken(context, data.getToken());
 

@@ -33,7 +33,7 @@ public class GroupDTO implements Serializable {
      */
     public static Group[] toGroups(GroupDTO[] groupsDTO) {
         if (groupsDTO == null)
-            return null;
+            return new Group[0];
         Group[] groups = new Group[groupsDTO.length];
         for (int i = 0; i < groupsDTO.length; i++)
             groups[i] = groupsDTO[i].toGroup();

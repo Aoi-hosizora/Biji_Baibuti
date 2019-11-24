@@ -22,7 +22,7 @@ public class ShareCodeNetInteract {
      * 为 docs 新建共享码
      */
     public Observable<MessageVO<String>> newShareCode(Document[] documents, int exp) {
-        int[] ids = new int[documents.length];
+        Integer[] ids = new Integer[documents.length];
         for (int i = 0; i < documents.length; i++)
             ids[i] = documents[i].getId();
 

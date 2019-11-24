@@ -4,7 +4,6 @@ import com.baibuti.biji.common.auth.dto.AuthRespDTO;
 import com.baibuti.biji.common.retrofit.RetrofitFactory;
 import com.baibuti.biji.model.vo.MessageVO;
 
-
 import io.reactivex.Observable;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;
@@ -32,11 +31,10 @@ public class AuthService {
             .createRequest(RetrofitFactory.getHeader())
             .login(username, password, expiration)
             .map(response -> {
-                if (response.code() != 200)
-                    return new MessageVO<AuthRespDTO>(false, response.body().getMessage());
-                AuthRespDTO respDTO = response.body().getData();
-                respDTO.setToken(response.headers().get("Authorization"));
-                return new MessageVO<>(respDTO);
+                if (response.getCode() != 200)
+                    return new MessageVO<AuthRespDTO>(false, response.getMessage());
+                // Log.i("", "login: token=" + response.getData().getToken());
+                return new MessageVO<>(response.getData());
             })
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread());

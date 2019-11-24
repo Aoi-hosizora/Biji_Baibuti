@@ -1,6 +1,5 @@
 package com.baibuti.biji.common.interact.server;
 
-import com.baibuti.biji.model.dao.DbStatusType;
 import com.baibuti.biji.common.interact.contract.IDocumentInteract;
 import com.baibuti.biji.model.dto.DocumentDTO;
 import com.baibuti.biji.model.po.Document;
@@ -9,7 +8,8 @@ import com.baibuti.biji.common.retrofit.RetrofitFactory;
 import com.baibuti.biji.model.vo.MessageVO;
 
 import java.io.File;
-import java.util.Arrays;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import io.reactivex.Observable;
@@ -26,7 +26,9 @@ public class DocumentNetInteract implements IDocumentInteract {
             .map(responseDTO -> {
                 if (responseDTO.getCode() != 200)
                     return new MessageVO<List<Document>>(false, responseDTO.getMessage());
-                return new MessageVO<>(Arrays.asList(DocumentDTO.toDocuments(responseDTO.getData())));
+                List<Document> fromDocuments = new ArrayList<>();
+                Collections.addAll(fromDocuments, DocumentDTO.toDocuments(responseDTO.getData()));
+                return new MessageVO<>(fromDocuments);
             })
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread());
@@ -40,7 +42,9 @@ public class DocumentNetInteract implements IDocumentInteract {
             .map(responseDTO -> {
                 if (responseDTO.getCode() != 200)
                     return new MessageVO<List<Document>>(false, responseDTO.getMessage());
-                return new MessageVO<>(Arrays.asList(DocumentDTO.toDocuments(responseDTO.getData())));
+                List<Document> fromDocuments = new ArrayList<>();
+                Collections.addAll(fromDocuments, DocumentDTO.toDocuments(responseDTO.getData()));
+                return new MessageVO<>(fromDocuments);
             })
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread());

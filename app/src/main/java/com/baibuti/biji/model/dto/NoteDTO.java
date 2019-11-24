@@ -1,9 +1,9 @@
 package com.baibuti.biji.model.dto;
 
 import com.baibuti.biji.model.po.Note;
+import com.baibuti.biji.util.otherUtil.DateColorUtil;
 
 import java.io.Serializable;
-import java.util.Date;
 
 import lombok.Data;
 
@@ -14,10 +14,10 @@ public class NoteDTO implements Serializable {
     private String title;
     private String content;
     private GroupDTO group; // <<<
-    private Date create_time;
-    private Date update_time;
+    private String create_time; // 不能用 Date，GSON 无法解析
+    private String update_time;
 
-    private NoteDTO(int id, String title, String content, GroupDTO group, Date create_time, Date update_time) {
+    private NoteDTO(int id, String title, String content, GroupDTO group, String create_time, String update_time) {
         this.id = id;
         this.title = title;
         this.content = content;
@@ -30,7 +30,7 @@ public class NoteDTO implements Serializable {
       * NoteDTO -> Note
       */
      public Note toNote() {
-         return new Note(id, title, content, group.toGroup(), create_time, update_time);
+         return new Note(id, title, content, group.toGroup(), DateColorUtil.Str2Date(create_time), DateColorUtil.Str2Date(update_time));
      }
 
     // /**
@@ -46,7 +46,8 @@ public class NoteDTO implements Serializable {
      * NoteDTO[] -> Note[]
      */
     public static Note[] toNotes(NoteDTO[] notesDTO) {
-        if (notesDTO == null) return null;
+        if (notesDTO == null)
+            return new Note[0];
         Note[] notes = new Note[notesDTO.length];
         for (int i = 0; i < notesDTO.length; i++)
             notes[i] = notesDTO[i].toNote();

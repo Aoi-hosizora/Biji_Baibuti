@@ -1,5 +1,7 @@
 package com.baibuti.biji.common.interact;
 
+import android.util.Log;
+
 import com.baibuti.biji.model.vo.MessageVO;
 
 public class MessageErrorParser {
@@ -36,7 +38,7 @@ public class MessageErrorParser {
      * 服务器端的错误
      */
     static String fromMessageVO(MessageVO messageVO) {
-
+        Log.e("", "fromMessageVO: " + messageVO.getMessage());
         switch (messageVO.getMessage()) {
             // Global
             case "Request Param Error":
@@ -51,6 +53,8 @@ public class MessageErrorParser {
                 return "登录过期";
             case "Token Bad Signature":
                 return "无效的登录";
+            case "Unauthorized":
+                return "未登录";
             ////////////////////////////////////////////////////
             // Auth
             case "Password Error":
@@ -172,6 +176,6 @@ public class MessageErrorParser {
                 return "压缩文件失败";
         }
 
-        return "未知错误";
+        return "未知错误：" + messageVO.getMessage();
     }
 }

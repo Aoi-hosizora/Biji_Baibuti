@@ -4,11 +4,15 @@ import com.baibuti.biji.model.dao.DbStatusType;
 import com.baibuti.biji.common.auth.AuthManager;
 import com.baibuti.biji.common.retrofit.RetrofitFactory;
 import com.baibuti.biji.common.interact.contract.ISearchItemInteract;
+import com.baibuti.biji.model.dto.DocClassDTO;
 import com.baibuti.biji.model.dto.SearchItemDTO;
+import com.baibuti.biji.model.po.DocClass;
 import com.baibuti.biji.model.po.SearchItem;
 import com.baibuti.biji.model.vo.MessageVO;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 import io.reactivex.Observable;
@@ -25,7 +29,9 @@ public class SearchItemNetInteract implements ISearchItemInteract {
             .map(responseDTO -> {
                 if (responseDTO.getCode() != 200)
                     return new MessageVO<List<SearchItem>>(false, responseDTO.getMessage());
-                return new MessageVO<>(Arrays.asList(SearchItemDTO.toSearchItems(responseDTO.getData())));
+                List<SearchItem> fromSearchItems = new ArrayList<>();
+                Collections.addAll(fromSearchItems, SearchItemDTO.toSearchItems(responseDTO.getData()));
+                return new MessageVO<>(fromSearchItems);
             })
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread());
@@ -82,7 +88,7 @@ public class SearchItemNetInteract implements ISearchItemInteract {
 
     @Override
     public Observable<MessageVO<Integer>> deleteSearchItems(List<SearchItem> searchItems) {
-        int[] ids = new int[searchItems.size()];
+        Integer[] ids = new Integer[searchItems.size()];
         for (int i = 0; i < ids.length; i++)
             ids[i] = searchItems.get(i).getId();
 

@@ -296,6 +296,7 @@ public class NoteFragment extends BaseFragment implements IContextHelper {
             groupInteract.queryAllGroups(), new InteractInterface<List<Group>>() {
                 @Override
                 public void onSuccess(List<Group> groups) {
+                    // UnsupportedOperationException
                     groups.add(0, Group.AllGroups);
                     Collections.sort(groups);
                     m_group_adapter.setGroupList(groups);
@@ -551,7 +552,7 @@ public class NoteFragment extends BaseFragment implements IContextHelper {
                             Note newNote = (Note) returnIntent.getSerializableExtra(INT_NOTE_DATA);
                             boolean isModify = returnIntent.getBooleanExtra(INT_IS_MODIFIED, true);
                             if (isModify) {
-                                showToast(getContext(), String.format(Locale.CHINA, "笔记 \"%s\"新建成功", newNote.getTitle()));
+                                showToast(getContext(), String.format(Locale.CHINA, "笔记 \"%s\" 新建成功", newNote.getTitle()));
                                 pageData.allNotes.add(newNote);
                                 pageData.showNoteList.add(newNote);
                                 Collections.sort(pageData.allNotes);

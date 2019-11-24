@@ -24,13 +24,12 @@ public class DocClassDTO implements Serializable {
         return new DocClass(id, name);
     }
 
-
     /**
      * DocClassDTO[] -> DocClass[]
      */
     public static DocClass[] toDocClasses(DocClassDTO[] docClassesDTO) {
         if (docClassesDTO == null)
-            return null;
+            return new DocClass[0];
         DocClass[] docClasses = new DocClass[docClassesDTO.length];
         for (int i = 0; i < docClassesDTO.length; i++)
             docClasses[i] = docClassesDTO[i].toDocClass();

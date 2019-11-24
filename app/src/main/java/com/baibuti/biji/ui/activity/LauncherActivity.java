@@ -30,16 +30,18 @@ public class LauncherActivity extends AppCompatActivity implements IContextHelpe
             actionBar.hide();
 
         String token = AuthManager.getInstance().getSpToken(this);
-
+        // Log.i("", "onCreate: " + token);
         if (token.isEmpty())
             continueToActivity();
         else {
+            AuthManager.getInstance().setToken(token);
+
             // Try Login
             ProgressHandler.process(this, "登录中...", false,
                 AuthService.currentAuth(), new InteractInterface<AuthRespDTO>() {
                     @Override
                     public void onSuccess(AuthRespDTO data) {
-                        AuthManager.getInstance().login(data.getUsername(), data.getToken());
+                        AuthManager.getInstance().login(data.getUsername(), token);
                         continueToActivity();
                     }
 
