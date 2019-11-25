@@ -1,11 +1,16 @@
 package com.baibuti.biji.common.interact.server;
 
+import com.baibuti.biji.model.dto.DocumentDTO;
 import com.baibuti.biji.model.po.DocClass;
 import com.baibuti.biji.model.po.Document;
 import com.baibuti.biji.common.auth.AuthManager;
 import com.baibuti.biji.common.retrofit.RetrofitFactory;
 import com.baibuti.biji.model.vo.MessageVO;
 
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 import io.reactivex.Observable;
 import io.reactivex.android.schedulers.AndroidSchedulers;
@@ -17,6 +22,24 @@ public class ShareCodeNetInteract {
      * 默认的期限
      */
     public static final int DEFAULT_EX = 3600;
+
+    public Observable<MessageVO<List<Document>>> getShareCodeContents(String sc) {
+
+        return RetrofitFactory.getInstance()
+            .createRequest(AuthManager.getInstance().getAuthorizationHead())
+            .getShareCodeContents(sc)
+            .map(responseDTO -> {
+                if (responseDTO.getCode() != 200)
+                    return new MessageVO<List<Document>>(false, responseDTO.getMessage());
+                else {
+                    List<Document> fromDocuments = new ArrayList<>();
+                    Collections.addAll(fromDocuments, DocumentDTO.toDocuments(responseDTO.getData()));
+                    return new MessageVO<>(fromDocuments);
+                }
+            })
+            .subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread());
+    }
 
     /**
      * 为 docs 新建共享码

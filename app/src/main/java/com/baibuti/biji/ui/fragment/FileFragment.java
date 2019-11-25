@@ -413,6 +413,7 @@ public class FileFragment extends BaseFragment implements IContextHelper {
 
         ((TextView) root.findViewById(R.id.id_doc_popup_label)).setText(String.format("当前选中文档: %s (%s)", document.getBaseFilename(), document.getDocClass().getName()));
         root.findViewById(R.id.id_doc_popup_open).setOnClickListener((v) -> OpenDocument(document));
+        root.findViewById(R.id.id_doc_popup_share).setOnClickListener((v) -> PopupShareDocument_Clicked(document));
         root.findViewById(R.id.id_doc_popup_move).setOnClickListener((v) -> PopupMoveDocument_Clicked(document));
         root.findViewById(R.id.id_doc_popup_delete).setOnClickListener((v) -> PopupDeleteDoc_Clicked(document, false));
         root.findViewById(R.id.id_doc_popup_delete_file).setOnClickListener((v) -> PopupDeleteDoc_Clicked(document, true));
@@ -526,6 +527,82 @@ public class FileFragment extends BaseFragment implements IContextHelper {
                     showAlert(getContext(), "错误", "网络错误：" + throwable.getMessage());
                 }
             }
+        );
+    }
+
+    /**
+     * 共享单个文档
+     */
+    private void PopupShareDocument_Clicked(Document document) {
+        if (m_popup_document != null && m_popup_document.isShowing())
+            m_popup_document.dismiss();
+
+        if (document == null) {
+            showAlert(getActivity(), "错误", "没有选择文件。");
+            return;
+        }
+        if (!AuthManager.getInstance().isLogin()) {
+            showToast(getContext(), "未登录");
+            return;
+        }
+
+        MainActivity activity = (MainActivity) getActivity();
+        if (activity == null) return;
+
+        showAlert(getContext(), "共享",
+            "确定要共享文件 \"" + document.getFilename() + "\" ？",
+            "共享", (d, w) -> {
+                d.dismiss();
+
+                // Ex
+                Spinner exChooser = new Spinner(getActivity());
+                ArrayAdapter<String> spinnerAdapter = new ArrayAdapter<>(getActivity(), R.layout.layout_common_spinner, exTexts);
+                exChooser.setAdapter(spinnerAdapter);
+                exChooser.setSelection(Arrays.asList(exTexts).indexOf("1个小时"), true);
+
+                showAlert(getActivity(),
+                    "文件共享时间", exChooser,
+                    "确定", (d1, w1) -> {
+                        int exp = exTextNumbers.get(exTexts[exChooser.getSelectedItemPosition()]);
+                        exp *= 3600;
+
+                        ProgressDialog progressDialog = showProgress(getActivity(), "生成共享码...", false, null);
+
+                        ShareCodeNetInteract shareCodeNetInteract = new ShareCodeNetInteract();
+                        ProgressHandler.process(getContext(), "生成共享码...", true,
+                            shareCodeNetInteract.newShareCode(new Document[]{document}, exp), new InteractInterface<String>() {
+                                @Override
+                                public void onSuccess(String shareCode) {
+                                    Bitmap qrCode = CommonUtil.generateQrCode(shareCode, 800, Color.BLACK);
+                                    progressDialog.dismiss();
+                                    if (qrCode == null) {
+                                        showAlert(getContext(), "错误", "二维码生成错误。");
+                                        return;
+                                    }
+
+                                    ImageView qrCodeImageView = new ImageView(getActivity());
+                                    qrCodeImageView.setImageBitmap(qrCode);
+                                    qrCodeImageView.setMinimumWidth(qrCode.getWidth());
+                                    qrCodeImageView.setMinimumHeight(qrCode.getHeight());
+                                    showAlert(getActivity(), "共享二维码", qrCodeImageView, "返回", null);
+                                }
+
+                                @Override
+                                public void onError(String message) {
+                                    showAlert(getActivity(), "错误", message);
+                                }
+
+                                @Override
+                                public void onFailed(Throwable throwable) {
+                                    showAlert(getActivity(), "错误", "网络错误：" + throwable.getMessage());
+                                }
+                            }
+                        );
+                    },
+                    "取消", null
+                );
+
+            }, "取消", null
         );
     }
 
@@ -745,7 +822,6 @@ public class FileFragment extends BaseFragment implements IContextHelper {
     // region Share
 
     /**
-     * !!! TODO 加入每个文件的进度判断，放在服务里上传
      * 导入资料
      */
     private void ToolbarImportFile_Clicked() {
@@ -928,7 +1004,6 @@ public class FileFragment extends BaseFragment implements IContextHelper {
      * 扫描共享码
      */
     private void scanShareCodeQrCode() {
-
         QRCodeManager.getInstance()
             .with(getActivity())
             .scanningQRCode(new OnQRCodeScanCallback() {
@@ -947,25 +1022,50 @@ public class FileFragment extends BaseFragment implements IContextHelper {
                         showAlert(getContext(), "错误", "共享码错误。");
                         return;
                     }
-                    showAlert(getContext(), "文件共享", "是否下载共享码中的文件？",
-                        "下载", (d, w) -> {
-                            File[] newFile = new File[]{new File(AppPathUtil.getDownloadDir(), shareCode)};
-                            if (newFile[0].exists()) {
-                                showAlert(getContext(), "下载文件", "文件 \"" + shareCode + "\" 已存在，是否覆盖？",
-                                    "覆盖", (d2, w2) -> {
-                                        AppPathUtil.deleteFile(newFile[0].getAbsolutePath());
-                                        onDownload(newFile[0], ServerUrl.getShareCodeUrl(shareCode), false);
+
+                    ShareCodeNetInteract shareCodeNetInteract = new ShareCodeNetInteract();
+                    ProgressHandler.process(getContext(), "加载共享码内容中...", true,
+                        shareCodeNetInteract.getShareCodeContents(shareCode), new InteractInterface<List<Document>>() {
+                            @Override
+                            public void onSuccess(List<Document> data) {
+                                StringBuilder hint = new StringBuilder();
+                                for (Document document : data)
+                                    hint.append(document.getBaseFilename()).append("\n");
+
+
+                                showAlert(getContext(), "共享", "该共享码包含了 " + data.size() + " 个文件\n" + hint + "是否下载？",
+                                    "下载", (d, v) -> {
+                                        String filename = (data.size() == 1) ? data.get(0).getBaseFilename() : data.get(0).getBaseFilename() + "等" + data.size() + "个文件.zip";
+                                        File[] newFile = new File[]{new File(AppPathUtil.getDownloadDir(), filename)};
+                                        if (newFile[0].exists()) {
+                                            showAlert(getContext(), "下载文件", "文件 \"" + shareCode + "\" 已存在，是否覆盖？",
+                                                "覆盖", (d2, w2) -> {
+                                                    AppPathUtil.deleteFile(newFile[0].getAbsolutePath());
+                                                    onDownload(newFile[0], ServerUrl.getShareCodeUrl(shareCode), false);
+                                                },
+                                                "重命名", (d2, w2) -> {
+                                                    newFile[0] = new File(AppPathUtil.getDownloadDir(), shareCode + " (1)");
+                                                    onDownload(newFile[0], ServerUrl.getShareCodeUrl(shareCode), false);
+                                                }
+                                            );
+                                        } else {
+                                            onDownload(newFile[0], ServerUrl.getShareCodeUrl(shareCode), false);
+                                        }
                                     },
-                                    "重命名", (d2, w2) -> {
-                                        newFile[0] = new File(AppPathUtil.getDownloadDir(), shareCode + " (1)");
-                                        onDownload(newFile[0], ServerUrl.getShareCodeUrl(shareCode), false);
-                                    }
+                                    "取消", null
                                 );
-                            } else {
-                                onDownload(newFile[0], ServerUrl.getShareCodeUrl(shareCode), false);
                             }
-                        },
-                        "取消", null
+
+                            @Override
+                            public void onError(String message) {
+                                showAlert(getContext(), "错误", message);
+                            }
+
+                            @Override
+                            public void onFailed(Throwable throwable) {
+                                showAlert(getContext(), "错误", "网络错误：" + throwable.getMessage());
+                            }
+                        }
                     );
                 }
             });

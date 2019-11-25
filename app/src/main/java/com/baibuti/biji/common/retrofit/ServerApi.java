@@ -337,6 +337,11 @@ public interface ServerApi {
     // @GET("/share/")
     // Observable<ResponseDTO<ShareCodeDTO[]>> getAllShareCode();
 
+    @GET("/share/doc/{sc}")
+    Observable<ResponseDTO<DocumentDTO[]>> getShareCodeContents(
+        @Path("sc") String sc
+    );
+
     /**
      * 将用户文档共享
      */

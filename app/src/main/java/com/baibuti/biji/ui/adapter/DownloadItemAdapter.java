@@ -114,6 +114,12 @@ public class DownloadItemAdapter extends RecyclerView.Adapter<DownloadItemAdapte
             case "rar":
                 holder.imageView.setImageResource(R.drawable.zip);
                 break;
+            case "jpg":
+            case "png":
+            case "jpeg":
+            case "bmp":
+                holder.imageView.setImageResource(R.drawable.image);
+                break;
             default:
                 holder.imageView.setImageResource(R.drawable.unknown);
                 break;
