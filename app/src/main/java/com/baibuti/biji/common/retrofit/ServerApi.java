@@ -23,6 +23,7 @@ import okhttp3.ResponseBody;
 import retrofit2.http.DELETE;
 import retrofit2.http.FormUrlEncoded;
 import retrofit2.http.GET;
+import retrofit2.http.Header;
 import retrofit2.http.Multipart;
 import retrofit2.http.POST;
 import retrofit2.http.PUT;
@@ -30,6 +31,7 @@ import retrofit2.http.Part;
 import retrofit2.http.Path;
 import retrofit2.http.Query;
 import retrofit2.http.Streaming;
+import retrofit2.http.Url;
 
 /**
  * 标注需要 Authorization 头
@@ -304,11 +306,25 @@ public interface ServerApi {
         @Part("type") String type
     );
 
+    /**
+     * 下载文件 需要认证
+     */
     @Streaming
     @NeedAuth
-    @GET("/raw/file/{uuid}")
-    Observable<ResponseBody> getRawFile(
-        @Path("uuid") String uuid
+    @GET
+    Observable<ResponseBody> downloadWithToken(
+        @Header("Authorization") String token,
+        @Url String uuid
+    );
+
+    /**
+     * 下载文件
+     */
+    @Streaming
+    @NeedAuth
+    @GET
+    Observable<ResponseBody> download(
+        @Url String url
     );
 
     // endregion Raw

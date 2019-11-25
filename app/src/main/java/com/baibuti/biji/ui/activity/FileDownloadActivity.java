@@ -2,12 +2,12 @@ package com.baibuti.biji.ui.activity;
 
 import android.app.Dialog;
 import android.app.ProgressDialog;
-import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.LinearLayoutManager;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.LinearLayout;
@@ -15,11 +15,12 @@ import android.widget.TextView;
 
 import com.baibuti.biji.R;
 import com.baibuti.biji.model.dao.local.DownloadedDao;
-import com.baibuti.biji.model.po.Document;
+import com.baibuti.biji.model.po.DownloadItem;
 import com.baibuti.biji.service.doc.DocService;
 import com.baibuti.biji.ui.IContextHelper;
-import com.baibuti.biji.ui.adapter.DocumentAdapter;
+import com.baibuti.biji.ui.adapter.DownloadItemAdapter;
 import com.baibuti.biji.ui.widget.listView.RecyclerViewEmptySupport;
+import com.baibuti.biji.ui.widget.listView.SpacesItemDecoration;
 import com.baibuti.biji.util.filePathUtil.AppPathUtil;
 import com.baibuti.biji.util.otherUtil.LayoutUtil;
 
@@ -34,7 +35,7 @@ import butterknife.ButterKnife;
 
 public class FileDownloadActivity extends AppCompatActivity implements IContextHelper {
 
-    private DocumentAdapter m_documentAdapter;
+    private DownloadItemAdapter m_downloadItemAdapter;
 
     @BindView(R.id.id_download_srl)
     SwipeRefreshLayout m_srl;
@@ -52,15 +53,21 @@ public class FileDownloadActivity extends AppCompatActivity implements IContextH
             actionBar.setDisplayHomeAsUpEnabled(true);
         setTitle("文件下载");
 
-        m_documentAdapter = new DocumentAdapter(this);
         RecyclerViewEmptySupport itemListView = findViewById(R.id.id_download_recycler_view);
+        itemListView.addItemDecoration(new SpacesItemDecoration(0));
+        LinearLayoutManager layoutManager = new LinearLayoutManager(this);
+        layoutManager.setOrientation(LinearLayoutManager.VERTICAL);
+        itemListView.setLayoutManager(layoutManager);
         itemListView.setEmptyView(findViewById(R.id.id_download_empty_view));
-        itemListView.setAdapter(m_documentAdapter);
 
-        m_documentAdapter.setDocumentList(new ArrayList<>());
-        m_documentAdapter.setOnDocumentClickListener(this::DocumentListItem_Clicked);
-        m_documentAdapter.setOnDocumentLongClickListener(this::DocumentListItem_LongClicked);
+        m_downloadItemAdapter = new DownloadItemAdapter(this);
+        itemListView.setAdapter(m_downloadItemAdapter);
+
+        m_downloadItemAdapter.setDownloadItemList(new ArrayList<>());
+        m_downloadItemAdapter.setOnDownloadItemClickListener(this::DocumentListItem_Clicked);
+        m_downloadItemAdapter.setOnDownloadItemLongClickListener(this::DocumentListItem_LongClicked);
         m_srl.setOnRefreshListener(this::initData);
+        m_srl.setColorSchemeResources(R.color.colorPrimary);
 
         initData();
     }
@@ -85,12 +92,12 @@ public class FileDownloadActivity extends AppCompatActivity implements IContextH
      */
     private void initData() {
         DownloadedDao downloadedDao = new DownloadedDao(this);
-        List<Document> documentList = downloadedDao.GetAllDownloadedItem();
-        Collections.sort(documentList);
-        m_documentAdapter.setDocumentList(documentList);
-        m_documentAdapter.notifyDataSetChanged();
+        List<DownloadItem> downloadItemList = downloadedDao.GetAllDownloadedItem();
+        Collections.sort(downloadItemList);
+        m_downloadItemAdapter.setDownloadItemList(downloadItemList);
+        m_downloadItemAdapter.notifyDataSetChanged();
 
-        setTitle("文件下载 (共 " + m_documentAdapter.getDocumentList().size() + " 项)");
+        setTitle("文件下载 (共 " + m_downloadItemAdapter.getDownloadItemList().size() + " 项)");
         m_srl.setEnabled(true);
         m_srl.setRefreshing(false);
     }
@@ -98,20 +105,19 @@ public class FileDownloadActivity extends AppCompatActivity implements IContextH
     /**
      * ListView 单击项
      */
-    private void DocumentListItem_Clicked(Document document) {
-        showAlert(this, "打开文档", "是否打开下载的文档 \"" + document.getBaseFilename() + "\"？",
+    private void DocumentListItem_Clicked(DownloadItem downloadItem) {
+        showAlert(this, "打开文档", "是否打开下载的文档 \"" + downloadItem.getBaseFilename() + "\"？",
             "打开", (d, w) -> {
 
-                File file = new File(document.getFilename());
-                String path = AppPathUtil.getFilePathByUri(this, Uri.fromFile(file));
+                File file = new File(downloadItem.getFilename());
 
-                if (!file.exists() || path == null) {
-                    showAlert(this, "打开", "文档 \"" + document.getBaseFilename() + "\" 不存在，是否删除下载记录？",
+                if (!file.exists()) {
+                    showAlert(this, "打开", "文档 \"" + downloadItem.getBaseFilename() + "\" 不存在，是否删除下载记录？",
                         "删除", (d1, w1) -> {
                             DownloadedDao downloadedDao = new DownloadedDao(this);
-                            if (downloadedDao.DeleteDownloadItem(document.getFilename())) {
-                                m_documentAdapter.getDocumentList().remove(document);
-                                m_documentAdapter.notifyDataSetChanged();
+                            if (downloadedDao.DeleteDownloadItem(downloadItem.getFilename())) {
+                                m_downloadItemAdapter.getDownloadItemList().remove(downloadItem);
+                                m_downloadItemAdapter.notifyDataSetChanged();
                             }
                         }, "取消", null
                     );
@@ -125,12 +131,12 @@ public class FileDownloadActivity extends AppCompatActivity implements IContextH
     /**
      * ListView 长按项弹出菜单
      */
-    private void DocumentListItem_LongClicked(Document document) {
+    private void DocumentListItem_LongClicked(DownloadItem downloadItem) {
         m_LongClickItemPopupMenu = new Dialog(this, R.style.BottomDialog);
         LinearLayout root = LayoutUtil.initPopupMenu(this, m_LongClickItemPopupMenu, R.layout.popup_download_act_long_click_item);
 
-        ((TextView) root.findViewById(R.id.id_download_popup_curr)).setText(String.format(Locale.CHINA, "当前选中项: %s", document.getBaseFilename()));
-        root.findViewById(R.id.id_download_popup_delete_file).setOnClickListener((v) -> PopupDeleteItemAndFile_Clicked(document));
+        ((TextView) root.findViewById(R.id.id_download_popup_curr)).setText(String.format(Locale.CHINA, "当前选中项: %s", downloadItem.getBaseFilename()));
+        root.findViewById(R.id.id_download_popup_delete_file).setOnClickListener((v) -> PopupDeleteItemAndFile_Clicked(downloadItem));
         root.findViewById(R.id.id_download_popup_delete_all).setOnClickListener((v) -> ActionClear_Clicked());
         root.findViewById(R.id.id_download_popup_cancel).setOnClickListener((v) -> m_LongClickItemPopupMenu.dismiss());
 
@@ -140,20 +146,19 @@ public class FileDownloadActivity extends AppCompatActivity implements IContextH
     /**
      * Popup 删除
      */
-    private void PopupDeleteItemAndFile_Clicked(Document document) {
+    private void PopupDeleteItemAndFile_Clicked(DownloadItem downloadItem) {
         m_LongClickItemPopupMenu.dismiss();
-        showAlert(this, "删除", "是否删除下载的文件 \"" + document.getBaseFilename() + "\"？",
+        showAlert(this, "删除", "是否删除下载的文件 \"" + downloadItem.getBaseFilename() + "\"？",
             "删除", (d, w) -> {
-                if (AppPathUtil.deleteFile(document.getFilename())) {
+                if (AppPathUtil.deleteFile(downloadItem.getFilename())) {
                     DownloadedDao downloadedDao = new DownloadedDao(this);
-                    if (downloadedDao.DeleteDownloadItem(document.getFilename())) {
-                        m_documentAdapter.getDocumentList().remove(document);
-                        m_documentAdapter.notifyDataSetChanged();
-                        showToast(this, "文件 \"" + document.getBaseFilename() + "\" 删除成功");
+                    if (downloadedDao.DeleteDownloadItem(downloadItem.getFilename())) {
+                        initData();
+                        showToast(this, "文件 \"" + downloadItem.getBaseFilename() + "\" 删除成功");
                         return;
                     }
                 }
-                showToast(this, "文件 \"" + document.getBaseFilename() + "\" 删除失败");
+                showToast(this, "文件 \"" + downloadItem.getBaseFilename() + "\" 删除失败");
             },
             "取消", null
         );
@@ -170,19 +175,9 @@ public class FileDownloadActivity extends AppCompatActivity implements IContextH
             "删除", (d, w) -> {
                 ProgressDialog progressDialog = showProgress(this, "删除文件中...", false, null);
                 DownloadedDao downloadedDao = new DownloadedDao(this);
-                List<Document> documents = downloadedDao.GetAllDownloadedItem();
-                for (Document document : documents) {
-                    if (AppPathUtil.deleteFile(document.getFilename())) {
-                        downloadedDao.DeleteDownloadItem(document.getFilename());
-                        m_documentAdapter.getDocumentList().remove(document);
-                    }
-                }
-                m_documentAdapter.notifyDataSetChanged();
+                downloadedDao.DeleteAllDownloadItem();
                 progressDialog.dismiss();
-                if (m_documentAdapter.getDocumentList().isEmpty())
-                    showToast(this, "总共删除 " + documents.size() + " 个文件");
-                else
-                    showAlert(this, "错误", "还剩下 " + m_documentAdapter.getDocumentList().size() + " 个文件删除失败。");
+                initData();
             },
             "取消", null
         );

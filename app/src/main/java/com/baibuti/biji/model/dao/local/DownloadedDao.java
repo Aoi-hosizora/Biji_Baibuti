@@ -3,7 +3,7 @@ package com.baibuti.biji.model.dao.local;
 import android.content.Context;
 import android.content.SharedPreferences;
 
-import com.baibuti.biji.model.po.Document;
+import com.baibuti.biji.model.po.DownloadItem;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -28,14 +28,14 @@ public class DownloadedDao {
     /**
      * SP 所有的下载记录
      */
-    public List<Document> GetAllDownloadedItem() {
+    public List<DownloadItem> GetAllDownloadedItem() {
         SharedPreferences sp = context.getSharedPreferences(SP_DOWNLOAD, Context.MODE_PRIVATE);
         String[] contents = sp.getStringSet(SP_KEY_DOCS, new TreeSet<>()).toArray(new String[0]);
-        List<Document> returns = new ArrayList<>();
+        List<DownloadItem> returns = new ArrayList<>();
         for (String content : contents) {
-            Document document = Document.fromDownloadContent(content);
-            if (document != null)
-                returns.add(document);
+            DownloadItem downloadItem = DownloadItem.fromDownloadContent(content);
+            if (downloadItem != null)
+                returns.add(downloadItem);
         }
         return returns;
     }
@@ -47,7 +47,7 @@ public class DownloadedDao {
     public void InsertDownloadItem(String path, Date date) {
         SharedPreferences sp = context.getSharedPreferences(SP_DOWNLOAD, Context.MODE_PRIVATE);
         Set<String> set = sp.getStringSet(SP_KEY_DOCS, new TreeSet<>());
-        set.add(new Document(path, date).toDownloadContent());
+        set.add(new DownloadItem(path, date).toDownloadContent());
         sp.edit().putStringSet(SP_KEY_DOCS, set).apply();
     }
 
@@ -62,8 +62,8 @@ public class DownloadedDao {
         String[] contents = sp.getStringSet(SP_KEY_DOCS, new TreeSet<>()).toArray(new String[0]);
         List<String> new_contents = new ArrayList<>();
         for (String content : contents) {
-            Document document = Document.fromDownloadContent(content);
-            if (document != null && !document.getFilename().equals(path))
+            DownloadItem downloadItem = DownloadItem.fromDownloadContent(content);
+            if (downloadItem != null && !downloadItem.getFilename().equals(path))
                 new_contents.add(content);
             else
                 deleted = true;
@@ -72,13 +72,13 @@ public class DownloadedDao {
         return deleted;
     }
 
-    // /**
-    //  * 删除所有下载记录
-    //  * @return 是否清空成功
-    //  */
-    // public boolean DeleteAllDownloadItem() {
-    //     SharedPreferences sp = context.getSharedPreferences(SP_DOWNLOAD, Context.MODE_PRIVATE);
-    //     sp.edit().putStringSet(SP_KEY_DOCS, new TreeSet<>()).apply();
-    //     return sp.getStringSet(SP_KEY_DOCS, new TreeSet<>()).isEmpty();
-    // }
+     /**
+      * 删除所有下载记录
+      * @return 是否清空成功
+      */
+     public boolean DeleteAllDownloadItem() {
+         SharedPreferences sp = context.getSharedPreferences(SP_DOWNLOAD, Context.MODE_PRIVATE);
+         sp.edit().putStringSet(SP_KEY_DOCS, new TreeSet<>()).apply();
+         return sp.getStringSet(SP_KEY_DOCS, new TreeSet<>()).isEmpty();
+     }
 }

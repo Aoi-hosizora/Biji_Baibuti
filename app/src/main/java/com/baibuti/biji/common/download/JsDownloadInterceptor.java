@@ -6,6 +6,7 @@ import okhttp3.Interceptor;
 import okhttp3.Response;
 import okhttp3.internal.annotations.EverythingIsNonNull;
 
+@EverythingIsNonNull
 public class JsDownloadInterceptor implements Interceptor {
     private JsDownloadListener downloadListener;
 
@@ -14,10 +15,10 @@ public class JsDownloadInterceptor implements Interceptor {
     }
 
     @Override
-    @EverythingIsNonNull
     public Response intercept(Chain chain) throws IOException {
         Response response = chain.proceed(chain.request());
-        return response.newBuilder().body(
-            new JsResponseBody(response.body(), downloadListener)).build();
+        return response.newBuilder()
+            .body(new JsResponseBody(response.body(), downloadListener))
+            .build();
     }
 }

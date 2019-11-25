@@ -47,8 +47,10 @@ public class ProgressHandler {
 
         Disposable disposable = observable.subscribe(
             (MessageVO<T> messageVO) -> {
-                if (progressDialog[0] != null) // <<
-                    progressDialog[0].dismiss();
+                new Handler().postDelayed(() -> {
+                    if (progressDialog[0] != null) // <<
+                        progressDialog[0].dismiss();
+                }, MIN_PROGRESS_TIME);
                 if (cancel[0]) return;
 
                 // 应该都是 SUCCESS
@@ -58,8 +60,10 @@ public class ProgressHandler {
                     handler.onError(MessageErrorParser.fromMessageVO(messageVO));
             },
             (throwable) -> {
-                if (progressDialog[0] != null) // <<
-                    progressDialog[0].dismiss();
+                new Handler().postDelayed(() -> {
+                    if (progressDialog[0] != null) // <<
+                        progressDialog[0].dismiss();
+                }, MIN_PROGRESS_TIME);
                 if (cancel[0]) return;
                 // retrofit2.adapter.rxjava2.HttpException: HTTP 601 UNKNOWN
 
@@ -97,7 +101,16 @@ public class ProgressHandler {
         void onComplete();
     }
 
-    public static void download(Context context, String message, File file, String uuid, OnDownloadListener listener) {
+    /**
+     * 下载文件
+     * @param file 本地文件名
+     * @param url 下载链接
+     * @param hasToken 是否需要认证
+     */
+    public static void download(
+        Context context, String message,
+        File file, String url, boolean hasToken, OnDownloadListener listener
+    ) {
         ProgressDialog[] progressDialog = new ProgressDialog[]{new ProgressDialog(context)};
         progressDialog[0].setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
         progressDialog[0].setMessage(message);
@@ -117,15 +130,17 @@ public class ProgressHandler {
             @Override
             public void onFail(String errorInfo) {
                 progressDialog[0].dismiss();
+                Log.e("", "onFail: " + errorInfo);
                 listener.onFailed(errorInfo);
             }
         });
 
-        Disposable disposable = downloadHandler.download(uuid, file)
+        Disposable disposable = downloadHandler.download(url, file, hasToken)
             .subscribe(inputStream -> {
 
             }, throwable -> {
                 progressDialog[0].dismiss();
+                throwable.printStackTrace();
                 listener.onFailed(throwable.getMessage());
             }, listener::onComplete);
 

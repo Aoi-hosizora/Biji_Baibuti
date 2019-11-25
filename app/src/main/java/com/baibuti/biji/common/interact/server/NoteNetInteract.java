@@ -188,7 +188,7 @@ public class NoteNetInteract implements INoteInteract {
                     .createRequest(AuthManager.getInstance().getAuthorizationHead())
                     .uploadImage(body, OneFieldDTO.RawImageType_Note)
                     .subscribeOn(Schedulers.io())
-                    .observeOn(AndroidSchedulers.mainThread())
+                    .observeOn(Schedulers.io()) // <<
                     .subscribe((ResponseDTO<OneFieldDTO.FilenameDTO> responseDTO) -> {
                         count[0]++;
                         if (responseDTO.getCode() == 200) {
@@ -201,6 +201,7 @@ public class NoteNetInteract implements INoteInteract {
 
                         if (count[0] == uploadUrl.size()) {
                             Log.i("", "uploadImage: xxx");
+                            // NetworkOnMainThreadException
                             emitter.onNext(newNote);
                             emitter.onComplete();
                         }

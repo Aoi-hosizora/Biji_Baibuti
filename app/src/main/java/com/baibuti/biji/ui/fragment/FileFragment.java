@@ -34,6 +34,7 @@ import com.baibuti.biji.common.interact.ProgressHandler;
 import com.baibuti.biji.common.interact.contract.IDocClassInteract;
 import com.baibuti.biji.common.interact.contract.IDocumentInteract;
 import com.baibuti.biji.common.interact.server.ShareCodeNetInteract;
+import com.baibuti.biji.common.retrofit.ServerUrl;
 import com.baibuti.biji.model.dao.local.DownloadedDao;
 import com.baibuti.biji.model.dto.ResponseDTO;
 import com.baibuti.biji.model.po.DocClass;
@@ -129,8 +130,7 @@ public class FileFragment extends BaseFragment implements IContextHelper {
             ViewGroup parent = (ViewGroup) view.getParent();
             if (null != parent)
                 parent.removeView(view);
-        }
-        else {
+        } else {
             view = inflater.inflate(R.layout.fragment_file, container, false);
             ButterKnife.bind(this, view);
 
@@ -219,7 +219,9 @@ public class FileFragment extends BaseFragment implements IContextHelper {
 
         m_searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
-            public boolean onQueryTextChange(String newText) { return false; }
+            public boolean onQueryTextChange(String newText) {
+                return false;
+            }
 
             @Override
             public boolean onQueryTextSubmit(String query) {
@@ -292,8 +294,7 @@ public class FileFragment extends BaseFragment implements IContextHelper {
                         if (currIdx == -1 && pageData.docClassListItems.size() != 0) {
                             m_docClassAdapter.setCurrentItem(pageData.docClassListItems.get(0));
                             onDocClassItemClicked(pageData.docClassListItems.get(0));
-                        }
-                        else if (currIdx != -1 && pageData.docClassListItems.size() > currIdx)
+                        } else if (currIdx != -1 && pageData.docClassListItems.size() > currIdx)
                             onDocClassItemClicked(pageData.docClassListItems.get(currIdx));
 
                         if (m_srl.isRefreshing())
@@ -326,6 +327,7 @@ public class FileFragment extends BaseFragment implements IContextHelper {
 
     /**
      * Search View 搜索
+     *
      * @param isBack 是否返回还是搜索
      */
     private void onSearchSubmitClicked(String query, boolean isBack) {
@@ -931,8 +933,13 @@ public class FileFragment extends BaseFragment implements IContextHelper {
             .with(getActivity())
             .scanningQRCode(new OnQRCodeScanCallback() {
 
-                public void onError(Throwable throwable) { showToast(getActivity(), throwable.getMessage()); }
-                public void onCancel() { showToast(getActivity(), "操作已取消"); }
+                public void onError(Throwable throwable) {
+                    showToast(getActivity(), throwable.getMessage());
+                }
+
+                public void onCancel() {
+                    showToast(getActivity(), "操作已取消");
+                }
 
                 @Override
                 public void onCompleted(String shareCode) {
@@ -942,9 +949,21 @@ public class FileFragment extends BaseFragment implements IContextHelper {
                     }
                     showAlert(getContext(), "文件共享", "是否下载共享码中的文件？",
                         "下载", (d, w) -> {
-
-                            // TODO 下载
-                            // new DownloadedDao(getContext()).InsertDownloadItem("", new Date()); // 本地路径
+                            File[] newFile = new File[]{new File(AppPathUtil.getDownloadDir(), shareCode)};
+                            if (newFile[0].exists()) {
+                                showAlert(getContext(), "下载文件", "文件 \"" + shareCode + "\" 已存在，是否覆盖？",
+                                    "覆盖", (d2, w2) -> {
+                                        AppPathUtil.deleteFile(newFile[0].getAbsolutePath());
+                                        onDownload(newFile[0], ServerUrl.getShareCodeUrl(shareCode), false);
+                                    },
+                                    "重命名", (d2, w2) -> {
+                                        newFile[0] = new File(AppPathUtil.getDownloadDir(), shareCode + " (1)");
+                                        onDownload(newFile[0], ServerUrl.getShareCodeUrl(shareCode), false);
+                                    }
+                                );
+                            } else {
+                                onDownload(newFile[0], ServerUrl.getShareCodeUrl(shareCode), false);
+                            }
                         },
                         "取消", null
                     );
@@ -965,11 +984,12 @@ public class FileFragment extends BaseFragment implements IContextHelper {
             "打开", (d, w) -> {
 
                 File file = new File(document.getFilename());
-                String path = AppPathUtil.getFilePathByUri(getContext(), Uri.fromFile(file));
+
+                // String path = AppPathUtil.getFilePathByUri(getContext(), Uri.fromFile(file));
                 Log.i("", "document.getFilename(): " + document.getFilename());
                 Log.i("", "file: " + file.getAbsolutePath());
                 Log.i("", "Uri: " + Uri.fromFile(file));
-                Log.i("", "path: " + path);
+                // Log.i("", "path: " + path);
 
                 /*
                     I/: document.getFilename(): /storage/emulated/0/Biji/NoteFile/5555255512125.docx
@@ -978,13 +998,13 @@ public class FileFragment extends BaseFragment implements IContextHelper {
                     I/: path: /storage/emulated/0/Biji/NoteFile/5555255512125.docx
                  */
 
-                if (path != null) { // 本地文件
+                if (document.isLocalFile()) { // 本地文件
                     if (file.exists()) { // 打开文件
                         if (!DocService.openFile(getActivity(), file)) {
                             showAlert(getContext(), "错误", "打开文件错误，文件格式不支持。");
                         }
                     } else { // 文件不存在
-                        showAlert(getContext(), "打开文档", "文件 \"" + document.getBaseFilename() +"\" 不存在，是否删除记录？",
+                        showAlert(getContext(), "打开文档", "文件 \"" + document.getBaseFilename() + "\" 不存在，是否删除记录？",
                             "删除", (d1, w1) -> {
                                 IDocumentInteract documentInteract = InteractStrategy.getInstance().getDocumentInteract(getContext());
                                 ProgressHandler.process(getContext(), "删除记录...", true,
@@ -997,8 +1017,13 @@ public class FileFragment extends BaseFragment implements IContextHelper {
                                             showToast(getContext(), "记录 \"" + document.getBaseFilename() + "\" 删除成功");
                                         }
 
-                                        public void onError(String message) { showAlert(getContext(), "错误", message); } // 应该不会出现
-                                        public void onFailed(Throwable throwable) { showAlert(getContext(), "错误", "网络错误：" + throwable.getMessage()); }
+                                        public void onError(String message) {
+                                            showAlert(getContext(), "错误", message);
+                                        } // 应该不会出现
+
+                                        public void onFailed(Throwable throwable) {
+                                            showAlert(getContext(), "错误", "网络错误：" + throwable.getMessage());
+                                        }
                                     }
                                 );
                             },
@@ -1006,31 +1031,46 @@ public class FileFragment extends BaseFragment implements IContextHelper {
                         );
                     }
                 } else { // 远程文件
-                    showAlert(getContext(), "错误", "文档 \"" + document.getBaseFilename() + "\" 为上传的文件，是否下载？",
+                    showAlert(getContext(), "错误", "文档 \"" + document.getBaseFilename() + "\" 不是本地文件，是否下载？",
                         "下载", (d1, w1) -> {
-                            File newFile = new File(AppPathUtil.getDownloadDir(), document.getBaseFilename());
-                            while (newFile.exists()) {
-                                newFile = new File(AppPathUtil.getDownloadDir(), document.getBaseFilename() + " (1)");
+                            File[] newFile = new File[]{new File(AppPathUtil.getDownloadDir(), document.getBaseFilename())};
+                            if (newFile[0].exists()) {
+                                showAlert(getContext(), "下载文件", "文件 \"" + document.getBaseFilename() + "\" 已存在，是否覆盖？",
+                                    "覆盖", (d2, w2) -> {
+                                        AppPathUtil.deleteFile(newFile[0].getAbsolutePath());
+                                        onDownload(newFile[0], ServerUrl.getRawUrl(document.getUuid()), true);
+                                    },
+                                    "重命名", (d2, w2) -> {
+                                        newFile[0] = new File(AppPathUtil.getDownloadDir(), document.getBaseFilename() + " (1)");
+                                        onDownload(newFile[0], ServerUrl.getRawUrl(document.getUuid()), true);
+                                    }
+                                );
+                            } else {
+                                onDownload(newFile[0], ServerUrl.getRawUrl(document.getUuid()), true);
                             }
-                            String filepath = newFile.getAbsolutePath();
-
-                            ProgressHandler.download(getContext(), "下载中...", newFile, document.getUuid(), new ProgressHandler.OnDownloadListener() {
-                                @Override
-                                public void onFailed(String message) {
-                                    showAlert(getContext(), "错误", message);
-                                }
-
-                                @Override
-                                public void onComplete() {
-                                    showToast(getContext(), "下载完成");
-                                    new DownloadedDao(getContext()).InsertDownloadItem(filepath, new Date()); // 本地路径
-                                }
-                            });
                         }, "取消", null
                     );
                 }
             },
             "取消", null
         );
+    }
+
+    /**
+     * 下载文件，用户判断完文件名后
+     */
+    private void onDownload(File file, String url, boolean hasToken) {
+        ProgressHandler.download(getContext(), "下载中...", file, url, hasToken, new ProgressHandler.OnDownloadListener() {
+            @Override
+            public void onFailed(String message) {
+                showAlert(getContext(), "错误", message);
+            }
+
+            @Override
+            public void onComplete() {
+                showToast(getContext(), "下载完成");
+                new DownloadedDao(getContext()).InsertDownloadItem(file.getAbsolutePath(), new Date()); // 本地路径
+            }
+        });
     }
 }

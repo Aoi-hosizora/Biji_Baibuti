@@ -83,6 +83,11 @@ public class WebViewActivity extends AppCompatActivity implements IContextHelper
     @SuppressLint({"JavascriptInterface", "SetJavaScriptEnabled", "AddJavascriptInterface"})
     private void initView() {
 
+        if (webView == null) {
+            showAlert(this, "错误", "浏览器加载错误。");
+            return;
+        }
+
         webView.requestFocus();
 
         WebSettings settings = webView.getSettings();
@@ -143,7 +148,7 @@ public class WebViewActivity extends AppCompatActivity implements IContextHelper
             webView.stopLoading();
             webView.getSettings().setJavaScriptEnabled(false);
             webView.clearHistory();
-            webView.clearView();
+            // webView.clearView();
             webView.removeAllViews();
             webView.destroy();
         }

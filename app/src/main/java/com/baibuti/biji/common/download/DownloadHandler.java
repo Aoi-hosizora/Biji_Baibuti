@@ -1,5 +1,6 @@
 package com.baibuti.biji.common.download;
 
+import com.baibuti.biji.common.auth.AuthManager;
 import com.baibuti.biji.common.retrofit.ServerApi;
 import com.baibuti.biji.common.retrofit.ServerUrl;
 import com.baibuti.biji.util.filePathUtil.AppPathUtil;
@@ -19,6 +20,9 @@ import okhttp3.ResponseBody;
 import retrofit2.Retrofit;
 import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory;
 
+/**
+ * https://blog.csdn.net/qq_34261214/article/details/81487110
+ */
 public class DownloadHandler {
 
     private static final int DEFAULT_TIMEOUT = 15;
@@ -41,13 +45,26 @@ public class DownloadHandler {
             .build();
     }
 
-    public Observable<InputStream> download(String uuid, final File file) {
-        return retrofit.create(ServerApi.class)
-            .getRawFile(uuid)
+    /**
+     * 下载文件
+     * @param url 端点地址
+     * @param file 包含本地文件路径
+     * @param hasToken 是否需要认证
+     */
+    public Observable<InputStream> download(String url, final File file, boolean hasToken) {
+        Observable<ResponseBody> observable;
+        if (hasToken) {
+            String token = "Bearer " + AuthManager.getInstance().getToken();
+            observable = retrofit.create(ServerApi.class).downloadWithToken(token, url);
+        } else {
+            observable = retrofit.create(ServerApi.class).download(url);
+        }
+
+        return observable
             .subscribeOn(Schedulers.io())
             .unsubscribeOn(Schedulers.io())
             .map(ResponseBody::byteStream)
-            .observeOn(Schedulers.computation()) // 用于计算任务
+            .observeOn(Schedulers.computation())
             .doOnNext((stream) -> writeFile(stream, file))
             .observeOn(AndroidSchedulers.mainThread());
     }

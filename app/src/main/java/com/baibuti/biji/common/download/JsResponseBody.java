@@ -8,7 +8,6 @@ import javax.annotation.ParametersAreNonnullByDefault;
 
 import okhttp3.MediaType;
 import okhttp3.ResponseBody;
-import okhttp3.internal.annotations.EverythingIsNonNull;
 import okio.Buffer;
 import okio.BufferedSource;
 import okio.ForwardingSource;
@@ -38,7 +37,6 @@ public class JsResponseBody extends ResponseBody {
     }
 
     @Override
-    @EverythingIsNonNull
     public BufferedSource source() {
         if (bufferedSource == null) {
             bufferedSource = Okio.buffer(source(responseBody.source()));
@@ -55,7 +53,7 @@ public class JsResponseBody extends ResponseBody {
             public long read(Buffer sink, long byteCount) throws IOException {
                 long bytesRead = super.read(sink, byteCount);
                 totalBytesRead += bytesRead != -1 ? bytesRead : 0;
-                Log.e("download", "read: " + (int) (totalBytesRead * 100 / responseBody.contentLength()));
+                // Log.e("download", "read: " + (int) (totalBytesRead * 100 / responseBody.contentLength()));
                 if (null != downloadListener) {
                     if (bytesRead != -1) {
                         downloadListener.onProgress((int) (totalBytesRead));
