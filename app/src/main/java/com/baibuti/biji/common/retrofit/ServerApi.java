@@ -10,7 +10,6 @@ import com.baibuti.biji.model.dto.SearchItemDTO;
 import com.baibuti.biji.model.dto.ShareCodeDTO;
 import com.baibuti.biji.common.auth.dto.AuthRespDTO;
 
-import java.io.File;
 import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -274,7 +273,7 @@ public interface ServerApi {
     @Multipart
     @POST("/document/")
     Observable<ResponseDTO<DocumentDTO>> insertDocument(
-        @Part("file") File file,
+        @Part MultipartBody.Part file, // file
         @Part("doc_class_id") Integer classId
     );
 

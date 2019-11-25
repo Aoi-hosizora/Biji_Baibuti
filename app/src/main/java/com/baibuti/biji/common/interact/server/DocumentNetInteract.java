@@ -15,6 +15,9 @@ import java.util.List;
 import io.reactivex.Observable;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;
+import okhttp3.MediaType;
+import okhttp3.MultipartBody;
+import okhttp3.RequestBody;
 
 public class DocumentNetInteract implements IDocumentInteract {
 
@@ -69,11 +72,13 @@ public class DocumentNetInteract implements IDocumentInteract {
      */
     @Override
     public Observable<MessageVO<Boolean>> insertDocument(Document document) {
-        // TODO
         File file = new File(document.getFilename());
+        RequestBody requestFile = RequestBody.create(MediaType.parse(""), file);
+        MultipartBody.Part body = MultipartBody.Part.createFormData("file", file.getName(), requestFile);
+
         return RetrofitFactory.getInstance()
             .createRequest(AuthManager.getInstance().getAuthorizationHead())
-            .insertDocument(file, document.getDocClass().getId())
+            .insertDocument(body, document.getDocClass().getId())
             .map(responseDTO -> {
                 if (responseDTO.getCode() != 200)
                     return new MessageVO<Boolean>(false, responseDTO.getMessage());
