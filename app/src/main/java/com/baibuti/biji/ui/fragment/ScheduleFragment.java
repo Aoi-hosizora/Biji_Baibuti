@@ -56,43 +56,28 @@ public class ScheduleFragment extends BaseFragment implements IContextHelper {
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        view = inflater.inflate(R.layout.fragment_schedule, container, false);
-        ButterKnife.bind(this, view);
-        isInit = true;
-        init();
+        if (null != view) {
+            ViewGroup parent = (ViewGroup) view.getParent();
+            if (null != parent)
+                parent.removeView(view);
+        } else {
+            view = inflater.inflate(R.layout.fragment_schedule, container, false);
+            ButterKnife.bind(this, view);
+
+            initView(view);
+            AuthManager.getInstance().addLoginChangeListener(new AuthManager.OnLoginChangeListener() {
+                @Override
+                public void onLogin(String username) {
+                    ActionRefresh_Clicked(false);
+                }
+
+                @Override
+                public void onLogout() {
+                    ActionRefresh_Clicked(false);
+                }
+            });
+        }
         return view;
-    }
-
-    private boolean isInit;
-
-    @Override
-    public void setUserVisibleHint(boolean isVisibleToUser) {
-        super.setUserVisibleHint(isVisibleToUser);
-        init();
-    }
-
-    @Override
-    public void onDestroyView() {
-        super.onDestroyView();
-        isInit = false;
-    }
-
-    private void init() {
-        if (!isInit || !getUserVisibleHint())
-            return;
-
-        initView(view);
-        AuthManager.getInstance().addLoginChangeListener(new AuthManager.OnLoginChangeListener() {
-            @Override
-            public void onLogin(String username) {
-                ActionRefresh_Clicked(false);
-            }
-
-            @Override
-            public void onLogout() {
-                ActionRefresh_Clicked(false);
-            }
-        });
     }
 
     @Override
@@ -308,6 +293,7 @@ public class ScheduleFragment extends BaseFragment implements IContextHelper {
                     if (scheduleJson.trim().isEmpty()) {
                         if (isShowToast)
                             showToast(getActivity(), "尚未设置课程表");
+
                     } else {
                         // Show Schedule
                         MainActivity activity = (MainActivity) getActivity();
@@ -324,12 +310,14 @@ public class ScheduleFragment extends BaseFragment implements IContextHelper {
 
                 @Override
                 public void onError(String message) {
-                    showAlert(getActivity(), "错误", message);
+                    if (isShowToast)
+                        showAlert(getActivity(), "错误", message);
                 }
 
                 @Override
                 public void onFailed(Throwable throwable) {
-                    showAlert(getActivity(), "错误", "网络错误：" + throwable.getMessage());
+                    if (isShowToast)
+                        showAlert(getActivity(), "错误", "网络错误：" + throwable.getMessage());
                 }
             }
         );

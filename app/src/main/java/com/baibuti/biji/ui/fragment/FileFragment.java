@@ -125,44 +125,32 @@ public class FileFragment extends BaseFragment implements IContextHelper {
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        view = inflater.inflate(R.layout.fragment_file, container, false);
-        ButterKnife.bind(this, view);
-        isInit = true;
-        init();
+        if (null != view) {
+            ViewGroup parent = (ViewGroup) view.getParent();
+            if (null != parent)
+                parent.removeView(view);
+        }
+        else {
+            view = inflater.inflate(R.layout.fragment_file, container, false);
+            ButterKnife.bind(this, view);
+
+            initView();
+            // initData();
+
+            AuthManager.getInstance().addLoginChangeListener(new AuthManager.OnLoginChangeListener() {
+
+                @Override
+                public void onLogin(String username) {
+                    initData();
+                }
+
+                @Override
+                public void onLogout() {
+                    initData();
+                }
+            });
+        }
         return view;
-    }
-
-    public boolean isInit;
-
-    @Override
-    public void setUserVisibleHint(boolean isVisibleToUser) {
-        super.setUserVisibleHint(isVisibleToUser);
-        init();
-    }
-
-    @Override
-    public void onDestroyView() {
-        super.onDestroyView();
-        isInit = false;
-    }
-
-    private void init() {
-        if (!isInit || !getUserVisibleHint())
-            return;
-
-        initView();
-        AuthManager.getInstance().addLoginChangeListener(new AuthManager.OnLoginChangeListener() {
-
-            @Override
-            public void onLogin(String username) {
-                initData();
-            }
-
-            @Override
-            public void onLogout() {
-                initData();
-            }
-        });
     }
 
     private void initView() {
