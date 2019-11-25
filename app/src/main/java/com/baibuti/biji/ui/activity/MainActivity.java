@@ -348,12 +348,7 @@ public class MainActivity extends FragmentActivity implements IContextHelper {
     private void Nav_About_Selected() {
         closeNavMenu();
 
-        String msg = "SCUT 百步梯项目 - 笔迹\n\n" +
-                "开发网站：https://github.com/Aoi-hosizora/Biji_Baibuti\n\n" +
-                "作者：17级软件学院 xxx\n\n" +
-                "更多信息详看开发 Github 网站。";
-
-        showAlert(this, "关于", msg);
+        startActivity(new Intent(this, AboutActivity.class));
     }
 
     /**

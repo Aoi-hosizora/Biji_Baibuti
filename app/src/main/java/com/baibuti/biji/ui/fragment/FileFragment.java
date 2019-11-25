@@ -617,15 +617,15 @@ public class FileFragment extends BaseFragment implements IContextHelper {
 
         switch (item.getItemId()) {
 
-            case R.id.action_new_fileclass:
-                ToolbarAddDocClass_Clicked();
-                break;
-            case R.id.action_rename_fileclass:
-                ToolbarRenameDocClass_Clicked(m_docClassAdapter.getCurrentItem());
-                break;
-            case R.id.action_delete_fileclass:
-                ToolDeleteDocClass_Clicked(m_docClassAdapter.getCurrentItem());
-                break;
+//            case R.id.action_new_fileclass:
+//                ToolbarAddDocClass_Clicked();
+//                break;
+//            case R.id.action_rename_fileclass:
+//                ToolbarRenameDocClass_Clicked(m_docClassAdapter.getCurrentItem());
+//                break;
+//            case R.id.action_delete_fileclass:
+//                ToolDeleteDocClass_Clicked(m_docClassAdapter.getCurrentItem());
+//                break;
 
             case R.id.action_share_documents:
                 ToolbarShareWholeDocClassDoc_Clicked(m_docClassAdapter.getCurrentItem());

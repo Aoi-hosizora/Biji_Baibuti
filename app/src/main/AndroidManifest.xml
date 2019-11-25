@@ -35,6 +35,7 @@
         </activity>
 
         <!-- Other Act -->
+        <activity android:name=".ui.activity.AboutActivity" android:screenOrientation="portrait" />
         <activity android:name=".ui.activity.MainActivity" android:screenOrientation="portrait" />
         <activity android:name=".ui.activity.AuthActivity" android:screenOrientation="portrait" />
         <activity android:name=".ui.activity.EditNoteActivity" android:screenOrientation="portrait" />
