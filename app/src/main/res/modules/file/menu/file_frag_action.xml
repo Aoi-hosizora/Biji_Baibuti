@@ -29,4 +29,8 @@
         android:title="@string/FileFragment_Item_Share_Title"
         app:showAsAction="never"/>
 
+    <item android:id="@+id/action_all_share_documents"
+        android:title="查看所有共享码"
+        app:showAsAction="never"/>
+
 </menu>

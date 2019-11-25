@@ -584,7 +584,13 @@ public class FileFragment extends BaseFragment implements IContextHelper {
                                     qrCodeImageView.setImageBitmap(qrCode);
                                     qrCodeImageView.setMinimumWidth(qrCode.getWidth());
                                     qrCodeImageView.setMinimumHeight(qrCode.getHeight());
-                                    showAlert(getActivity(), "共享二维码", qrCodeImageView, "返回", null);
+                                    showAlert(getActivity(), "共享二维码", qrCodeImageView,
+                                        "复制共享码", (d2, w2) -> {
+                                            if (CommonUtil.copyText(getContext(), shareCode))
+                                                showToast(getContext(), "共享码：" + shareCode + " 复制成功");
+                                        },
+                                        "返回", null
+                                    );
                                 }
 
                                 @Override
@@ -638,6 +644,9 @@ public class FileFragment extends BaseFragment implements IContextHelper {
                 break;
             case R.id.action_downloaded_documents:
                 RxActivityResult.on(this).startIntent(new Intent(getActivity(), FileDownloadActivity.class));
+                break;
+            case R.id.action_all_share_documents:
+                showToast(getContext(), "未实现");
                 break;
         }
         return true;
@@ -972,7 +981,13 @@ public class FileFragment extends BaseFragment implements IContextHelper {
                                     qrCodeImageView.setImageBitmap(qrCode);
                                     qrCodeImageView.setMinimumWidth(qrCode.getWidth());
                                     qrCodeImageView.setMinimumHeight(qrCode.getHeight());
-                                    showAlert(getActivity(), "共享二维码", qrCodeImageView, "返回", null);
+                                    showAlert(getActivity(), "共享二维码", qrCodeImageView,
+                                        "复制共享码", (d2, w2) -> {
+                                            if (CommonUtil.copyText(getContext(), shareCode))
+                                                showToast(getContext(), "共享码：" + shareCode + " 复制成功");
+                                        },
+                                        "返回", null
+                                    );
                                 }
 
                                 @Override
@@ -1004,69 +1019,84 @@ public class FileFragment extends BaseFragment implements IContextHelper {
      * 扫描共享码
      */
     private void scanShareCodeQrCode() {
-        QRCodeManager.getInstance()
-            .with(getActivity())
-            .scanningQRCode(new OnQRCodeScanCallback() {
+        showAlert(getContext(), "获取共享文件", "请选择操作：",
+            "扫描二维码", (d, w) -> QRCodeManager.getInstance()
+                .with(getActivity())
+                .scanningQRCode(new OnQRCodeScanCallback() {
 
-                public void onError(Throwable throwable) {
-                    showToast(getActivity(), throwable.getMessage());
-                }
+                    public void onError(Throwable throwable) {
+                        showToast(getActivity(), throwable.getMessage());
+                    }
 
-                public void onCancel() {
-                    showToast(getActivity(), "操作已取消");
+                    public void onCancel() {
+                        showToast(getActivity(), "操作已取消");
+                    }
+
+                    @Override
+                    public void onCompleted(String shareCode) {
+                        if (shareCode.isEmpty())
+                            showAlert(getContext(), "错误", "共享码错误。");
+                        else
+                            onGetScContent(shareCode);
+                    }
+                }),
+            "直接输入共享码", (d, w) -> showInputDialog(getContext(), "获取共享文件", "", "请输入共享码", 1,
+                "确定", (d2, w2, shareCode) -> {
+                    if (shareCode.isEmpty())
+                        showAlert(getContext(), "错误", "共享码错误。");
+                    else
+                        onGetScContent(shareCode);
+                },
+                "取消", null
+            ),
+            "取消", null
+        );
+    }
+
+    /**
+     * 获取共享文件
+     */
+    private void onGetScContent(String shareCode) {
+        ShareCodeNetInteract shareCodeNetInteract = new ShareCodeNetInteract();
+        ProgressHandler.process(getContext(), "加载共享码内容中...", true,
+            shareCodeNetInteract.getShareCodeContents(shareCode), new InteractInterface<List<Document>>() {
+                @Override
+                public void onSuccess(List<Document> data) {
+                    StringBuilder hint = new StringBuilder();
+                    for (Document document : data)
+                        hint.append(document.getBaseFilename()).append("\n");
+
+                    showAlert(getContext(), "共享", "该共享码包含了 " + data.size() + " 个文件\n" + hint + "是否下载？",
+                        "下载", (d, v) -> {
+                            String filename = (data.size() == 1) ? data.get(0).getBaseFilename() : data.get(0).getBaseFilename() + "等" + data.size() + "个文件.zip";
+                            File[] newFile = new File[]{new File(AppPathUtil.getDownloadDir(), filename)};
+                            if (newFile[0].exists()) {
+                                showAlert(getContext(), "下载文件", "文件 \"" + shareCode + "\" 已存在，是否覆盖？",
+                                    "覆盖", (d2, w2) -> {
+                                        AppPathUtil.deleteFile(newFile[0].getAbsolutePath());
+                                        onDownload(newFile[0], ServerUrl.getShareCodeUrl(shareCode), false);
+                                    },
+                                    "重命名", (d2, w2) -> {
+                                        newFile[0] = new File(AppPathUtil.getDownloadDir(), shareCode + " (1)");
+                                        onDownload(newFile[0], ServerUrl.getShareCodeUrl(shareCode), false);
+                                    }
+                                );
+                            } else {
+                                onDownload(newFile[0], ServerUrl.getShareCodeUrl(shareCode), false);
+                            }
+                        },
+                        "取消", null
+                    );
                 }
 
                 @Override
-                public void onCompleted(String shareCode) {
-                    if (shareCode.isEmpty()) {
-                        showAlert(getContext(), "错误", "共享码错误。");
-                        return;
-                    }
+                public void onError(String message) {
+                    showAlert(getContext(), "错误", message);
+                }
 
-                    ShareCodeNetInteract shareCodeNetInteract = new ShareCodeNetInteract();
-                    ProgressHandler.process(getContext(), "加载共享码内容中...", true,
-                        shareCodeNetInteract.getShareCodeContents(shareCode), new InteractInterface<List<Document>>() {
-                            @Override
-                            public void onSuccess(List<Document> data) {
-                                StringBuilder hint = new StringBuilder();
-                                for (Document document : data)
-                                    hint.append(document.getBaseFilename()).append("\n");
-
-
-                                showAlert(getContext(), "共享", "该共享码包含了 " + data.size() + " 个文件\n" + hint + "是否下载？",
-                                    "下载", (d, v) -> {
-                                        String filename = (data.size() == 1) ? data.get(0).getBaseFilename() : data.get(0).getBaseFilename() + "等" + data.size() + "个文件.zip";
-                                        File[] newFile = new File[]{new File(AppPathUtil.getDownloadDir(), filename)};
-                                        if (newFile[0].exists()) {
-                                            showAlert(getContext(), "下载文件", "文件 \"" + shareCode + "\" 已存在，是否覆盖？",
-                                                "覆盖", (d2, w2) -> {
-                                                    AppPathUtil.deleteFile(newFile[0].getAbsolutePath());
-                                                    onDownload(newFile[0], ServerUrl.getShareCodeUrl(shareCode), false);
-                                                },
-                                                "重命名", (d2, w2) -> {
-                                                    newFile[0] = new File(AppPathUtil.getDownloadDir(), shareCode + " (1)");
-                                                    onDownload(newFile[0], ServerUrl.getShareCodeUrl(shareCode), false);
-                                                }
-                                            );
-                                        } else {
-                                            onDownload(newFile[0], ServerUrl.getShareCodeUrl(shareCode), false);
-                                        }
-                                    },
-                                    "取消", null
-                                );
-                            }
-
-                            @Override
-                            public void onError(String message) {
-                                showAlert(getContext(), "错误", message);
-                            }
-
-                            @Override
-                            public void onFailed(Throwable throwable) {
-                                showAlert(getContext(), "错误", "网络错误：" + throwable.getMessage());
-                            }
-                        }
-                    );
+                @Override
+                public void onFailed(Throwable throwable) {
+                    showAlert(getContext(), "错误", "网络错误：" + throwable.getMessage());
                 }
             });
     }
