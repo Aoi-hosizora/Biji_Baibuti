@@ -43,6 +43,7 @@ import com.baibuti.biji.model.vo.MessageVO;
 import com.baibuti.biji.service.doc.DocService;
 import com.baibuti.biji.ui.IContextHelper;
 import com.baibuti.biji.ui.activity.FileDownloadActivity;
+import com.baibuti.biji.ui.activity.ShareCodeActivity;
 import com.baibuti.biji.ui.adapter.DocumentAdapter;
 import com.baibuti.biji.ui.adapter.DocClassAdapter;
 import com.baibuti.biji.model.po.Document;
@@ -77,7 +78,6 @@ import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.disposables.Disposable;
 import okhttp3.ResponseBody;
 import retrofit2.HttpException;
-import rx_activity_result2.RxActivityResult;
 
 public class FileFragment extends BaseFragment implements IContextHelper {
 
@@ -640,13 +640,16 @@ public class FileFragment extends BaseFragment implements IContextHelper {
                 ToolbarImportFile_Clicked();
                 break;
             case R.id.action_scan_share_code:
-                scanShareCodeQrCode();
+                ToolbarScanShareCode_Clicked();
                 break;
             case R.id.action_downloaded_documents:
-                RxActivityResult.on(this).startIntent(new Intent(getActivity(), FileDownloadActivity.class));
+                startActivity(new Intent(getActivity(), FileDownloadActivity.class));
                 break;
             case R.id.action_all_share_documents:
-                showToast(getContext(), "未实现");
+                if (!AuthManager.getInstance().isLogin())
+                    showToast(getContext(), "未登录");
+                else
+                    startActivity(new Intent(getActivity(), ShareCodeActivity.class));
                 break;
         }
         return true;
@@ -1018,7 +1021,7 @@ public class FileFragment extends BaseFragment implements IContextHelper {
     /**
      * 扫描共享码
      */
-    private void scanShareCodeQrCode() {
+    private void ToolbarScanShareCode_Clicked() {
         showAlert(getContext(), "获取共享文件", "请选择操作：",
             "扫描二维码", (d, w) -> QRCodeManager.getInstance()
                 .with(getActivity())

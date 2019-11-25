@@ -330,12 +330,12 @@ public interface ServerApi {
 
     // region Share
 
-    // /**
-    //  * 获取用户所有的共享码
-    //  */
-    // @NeedAuth
-    // @GET("/share/")
-    // Observable<ResponseDTO<ShareCodeDTO[]>> getAllShareCode();
+     /**
+      * 获取用户所有的共享码
+      */
+     @NeedAuth
+     @GET("/share/")
+     Observable<ResponseDTO<ShareCodeDTO[]>> getAllShareCode();
 
     @GET("/share/doc/{sc}")
     Observable<ResponseDTO<DocumentDTO[]>> getShareCodeContents(
@@ -364,22 +364,22 @@ public interface ServerApi {
         @Query("cid") Integer cid
     );
 
-    // /**
-    //  * 删除用户共享码
-    //  */
-    // @NeedAuth
-    // @Multipart
-    // @DELETE("/share/")
-    // Observable<ResponseDTO<OneFieldDTO.CountDTO>> deleteShareCodes(
-    //     @Query("sc") String[] scs
-    // );
+     /**
+      * 删除用户共享码
+      */
+     @NeedAuth
+     @Multipart
+     @DELETE("/share/")
+     Observable<ResponseDTO<OneFieldDTO.CountDTO>> deleteShareCodes(
+         @Query("sc") String[] scs
+     );
 
-    // /**
-    //  * 删除用户所有共享码
-    //  */
-    // @NeedAuth
-    // @DELETE("/share/user")
-    // Observable<ResponseDTO<OneFieldDTO.CountDTO>> deleteUserShareCodes();
+     /**
+      * 删除用户所有共享码
+      */
+     @NeedAuth
+     @DELETE("/share/user")
+     Observable<ResponseDTO<OneFieldDTO.CountDTO>> deleteUserShareCodes();
 
     // endregion Share
 

@@ -33,9 +33,9 @@ public class NoteAdapter extends RecyclerViewEmptySupport.Adapter<NoteAdapter.Vi
         this.noteList = noteList;
     }
 
-    public List<Note> getNoteList() {
-        return noteList;
-    }
+    // public List<Note> getNoteList() {
+    //     return noteList;
+    // }
 
     ///
 
