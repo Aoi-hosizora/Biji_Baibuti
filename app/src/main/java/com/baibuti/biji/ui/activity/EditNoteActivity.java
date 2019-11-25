@@ -218,7 +218,7 @@ public class EditNoteActivity extends AppCompatActivity implements IContextHelpe
                     showToast(this, "未找到图片");
                 else {
                     throwable.printStackTrace();
-                    showToast(this, "未知错误：" + throwable.getMessage());
+                    // showToast(this, "未知错误：" + throwable.getMessage());
                 }
             }).isDisposed();
     }

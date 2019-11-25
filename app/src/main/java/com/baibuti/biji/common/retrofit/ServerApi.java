@@ -18,6 +18,8 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 import io.reactivex.Observable;
+import okhttp3.MultipartBody;
+import okhttp3.ResponseBody;
 import retrofit2.http.DELETE;
 import retrofit2.http.FormUrlEncoded;
 import retrofit2.http.GET;
@@ -27,6 +29,7 @@ import retrofit2.http.PUT;
 import retrofit2.http.Part;
 import retrofit2.http.Path;
 import retrofit2.http.Query;
+import retrofit2.http.Streaming;
 
 /**
  * 标注需要 Authorization 头
@@ -223,7 +226,7 @@ public interface ServerApi {
     Observable<ResponseDTO<DocClassDTO>> getDocClassById(@Path("cid") Integer id);
 
     @NeedAuth
-    @GET("/docclass/}")
+    @GET("/docclass/")
     Observable<ResponseDTO<DocClassDTO>> getDocClassByName(@Query("name") String name);
 
     @NeedAuth
@@ -297,13 +300,14 @@ public interface ServerApi {
     @Multipart
     @POST("/raw/image")
     Observable<ResponseDTO<OneFieldDTO.FilenameDTO>> uploadImage(
-        @Part("image") File image,
+        @Part MultipartBody.Part image, // image
         @Part("type") String type
     );
 
+    @Streaming
     @NeedAuth
     @GET("/raw/file/{uuid}")
-    Observable<ResponseDTO<OneFieldDTO.FilenameDTO>> getRawFile(
+    Observable<ResponseBody> getRawFile(
         @Path("uuid") String uuid
     );
 

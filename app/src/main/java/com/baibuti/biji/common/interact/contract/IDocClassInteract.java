@@ -1,7 +1,5 @@
 package com.baibuti.biji.common.interact.contract;
 
-import com.baibuti.biji.model.dao.DbStatusType;
-import com.baibuti.biji.model.dto.ServerException;
 import com.baibuti.biji.model.po.DocClass;
 import com.baibuti.biji.model.vo.MessageVO;
 

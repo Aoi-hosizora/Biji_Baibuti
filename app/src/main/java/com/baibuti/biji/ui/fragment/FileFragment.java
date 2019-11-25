@@ -34,6 +34,7 @@ import com.baibuti.biji.common.interact.ProgressHandler;
 import com.baibuti.biji.common.interact.contract.IDocClassInteract;
 import com.baibuti.biji.common.interact.contract.IDocumentInteract;
 import com.baibuti.biji.common.interact.server.ShareCodeNetInteract;
+import com.baibuti.biji.model.dao.local.DownloadedDao;
 import com.baibuti.biji.model.dto.ResponseDTO;
 import com.baibuti.biji.model.po.DocClass;
 import com.baibuti.biji.common.auth.AuthManager;
@@ -60,6 +61,7 @@ import com.jwsd.libzxing.QRCodeManager;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
@@ -123,32 +125,44 @@ public class FileFragment extends BaseFragment implements IContextHelper {
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        if (null != view) {
-            ViewGroup parent = (ViewGroup) view.getParent();
-            if (null != parent)
-                parent.removeView(view);
-        }
-        else {
-            view = inflater.inflate(R.layout.fragment_file, container, false);
-            ButterKnife.bind(this, view);
-
-            initView();
-            initData();
-
-            AuthManager.getInstance().addLoginChangeListener(new AuthManager.OnLoginChangeListener() {
-
-                @Override
-                public void onLogin(String username) {
-                    initData();
-                }
-
-                @Override
-                public void onLogout() {
-                    initData();
-                }
-            });
-        }
+        view = inflater.inflate(R.layout.fragment_file, container, false);
+        ButterKnife.bind(this, view);
+        isInit = true;
+        init();
         return view;
+    }
+
+    public boolean isInit;
+
+    @Override
+    public void setUserVisibleHint(boolean isVisibleToUser) {
+        super.setUserVisibleHint(isVisibleToUser);
+        init();
+    }
+
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        isInit = false;
+    }
+
+    private void init() {
+        if (!isInit || !getUserVisibleHint())
+            return;
+
+        initView();
+        AuthManager.getInstance().addLoginChangeListener(new AuthManager.OnLoginChangeListener() {
+
+            @Override
+            public void onLogin(String username) {
+                initData();
+            }
+
+            @Override
+            public void onLogout() {
+                initData();
+            }
+        });
     }
 
     private void initView() {
@@ -778,8 +792,11 @@ public class FileFragment extends BaseFragment implements IContextHelper {
                         }, throwable -> {
                             if (throwable instanceof HttpException) {
                                 ResponseBody responseBody = ((HttpException) throwable).response().errorBody();
-                                ResponseDTO resp = new Gson().fromJson(responseBody.string(), ResponseDTO.class);
-                                emitter.onNext(new MessageVO<>(false, resp.getMessage())); // 上传失败一个
+                                if (responseBody != null) {
+                                    ResponseDTO resp = new Gson().fromJson(responseBody.string(), ResponseDTO.class);
+                                    emitter.onNext(new MessageVO<>(false, resp.getMessage())); // 上传失败一个
+                                } else
+                                    emitter.onNext(new MessageVO<>(false, "File Upload Failed")); // 上传失败一个
                             } else {
                                 throwable.printStackTrace();
                                 emitter.onError(throwable); // 网络出错
@@ -921,39 +938,28 @@ public class FileFragment extends BaseFragment implements IContextHelper {
      * 扫描共享码
      */
     private void scanShareCodeQrCode() {
-        // if (!AuthManager.getInstance().isLogin()) {
-        //     Toast.makeText(getContext(), "未登录", Toast.LENGTH_SHORT).show();
-        //     return;
-        // }
 
         QRCodeManager.getInstance()
             .with(getActivity())
             .scanningQRCode(new OnQRCodeScanCallback() {
 
+                public void onError(Throwable throwable) { showToast(getActivity(), throwable.getMessage()); }
+                public void onCancel() { showToast(getActivity(), "操作已取消"); }
+
                 @Override
                 public void onCompleted(String shareCode) {
-
-                    if (shareCode.isEmpty())
+                    if (shareCode.isEmpty()) {
                         showAlert(getContext(), "错误", "共享码错误。");
-                    else {
-                        showAlert(getContext(), "文件共享", "是否下载共享码中的文件？",
-                            "下载", (d, w) -> {
-                                // TODO 下载
-                                // new DownloadedDao(getContext()).InsertDownloadItem("", new Date()); // 本地路径
-                            },
-                            "取消", null
-                        );
+                        return;
                     }
-                }
+                    showAlert(getContext(), "文件共享", "是否下载共享码中的文件？",
+                        "下载", (d, w) -> {
 
-                @Override
-                public void onError(Throwable throwable) {
-                    showToast(getActivity(), throwable.getMessage());
-                }
-
-                @Override
-                public void onCancel() {
-                    showToast(getActivity(), "操作已取消");
+                            // TODO 下载
+                            // new DownloadedDao(getContext()).InsertDownloadItem("", new Date()); // 本地路径
+                        },
+                        "取消", null
+                    );
                 }
             });
     }
@@ -1014,9 +1020,24 @@ public class FileFragment extends BaseFragment implements IContextHelper {
                 } else { // 远程文件
                     showAlert(getContext(), "错误", "文档 \"" + document.getBaseFilename() + "\" 为上传的文件，是否下载？",
                         "下载", (d1, w1) -> {
-                            // TODO api 下载
-                            // new DownloadedDao(getContext()).InsertDownloadItem("", new Date()); // 本地路径
+                            File newFile = new File(AppPathUtil.getDownloadDir(), document.getBaseFilename());
+                            while (newFile.exists()) {
+                                newFile = new File(AppPathUtil.getDownloadDir(), document.getBaseFilename() + " (1)");
+                            }
+                            String filepath = newFile.getAbsolutePath();
 
+                            ProgressHandler.download(getContext(), "下载中...", newFile, document.getUuid(), new ProgressHandler.OnDownloadListener() {
+                                @Override
+                                public void onFailed(String message) {
+                                    showAlert(getContext(), "错误", message);
+                                }
+
+                                @Override
+                                public void onComplete() {
+                                    showToast(getContext(), "下载完成");
+                                    new DownloadedDao(getContext()).InsertDownloadItem(filepath, new Date()); // 本地路径
+                                }
+                            });
                         }, "取消", null
                     );
                 }

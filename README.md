@@ -36,7 +36,7 @@
 + See [libs/](https://github.com/Aoi-hosizora/Biji_Baibuti/tree/Module-Search/libs)
 + [xrichtext](https://github.com/sendtion/XRichText) (RichTextView.java - `addImageViewAtIndex()`)
 + [SearchDialog](https://github.com/wenwenwen888/SearchDialog) (SearchFragment.java - `search()`)
-+ [image_lib](https://github.com/zhangphil/WeiXinPictureTool) (IMGEditActivity.java - `onDoneClick()`)
++ [image_lib](https://github.com/zhangphil/WeiXinPictureTool) (IMGEditActivity.java - `IMGContentFileDecoder`)
 
 ### RxJava
 

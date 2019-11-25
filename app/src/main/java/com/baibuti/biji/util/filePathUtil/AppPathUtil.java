@@ -27,6 +27,7 @@ public class AppPathUtil {
     private static final String SUB_PATH_NOTE_FILE = "NoteFile" + File.separator;
     private static final String SUB_PATH_OCR_TMP = "OCRTmp" + File.separator;
     private static final String SUB_PATH_SCHEDULE = "Schedule" + File.separator;
+    private static final String SUB_PATH_DOWNLOAD = "Download" + File.separator;
 
     // /**
     //  * 检查是否存在SDCard
@@ -69,6 +70,13 @@ public class AppPathUtil {
      */
     public static String getScheduleDir() {
         return mkdirAndGetDir(APP_ROOT + SUB_PATH_SCHEDULE);
+    }
+
+    /**
+     * 下载文件保存路径, /Biji/Download/
+     */
+    public static String getDownloadDir() {
+        return mkdirAndGetDir(APP_ROOT + SUB_PATH_DOWNLOAD);
     }
 
     /**

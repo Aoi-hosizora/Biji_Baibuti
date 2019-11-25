@@ -1,6 +1,5 @@
 package com.baibuti.biji.ui.fragment;
 
-import android.app.ProgressDialog;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -57,29 +56,43 @@ public class ScheduleFragment extends BaseFragment implements IContextHelper {
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        if (null != view) {
-            ViewGroup parent = (ViewGroup) view.getParent();
-            if (null != parent)
-                parent.removeView(view);
-        } else {
-            view = inflater.inflate(R.layout.fragment_schedule, container, false);
-            ButterKnife.bind(this, view);
-
-            initView(view);
-
-            AuthManager.getInstance().addLoginChangeListener(new AuthManager.OnLoginChangeListener() {
-                @Override
-                public void onLogin(String username) {
-                    ActionRefresh_Clicked(false);
-                }
-
-                @Override
-                public void onLogout() {
-                    ActionRefresh_Clicked(false);
-                }
-            });
-        }
+        view = inflater.inflate(R.layout.fragment_schedule, container, false);
+        ButterKnife.bind(this, view);
+        isInit = true;
+        init();
         return view;
+    }
+
+    private boolean isInit;
+
+    @Override
+    public void setUserVisibleHint(boolean isVisibleToUser) {
+        super.setUserVisibleHint(isVisibleToUser);
+        init();
+    }
+
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        isInit = false;
+    }
+
+    private void init() {
+        if (!isInit || !getUserVisibleHint())
+            return;
+
+        initView(view);
+        AuthManager.getInstance().addLoginChangeListener(new AuthManager.OnLoginChangeListener() {
+            @Override
+            public void onLogin(String username) {
+                ActionRefresh_Clicked(false);
+            }
+
+            @Override
+            public void onLogout() {
+                ActionRefresh_Clicked(false);
+            }
+        });
     }
 
     @Override
@@ -147,7 +160,7 @@ public class ScheduleFragment extends BaseFragment implements IContextHelper {
             .showView();
 
         // Load data
-        ActionRefresh_Clicked(true);
+        // ActionRefresh_Clicked(true);
     }
 
     /**
@@ -211,7 +224,7 @@ public class ScheduleFragment extends BaseFragment implements IContextHelper {
                 ActionImportSchedule_Clicked();
                 break;
             case R.id.action_refresh_schedule:
-                ActionRefresh_Clicked(false);
+                ActionRefresh_Clicked(true);
                 break;
             case R.id.action_delete_schedule:
                 ActionDeleteSchedule_Clicked();
@@ -281,11 +294,8 @@ public class ScheduleFragment extends BaseFragment implements IContextHelper {
 
     /**
      * ActionBar 刷新课程表
-     * @param isInit 首次进入是不显示 toast
      */
-    private void ActionRefresh_Clicked(boolean isInit) {
-        ProgressDialog progressDialog = showProgress(getActivity(), "加載中...", false, null);
-
+    private void ActionRefresh_Clicked(boolean isShowToast) {
         // Load Data
         IScheduleInteract scheduleInteract = InteractStrategy.getInstance().getScheduleInteract(getContext());
         ProgressHandler.process(getActivity(), "更新中...", true,
@@ -296,8 +306,7 @@ public class ScheduleFragment extends BaseFragment implements IContextHelper {
                     int currWeek = pair.second;
 
                     if (scheduleJson.trim().isEmpty()) {
-                        if (progressDialog.isShowing()) progressDialog.dismiss();
-                        if (!isInit)
+                        if (isShowToast)
                             showToast(getActivity(), "尚未设置课程表");
                     } else {
                         // Show Schedule
@@ -308,9 +317,7 @@ public class ScheduleFragment extends BaseFragment implements IContextHelper {
                         m_weekView.curWeek(currWeek).source(mySubjects).showView();
                         m_timetableView.curWeek(currWeek).source(mySubjects).updateView();
 
-                        if (progressDialog.isShowing())
-                            progressDialog.dismiss();
-                        if (!isInit)
+                        if (isShowToast)
                             showToast(getActivity(), "课程表更新完成");
                     }
                 }
