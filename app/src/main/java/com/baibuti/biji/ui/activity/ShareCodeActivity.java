@@ -8,6 +8,7 @@ import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
+import android.view.MenuItem;
 import android.widget.ImageView;
 
 import com.baibuti.biji.R;
@@ -47,6 +48,13 @@ public class ShareCodeActivity extends AppCompatActivity implements IContextHelp
 
         initView();
         initData();
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        if (item.getItemId() == android.R.id.home)
+            finish();
+        return true;
     }
 
     private void initView() {

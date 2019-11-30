@@ -35,9 +35,9 @@ public class AboutActivity extends AppCompatActivity implements IContextHelper {
             actionBar.setDisplayHomeAsUpEnabled(true);
         setTitle("关于笔迹");
 
-        m_txt_author.setText("By SCUT 2017\\n" +
-            "郑东润 郭晓凡 刘莹灿 蔡镇峰 陈楷婷\\n" +
-            "Of Baibuti 2018-2019\\n" +
+        m_txt_author.setText("By SCUT 2017\n" +
+            "郑东润 郭晓凡 刘莹灿 蔡镇峰 陈楷婷\n" +
+            "Of Baibuti 2018-2019\n" +
             "https://github.com/Aoi-hosizora/Biji_Baibuti");
         m_txt_version.setText("V1.2.0");
         m_txt_copyright.setText("Copyright © 2018-2019 | All Rights Reserved.");

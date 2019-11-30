@@ -12,7 +12,7 @@ public class ServerUrl {
     /**
      * 临时设置的本地局域网 (调试记得设置)
      */
-    private static final String tmpLAN = "http://110.64.91.207:8001/";
+    private static final String tmpLAN = "http:/132.232.142.7:8001/";
 
     /**
      * !!! 服务器后端 API 地址

@@ -1,6 +1,6 @@
 # Biji_Baibuti
 
-+ SCUT Baibuti Project (Developing...)
++ SCUT Baibuti Project
 
 ## Environment
 
@@ -24,7 +24,6 @@
 
 ### Auth & Note & Star & Schedule & File
 
-+ Continue...
 + See [Biji_BackEnd](https://github.com/Aoi-hosizora/Biji_BackEnd)
 
 ---
